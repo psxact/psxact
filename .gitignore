@@ -1,0 +1,9 @@
+# Paths
+debug/
+release/
+ipch/
+
+# Files
+*.sdf
+*.suo
+*.user

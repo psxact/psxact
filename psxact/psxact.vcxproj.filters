@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="cpu\r3051.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="cpu\r3051.c" />
+    <ClCompile Include="stdafx.c" />
+    <ClCompile Include="psxact.c" />
+    <ClCompile Include="cpu\stage-4-dc.c" />
+    <ClCompile Include="cpu\stage-1-ic.c" />
+    <ClCompile Include="cpu\stage-2-rf.c" />
+    <ClCompile Include="cpu\stage-3-ex.c" />
+    <ClCompile Include="cpu\stage-5-wb.c" />
+  </ItemGroup>
+</Project>
