@@ -15,10 +15,10 @@ struct r3051 {
   struct r3051_stage wb;
 };
 
-void psx_cpu_step(struct r3051*);
-void psx_cpu_init(struct r3051*);
+void r3051_step(struct r3051*);
+void r3051_init(struct r3051*);
 
-#define STAGE(name) void psx_cpu_##name(struct r3051* processor)
+#define STAGE(name) void r3051_##name(struct r3051* processor)
 
 STAGE(ic);
 STAGE(rf);
