@@ -19,9 +19,9 @@ void r3051_init(struct r3051* processor) {
     processor->registers[i] = 0x00000000;
   }
 
-  r3051_bus_read(8, 0, &processor->registers[0]);
-
-  processor->registers[31] = 0xff;
+  processor->pc = 0xbfc00000;
+  processor->lo = 0x00000000;
+  processor->hi = 0x00000000;
 }
 
 void r3051_step(struct r3051* processor) {
