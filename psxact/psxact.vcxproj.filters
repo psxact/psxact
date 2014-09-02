@@ -3,26 +3,27 @@
   <ItemGroup>
     <ClInclude Include="targetver.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="r3051\bus-decoder.h" />
+    <ClInclude Include="util.h" />
+    <ClInclude Include="system.h" />
     <ClInclude Include="r3051\r3051.h" />
-    <ClInclude Include="cd-rom\mc68hc05.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.c" />
     <ClCompile Include="psxact.c" />
-    <ClCompile Include="r3051\bus-decoder.c" />
+    <ClCompile Include="util.c" />
+    <ClCompile Include="system.c" />
     <ClCompile Include="r3051\r3051.c" />
-    <ClCompile Include="r3051\stage-1-ic.c" />
-    <ClCompile Include="r3051\stage-2-rf.c" />
-    <ClCompile Include="r3051\stage-3-ex.c" />
-    <ClCompile Include="r3051\stage-4-dc.c" />
-    <ClCompile Include="r3051\stage-5-wb.c" />
-    <ClCompile Include="cd-rom\mc68hc05.c" />
+    <ClCompile Include="r3051\stage-rf.c" />
+    <ClCompile Include="r3051\stage-ic.c" />
+    <ClCompile Include="r3051\stage-ex.c" />
+    <ClCompile Include="r3051\stage-dc.c" />
+    <ClCompile Include="r3051\stage-wb.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="gpu\stub.md" />
     <None Include="gte\stub.md" />
     <None Include="mdec\stub.md" />
     <None Include="spu\stub.md" />
+    <None Include="cd-rom\stub.md" />
   </ItemGroup>
 </Project>

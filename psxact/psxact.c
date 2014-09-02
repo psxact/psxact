@@ -1,19 +1,33 @@
-// psxact.cpp : Defines the entry point for the console application.
-//
-
 #include "stdafx.h"
-#include "r3051/r3051.h"
+#include "system.h"
 
-#define E_FATAL -1
-#define E_OK     0
-#define E_USAGE +1
+extern uint8_t* bios;
+extern uint8_t* disk;
 
-int _tmain(int argc, _TCHAR* argv[]) {
-  if (argc < 3) {
-    printf("improper usage:\n");
-    printf("$ psxact <bios image> <disk image>\n");
-    return E_USAGE;
+int main(int argc, char* argv[]) {
+  if (argc <= 1 || argc >= 4) {
+    printf("Improper usage:\n");
+    printf("$ psxact <bios path> <disk path>");
+    return 1;
   }
 
-  return E_OK;
+  if (argc > 1 && load_file(argv[1], &bios)) {
+    printf("Unable to load file '%s'.", argv[1]);
+    return 0;
+  }
+
+  if (argc > 2 && load_file(argv[2], &disk)) {
+    printf("Unable to load disk '%s'.", argv[2]);
+    return 0;
+  }
+
+  psx_init();
+  
+  while (true) {
+    psx_step();
+  }
+
+  psx_kill();
+
+  return 0;
 }
