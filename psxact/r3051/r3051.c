@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "r3051.h"
+#include "..\bus\bus.h"
 
 void r3051_init(struct r3051* processor) {
   processor->pc = 0xbfc00000;
@@ -10,7 +11,10 @@ void r3051_init(struct r3051* processor) {
 }
 
 void r3051_step(struct r3051* processor) {
+  r3051_stage_wb(processor);
+
   r3051_stage_dc(processor);
+  processor->wb = processor->dc;
 
   r3051_stage_ex(processor);
   processor->dc = processor->ex;
@@ -22,95 +26,71 @@ void r3051_step(struct r3051* processor) {
   processor->rf = processor->ic;
 }
 
-uint8_t* bios;
-uint8_t* disk;
-uint8_t  wram[0x200000];
+uint32_t address_mask[5] = { 0, 0, 1, 1, 3 };
+uint32_t data_mask[5] = { 0xff, 0xff, 0xffff, 0xffff, 0xffffffff };
+uint32_t data_sign[5] = { 0x80, 0x00, 0x8000, 0x0000, 0x00000000 };
 
-bool r3051_dcache_fetch(uint32_t address, uint32_t* data) {
-  if (address >= 0x1f800000 && address <= 0x1f8003ff) {
-    printf("Scratchpad Read: [%08x]\n", address);
-    return 0;
+void r3051_dcache_fetch(enum r3051_datatype datatype, uint32_t address, uint32_t* data) {
+  if (address & address_mask[datatype]) {
+    // todo: address exception
+    return;
   }
 
-  if (address >= 0x1f801000 && address <= 0x1f801fff) {
-    printf("I/O Read: [%08x]\n", address);
-    return 0;
+  uint32_t safe;
+
+  if (bus_fetch(address, &safe)) {
+    // todo: bus exception
+    return;
   }
 
-  if (address >= 0x80000000 && address <= 0x801fffff) {
-    *data = *((uint32_t*)(wram + (address & 0x1ffffc)));
-    return 0;
+  uint32_t mask = data_mask[datatype];
+  uint32_t sign = data_sign[datatype];
+
+  switch (address & 3) {
+  case 0: safe = (safe >>  0); break;
+  case 1: safe = (safe >>  8); break;
+  case 2: safe = (safe >> 16); break;
+  case 3: safe = (safe >> 24); break;
   }
 
-  if (address >= 0xa0000000 && address <= 0xa01fffff) {
-    *data = *((uint32_t*)(wram + (address & 0x1ffffc)));
-    return 0;
-  }
-
-  printf("Unknown D-Cache Read: [%08x]\n", address);
-  return 1;
+  *data = ((safe & mask) ^ sign) - sign;
 }
 
-bool r3051_dcache_store(uint32_t address, uint32_t* data) {
-  if (address == 0xbfc06f0c) {
-    printf("woo\n");
+void r3051_dcache_store(enum r3051_datatype datatype, uint32_t address, uint32_t* data) {
+  uint32_t safe;
+
+  if (datatype == WORD) {
+    safe = *data;
+  }
+  else {
+    if (bus_fetch(address, &safe)) {
+      // todo: bus exception
+      // todo: only do merging for non-word writes
+    }
+
+    uint32_t mask = data_mask[datatype];
+
+    safe = (safe & ~mask) | (*data & mask);
   }
 
-  if (address >= 0x00000000 && address <= 0x001fffff) {
-    *((uint32_t*)(wram + (address & 0x1ffffc))) = *data;
-    return 0;
+  if (bus_store(address, &safe)) {
+    // todo: bus exception
+    return;
   }
-
-  if (address >= 0x1f800000 && address <= 0x1f8003ff) {
-    printf("Scratchpad Write: [%08x] <= %08x\n", address, *data);
-    return 0;
-  }
-
-  if (address >= 0x1f801000 && address <= 0x1f801fff) {
-    printf("I/O Write: [%08x] <= %08x\n", address, *data);
-    return 0;
-  }
-
-  if (address >= 0x1f802000 && address <= 0x1f802fff) {
-    printf("EXP2 Write: [%08x] <= %08x\n", address, *data);
-    return 0;
-  }
-
-  if (address >= 0x80000000 && address <= 0x801fffff) {
-    *((uint32_t*)(wram + (address & 0x1ffffc))) = *data;
-    return 0;
-  }
-
-  if (address >= 0xa0000000 && address <= 0xa01fffff) {
-    *((uint32_t*)(wram + (address & 0x1ffffc))) = *data;
-    return 0;
-  }
-
-  if (address == 0xfffe0130) {
-    printf("Cache Control Register: [%08x] <= %08x\n", address, *data);
-    return 0;
-  }
-
-  printf("Unknown D-Cache Write: [%08x] <= %08x\n", address, *data);
-  return 1;
 }
 
-bool r3051_icache_fetch(uint32_t address, uint32_t* data) {
-  if (address >= 0xbfc00000 && address <= 0xbfffffff) {
-    address = (address & 0x7fffc);
-
-    *data =
-      (bios[address | 0] <<  0) |
-      (bios[address | 1] <<  8) |
-      (bios[address | 2] << 16) |
-      (bios[address | 3] << 24);
-
-    return true;
+void r3051_icache_fetch(enum r3051_datatype datatype, uint32_t address, uint32_t* data) {
+  if (address & address_mask[datatype]) {
+    // todo: address exception
+    return;
   }
 
-  //
-  // signal a cache error on un-mapped addresses
+  uint32_t safe;
 
-  printf("Unknown I-Cache Read: [%08x]\n", address);
-  return false;
+  if (bus_fetch(address, &safe)) {
+    // todo: bus exception
+    return;
+  }
+
+  *data = safe;
 }

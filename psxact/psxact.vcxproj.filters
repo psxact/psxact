@@ -6,6 +6,7 @@
     <ClInclude Include="util.h" />
     <ClInclude Include="system.h" />
     <ClInclude Include="r3051\r3051.h" />
+    <ClInclude Include="bus\bus.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.c" />
@@ -18,6 +19,7 @@
     <ClCompile Include="r3051\stage-ex.c" />
     <ClCompile Include="r3051\stage-dc.c" />
     <ClCompile Include="r3051\stage-wb.c" />
+    <ClCompile Include="bus\bus.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="gpu\stub.md" />

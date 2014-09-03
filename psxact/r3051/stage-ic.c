@@ -6,10 +6,7 @@ void r3051_stage_ic(struct r3051* processor) {
 
   ic->address = processor->pc;
 
-  if (r3051_icache_fetch(ic->address, &ic->code) == false) {
-    assert(0 && "I-Cache Error");
-    return;
-  }
+  r3051_icache_fetch(WORD, ic->address, &ic->code);
 
   processor->pc += 4;
 }

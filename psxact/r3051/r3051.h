@@ -1,15 +1,25 @@
 #include "stdafx.h"
 
+enum r3051_datatype {
+   BYTE = 0,
+  UBYTE = 1,
+   HALF = 2,
+  UHALF = 3,
+   WORD = 4
+};
+
 struct r3051_pipestage {
   uint32_t address;
   uint32_t code;
   uint32_t target;
 
   uint32_t si;
+  uint8_t op;
   uint8_t rs;
   uint8_t rt;
   uint8_t rd;
   uint8_t sh;
+  uint8_t fn;
 };
 
 struct r3051 {
@@ -22,6 +32,7 @@ struct r3051 {
   struct r3051_pipestage rf;
   struct r3051_pipestage ex;
   struct r3051_pipestage dc;
+  struct r3051_pipestage wb;
 };
 
 //
@@ -54,12 +65,12 @@ void r3051_cp3(struct r3051*);
 // D-Cache Functions
 //
 
-bool r3051_dcache_fetch(uint32_t, uint32_t*);
-bool r3051_dcache_store(uint32_t, uint32_t*);
+void r3051_dcache_fetch(enum r3051_datatype, uint32_t, uint32_t*);
+void r3051_dcache_store(enum r3051_datatype, uint32_t, uint32_t*);
 
 //
 // I-Cache Functions
 //
 
-bool r3051_icache_fetch(uint32_t, uint32_t*);
-bool r3051_icache_store(uint32_t, uint32_t*);
+void r3051_icache_fetch(enum r3051_datatype, uint32_t, uint32_t*);
+void r3051_icache_store(enum r3051_datatype, uint32_t, uint32_t*);

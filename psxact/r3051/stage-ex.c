@@ -3,14 +3,18 @@
 
 #define op(name) static void r3051_op_##name(struct r3051* processor, struct r3051_pipestage* stage)
 
+op(add);
 op(addi);
 op(addiu);
 op(addu);
+op(and);
 op(andi);
+op(beq);
 op(bne);
 op(j);
 op(jal);
 op(jr);
+op(lb);
 op(lui);
 op(lw);
 op(or);
@@ -24,10 +28,12 @@ op(sw);
 void r3051_stage_ex_00(struct r3051* processor, struct r3051_pipestage* stage) {
   struct r3051_pipestage* ex = &processor->ex;
 
-  switch ((ex->code >> 0) & 63) {
+  switch (ex->fn) {
   case 0x00: r3051_op_sll(processor, ex); return;
   case 0x08: r3051_op_jr(processor, ex); return;
+  case 0x20: r3051_op_add(processor, ex); return;
   case 0x21: r3051_op_addu(processor, ex); return;
+  case 0x24: r3051_op_and(processor, ex); return;
   case 0x25: r3051_op_or(processor, ex); return;
   case 0x2b: r3051_op_sltu(processor, ex); return;
   }
@@ -43,10 +49,11 @@ void r3051_stage_ex_cp(struct r3051* processor, struct r3051_pipestage* stage) {
 void r3051_stage_ex(struct r3051* processor) {
   struct r3051_pipestage* ex = &processor->ex;
 
-  switch ((ex->code >> 26) & 63) {
+  switch (ex->op) {
   case 0x00: r3051_stage_ex_00(processor, ex); return;
   case 0x02: r3051_op_j(processor, ex); return;
   case 0x03: r3051_op_jal(processor, ex); return;
+  case 0x04: r3051_op_beq(processor, ex); return;
   case 0x05: r3051_op_bne(processor, ex); return;
   case 0x08: r3051_op_addi(processor, ex); return;
   case 0x09: r3051_op_addiu(processor, ex); return;
@@ -57,6 +64,7 @@ void r3051_stage_ex(struct r3051* processor) {
   case 0x11: r3051_stage_ex_cp(processor, ex); return;
   case 0x12: r3051_stage_ex_cp(processor, ex); return;
   case 0x13: r3051_stage_ex_cp(processor, ex); return;
+  case 0x20: r3051_op_lb(processor, ex); return;
   case 0x23: r3051_op_lw(processor, ex); return;
   case 0x28: r3051_op_sb(processor, ex); return;
   case 0x29: r3051_op_sh(processor, ex); return;
@@ -64,6 +72,12 @@ void r3051_stage_ex(struct r3051* processor) {
   }
 
   assert(0 && "Unimplemented instruction");
+}
+
+op(add) {
+  uint32_t result = processor->registers[stage->rs] + processor->registers[stage->rt];
+
+  processor->registers[stage->rd] = result;
 }
 
 op(addi) {
@@ -84,8 +98,19 @@ op(addu) {
   processor->registers[stage->rd] = processor->registers[stage->rs] + processor->registers[stage->rt];
 }
 
+op(and) {
+  processor->registers[stage->rt] = processor->registers[stage->rs] & processor->registers[stage->rt];
+}
+
 op(andi) {
   processor->registers[stage->rt] = processor->registers[stage->rs] & stage->si;
+}
+
+op(beq) {
+  if (processor->registers[stage->rs] == processor->registers[stage->rt]) {
+    processor->pc -= 4;
+    processor->pc += ((int16_t) stage->si) << 2;
+  }
 }
 
 op(bne) {
@@ -111,6 +136,10 @@ op(jal) {
 
 op(jr) {
   processor->pc = processor->registers[stage->rs];
+}
+
+op(lb) {
+  stage->target = processor->registers[stage->rs] + ((int16_t) stage->si);
 }
 
 op(lui) {
