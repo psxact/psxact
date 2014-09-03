@@ -79,6 +79,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="bus\bus.h" />
+    <ClInclude Include="r3051\cop0.h" />
     <ClInclude Include="r3051\r3051.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="system.h" />
@@ -88,6 +89,7 @@
   <ItemGroup>
     <ClCompile Include="bus\bus.c" />
     <ClCompile Include="psxact.c" />
+    <ClCompile Include="r3051\cop0.c" />
     <ClCompile Include="r3051\r3051.c" />
     <ClCompile Include="r3051\stage-dc.c" />
     <ClCompile Include="r3051\stage-ex.c" />
