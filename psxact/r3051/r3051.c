@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "r3051.h"
+#include "cp0.h"
 #include "..\bus\bus.h"
 
 void r3051_init(struct r3051* processor) {
@@ -30,6 +31,8 @@ uint32_t address_mask[5] = { 0, 0, 1, 1, 3 };
 uint32_t data_mask[5] = { 0xff, 0xff, 0xffff, 0xffff, 0xffffffff };
 uint32_t data_sign[5] = { 0x80, 0x00, 0x8000, 0x0000, 0x00000000 };
 
+extern struct r3051_cp0* cp0;
+
 void r3051_dcache_fetch(enum r3051_datatype datatype, uint32_t address, uint32_t* data) {
   if (address & address_mask[datatype]) {
     // todo: address exception
@@ -58,6 +61,14 @@ void r3051_dcache_fetch(enum r3051_datatype datatype, uint32_t address, uint32_t
 
 void r3051_dcache_store(enum r3051_datatype datatype, uint32_t address, uint32_t* data) {
   uint32_t safe;
+
+  if (cp0->registers[12] & (1 << 16)) {
+    if (*data) {
+      printf("IsC Write: 0x%08x => 0x%08x\n", *data, address);
+    }
+
+    return; // IsC
+  }
 
   if (datatype == WORD) {
     safe = *data;

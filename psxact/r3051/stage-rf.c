@@ -35,6 +35,7 @@ void r3051_stage_rf_00(struct r3051* processor, struct r3051_pipestage* stage) {
   switch (stage->fn = DECODE_FN()) {
   case 0x00: // sll rd,rt,sa
   case 0x08: // jr rs
+  case 0x09: // jalr rd,rs
   case 0x20: // add rd,rs,rt
   case 0x21: // addu rd,rs,rt
   case 0x24: // and rd,rs,rt
@@ -56,6 +57,8 @@ void r3051_stage_rf(struct r3051* processor) {
   case 0x03: r3051_stage_rf_jtype(processor, stage); return;
   case 0x04: // beq rs,rt,immediate
   case 0x05: // bne rs,rt,immediate
+  case 0x06: // blez rs,rt,immediate
+  case 0x07: // bgtz rs,rt,immediate
     r3051_stage_rf_itype(processor, stage); return;
 
   case 0x08:
@@ -75,6 +78,7 @@ void r3051_stage_rf(struct r3051* processor) {
     
   case 0x20: // lb rt,offset(rs)
   case 0x23: // lw rt,offset(rs)
+  case 0x24: // lbu rt,offset(rs)
   case 0x28: // sb rt,offset(rs)
   case 0x29: // sh rt,offset(rs)
   case 0x2b: // sw rt,offset(rs)

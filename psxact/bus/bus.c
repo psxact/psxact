@@ -25,7 +25,7 @@ int bus_fetch(uint32_t address, uint32_t* data) {
     IN_RANGE(0x9f000000, 0x9f7fffff) || // KSEG0
     IN_RANGE(0xbf000000, 0xbf7fffff)) { // KSEG1
     *data = 0x00000000;
-    printf("EXP1 Read: [%08x]\n", address);
+    printf("[W] EXP1: [%08x]\n", address);
     return BUS_OK;
   }
 
@@ -33,7 +33,7 @@ int bus_fetch(uint32_t address, uint32_t* data) {
     IN_RANGE(0x1f800000, 0x1f8003ff) || // KUSEG
     IN_RANGE(0x9f800000, 0x9f8003ff)) { // KSEG0
     *data = 0x00000000;
-    printf("Scratchpad Read: [%08x]\n", address);
+    printf("[W] Scratchpad: [%08x]\n", address);
     return BUS_OK;
   }
 
@@ -42,7 +42,7 @@ int bus_fetch(uint32_t address, uint32_t* data) {
     IN_RANGE(0x9f801000, 0x9f801fff) || // KSEG0
     IN_RANGE(0xbf801000, 0xbf801fff)) { // KSEG1
     *data = 0x00000000;
-    printf("I/O Read: [%08x]\n", address);
+    printf("[W] I/O: [%08x]\n", address);
     return BUS_OK;
   }
 
@@ -51,7 +51,7 @@ int bus_fetch(uint32_t address, uint32_t* data) {
     IN_RANGE(0x9f802000, 0x9f802fff) || // KSEG0
     IN_RANGE(0xbf802000, 0xbf802fff)) { // KSEG1
     *data = 0x00000000;
-    printf("EXP2 Read: [%08x]\n", address);
+    printf("[W] EXP2: [%08x]\n", address);
     return BUS_OK;
   }
 
@@ -60,7 +60,7 @@ int bus_fetch(uint32_t address, uint32_t* data) {
     IN_RANGE(0x9fa00000, 0x9fbfffff) || // KSEG0
     IN_RANGE(0xbfa00000, 0xbfbfffff)) { // KSEG1
     *data = 0x00000000;
-    printf("EXP3 Read: [%08x]\n", address);
+    printf("[W] EXP3: [%08x]\n", address);
     return BUS_OK;
   }
 
@@ -87,11 +87,6 @@ int bus_fetch(uint32_t address, uint32_t* data) {
 //
 
 int bus_store(uint32_t address, uint32_t* data) {
-  if (address == 0x000000b0 && *data == 0) {
-    printf("$000000b0 <= %08x\n", *data);
-    return;
-  }
-
   if (
     IN_RANGE(0x00000000, 0x001fffff) || // KUSEG
     IN_RANGE(0x80000000, 0x801fffff) || // KSEG0
@@ -104,14 +99,14 @@ int bus_store(uint32_t address, uint32_t* data) {
     IN_RANGE(0x1f000000, 0x1f7fffff) || // KUSEG
     IN_RANGE(0x9f000000, 0x9f7fffff) || // KSEG0
     IN_RANGE(0xbf000000, 0xbf7fffff)) { // KSEG1
-    printf("EXP1 Write: [%08x] <= %08x\n", address, *data);
+    printf("[W] EXP1: [%08x] <= %08x\n", address, *data);
     return BUS_OK;
   }
 
   if (
     IN_RANGE(0x1f800000, 0x1f8003ff) || // KUSEG
     IN_RANGE(0x9f800000, 0x9f8003ff)) { // KSEG0
-    printf("Scratchpad Write: [%08x] <= %08x\n", address, *data);
+    printf("[W] Scratchpad: [%08x] <= %08x\n", address, *data);
     return BUS_OK;
   }
 
@@ -119,7 +114,7 @@ int bus_store(uint32_t address, uint32_t* data) {
     IN_RANGE(0x1f801000, 0x1f801fff) || // KUSEG
     IN_RANGE(0x9f801000, 0x9f801fff) || // KSEG0
     IN_RANGE(0xbf801000, 0xbf801fff)) { // KSEG1
-    printf("I/O Write: [%08x] <= %08x\n", address, *data);
+    printf("[W] I/O: [%08x] <= %08x\n", address, *data);
     return BUS_OK;
   }
 
@@ -127,7 +122,7 @@ int bus_store(uint32_t address, uint32_t* data) {
     IN_RANGE(0x1f802000, 0x1f802fff) || // KUSEG
     IN_RANGE(0x9f802000, 0x9f802fff) || // KSEG0
     IN_RANGE(0xbf802000, 0xbf802fff)) { // KSEG1
-    printf("EXP2 Write: [%08x] <= %08x\n", address, *data);
+    printf("[W] EXP2: [%08x] <= %08x\n", address, *data);
     return BUS_OK;
   }
 
@@ -135,7 +130,7 @@ int bus_store(uint32_t address, uint32_t* data) {
     IN_RANGE(0x1fa00000, 0x1fbfffff) || // KUSEG
     IN_RANGE(0x9fa00000, 0x9fbfffff) || // KSEG0
     IN_RANGE(0xbfa00000, 0xbfbfffff)) { // KSEG1
-    printf("EXP3 Write: [%08x] <= %08x\n", address, *data);
+    printf("[W] EXP3: [%08x] <= %08x\n", address, *data);
     return BUS_OK;
   }
 
