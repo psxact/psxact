@@ -28,6 +28,7 @@ op(sb);
 op(sh);
 op(sll);
 op(sltu);
+op(srl);
 op(sw);
 
 static void r3051_op_mfc(struct r3051*, struct r3051_pipestage*, uint32_t);
@@ -38,6 +39,7 @@ void r3051_stage_ex_00(struct r3051* processor, struct r3051_pipestage* stage) {
 
   switch (ex->fn) {
   case 0x00: r3051_op_sll(processor, ex); return;
+  case 0x02: r3051_op_srl(processor, ex); return;
   case 0x08: r3051_op_jr(processor, ex); return;
   case 0x09: r3051_op_jalr(processor, ex); return;
   case 0x20: r3051_op_add(processor, ex); return;
@@ -161,6 +163,8 @@ op(j) {
   processor->pc -= 4;
   processor->pc &= 0xf0000000;
   processor->pc |= stage->si << 2;
+
+  printf("j $%08x\n", processor->pc);
 }
 
 op(jal) {
@@ -169,16 +173,22 @@ op(jal) {
   processor->pc -= 4;
   processor->pc &= 0xf0000000;
   processor->pc |= stage->si << 2;
+
+  printf("jal $%08x\n", processor->pc);
 }
 
 op(jalr) {
   processor->registers[stage->rd] = processor->pc;
 
   processor->pc = processor->registers[stage->rs];
+
+  printf("jalr r%d\n", stage->rs);
 }
 
 op(jr) {
   processor->pc = processor->registers[stage->rs];
+
+  printf("jr r%d\n", stage->rs);
 }
 
 op(lb) {
@@ -219,6 +229,10 @@ op(sll) {
 
 op(sltu) {
   processor->registers[stage->rd] = processor->registers[stage->rs] < processor->registers[stage->rt];
+}
+
+op(srl) {
+  processor->registers[stage->rd] = processor->registers[stage->rt] >> stage->sh;
 }
 
 op(sw) {

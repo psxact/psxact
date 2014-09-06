@@ -39,25 +39,25 @@ void r3051_stage_dc(struct r3051* processor) {
 }
 
 op(lb) {
-  r3051_dcache_fetch(BYTE, stage->target, &processor->registers[stage->rt]);
+  r3051_fetch_data(BYTE, stage->target, &processor->registers[stage->rt]);
 }
 
 op(lbu) {
-  r3051_dcache_fetch(UBYTE, stage->target, &processor->registers[stage->rt]);
+  r3051_fetch_data(UBYTE, stage->target, &processor->registers[stage->rt]);
 }
 
 op(lw) {
-  r3051_dcache_fetch(WORD, stage->target, &processor->registers[stage->rt]);
+  r3051_fetch_data(WORD, stage->target, &processor->registers[stage->rt]);
 }
 
 op(sb) {
-  r3051_dcache_store(BYTE, stage->target, &processor->registers[stage->rt]);
+  r3051_store_data(BYTE, stage->target, &processor->registers[stage->rt]);
 }
 
 op(sh) {
-  r3051_dcache_store(HALF, stage->target, &processor->registers[stage->rt]);
+  r3051_store_data(HALF, stage->target, &processor->registers[stage->rt]);
 }
 
 op(sw) {
-  r3051_dcache_store(WORD, stage->target, &processor->registers[stage->rt]);
+  r3051_store_data(WORD, stage->target, &processor->registers[stage->rt]);
 }

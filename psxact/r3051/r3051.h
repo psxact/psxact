@@ -8,6 +8,13 @@ enum r3051_datatype {
    WORD = 4
 };
 
+struct r3051_segment {
+  uint32_t start;
+  uint32_t length;
+  uint32_t offset;
+  bool cached;
+};
+
 struct r3051_pipestage {
   uint32_t address;
   uint32_t code;
@@ -65,12 +72,34 @@ void r3051_cp3(struct r3051*);
 // D-Cache Functions
 //
 
-void r3051_dcache_fetch(enum r3051_datatype, uint32_t, uint32_t*);
-void r3051_dcache_store(enum r3051_datatype, uint32_t, uint32_t*);
+enum {
+  DCACHE_SIZE = 0x100,
+  DCACHE_LINE = 1,
+  DCACHE_ITEM = DCACHE_SIZE / DCACHE_LINE
+};
+
+struct r3051_dcache {
+  uint32_t lines[DCACHE_ITEM][DCACHE_LINE];
+};
+
+void r3051_fetch_data(enum r3051_datatype, uint32_t, uint32_t*);
+void r3051_store_data(enum r3051_datatype, uint32_t, uint32_t*);
 
 //
 // I-Cache Functions
 //
 
-void r3051_icache_fetch(enum r3051_datatype, uint32_t, uint32_t*);
-void r3051_icache_store(enum r3051_datatype, uint32_t, uint32_t*);
+enum {
+  ICACHE_SIZE = 0x400,
+  ICACHE_LINE = 4,
+  ICACHE_ITEM = ICACHE_SIZE / ICACHE_LINE
+};
+
+struct r3051_icache {
+  uint32_t lines[ICACHE_ITEM][ICACHE_LINE];
+  uint32_t tag[ICACHE_ITEM];
+  uint32_t valid[ICACHE_ITEM];
+};
+
+void r3051_fetch_inst(enum r3051_datatype, uint32_t, uint32_t*);
+void r3051_store_inst(enum r3051_datatype, uint32_t, uint32_t*);

@@ -16,7 +16,7 @@ static uint32_t registers_mask[16] = {
   0x00000000, // r9 - locked
   0x00000000, // r10 - locked
   0x00000000, // r11 - locked
-  0xf27fff3f, // r12 - sr
+  0xf04fff3f, // r12 - sr
   0xb000ff7c, // r13 - cause
   0xffffffff, // r14 - epc
   0x0000ffff, // r15 - prid

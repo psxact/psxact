@@ -34,6 +34,7 @@ void r3051_stage_rf_rtype(struct r3051* processor, struct r3051_pipestage* stage
 void r3051_stage_rf_00(struct r3051* processor, struct r3051_pipestage* stage) {
   switch (stage->fn = DECODE_FN()) {
   case 0x00: // sll rd,rt,sa
+  case 0x02: // srl rd,rt,sa
   case 0x08: // jr rs
   case 0x09: // jalr rd,rs
   case 0x20: // add rd,rs,rt
