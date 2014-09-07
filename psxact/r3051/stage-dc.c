@@ -1,63 +1,69 @@
 #include "stdafx.h"
 #include "r3051.h"
 
-#define op(name) static void r3051_op_##name(struct r3051* processor, struct r3051_pipestage* stage)
-
-op(lb);
-op(lbu);
-op(lw);
-op(sb);
-op(sh);
-op(sw);
+static void r3051_dc_lb(struct r3051*, struct r3051_stage*);
+static void r3051_dc_lbu(struct r3051*, struct r3051_stage*);
+static void r3051_dc_lw(struct r3051*, struct r3051_stage*);
+static void r3051_dc_sb(struct r3051*, struct r3051_stage*);
+static void r3051_dc_sh(struct r3051*, struct r3051_stage*);
+static void r3051_dc_sw(struct r3051*, struct r3051_stage*);
 
 void r3051_stage_dc(struct r3051* processor) {
-  struct r3051_pipestage* stage = &processor->dc;
+  struct r3051_stage* stage = &processor->dc;
 
   switch (stage->op) {
   case 0x00: return;
-  case 0x02: return;
-  case 0x03: return;
-  case 0x04: return;
-  case 0x05: return;
-  case 0x06: return;
-  case 0x07: return;
-  case 0x08: return;
-  case 0x09: return;
-  case 0x0c: return;
-  case 0x0d: return;
-  case 0x0f: return;
-  case 0x10: return;
-  case 0x20: r3051_op_lb(processor, stage); return;
-  case 0x23: r3051_op_lw(processor, stage); return;
-  case 0x24: r3051_op_lbu(processor, stage); return;
-  case 0x28: r3051_op_sb(processor, stage); return;
-  case 0x29: r3051_op_sh(processor, stage); return;
-  case 0x2b: r3051_op_sw(processor, stage); return;
+  case 0x01: return;
+  case 0x02: return; // j
+  case 0x03: return; // jal
+  case 0x04: return; // beq
+  case 0x05: return; // bne
+  case 0x06: return; // blez
+  case 0x07: return; // bgtz
+  case 0x08: return; // addi
+  case 0x09: return; // addiu
+  case 0x0a: return; // slti
+  case 0x0b: return; // sltiu
+  case 0x0c: return; // andi
+  case 0x0d: return; // ori
+
+  case 0x0f: return; // lui
+  case 0x10: return; // cop0
+
+  case 0x20: r3051_dc_lb(processor, stage); return; // lb
+
+  case 0x23: r3051_dc_lw(processor, stage); return; // lw
+  case 0x24: r3051_dc_lbu(processor, stage); return; // lbu
+
+  case 0x28: r3051_dc_sb(processor, stage); return; // sb
+  case 0x29: r3051_dc_sh(processor, stage); return; // sh
+
+  case 0x2b: r3051_dc_sw(processor, stage); return; // sw
   }
 
   assert(0 && "Unimplemented instruction");
 }
 
-op(lb) {
-  r3051_fetch_data(BYTE, stage->target, &processor->registers[stage->rt]);
+static void r3051_dc_lb(struct r3051* processor, struct r3051_stage* stage) {
+  processor->registers[stage->rt] = r3051_fetch_byte(stage->target);
 }
 
-op(lbu) {
-  r3051_fetch_data(UBYTE, stage->target, &processor->registers[stage->rt]);
+static void r3051_dc_lbu(struct r3051* processor, struct r3051_stage* stage) {
+  processor->registers[stage->rt] = r3051_fetch_byte(stage->target) & 0xff;
 }
 
-op(lw) {
-  r3051_fetch_data(WORD, stage->target, &processor->registers[stage->rt]);
+static void r3051_dc_lw(struct r3051* processor, struct r3051_stage* stage) {
+  processor->registers[stage->rt] = r3051_fetch_word(stage->target);
 }
 
-op(sb) {
-  r3051_store_data(BYTE, stage->target, &processor->registers[stage->rt]);
+static void r3051_dc_sb(struct r3051* processor, struct r3051_stage* stage) {
+  r3051_store_byte(stage->target, processor->registers[stage->rt]);
 }
 
-op(sh) {
-  r3051_store_data(HALF, stage->target, &processor->registers[stage->rt]);
+static void r3051_dc_sh(struct r3051* processor, struct r3051_stage* stage) {
+  r3051_store_half(stage->target, processor->registers[stage->rt]);
 }
 
-op(sw) {
-  r3051_store_data(WORD, stage->target, &processor->registers[stage->rt]);
+static void r3051_dc_sw(struct r3051* processor, struct r3051_stage* stage) {
+  r3051_store_word(stage->target, processor->registers[stage->rt]);
 }

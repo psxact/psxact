@@ -15,17 +15,17 @@ struct r3051_segment {
   bool cached;
 };
 
-struct r3051_pipestage {
+struct r3051_stage {
   uint32_t address;
   uint32_t code;
   uint32_t target;
 
-  uint32_t si;
+  uint32_t nn;
   uint8_t op;
   uint8_t rs;
   uint8_t rt;
   uint8_t rd;
-  uint8_t sh;
+  uint8_t sa;
   uint8_t fn;
 };
 
@@ -35,11 +35,11 @@ struct r3051 {
   uint32_t hi;
   uint32_t pc;
 
-  struct r3051_pipestage ic;
-  struct r3051_pipestage rf;
-  struct r3051_pipestage ex;
-  struct r3051_pipestage dc;
-  struct r3051_pipestage wb;
+  struct r3051_stage ic;
+  struct r3051_stage rf;
+  struct r3051_stage ex;
+  struct r3051_stage dc;
+  struct r3051_stage wb;
 };
 
 //
@@ -60,13 +60,15 @@ void r3051_stage_dc(struct r3051*);
 void r3051_stage_wb(struct r3051*);
 
 //
-// Co-processors
-//
+// Memory Interfaces
 
-void r3051_cp0(struct r3051*);
-void r3051_cp1(struct r3051*);
-void r3051_cp2(struct r3051*);
-void r3051_cp3(struct r3051*);
+uint32_t r3051_fetch_byte(uint32_t);
+uint32_t r3051_fetch_half(uint32_t);
+uint32_t r3051_fetch_word(uint32_t);
+
+void r3051_store_byte(uint32_t, uint32_t);
+void r3051_store_half(uint32_t, uint32_t);
+void r3051_store_word(uint32_t, uint32_t);
 
 //
 // D-Cache Functions
@@ -81,9 +83,6 @@ enum {
 struct r3051_dcache {
   uint32_t lines[DCACHE_ITEM][DCACHE_LINE];
 };
-
-void r3051_fetch_data(enum r3051_datatype, uint32_t, uint32_t*);
-void r3051_store_data(enum r3051_datatype, uint32_t, uint32_t*);
 
 //
 // I-Cache Functions
@@ -100,6 +99,3 @@ struct r3051_icache {
   uint32_t tag[ICACHE_ITEM];
   uint32_t valid[ICACHE_ITEM];
 };
-
-void r3051_fetch_inst(enum r3051_datatype, uint32_t, uint32_t*);
-void r3051_store_inst(enum r3051_datatype, uint32_t, uint32_t*);

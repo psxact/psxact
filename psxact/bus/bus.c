@@ -28,26 +28,31 @@ int bus_fetch(uint32_t address, uint32_t* data) {
 
   if (IN_RANGE(0x1f000000, 0x1f7fffff)) {
     printf("[R] EXP1 $%08x\n", address);
+    *data = 0;
     return BUS_OK;
   }
 
   if (IN_RANGE(0x1f800000, 0x1f8003ff)) {
     printf("[R] DCache $%08x\n", address);
+    *data = 0;
     return BUS_OK;
   }
 
   if (IN_RANGE(0x1f801000, 0x1f801fff)) {
     printf("[R] I/O $%08x\n", address);
+    *data = 0;
     return BUS_OK;
   }
 
   if (IN_RANGE(0x1f802000, 0x1f802fff)) {
     printf("[R] EXP2 $%08x\n", address);
+    *data = 0;
     return BUS_OK;
   }
 
   if (IN_RANGE(0x1fa00000, 0x1fbfffff)) {
     printf("[R] EXP3 $%08x\n", address);
+    *data = 0;
     return BUS_OK;
   }
 

@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "cp0.h"
 
-extern struct r3051_cp0* cp0;
-
 static uint32_t registers_mask[16] = {
   0x00000000, // r0 - locked
   0x00000000, // r1 - locked
@@ -22,14 +20,14 @@ static uint32_t registers_mask[16] = {
   0x0000ffff, // r15 - prid
 };
 
-void r3051_cp0_init(struct r3051_cp0* cp) {
+void r3051_cop0_init(struct r3051_cop0* cp) {
   cp->registers[15] = 0x00000302; // imp=3, rev=2
 }
 
-void r3051_cp0_fetch(struct r3051_cp0* cp, uint32_t reg, uint32_t* data) {
-  *data = cp0->registers[reg] & registers_mask[reg];
+void r3051_cop0_fetch(struct r3051_cop0* cp, uint32_t reg, uint32_t* data) {
+  *data = cp->registers[reg] & registers_mask[reg];
 }
 
-void r3051_cp0_store(struct r3051_cp0* cp, uint32_t reg, uint32_t* data) {
-  cp0->registers[reg] = *data & registers_mask[reg];
+void r3051_cop0_store(struct r3051_cop0* cp, uint32_t reg, uint32_t* data) {
+  cp->registers[reg] = *data & registers_mask[reg];
 }
