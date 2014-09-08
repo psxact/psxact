@@ -1,87 +1,108 @@
 #include "stdafx.h"
 #include "r3051.h"
-#include "cp0.h"
+#include "cop0.h"
 
-static void r3051_ex_add(struct r3051*, struct r3051_stage*);
-static void r3051_ex_addi(struct r3051*, struct r3051_stage*);
-static void r3051_ex_addiu(struct r3051*, struct r3051_stage*);
-static void r3051_ex_addu(struct r3051*, struct r3051_stage*);
-static void r3051_ex_and(struct r3051*, struct r3051_stage*);
-static void r3051_ex_andi(struct r3051*, struct r3051_stage*);
-static void r3051_ex_beq(struct r3051*, struct r3051_stage*);
-static void r3051_ex_bgez(struct r3051*, struct r3051_stage*);
-static void r3051_ex_bgtz(struct r3051*, struct r3051_stage*);
-static void r3051_ex_blez(struct r3051*, struct r3051_stage*);
-static void r3051_ex_bltz(struct r3051*, struct r3051_stage*);
-static void r3051_ex_bne(struct r3051*, struct r3051_stage*);
-static void r3051_ex_div(struct r3051*, struct r3051_stage*);
-static void r3051_ex_divu(struct r3051*, struct r3051_stage*);
-static void r3051_ex_j(struct r3051*, struct r3051_stage*);
-static void r3051_ex_jal(struct r3051*, struct r3051_stage*);
-static void r3051_ex_jalr(struct r3051*, struct r3051_stage*);
-static void r3051_ex_jr(struct r3051*, struct r3051_stage*);
-static void r3051_ex_lui(struct r3051*, struct r3051_stage*);
-static void r3051_ex_lb(struct r3051*, struct r3051_stage*);
-static void r3051_ex_lbu(struct r3051*, struct r3051_stage*);
-static void r3051_ex_lw(struct r3051*, struct r3051_stage*);
-static void r3051_ex_mfhi(struct r3051*, struct r3051_stage*);
-static void r3051_ex_mflo(struct r3051*, struct r3051_stage*);
-static void r3051_ex_or(struct r3051*, struct r3051_stage*);
-static void r3051_ex_ori(struct r3051*, struct r3051_stage*);
-static void r3051_ex_sll(struct r3051*, struct r3051_stage*);
-static void r3051_ex_slt(struct r3051*, struct r3051_stage*);
-static void r3051_ex_slti(struct r3051*, struct r3051_stage*);
-static void r3051_ex_sltiu(struct r3051*, struct r3051_stage*);
-static void r3051_ex_sltu(struct r3051*, struct r3051_stage*);
-static void r3051_ex_sra(struct r3051*, struct r3051_stage*);
-static void r3051_ex_srl(struct r3051*, struct r3051_stage*);
-static void r3051_ex_subu(struct r3051*, struct r3051_stage*);
-static void r3051_ex_sb(struct r3051*, struct r3051_stage*);
-static void r3051_ex_sh(struct r3051*, struct r3051_stage*);
-static void r3051_ex_sw(struct r3051*, struct r3051_stage*);
+#define op_impl(name) static void r3051_stage_ex_##name(struct r3051*, struct r3051_stage*)
+#define op_decl(name) static void r3051_stage_ex_##name(struct r3051* processor, struct r3051_stage* stage)
+#define op_call(name) r3051_stage_ex_##name(processor, stage)
 
-static void r3051_ex_cp(struct r3051*, struct r3051_stage*);
+op_impl(add);
+op_impl(addi);
+op_impl(addiu);
+op_impl(addu);
+op_impl(and);
+op_impl(andi);
+op_impl(beq);
+op_impl(bgez);
+op_impl(bgtz);
+op_impl(blez);
+op_impl(bltz);
+op_impl(bne);
+op_impl(div);
+op_impl(divu);
+op_impl(j);
+op_impl(jal);
+op_impl(jalr);
+op_impl(jr);
+op_impl(lui);
+op_impl(lb);
+op_impl(lbu);
+op_impl(lw);
+op_impl(mfhi);
+op_impl(mflo);
+op_impl(or);
+op_impl(ori);
+op_impl(sll);
+op_impl(slt);
+op_impl(slti);
+op_impl(sltiu);
+op_impl(sltu);
+op_impl(sra);
+op_impl(srl);
+op_impl(sub);
+op_impl(subu);
+op_impl(sb);
+op_impl(sh);
+op_impl(sw);
+op_impl(xor);
+op_impl(xori);
 
 extern struct r3051_cop0* cop0;
 
-void r3051_stage_ex_00(struct r3051* processor, struct r3051_stage* stage) {
+static void r3051_stage_ex_00(struct r3051* processor, struct r3051_stage* stage) {
   switch (stage->fn) {
-  case 0x00: r3051_ex_sll(processor, stage); return;
+  case 0x00: op_call(sll); return;
 
-  case 0x02: r3051_ex_srl(processor, stage); return;
-  case 0x03: r3051_ex_sra(processor, stage); return;
+  case 0x02: op_call(srl); return;
+  case 0x03: op_call(sra); return;
 
-  case 0x08: r3051_ex_jr(processor, stage); return;
-  case 0x09: r3051_ex_jalr(processor, stage); return;
+  case 0x08: op_call(jr); return;
+  case 0x09: op_call(jalr); return;
 
-  case 0x10: r3051_ex_mfhi(processor, stage); return;
+  case 0x10: op_call(mfhi); return;
 
-  case 0x12: r3051_ex_mflo(processor, stage); return;
+  case 0x12: op_call(mflo); return;
 
-  case 0x1a: r3051_ex_div(processor, stage); return;
-  case 0x1b: r3051_ex_divu(processor, stage); return;
+  case 0x1a: op_call(div); return;
+  case 0x1b: op_call(divu); return;
 
-  case 0x20: r3051_ex_add(processor, stage); return;
-  case 0x21: r3051_ex_addu(processor, stage); return;
+  case 0x20: op_call(add); return;
+  case 0x21: op_call(addu); return;
+  case 0x22: op_call(sub); return;
+  case 0x23: op_call(subu); return;
+  case 0x24: op_call(and); return;
+  case 0x25: op_call(or); return;
+  case 0x26: op_call(xor); return;
 
-  case 0x23: r3051_ex_subu(processor, stage); return;
-  case 0x24: r3051_ex_and(processor, stage); return;
-  case 0x25: r3051_ex_or(processor, stage); return;
-
-  case 0x2a: r3051_ex_slt(processor, stage); return;
-  case 0x2b: r3051_ex_sltu(processor, stage); return;
+  case 0x2a: op_call(slt); return;
+  case 0x2b: op_call(sltu); return;
   }
 
   assert(0 && "Unimplemented instruction");
 }
 
-void r3051_stage_ex_01(struct r3051* processor, struct r3051_stage* stage) {
+static void r3051_stage_ex_01(struct r3051* processor, struct r3051_stage* stage) {
   switch (stage->fn) {
-  case 0x00: r3051_ex_bltz(processor, stage); return;
-  case 0x01: r3051_ex_bgez(processor, stage); return;
+  case 0x00: op_call(bltz); return;
+  case 0x01: op_call(bgez); return;
   }
 
   assert(0 && "Unimplemented instruction");
+}
+
+static void r3051_stage_ex_cp(struct r3051* processor, struct r3051_stage* stage) {
+  switch (stage->op & 3) {
+  case 0:
+    switch (stage->rs) {
+    case 0x00: processor->registers[stage->rt] = r3051_cop0_fetch_sr(cop0, stage->rd); return; // mfc0 rd,rt
+    case 0x02: processor->registers[stage->rt] = r3051_cop0_fetch_cr(cop0, stage->rd); return; // cfc0 rd,rt
+    case 0x04: r3051_cop0_store_sr(cop0, stage->rd, processor->registers[stage->rt]); return; // mtc0 rd,rt
+    case 0x06: r3051_cop0_store_cr(cop0, stage->rd, processor->registers[stage->rt]); return; // ctc0 rd,rt
+    }
+    break;
+  }
+
+  assert(0 && "Unimplemented coprocessor instruction");
 }
 
 void r3051_stage_ex(struct r3051* processor) {
@@ -90,37 +111,74 @@ void r3051_stage_ex(struct r3051* processor) {
   switch (stage->op) {
   case 0x00: r3051_stage_ex_00(processor, stage); return;
   case 0x01: r3051_stage_ex_01(processor, stage); return;
-  case 0x02: r3051_ex_j(processor, stage); return;
-  case 0x03: r3051_ex_jal(processor, stage); return;
-  case 0x04: r3051_ex_beq(processor, stage); return;
-  case 0x05: r3051_ex_bne(processor, stage); return;
-  case 0x06: r3051_ex_blez(processor, stage); return;
-  case 0x07: r3051_ex_bgtz(processor, stage); return;
-  case 0x08: r3051_ex_addi(processor, stage); return;
-  case 0x09: r3051_ex_addiu(processor, stage); return;
-  case 0x0a: r3051_ex_slti(processor, stage); return;
-  case 0x0b: r3051_ex_sltiu(processor, stage); return;
-  case 0x0c: r3051_ex_andi(processor, stage); return;
-  case 0x0d: r3051_ex_ori(processor, stage); return;
-
-  case 0x0f: r3051_ex_lui(processor, stage); return;
-  case 0x10: r3051_ex_cp(processor, stage); return;
-
-  case 0x20: r3051_ex_lb(processor, stage); return;
-
-  case 0x23: r3051_ex_lw(processor, stage); return;
-  case 0x24: r3051_ex_lbu(processor, stage); return;
-
-  case 0x28: r3051_ex_sb(processor, stage); return;
-  case 0x29: r3051_ex_sh(processor, stage); return;
-
-  case 0x2b: r3051_ex_sw(processor, stage); return;
+  case 0x02: op_call(j); return;
+  case 0x03: op_call(jal); return;
+  case 0x04: op_call(beq); return;
+  case 0x05: op_call(bne); return;
+  case 0x06: op_call(blez); return;
+  case 0x07: op_call(bgtz); return;
+  case 0x08: op_call(addi); return;
+  case 0x09: op_call(addiu); return;
+  case 0x0a: op_call(slti); return;
+  case 0x0b: op_call(sltiu); return;
+  case 0x0c: op_call(andi); return;
+  case 0x0d: op_call(ori); return;
+  case 0x0e: op_call(xori); return;
+  case 0x0f: op_call(lui); return;
+  case 0x10: op_call(cp); return;
+//case 0x11:
+//case 0x12:
+//case 0x13:
+//case 0x14:
+//case 0x15:
+//case 0x16:
+//case 0x17:
+//case 0x18:
+//case 0x19:
+//case 0x1a:
+//case 0x1b:
+//case 0x1c:
+//case 0x1d:
+//case 0x1e:
+//case 0x1f:
+  case 0x20: op_call(lb); return;
+//case 0x21:
+//case 0x22:
+  case 0x23: op_call(lw); return;
+  case 0x24: op_call(lbu); return;
+//case 0x25:
+//case 0x26:
+//case 0x27:
+  case 0x28: op_call(sb); return;
+  case 0x29: op_call(sh); return;
+//case 0x2a:
+  case 0x2b: op_call(sw); return;
+//case 0x2c:
+//case 0x2d:
+//case 0x2e:
+//case 0x2f:
+//case 0x30:
+//case 0x31:
+//case 0x32:
+//case 0x33:
+//case 0x34:
+//case 0x35:
+//case 0x36:
+//case 0x37:
+//case 0x38:
+//case 0x39:
+//case 0x3a:
+//case 0x3b:
+//case 0x3c:
+//case 0x3d:
+//case 0x3e:
+//case 0x3f:
   }
 
   assert(0 && "Unimplemented instruction");
 }
 
-static void r3051_ex_add(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(add) {
   uint32_t sum = processor->registers[stage->rs] + processor->registers[stage->rt];
 
   // todo: integer overflow exception
@@ -128,7 +186,7 @@ static void r3051_ex_add(struct r3051* processor, struct r3051_stage* stage) {
   processor->registers[stage->rd] = sum;
 }
 
-static void r3051_ex_addi(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(addi) {
   uint32_t sum = processor->registers[stage->rs] + ((int16_t) stage->nn);
 
   // todo: integer overflow exception
@@ -136,78 +194,65 @@ static void r3051_ex_addi(struct r3051* processor, struct r3051_stage* stage) {
   processor->registers[stage->rt] = sum;
 }
 
-static void r3051_ex_addiu(struct r3051* processor, struct r3051_stage* stage) {
-  processor->registers[stage->rt] = processor->registers[stage->rs] + ((int16_t)stage->nn);
+op_decl(addiu) {
+  processor->registers[stage->rt] = processor->registers[stage->rs] + ((int16_t) stage->nn);
 }
 
-static void r3051_ex_addu(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(addu) {
   processor->registers[stage->rd] = processor->registers[stage->rs] + processor->registers[stage->rt];
 }
 
-static void r3051_ex_and(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(and) {
   processor->registers[stage->rd] = processor->registers[stage->rs] & processor->registers[stage->rt];
 }
 
-static void r3051_ex_andi(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(andi) {
   processor->registers[stage->rt] = processor->registers[stage->rs] & stage->nn;
 }
 
-static void r3051_ex_beq(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(beq) {
   if (processor->registers[stage->rt] == processor->registers[stage->rs]) {
     processor->pc -= 4;
     processor->pc += (uint32_t) (((int16_t) stage->nn) << 2);
   }
 }
 
-static void r3051_ex_bgez(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(bgez) {
   if (((int32_t)processor->registers[stage->rs]) >= 0) {
     processor->pc -= 4;
-    processor->pc += (uint32_t)(((int16_t)stage->nn) << 2);
+    processor->pc += (uint32_t) (((int16_t) stage->nn) << 2);
   }
 }
 
-static void r3051_ex_bgtz(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(bgtz) {
   if (((int32_t) processor->registers[stage->rs]) > 0) {
     processor->pc -= 4;
-    processor->pc += (uint32_t)(((int16_t)stage->nn) << 2);
+    processor->pc += (uint32_t) (((int16_t) stage->nn) << 2);
   }
 }
 
-static void r3051_ex_blez(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(blez) {
   if (((int32_t)processor->registers[stage->rs]) <= 0) {
     processor->pc -= 4;
-    processor->pc += (uint32_t)(((int16_t)stage->nn) << 2);
+    processor->pc += (uint32_t) (((int16_t) stage->nn) << 2);
   }
 }
 
-static void r3051_ex_bltz(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(bltz) {
   if (((int32_t)processor->registers[stage->rs]) < 0) {
     processor->pc -= 4;
-    processor->pc += (uint32_t)(((int16_t)stage->nn) << 2);
+    processor->pc += (uint32_t) (((int16_t) stage->nn) << 2);
   }
 }
 
-static void r3051_ex_bne(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(bne) {
   if (processor->registers[stage->rt] != processor->registers[stage->rs]) {
     processor->pc -= 4;
     processor->pc += (uint32_t) (((int16_t) stage->nn) << 2);
   }
 }
 
-static void r3051_ex_cp(struct r3051* processor, struct r3051_stage* stage) {
-  switch (stage->op & 3) {
-  case 0:
-    switch (stage->rs) {
-    case 0x00: r3051_cop0_fetch(cop0, stage->rd, &processor->registers[stage->rt]); return;
-    case 0x04: r3051_cop0_store(cop0, stage->rd, &processor->registers[stage->rt]); return;
-    }
-    break;
-  }
-
-  assert(0 && "Unimplemented coprocessor instruction");
-}
-
-static void r3051_ex_div(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(div) {
   int32_t rs = ((int32_t) processor->registers[stage->rs]);
   int32_t rt = ((int32_t) processor->registers[stage->rt]);
 
@@ -215,17 +260,13 @@ static void r3051_ex_div(struct r3051* processor, struct r3051_stage* stage) {
     processor->lo = -((rs >> 31) | 1);
     processor->hi = rs;
   }
-  else if (rt == -1 && rs == -0x80000000) {
-    processor->lo = -0x80000000;
-    processor->hi = 0;
-  }
   else {
     processor->lo = rs / rt;
     processor->hi = rs % rt;
   }
 }
 
-static void r3051_ex_divu(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(divu) {
   uint32_t rs = processor->registers[stage->rs];
   uint32_t rt = processor->registers[stage->rt];
 
@@ -239,13 +280,13 @@ static void r3051_ex_divu(struct r3051* processor, struct r3051_stage* stage) {
   }
 }
 
-static void r3051_ex_j(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(j) {
   processor->pc -= 4;
   processor->pc &= 0xf0000000;
   processor->pc |= stage->nn << 2;
 }
 
-static void r3051_ex_jal(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(jal) {
   processor->registers[31] = processor->pc;
 
   processor->pc -= 4;
@@ -253,90 +294,106 @@ static void r3051_ex_jal(struct r3051* processor, struct r3051_stage* stage) {
   processor->pc |= stage->nn << 2;
 }
 
-static void r3051_ex_jalr(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(jalr) {
   processor->registers[stage->rd] = processor->pc;
 
   processor->pc = processor->registers[stage->rs];
 }
 
-static void r3051_ex_jr(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(jr) {
   processor->pc = processor->registers[stage->rs];
 }
 
-static void r3051_ex_lui(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(lui) {
   processor->registers[stage->rt] = stage->nn << 16;
 }
 
-static void r3051_ex_lb(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(lb) {
   stage->target = processor->registers[stage->rs] + ((int16_t) stage->nn);
 }
 
-static void r3051_ex_lbu(struct r3051* processor, struct r3051_stage* stage) {
-  stage->target = processor->registers[stage->rs] + ((int16_t)stage->nn);
-}
-
-static void r3051_ex_lw(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(lbu) {
   stage->target = processor->registers[stage->rs] + ((int16_t) stage->nn);
 }
 
-static void r3051_ex_mfhi(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(lw) {
+  stage->target = processor->registers[stage->rs] + ((int16_t) stage->nn);
+}
+
+op_decl(mfhi) {
   processor->registers[stage->rd] = processor->hi;
 }
 
-static void r3051_ex_mflo(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(mflo) {
   processor->registers[stage->rd] = processor->lo;
 }
 
-static void r3051_ex_or(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(or) {
   processor->registers[stage->rd] = processor->registers[stage->rs] | processor->registers[stage->rt];
 }
 
-static void r3051_ex_ori(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(ori) {
   processor->registers[stage->rt] = processor->registers[stage->rs] | stage->nn;
 }
 
-static void r3051_ex_sll(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(sll) {
   processor->registers[stage->rd] = processor->registers[stage->rt] << stage->sa;
 }
 
-static void r3051_ex_slt(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(slt) {
   processor->registers[stage->rd] =
     ((int32_t) processor->registers[stage->rs]) < ((int32_t) processor->registers[stage->rt]);
 }
 
-static void r3051_ex_slti(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(slti) {
   processor->registers[stage->rt] = 
     ((int32_t) processor->registers[stage->rs]) < ((int16_t) stage->nn);
 }
 
-static void r3051_ex_sltiu(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(sltiu) {
   processor->registers[stage->rt] = processor->registers[stage->rs] < ((uint32_t) ((int16_t) stage->nn));
 }
 
-static void r3051_ex_sltu(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(sltu) {
   processor->registers[stage->rd] = processor->registers[stage->rs] < processor->registers[stage->rt];
 }
 
-static void r3051_ex_sra(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(sra) {
   processor->registers[stage->rd] = ((int32_t) processor->registers[stage->rt]) >> stage->sa;
 }
 
-static void r3051_ex_srl(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(srl) {
   processor->registers[stage->rd] = processor->registers[stage->rt] >> stage->sa;
 }
 
-static void r3051_ex_subu(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(sub) {
+  uint32_t difference = processor->registers[stage->rs] - processor->registers[stage->rt];
+
+  // todo: arithmetic overflow exception
+
+  processor->registers[stage->rd] = difference;
+}
+
+op_decl(subu) {
   processor->registers[stage->rd] = processor->registers[stage->rs] - processor->registers[stage->rt];
 }
 
-static void r3051_ex_sb(struct r3051* processor, struct r3051_stage* stage) {
-  stage->target = processor->registers[stage->rs] + ((int16_t)stage->nn);
-}
-
-static void r3051_ex_sh(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(sb) {
   stage->target = processor->registers[stage->rs] + ((int16_t) stage->nn);
 }
 
-static void r3051_ex_sw(struct r3051* processor, struct r3051_stage* stage) {
+op_decl(sh) {
   stage->target = processor->registers[stage->rs] + ((int16_t) stage->nn);
+}
+
+op_decl(sw) {
+  stage->target = processor->registers[stage->rs] + ((int16_t) stage->nn);
+}
+
+op_decl(xor) {
+  processor->registers[stage->rd] = processor->registers[stage->rs] ^ processor->registers[stage->rt];
+}
+
+op_decl(xori) {
+  processor->registers[stage->rt] = processor->registers[stage->rs] ^ stage->nn;
 }

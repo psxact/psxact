@@ -44,14 +44,13 @@ struct r3051 {
 
 //
 // Processor State
-//
 
 void r3051_init(struct r3051*);
+void r3051_kill(struct r3051*);
 void r3051_step(struct r3051*);
 
 //
 // Pipeline Stages
-//
 
 void r3051_stage_ic(struct r3051*);
 void r3051_stage_rf(struct r3051*);
@@ -72,7 +71,6 @@ void r3051_store_word(uint32_t, uint32_t);
 
 //
 // D-Cache Functions
-//
 
 enum {
   DCACHE_SIZE = 0x100,
@@ -84,9 +82,11 @@ struct r3051_dcache {
   uint32_t lines[DCACHE_ITEM][DCACHE_LINE];
 };
 
+uint32_t r3051_dcache_fetch(uint32_t);
+void r3051_dcache_store(uint32_t, uint32_t);
+
 //
 // I-Cache Functions
-//
 
 enum {
   ICACHE_SIZE = 0x400,
@@ -99,3 +99,11 @@ struct r3051_icache {
   uint32_t tag[ICACHE_ITEM];
   uint32_t valid[ICACHE_ITEM];
 };
+
+uint32_t r3051_icache_fetch(uint32_t);
+void r3051_icache_store(uint32_t, uint32_t);
+
+//
+// I-Cache
+
+uint32_t r3051_fetch_inst(uint32_t);

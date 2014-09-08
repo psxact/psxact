@@ -7,7 +7,7 @@
     <ClInclude Include="system.h" />
     <ClInclude Include="r3051\r3051.h" />
     <ClInclude Include="bus\bus.h" />
-    <ClInclude Include="r3051\cp0.h" />
+    <ClInclude Include="r3051\cop0.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.c" />
@@ -21,7 +21,9 @@
     <ClCompile Include="r3051\stage-dc.c" />
     <ClCompile Include="r3051\stage-wb.c" />
     <ClCompile Include="bus\bus.c" />
-    <ClCompile Include="r3051\cp0.c" />
+    <ClCompile Include="r3051\cop0.c" />
+    <ClCompile Include="r3051\dcache.c" />
+    <ClCompile Include="r3051\icache.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="gpu\stub.md" />
