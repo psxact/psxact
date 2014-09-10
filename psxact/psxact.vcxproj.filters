@@ -31,5 +31,6 @@
     <None Include="mdec\stub.md" />
     <None Include="spu\stub.md" />
     <None Include="cd-rom\stub.md" />
+    <None Include="README.md" />
   </ItemGroup>
 </Project>

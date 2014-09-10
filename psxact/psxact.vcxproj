@@ -110,6 +110,7 @@
     <None Include="gpu\stub.md" />
     <None Include="gte\stub.md" />
     <None Include="mdec\stub.md" />
+    <None Include="README.md" />
     <None Include="spu\stub.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
