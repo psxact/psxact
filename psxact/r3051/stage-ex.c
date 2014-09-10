@@ -2,6 +2,8 @@
 #include "r3051.h"
 #include "cop0.h"
 
+#define ExLog(format, ...) printf(format, __VA_ARGS__)
+
 #define op_impl(name) static void r3051_stage_ex_##name(struct r3051*, struct r3051_stage*)
 #define op_decl(name) static void r3051_stage_ex_##name(struct r3051* processor, struct r3051_stage* stage)
 #define op_call(name) r3051_stage_ex_##name(processor, stage)
@@ -284,6 +286,8 @@ op_decl(j) {
   processor->pc -= 4;
   processor->pc &= 0xf0000000;
   processor->pc |= stage->nn << 2;
+
+  ExLog("[$%08x] j $%08x\n", stage->address, processor->pc);
 }
 
 op_decl(jal) {
@@ -292,16 +296,22 @@ op_decl(jal) {
   processor->pc -= 4;
   processor->pc &= 0xf0000000;
   processor->pc |= stage->nn << 2;
+
+  ExLog("[$%08x] jal $%08x\n", stage->address, processor->pc);
 }
 
 op_decl(jalr) {
   processor->registers[stage->rd] = processor->pc;
 
   processor->pc = processor->registers[stage->rs];
+
+  ExLog("[$%08x] jalr r%d,r%d\n", stage->address, stage->rd, stage->rs);
 }
 
 op_decl(jr) {
   processor->pc = processor->registers[stage->rs];
+
+  ExLog("[$%08x] jr r%d\n", stage->address, stage->rs);
 }
 
 op_decl(lui) {
