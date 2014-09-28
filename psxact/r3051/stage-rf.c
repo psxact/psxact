@@ -84,7 +84,9 @@ void r3051_stage_rf(struct r3051* processor) {
   case 0x0e: decode_itype(processor, stage); return; // xori rt,rs,immediate
   case 0x0f: decode_itype(processor, stage); return; // lui rt,immediate
   case 0x10: decode_rtype(processor, stage); return; // cop0
-
+  case 0x11: decode_rtype(processor, stage); return; // cop1
+  case 0x12: decode_rtype(processor, stage); return; // cop2
+  case 0x13: decode_rtype(processor, stage); return; // cop3
   case 0x20: decode_itype(processor, stage); return; // lb rt,immediate(rs)
   case 0x21: decode_itype(processor, stage); return; // lh rt,immediate(rs)
   case 0x22: decode_itype(processor, stage); return; // lwl rt,immediate(rs)

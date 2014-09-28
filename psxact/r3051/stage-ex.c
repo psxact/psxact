@@ -130,10 +130,18 @@ static void r3051_stage_ex_cp(struct r3051* processor, struct r3051_stage* stage
   switch (stage->op & 3) {
   case 0:
     switch (stage->rs) {
-    case 0x00: processor->registers[stage->rt] = r3051_cop0_fetch_sr(cop0, stage->rd); return; // mfc0 rd,rt
-    case 0x02: processor->registers[stage->rt] = r3051_cop0_fetch_cr(cop0, stage->rd); return; // cfc0 rd,rt
-    case 0x04: r3051_cop0_store_sr(cop0, stage->rd, processor->registers[stage->rt]); return; // mtc0 rd,rt
-    case 0x06: r3051_cop0_store_cr(cop0, stage->rd, processor->registers[stage->rt]); return; // ctc0 rd,rt
+    case 0x00: Rt = r3051_cop0_fetch_sr(cop0, stage->rd); return; // mfc0 rd,rt
+    case 0x02: Rt = r3051_cop0_fetch_cr(cop0, stage->rd); return; // cfc0 rd,rt
+    case 0x04: r3051_cop0_store_sr(cop0, stage->rd, Rt); return; // mtc0 rd,rt
+    case 0x06: r3051_cop0_store_cr(cop0, stage->rd, Rt); return; // ctc0 rd,rt
+    case 0x10: // cop0
+      switch (stage->code & 0x1f) {
+      case 0x10: // rfe
+        cop0->registers[12] &= ~0x0f;
+        cop0->registers[12] |= (cop0->registers[12] >> 2) & 0x0f;
+        return;
+      }
+      break;
     }
     break;
   }
@@ -162,9 +170,9 @@ void r3051_stage_ex(struct r3051* processor) {
   case 0x0e: op_call(xori); return;
   case 0x0f: op_call(lui); return;
   case 0x10: op_call(cp); return;
-//case 0x11:
-//case 0x12:
-//case 0x13:
+  case 0x11: op_call(cp); return;
+  case 0x12: op_call(cp); return;
+  case 0x13: op_call(cp); return;
 //case 0x14:
 //case 0x15:
 //case 0x16:
