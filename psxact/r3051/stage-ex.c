@@ -21,9 +21,11 @@ op_impl(and);
 op_impl(andi);
 op_impl(beq);
 op_impl(bgez);
+op_impl(bgezal);
 op_impl(bgtz);
 op_impl(blez);
 op_impl(bltz);
+op_impl(bltzal);
 op_impl(bne);
 op_impl(break);
 op_impl(div);
@@ -117,6 +119,8 @@ static void r3051_stage_ex_01(struct r3051* processor, struct r3051_stage* stage
   switch (stage->fn) {
   case 0x00: op_call(bltz); return;
   case 0x01: op_call(bgez); return;
+  case 0x10: op_call(bltzal); return;
+  case 0x11: op_call(bgezal); return;
   }
 
   assert(0 && "Unimplemented instruction");
@@ -243,44 +247,52 @@ op_decl(andi) {
 }
 
 op_decl(beq) {
-  if (processor->registers[stage->rt] == processor->registers[stage->rs]) {
+  if (Rt == Rs) {
     processor->pc -= 4;
-    processor->pc += (uint32_t) (((int16_t) stage->nn) << 2);
+    processor->pc += sx(16, Cv) << 2;
   }
 }
 
 op_decl(bgez) {
-  if (((int32_t)processor->registers[stage->rs]) >= 0) {
+  if (((int32_t)Rs) >= 0) {
     processor->pc -= 4;
-    processor->pc += (uint32_t) (((int16_t) stage->nn) << 2);
+    processor->pc += sx(16, Cv) << 2;
   }
 }
 
+op_decl(bgezal) {
+  assert(0 && "unimplemented instruction: BGEZAL");
+}
+
 op_decl(bgtz) {
-  if (((int32_t) processor->registers[stage->rs]) > 0) {
+  if (((int32_t) Rs) > 0) {
     processor->pc -= 4;
-    processor->pc += (uint32_t) (((int16_t) stage->nn) << 2);
+    processor->pc += sx(16, Cv) << 2;
   }
 }
 
 op_decl(blez) {
-  if (((int32_t)processor->registers[stage->rs]) <= 0) {
+  if (((int32_t)Rs) <= 0) {
     processor->pc -= 4;
-    processor->pc += (uint32_t) (((int16_t) stage->nn) << 2);
+    processor->pc += sx(16, Cv) << 2;
   }
 }
 
 op_decl(bltz) {
-  if (((int32_t)processor->registers[stage->rs]) < 0) {
+  if (((int32_t)Rs) < 0) {
     processor->pc -= 4;
-    processor->pc += (uint32_t) (((int16_t) stage->nn) << 2);
+    processor->pc += sx(16, Cv) << 2;
   }
 }
 
+op_decl(bltzal) {
+  assert(0 && "unimplemented instruction: BLTZAL");
+}
+
 op_decl(bne) {
-  if (processor->registers[stage->rt] != processor->registers[stage->rs]) {
+  if (Rt != Rs) {
     processor->pc -= 4;
-    processor->pc += (uint32_t) (((int16_t) stage->nn) << 2);
+    processor->pc += sx(16, Cv) << 2;
   }
 }
 
@@ -317,39 +329,33 @@ op_decl(divu) {
 }
 
 op_decl(j) {
-  processor->pc -= 4;
-  processor->pc &= 0xf0000000;
-  processor->pc |= stage->nn << 2;
+  processor->pc = ((processor->pc - 4) & 0xf0000000) | (Cv << 2);
 
   ExLog("[$%08x] j $%08x\n", stage->address, processor->pc);
 }
 
 op_decl(jal) {
   processor->registers[31] = processor->pc;
-
-  processor->pc -= 4;
-  processor->pc &= 0xf0000000;
-  processor->pc |= stage->nn << 2;
+  processor->pc = ((processor->pc - 4) & 0xf0000000) | (Cv << 2);
 
   ExLog("[$%08x] jal $%08x\n", stage->address, processor->pc);
 }
 
 op_decl(jalr) {
-  processor->registers[stage->rd] = processor->pc;
-
-  processor->pc = processor->registers[stage->rs];
+  Rd = processor->pc;
+  processor->pc = Rs;
 
   ExLog("[$%08x] jalr r%d,r%d\n", stage->address, stage->rd, stage->rs);
 }
 
 op_decl(jr) {
-  processor->pc = processor->registers[stage->rs];
+  processor->pc = Rs;
 
   ExLog("[$%08x] jr r%d\n", stage->address, stage->rs);
 }
 
 op_decl(lui) {
-  processor->registers[stage->rt] = stage->nn << 16;
+  Rt = Cv << 16;
 }
 
 op_decl(lb) {

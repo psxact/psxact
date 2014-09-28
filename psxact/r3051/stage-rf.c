@@ -56,6 +56,8 @@ void r3051_stage_rf_01(struct r3051* processor, struct r3051_stage* stage) {
   switch (stage->rt = DECODE_RT()) {
   case 0x00: decode_itype(processor, stage); return; // bltz rs,immediate
   case 0x01: decode_itype(processor, stage); return; // bgez rs,immediate
+  case 0x10: decode_itype(processor, stage); return; // bltzal rs,immediate
+  case 0x11: decode_itype(processor, stage); return; // bgezal rs,immediate
   }
 
   assert(0 && "Unimplemented instruction");
