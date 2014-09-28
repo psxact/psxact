@@ -47,15 +47,19 @@ op_impl(mthi);
 op_impl(mtlo);
 op_impl(mult);
 op_impl(multu);
+op_impl(nor);
 op_impl(or);
 op_impl(ori);
 op_impl(sll);
+op_impl(sllv);
 op_impl(slt);
 op_impl(slti);
 op_impl(sltiu);
 op_impl(sltu);
 op_impl(sra);
+op_impl(srav);
 op_impl(srl);
+op_impl(srlv);
 op_impl(sub);
 op_impl(subu);
 op_impl(sb);
@@ -76,7 +80,10 @@ static void r3051_stage_ex_00(struct r3051* processor, struct r3051_stage* stage
 
   case 0x02: op_call(srl); return;
   case 0x03: op_call(sra); return;
-
+  case 0x04: op_call(sllv); return;
+//case 0x05:
+  case 0x06: op_call(srlv); return;
+  case 0x07: op_call(srav); return;
   case 0x08: op_call(jr); return;
   case 0x09: op_call(jalr); return;
 
@@ -98,7 +105,7 @@ static void r3051_stage_ex_00(struct r3051* processor, struct r3051_stage* stage
   case 0x24: op_call(and); return;
   case 0x25: op_call(or); return;
   case 0x26: op_call(xor); return;
-
+  case 0x27: op_call(nor); return;
   case 0x2a: op_call(slt); return;
   case 0x2b: op_call(sltu); return;
   }
@@ -204,35 +211,35 @@ void r3051_stage_ex(struct r3051* processor) {
 }
 
 op_decl(add) {
-  uint32_t sum = processor->registers[stage->rs] + processor->registers[stage->rt];
+  uint32_t sum = Rs + Rt;
 
   // todo: integer overflow exception
 
-  processor->registers[stage->rd] = sum;
+  Rd = sum;
 }
 
 op_decl(addi) {
-  uint32_t sum = processor->registers[stage->rs] + ((int16_t) stage->nn);
+  uint32_t sum = Rs + ((int16_t) Cv);
 
   // todo: integer overflow exception
 
-  processor->registers[stage->rt] = sum;
+  Rt = sum;
 }
 
 op_decl(addiu) {
-  processor->registers[stage->rt] = processor->registers[stage->rs] + ((int16_t) stage->nn);
+  Rt = Rs + ((int16_t) Cv);
 }
 
 op_decl(addu) {
-  processor->registers[stage->rd] = processor->registers[stage->rs] + processor->registers[stage->rt];
+  Rd = Rs + Rt;
 }
 
 op_decl(and) {
-  processor->registers[stage->rd] = processor->registers[stage->rs] & processor->registers[stage->rt];
+  Rd = Rs & Rt;
 }
 
 op_decl(andi) {
-  processor->registers[stage->rt] = processor->registers[stage->rs] & stage->nn;
+  Rt = Rs & Cv;
 }
 
 op_decl(beq) {
@@ -282,8 +289,8 @@ op_decl(break) {
 }
 
 op_decl(div) {
-  int32_t rs = ((int32_t) processor->registers[stage->rs]);
-  int32_t rt = ((int32_t) processor->registers[stage->rt]);
+  int32_t rs = (int32_t) Rs;
+  int32_t rt = (int32_t) Rt;
 
   if (rt == 0) {
     processor->lo = -((rs >> 31) | 1);
@@ -296,8 +303,8 @@ op_decl(div) {
 }
 
 op_decl(divu) {
-  uint32_t rs = processor->registers[stage->rs];
-  uint32_t rt = processor->registers[stage->rt];
+  uint32_t rs = Rs;
+  uint32_t rt = Rt;
 
   if (rt == 0) {
     processor->lo = 0xffffffff;
@@ -404,18 +411,24 @@ op_decl(multu) {
   processor->hi = (uint32_t) (result >> 32);
 }
 
+op_decl(nor) {
+  Rd = ~(Rs | Rt);
 }
 
 op_decl(or) {
-  processor->registers[stage->rd] = processor->registers[stage->rs] | processor->registers[stage->rt];
+  Rd = Rs | Rt;
 }
 
 op_decl(ori) {
-  processor->registers[stage->rt] = processor->registers[stage->rs] | stage->nn;
+  Rt = Rs | Cv;
 }
 
 op_decl(sll) {
-  processor->registers[stage->rd] = processor->registers[stage->rt] << stage->sa;
+  Rd = Rt << Cv;
+}
+
+op_decl(sllv) {
+  Rd = Rt << Rs;
 }
 
 op_decl(slt) {
@@ -437,23 +450,31 @@ op_decl(sltu) {
 }
 
 op_decl(sra) {
-  processor->registers[stage->rd] = ((int32_t) processor->registers[stage->rt]) >> stage->sa;
+  Rd = ((int32_t) Rt) >> Cv;
+}
+
+op_decl(srav) {
+  Rd = ((int32_t) Rt) >> Rs;
 }
 
 op_decl(srl) {
-  processor->registers[stage->rd] = processor->registers[stage->rt] >> stage->sa;
+  Rd = Rt >> Cv;
+}
+
+op_decl(srlv) {
+  Rd = Rt >> Rs;
 }
 
 op_decl(sub) {
-  uint32_t difference = processor->registers[stage->rs] - processor->registers[stage->rt];
+  uint32_t difference = Rs - Rt;
 
   // todo: arithmetic overflow exception
 
-  processor->registers[stage->rd] = difference;
+  Rd = difference;
 }
 
 op_decl(subu) {
-  processor->registers[stage->rd] = processor->registers[stage->rs] - processor->registers[stage->rt];
+  Rd = Rs - Rt;
 }
 
 op_decl(sb) {
@@ -485,9 +506,9 @@ op_decl(syscall) {
 }
 
 op_decl(xor) {
-  processor->registers[stage->rd] = processor->registers[stage->rs] ^ processor->registers[stage->rt];
+  Rd = Rs ^ Rt;
 }
 
 op_decl(xori) {
-  processor->registers[stage->rt] = processor->registers[stage->rs] ^ stage->nn;
+  Rt = Rs ^ Cv;
 }

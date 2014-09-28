@@ -20,7 +20,9 @@ void r3051_stage_rf_00(struct r3051* processor, struct r3051_stage* stage) {
 
   case 0x02: decode_rtype(processor, stage); return; // srl rd,rt,sa
   case 0x03: decode_rtype(processor, stage); return; // sra rd,rt,sa
-
+  case 0x04: decode_rtype(processor, stage); return; // sllv rd,rt,rs
+  case 0x06: decode_rtype(processor, stage); return; // srlv rd,rt,rs
+  case 0x07: decode_rtype(processor, stage); return; // srav rd,rt,rs
   case 0x08: decode_rtype(processor, stage); return; // jr rs
   case 0x09: decode_rtype(processor, stage); return; // jalr rd,rs
 
@@ -37,11 +39,12 @@ void r3051_stage_rf_00(struct r3051* processor, struct r3051_stage* stage) {
 
   case 0x20: decode_rtype(processor, stage); return; // add rd,rt,rs
   case 0x21: decode_rtype(processor, stage); return; // addu rd,rt,rs
-
+  case 0x22: decode_rtype(processor, stage); return; // sub rd,rt,rs
   case 0x23: decode_rtype(processor, stage); return; // subu rd,rt,rs
   case 0x24: decode_rtype(processor, stage); return; // and rd,rt,rs
   case 0x25: decode_rtype(processor, stage); return; // or rd,rt,rs
-
+  case 0x26: decode_rtype(processor, stage); return; // xor rd,rt,rs
+  case 0x27: decode_rtype(processor, stage); return; // nor rd,rt,rs
   case 0x2a: decode_rtype(processor, stage); return; // slt rd,rt,rs
   case 0x2b: decode_rtype(processor, stage); return; // sltu rd,rt,rs
   }
@@ -76,7 +79,7 @@ void r3051_stage_rf(struct r3051* processor) {
   case 0x0b: decode_itype(processor, stage); return; // sltiu rt,rs,immediate
   case 0x0c: decode_itype(processor, stage); return; // andi rt,rs,immediate
   case 0x0d: decode_itype(processor, stage); return; // ori rt,rs,immediate
-
+  case 0x0e: decode_itype(processor, stage); return; // xori rt,rs,immediate
   case 0x0f: decode_itype(processor, stage); return; // lui rt,immediate
   case 0x10: decode_rtype(processor, stage); return; // cop0
 
