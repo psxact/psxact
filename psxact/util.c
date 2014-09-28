@@ -27,3 +27,17 @@ int load_file(char* lpFileName, uint8_t** lpBuffer) {
   fclose(lpFile);
   return 0;
 }
+
+uint32_t sx(int bits, uint32_t value) {
+  uint32_t sign = 1U << (bits - 1);
+  uint32_t mask = (1U << bits) - 1;
+
+  return ((value & mask) ^ sign) - sign;
+}
+
+uint32_t zx(int bits, uint32_t value) {
+  uint32_t sign = 1U << (bits - 1);
+  uint32_t mask = (1U << bits) - 1;
+
+  return ((value & mask) ^ sign) - sign;
+}

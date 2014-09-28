@@ -79,7 +79,7 @@ extern struct r3051_cop0* cop0;
 static void r3051_stage_ex_00(struct r3051* processor, struct r3051_stage* stage) {
   switch (stage->fn) {
   case 0x00: op_call(sll); return;
-
+//case 0x01:
   case 0x02: op_call(srl); return;
   case 0x03: op_call(sra); return;
   case 0x04: op_call(sllv); return;
@@ -88,18 +88,28 @@ static void r3051_stage_ex_00(struct r3051* processor, struct r3051_stage* stage
   case 0x07: op_call(srav); return;
   case 0x08: op_call(jr); return;
   case 0x09: op_call(jalr); return;
-
+//case 0x0a:
+//case 0x0b:
   case 0x0c: op_call(syscall); return;
   case 0x0d: op_call(break); return;
+//case 0x0e:
+//case 0x0f:
   case 0x10: op_call(mfhi); return;
   case 0x11: op_call(mthi); return;
   case 0x12: op_call(mflo); return;
   case 0x13: op_call(mtlo); return;
+//case 0x14:
+//case 0x15:
+//case 0x16:
+//case 0x17:
   case 0x18: op_call(mult); return;
   case 0x19: op_call(multu); return;
   case 0x1a: op_call(div); return;
   case 0x1b: op_call(divu); return;
-
+//case 0x1c:
+//case 0x1d:
+//case 0x1e:
+//case 0x1f:
   case 0x20: op_call(add); return;
   case 0x21: op_call(addu); return;
   case 0x22: op_call(sub); return;
@@ -108,8 +118,30 @@ static void r3051_stage_ex_00(struct r3051* processor, struct r3051_stage* stage
   case 0x25: op_call(or); return;
   case 0x26: op_call(xor); return;
   case 0x27: op_call(nor); return;
+//case 0x28:
+//case 0x29:
   case 0x2a: op_call(slt); return;
   case 0x2b: op_call(sltu); return;
+//case 0x2c:
+//case 0x2d:
+//case 0x2e:
+//case 0x2f:
+//case 0x30:
+//case 0x31:
+//case 0x32:
+//case 0x33:
+//case 0x34:
+//case 0x35:
+//case 0x36:
+//case 0x37:
+//case 0x38:
+//case 0x39:
+//case 0x3a:
+//case 0x3b:
+//case 0x3c:
+//case 0x3d:
+//case 0x3e:
+//case 0x3f:
   }
 
   assert(0 && "Unimplemented instruction");
@@ -119,8 +151,36 @@ static void r3051_stage_ex_01(struct r3051* processor, struct r3051_stage* stage
   switch (stage->fn) {
   case 0x00: op_call(bltz); return;
   case 0x01: op_call(bgez); return;
+//case 0x02:
+//case 0x03:
+//case 0x04:
+//case 0x05:
+//case 0x06:
+//case 0x07:
+//case 0x09:
+//case 0x00:
+//case 0x0a:
+//case 0x0b:
+//case 0x0c:
+//case 0x0d:
+//case 0x0e:
+//case 0x0f:
   case 0x10: op_call(bltzal); return;
   case 0x11: op_call(bgezal); return;
+//case 0x12:
+//case 0x13:
+//case 0x14:
+//case 0x15:
+//case 0x16:
+//case 0x17:
+//case 0x19:
+//case 0x10:
+//case 0x1a:
+//case 0x1b:
+//case 0x1c:
+//case 0x1d:
+//case 0x1e:
+//case 0x1f:
   }
 
   assert(0 && "Unimplemented instruction");
@@ -446,21 +506,21 @@ op_decl(sllv) {
 }
 
 op_decl(slt) {
-  processor->registers[stage->rd] =
-    ((int32_t) processor->registers[stage->rs]) < ((int32_t) processor->registers[stage->rt]);
+  Rd =
+    ((int32_t) Rs) < ((int32_t) Rt);
 }
 
 op_decl(slti) {
-  processor->registers[stage->rt] = 
-    ((int32_t) processor->registers[stage->rs]) < ((int16_t) stage->nn);
+  Rt = 
+    ((int32_t) Rs) < ((int16_t) Cv);
 }
 
 op_decl(sltiu) {
-  processor->registers[stage->rt] = processor->registers[stage->rs] < ((uint32_t) ((int16_t) stage->nn));
+  Rt = Rs < ((uint32_t) ((int16_t) Cv));
 }
 
 op_decl(sltu) {
-  processor->registers[stage->rd] = processor->registers[stage->rs] < processor->registers[stage->rt];
+  Rd = Rs < Rt;
 }
 
 op_decl(sra) {
