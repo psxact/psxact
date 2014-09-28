@@ -24,6 +24,7 @@
     <ClCompile Include="r3051\cop0.c" />
     <ClCompile Include="r3051\dcache.c" />
     <ClCompile Include="r3051\icache.c" />
+    <ClCompile Include="r3051\exception.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="gpu\stub.md" />

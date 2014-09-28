@@ -2,7 +2,7 @@
 #include "r3051.h"
 #include "cop0.h"
 
-#define ExLog(format, ...) printf(format, __VA_ARGS__)
+#define ExLog(format, ...) //printf(format, __VA_ARGS__)
 
 #define op_impl(name) static void r3051_stage_ex_##name(struct r3051*, struct r3051_stage*)
 #define op_decl(name) static void r3051_stage_ex_##name(struct r3051* processor, struct r3051_stage* stage)
@@ -20,6 +20,7 @@ op_impl(bgtz);
 op_impl(blez);
 op_impl(bltz);
 op_impl(bne);
+op_impl(break);
 op_impl(div);
 op_impl(divu);
 op_impl(j);
@@ -46,6 +47,7 @@ op_impl(subu);
 op_impl(sb);
 op_impl(sh);
 op_impl(sw);
+op_impl(syscall);
 op_impl(xor);
 op_impl(xori);
 
@@ -61,6 +63,8 @@ static void r3051_stage_ex_00(struct r3051* processor, struct r3051_stage* stage
   case 0x08: op_call(jr); return;
   case 0x09: op_call(jalr); return;
 
+  case 0x0c: op_call(syscall); return;
+  case 0x0d: op_call(break); return;
   case 0x10: op_call(mfhi); return;
 
   case 0x12: op_call(mflo); return;
@@ -254,6 +258,10 @@ op_decl(bne) {
   }
 }
 
+op_decl(break) {
+  assert(0 && "unimplemented instruction: BREAK");
+}
+
 op_decl(div) {
   int32_t rs = ((int32_t) processor->registers[stage->rs]);
   int32_t rt = ((int32_t) processor->registers[stage->rt]);
@@ -398,6 +406,10 @@ op_decl(sh) {
 
 op_decl(sw) {
   stage->target = processor->registers[stage->rs] + ((int16_t) stage->nn);
+}
+
+op_decl(syscall) {
+  r3051_syscall(cop0, processor);
 }
 
 op_decl(xor) {

@@ -23,7 +23,7 @@ static uint32_t registers_mask[16] = {
 void r3051_cop0_init(struct r3051_cop0* cop) {
   memset(cop, 0, sizeof(struct r3051_cop0));
 
-  cop->registers[15] = 0x00000302; // imp=3, rev=2
+  cop->registers[15] = 0x00000002; // imp=0, rev=2
 }
 
 void r3051_cop0_kill(struct r3051_cop0* cop) {

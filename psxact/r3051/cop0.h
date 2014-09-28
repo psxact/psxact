@@ -12,3 +12,5 @@ void r3051_cop0_store_sr(struct r3051_cop0*, uint32_t, uint32_t);
 
 uint32_t r3051_cop0_fetch_cr(struct r3051_cop0*, uint32_t);
 void r3051_cop0_store_cr(struct r3051_cop0*, uint32_t, uint32_t);
+
+void r3051_syscall(struct r3051_cop0*, struct r3051*);
