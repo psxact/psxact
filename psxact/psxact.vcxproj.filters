@@ -3,16 +3,35 @@
   <ItemGroup>
     <ClInclude Include="targetver.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="cpu\r3051.h" />
+    <ClInclude Include="util.h" />
+    <ClInclude Include="system.h" />
+    <ClInclude Include="r3051\r3051.h" />
+    <ClInclude Include="bus\bus.h" />
+    <ClInclude Include="r3051\cop0.h" />
+    <ClInclude Include="gpu\gpu.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cpu\r3051.c" />
     <ClCompile Include="stdafx.c" />
     <ClCompile Include="psxact.c" />
-    <ClCompile Include="cpu\stage-4-dc.c" />
-    <ClCompile Include="cpu\stage-1-ic.c" />
-    <ClCompile Include="cpu\stage-2-rf.c" />
-    <ClCompile Include="cpu\stage-3-ex.c" />
-    <ClCompile Include="cpu\stage-5-wb.c" />
+    <ClCompile Include="util.c" />
+    <ClCompile Include="system.c" />
+    <ClCompile Include="r3051\r3051.c" />
+    <ClCompile Include="r3051\stage-rf.c" />
+    <ClCompile Include="r3051\stage-ic.c" />
+    <ClCompile Include="r3051\stage-ex.c" />
+    <ClCompile Include="r3051\stage-dc.c" />
+    <ClCompile Include="r3051\stage-wb.c" />
+    <ClCompile Include="bus\bus.c" />
+    <ClCompile Include="r3051\cop0.c" />
+    <ClCompile Include="r3051\dcache.c" />
+    <ClCompile Include="r3051\icache.c" />
+    <ClCompile Include="r3051\exception.c" />
+    <ClCompile Include="gpu\gpu.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="gte\stub.md" />
+    <None Include="mdec\stub.md" />
+    <None Include="spu\stub.md" />
+    <None Include="cd-rom\stub.md" />
   </ItemGroup>
 </Project>

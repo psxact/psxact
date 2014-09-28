@@ -7,9 +7,13 @@
 
 #include "targetver.h"
 
+#include <assert.h>
 #include <stdio.h>
-#include <tchar.h>
-
+#include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <tchar.h>
+#include <math.h>
 
-// TODO: reference additional headers your program requires here
+#include "util.h"

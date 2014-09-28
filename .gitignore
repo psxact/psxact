@@ -4,6 +4,7 @@ release/
 ipch/
 
 # Files
+*.opensdf
 *.sdf
 *.suo
 *.user
