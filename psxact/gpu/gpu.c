@@ -146,6 +146,7 @@ void gpu_write_gp0(uint32_t data) {
 	case 0x52: // Shaded line, semi-transparent
 	case 0x58: // Shaded Poly-line, opaque
 	case 0x5a: // Shaded Poly-line, semi-transparent
+    break;
 	}
 }
 
