@@ -43,6 +43,10 @@ op_impl(lwl);
 op_impl(lwr);
 op_impl(mfhi);
 op_impl(mflo);
+op_impl(mthi);
+op_impl(mtlo);
+op_impl(mult);
+op_impl(multu);
 op_impl(or);
 op_impl(ori);
 op_impl(sll);
@@ -79,9 +83,11 @@ static void r3051_stage_ex_00(struct r3051* processor, struct r3051_stage* stage
   case 0x0c: op_call(syscall); return;
   case 0x0d: op_call(break); return;
   case 0x10: op_call(mfhi); return;
-
+  case 0x11: op_call(mthi); return;
   case 0x12: op_call(mflo); return;
-
+  case 0x13: op_call(mtlo); return;
+  case 0x18: op_call(mult); return;
+  case 0x19: op_call(multu); return;
   case 0x1a: op_call(div); return;
   case 0x1b: op_call(divu); return;
 
@@ -372,11 +378,32 @@ op_decl(lwr) {
 }
 
 op_decl(mfhi) {
-  processor->registers[stage->rd] = processor->hi;
+  Rd = processor->hi;
 }
 
 op_decl(mflo) {
-  processor->registers[stage->rd] = processor->lo;
+  Rd = processor->lo;
+}
+
+op_decl(mthi) {
+  processor->hi = Rs;
+}
+
+op_decl(mtlo) {
+  processor->lo = Rs;
+}
+
+op_decl(mult) {
+  assert(0 && "unimplemented instruction: MULT");
+}
+
+op_decl(multu) {
+  uint64_t result = ((uint64_t) Rt) * ((uint64_t) Rs);
+
+  processor->lo = (uint32_t) (result >> 0);
+  processor->hi = (uint32_t) (result >> 32);
+}
+
 }
 
 op_decl(or) {

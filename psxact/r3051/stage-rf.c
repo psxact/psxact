@@ -27,9 +27,11 @@ void r3051_stage_rf_00(struct r3051* processor, struct r3051_stage* stage) {
   case 0x0c: return; // syscall
   case 0x0d: return; // break
   case 0x10: decode_rtype(processor, stage); return; // mfhi rd
-
+  case 0x11: decode_rtype(processor, stage); return; // mthi rs
   case 0x12: decode_rtype(processor, stage); return; // mflo rd
-
+  case 0x13: decode_rtype(processor, stage); return; // mtlo rs
+  case 0x18: decode_rtype(processor, stage); return; // mult rs,rt
+  case 0x19: decode_rtype(processor, stage); return; // multu rs,rt
   case 0x1a: decode_rtype(processor, stage); return; // div rs,rt
   case 0x1b: decode_rtype(processor, stage); return; // divu rs,rt
 
