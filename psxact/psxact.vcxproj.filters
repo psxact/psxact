@@ -8,6 +8,7 @@
     <ClInclude Include="r3051\r3051.h" />
     <ClInclude Include="bus\bus.h" />
     <ClInclude Include="r3051\cop0.h" />
+    <ClInclude Include="gpu\gpu.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.c" />
@@ -25,9 +26,9 @@
     <ClCompile Include="r3051\dcache.c" />
     <ClCompile Include="r3051\icache.c" />
     <ClCompile Include="r3051\exception.c" />
+    <ClCompile Include="gpu\gpu.c" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="gpu\stub.md" />
     <None Include="gte\stub.md" />
     <None Include="mdec\stub.md" />
     <None Include="spu\stub.md" />

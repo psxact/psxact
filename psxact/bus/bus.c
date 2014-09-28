@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "bus.h"
+#include "../gpu/gpu.h"
 
 uint8_t* bios;
 uint8_t* disk;
@@ -19,7 +20,7 @@ uint32_t bus_fetch(uint32_t address) {
   }
 
   address = address & ~0xe0000000;
-  
+
   if (Within(0x00000000, 0x007fffff)) {
     return Access(wram, address & 0x1ffffc);
   }
@@ -35,6 +36,11 @@ uint32_t bus_fetch(uint32_t address) {
   }
 
   if (Within(0x1f801000, 0x1f801fff)) {
+    switch (address) {
+    case 0x1f801810: return gpu_read_resp();
+    case 0x1f801814: return gpu_read_stat();
+    }
+
     BusLog("[R] I/O $%08x", address);
     return 0x00000000;
   }
@@ -84,6 +90,11 @@ void bus_store(uint32_t address, uint32_t data) {
   }
 
   if (Within(0x1f801000, 0x1f801fff)) {
+    switch (address) {
+    case 0x1f801810: gpu_write_gp0(data); return;
+    case 0x1f801814: gpu_write_gp1(data); return;
+    }
+
     BusLog("[W] I/O $%08x <= $%08x", address, data);
     return;
   }

@@ -79,6 +79,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="bus\bus.h" />
+    <ClInclude Include="gpu\gpu.h" />
     <ClInclude Include="r3051\cop0.h" />
     <ClInclude Include="r3051\r3051.h" />
     <ClInclude Include="stdafx.h" />
@@ -88,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bus\bus.c" />
+    <ClCompile Include="gpu\gpu.c" />
     <ClCompile Include="psxact.c" />
     <ClCompile Include="r3051\cop0.c" />
     <ClCompile Include="r3051\dcache.c" />
@@ -108,7 +110,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cd-rom\stub.md" />
-    <None Include="gpu\stub.md" />
     <None Include="gte\stub.md" />
     <None Include="mdec\stub.md" />
     <None Include="README.md" />
