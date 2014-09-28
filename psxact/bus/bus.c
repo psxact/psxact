@@ -6,7 +6,7 @@ uint8_t* disk;
 uint8_t  wram[0x200000];
 
 #define Access(memory, address) *((uint32_t*)(memory + (address)))
-#define BusLog(format, ...) //printf(format, __VA_ARGS__)
+#define BusLog(format, ...) printf(format"\n", __VA_ARGS__)
 #define Within(a, b) ((address & ~((a) ^ (b))) == (a))
 
 //
@@ -14,7 +14,7 @@ uint8_t  wram[0x200000];
 
 uint32_t bus_fetch(uint32_t address) {
   if (address == 0xfffe0130) {
-    BusLog("[R] Cache Control Register\n");
+    BusLog("[R] Cache Control Register");
     return 0x00000000;
   }
 
@@ -25,27 +25,27 @@ uint32_t bus_fetch(uint32_t address) {
   }
 
   if (Within(0x1f000000, 0x1f7fffff)) {
-    BusLog("[R] EXP1 $%08x\n", address);
+    BusLog("[R] EXP1 $%08x", address);
     return 0x00000000;
   }
 
   if (Within(0x1f800000, 0x1f8003ff)) {
-    BusLog("[R] DCache $%08x\n", address);
+    BusLog("[R] DCache $%08x", address);
     return 0x00000000;
   }
 
   if (Within(0x1f801000, 0x1f801fff)) {
-    BusLog("[R] I/O $%08x\n", address);
+    BusLog("[R] I/O $%08x", address);
     return 0x00000000;
   }
 
   if (Within(0x1f802000, 0x1f802fff)) {
-    BusLog("[R] EXP2 $%08x\n", address);
+    BusLog("[R] EXP2 $%08x", address);
     return 0x00000000;
   }
 
   if (Within(0x1fa00000, 0x1fbfffff)) {
-    BusLog("[R] EXP3 $%08x\n", address);
+    BusLog("[R] EXP3 $%08x", address);
     return 0x00000000;
   }
 
@@ -53,7 +53,7 @@ uint32_t bus_fetch(uint32_t address) {
     return Access(bios, address & 0x7fffc);
   }
 
-  printf("Unknown Read: [%08x]\n", address);
+  BusLog("Unknown Read: [%08x]", address);
   return 0;
 }
 
@@ -62,7 +62,7 @@ uint32_t bus_fetch(uint32_t address) {
 
 void bus_store(uint32_t address, uint32_t data) {
   if (address == 0xfffe0130) {
-    BusLog("[W] Cache Control Register <= $%08x\n", data);
+    BusLog("[W] Cache Control Register <= $%08x", data);
     return;
   }
 
@@ -74,34 +74,34 @@ void bus_store(uint32_t address, uint32_t data) {
   }
 
   if (Within(0x1f000000, 0x1f7fffff)) {
-    BusLog("[W] EXP1 $%08x <= $%08x\n", address, data);
+    BusLog("[W] EXP1 $%08x <= $%08x", address, data);
     return;
   }
 
   if (Within(0x1f800000, 0x1f8003ff)) {
-    BusLog("[W] DCache $%08x <= $%08x\n", address, data);
+    BusLog("[W] DCache $%08x <= $%08x", address, data);
     return;
   }
 
   if (Within(0x1f801000, 0x1f801fff)) {
-    BusLog("[W] I/O $%08x <= $%08x\n", address, data);
+    BusLog("[W] I/O $%08x <= $%08x", address, data);
     return;
   }
 
   if (Within(0x1f802000, 0x1f802fff)) {
-    BusLog("[W] EXP2 $%08x <= $%08x\n", address, data);
+    BusLog("[W] EXP2 $%08x <= $%08x", address, data);
     return;
   }
 
   if (Within(0x1fa00000, 0x1fbfffff)) {
-    BusLog("[W] EXP3 $%08x <= $%08x\n", address, data);
+    BusLog("[W] EXP3 $%08x <= $%08x", address, data);
     return;
   }
 
   if (Within(0x1fc00000, 0x1fc7ffff)) {
-    BusLog("[W] BIOS $%08x <= $%08x\n", address, data);
+    BusLog("[W] BIOS $%08x <= $%08x", address, data);
     return;
   }
 
-  printf("Unknown Write: [%08x] <= %08x\n", address, data);
+  printf("Unknown Write: [%08x] <= %08x", address, data);
 }
