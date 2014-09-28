@@ -7,6 +7,8 @@
 
 op_impl(lb);
 op_impl(lbu);
+op_impl(lh);
+op_impl(lhu);
 op_impl(lw);
 op_impl(sb);
 op_impl(sh);
@@ -35,9 +37,11 @@ void r3051_stage_dc(struct r3051* processor) {
   case 0x10: return; // cop0
 
   case 0x20: op_call(lb); return; // lb
+  case 0x21: op_call(lh); return; // lh
 
   case 0x23: op_call(lw); return; // lw
   case 0x24: op_call(lbu); return; // lbu
+  case 0x25: op_call(lhu); return; // lhu
 
   case 0x28: op_call(sb); return; // sb
   case 0x29: op_call(sh); return; // sh
@@ -54,6 +58,14 @@ op_decl(lb) {
 
 op_decl(lbu) {
   processor->registers[stage->rt] = r3051_fetch_byte(stage->target) & 0xff;
+}
+
+op_decl(lh) {
+	processor->registers[stage->rt] = r3051_fetch_half(stage->target);
+}
+
+op_decl(lhu) {
+	processor->registers[stage->rt] = r3051_fetch_half(stage->target) & 0xffff;
 }
 
 op_decl(lw) {

@@ -79,14 +79,25 @@ void r3051_stage_rf(struct r3051* processor) {
   case 0x10: decode_rtype(processor, stage); return; // cop0
 
   case 0x20: decode_itype(processor, stage); return; // lb rt,immediate(rs)
-
+  case 0x21: decode_itype(processor, stage); return; // lh rt,immediate(rs)
+  case 0x22: decode_itype(processor, stage); return; // lwl rt,immediate(rs)
   case 0x23: decode_itype(processor, stage); return; // lw rt,immediate(rs)
   case 0x24: decode_itype(processor, stage); return; // lbu rt,immediate(rs)
-
+  case 0x25: decode_itype(processor, stage); return; // lhu rt,immediate(rs)
+  case 0x26: decode_itype(processor, stage); return; // lwr rt,immediate(rs)
   case 0x28: decode_itype(processor, stage); return; // sb rt,immediate(rs)
   case 0x29: decode_itype(processor, stage); return; // sh rt,immediate(rs)
-
+  case 0x2a: decode_itype(processor, stage); return; // swl rt,immediate(rs)
   case 0x2b: decode_itype(processor, stage); return; // sw rt,immediate(rs)
+  case 0x2e: decode_itype(processor, stage); return; // swr rt,immediate(rs)
+  case 0x30: decode_itype(processor, stage); return; // lwc0 rt,immediate(rs)
+  case 0x31: decode_itype(processor, stage); return; // lwc1 rt,immediate(rs)
+  case 0x32: decode_itype(processor, stage); return; // lwc2 rt,immediate(rs)
+  case 0x33: decode_itype(processor, stage); return; // lwc3 rt,immediate(rs)
+  case 0x38: decode_itype(processor, stage); return; // swc0 rt,immediate(rs)
+  case 0x39: decode_itype(processor, stage); return; // swc1 rt,immediate(rs)
+  case 0x3a: decode_itype(processor, stage); return; // swc2 rt,immediate(rs)
+  case 0x3b: decode_itype(processor, stage); return; // swc3 rt,immediate(rs)
   }
 
   assert(0 && "Unimplemented instruction");

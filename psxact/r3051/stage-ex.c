@@ -2,6 +2,11 @@
 #include "r3051.h"
 #include "cop0.h"
 
+#define Cv stage->nn
+#define Rd processor->registers[stage->rd]
+#define Rs processor->registers[stage->rs]
+#define Rt processor->registers[stage->rt]
+
 #define ExLog(format, ...) //printf(format, __VA_ARGS__)
 
 #define op_impl(name) static void r3051_stage_ex_##name(struct r3051*, struct r3051_stage*)
@@ -30,7 +35,12 @@ op_impl(jr);
 op_impl(lui);
 op_impl(lb);
 op_impl(lbu);
+op_impl(lh);
+op_impl(lhu);
 op_impl(lw);
+op_impl(lwc);
+op_impl(lwl);
+op_impl(lwr);
 op_impl(mfhi);
 op_impl(mflo);
 op_impl(or);
@@ -47,6 +57,9 @@ op_impl(subu);
 op_impl(sb);
 op_impl(sh);
 op_impl(sw);
+op_impl(swc);
+op_impl(swl);
+op_impl(swr);
 op_impl(syscall);
 op_impl(xor);
 op_impl(xori);
@@ -148,33 +161,33 @@ void r3051_stage_ex(struct r3051* processor) {
 //case 0x1e:
 //case 0x1f:
   case 0x20: op_call(lb); return;
-//case 0x21:
-//case 0x22:
+  case 0x21: op_call(lh); return;
+  case 0x22: op_call(lwl); return;
   case 0x23: op_call(lw); return;
   case 0x24: op_call(lbu); return;
-//case 0x25:
-//case 0x26:
+  case 0x25: op_call(lhu); return;
+  case 0x26: op_call(lwr); return;
 //case 0x27:
   case 0x28: op_call(sb); return;
   case 0x29: op_call(sh); return;
-//case 0x2a:
+  case 0x2a: op_call(swl); return;
   case 0x2b: op_call(sw); return;
 //case 0x2c:
 //case 0x2d:
-//case 0x2e:
+  case 0x2e: op_call(swr); return;
 //case 0x2f:
-//case 0x30:
-//case 0x31:
-//case 0x32:
-//case 0x33:
+  case 0x30: op_call(lwc); return;
+  case 0x31: op_call(lwc); return;
+  case 0x32: op_call(lwc); return;
+  case 0x33: op_call(lwc); return;
 //case 0x34:
 //case 0x35:
 //case 0x36:
 //case 0x37:
-//case 0x38:
-//case 0x39:
-//case 0x3a:
-//case 0x3b:
+  case 0x38: op_call(swc); return;
+  case 0x39: op_call(swc); return;
+  case 0x3a: op_call(swc); return;
+  case 0x3b: op_call(swc); return;
 //case 0x3c:
 //case 0x3d:
 //case 0x3e:
@@ -327,15 +340,35 @@ op_decl(lui) {
 }
 
 op_decl(lb) {
-  stage->target = processor->registers[stage->rs] + ((int16_t) stage->nn);
+  stage->target = Rs + ((int16_t) Cv);
 }
 
 op_decl(lbu) {
-  stage->target = processor->registers[stage->rs] + ((int16_t) stage->nn);
+  stage->target = Rs + ((int16_t) Cv);
+}
+
+op_decl(lh) {
+  stage->target = Rs + ((int16_t) Cv);
+}
+
+op_decl(lhu) {
+  stage->target = Rs + ((int16_t) Cv);
 }
 
 op_decl(lw) {
-  stage->target = processor->registers[stage->rs] + ((int16_t) stage->nn);
+  stage->target = Rs + ((int16_t) Cv);
+}
+
+op_decl(lwc) {
+  assert(0 && "unimplemented instruction: LWC");
+}
+
+op_decl(lwl) {
+  assert(0 && "unimplemented instruction: LWL");
+}
+
+op_decl(lwr) {
+  assert(0 && "unimplemented instruction: LWR");
 }
 
 op_decl(mfhi) {
@@ -397,15 +430,27 @@ op_decl(subu) {
 }
 
 op_decl(sb) {
-  stage->target = processor->registers[stage->rs] + ((int16_t) stage->nn);
+  stage->target = Rs + ((int16_t) Cv);
 }
 
 op_decl(sh) {
-  stage->target = processor->registers[stage->rs] + ((int16_t) stage->nn);
+  stage->target = Rs + ((int16_t) Cv);
 }
 
 op_decl(sw) {
-  stage->target = processor->registers[stage->rs] + ((int16_t) stage->nn);
+  stage->target = Rs + ((int16_t) Cv);
+}
+
+op_decl(swc) {
+  assert(0 && "unimplemented instruction: SWC");
+}
+
+op_decl(swl) {
+  assert(0 && "unimplemented instruction: SWL");
+}
+
+op_decl(swr) {
+  assert(0 && "unimplemented instruction: SWR");
 }
 
 op_decl(syscall) {
