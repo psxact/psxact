@@ -7,7 +7,7 @@
 #define Rs processor->registers[stage->rs]
 #define Rt processor->registers[stage->rt]
 
-#define ExLog(format, ...) //printf(format, __VA_ARGS__)
+#define ExLog(format, ...) //printf(format"\n", __VA_ARGS__)
 
 #define op_impl(name) static void r3051_stage_ex_##name(struct r3051*, struct r3051_stage*)
 #define op_decl(name) static void r3051_stage_ex_##name(struct r3051* processor, struct r3051_stage* stage)
@@ -148,7 +148,7 @@ static void r3051_stage_ex_00(struct r3051* processor, struct r3051_stage* stage
 }
 
 static void r3051_stage_ex_01(struct r3051* processor, struct r3051_stage* stage) {
-  switch (stage->fn) {
+  switch (stage->rt) {
   case 0x00: op_call(bltz); return;
   case 0x01: op_call(bgez); return;
 //case 0x02:
@@ -399,27 +399,27 @@ op_decl(divu) {
 op_decl(j) {
   processor->pc = ((processor->pc - 4) & 0xf0000000) | (Cv << 2);
 
-  ExLog("[$%08x] j $%08x\n", stage->address, processor->pc);
+  ExLog("[$%08x] j $%08x", stage->address, processor->pc);
 }
 
 op_decl(jal) {
   processor->registers[31] = processor->pc;
   processor->pc = ((processor->pc - 4) & 0xf0000000) | (Cv << 2);
 
-  ExLog("[$%08x] jal $%08x\n", stage->address, processor->pc);
+  ExLog("[$%08x] jal $%08x", stage->address, processor->pc);
 }
 
 op_decl(jalr) {
   Rd = processor->pc;
   processor->pc = Rs;
 
-  ExLog("[$%08x] jalr r%d,r%d\n", stage->address, stage->rd, stage->rs);
+  ExLog("[$%08x] jalr r%d,r%d", stage->address, stage->rd, stage->rs);
 }
 
 op_decl(jr) {
   processor->pc = Rs;
 
-  ExLog("[$%08x] jr r%d\n", stage->address, stage->rs);
+  ExLog("[$%08x] jr r%d", stage->address, stage->rs);
 }
 
 op_decl(lui) {

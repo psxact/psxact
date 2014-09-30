@@ -10,8 +10,8 @@ uint32_t gpu_read_resp(void);
 uint32_t gpu_read_stat(void);
 
 struct coordinate {
-	uint32_t x;
-	uint32_t y;
+  uint32_t x;
+  uint32_t y;
 };
 
 #endif

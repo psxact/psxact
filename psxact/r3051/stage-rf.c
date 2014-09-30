@@ -208,7 +208,7 @@ static void decode_jtype(struct r3051* processor, struct r3051_stage* stage) {
 }
 
 static void decode_rtype(struct r3051* processor, struct r3051_stage* stage) {
-  stage->sa = DECODE_SA();
+  stage->nn = DECODE_SA();
   stage->rd = DECODE_RD();
   stage->rt = DECODE_RT();
   stage->rs = DECODE_RS();

@@ -61,11 +61,11 @@ op_decl(lbu) {
 }
 
 op_decl(lh) {
-	processor->registers[stage->rt] = r3051_fetch_half(stage->target);
+  processor->registers[stage->rt] = r3051_fetch_half(stage->target);
 }
 
 op_decl(lhu) {
-	processor->registers[stage->rt] = r3051_fetch_half(stage->target) & 0xffff;
+  processor->registers[stage->rt] = r3051_fetch_half(stage->target) & 0xffff;
 }
 
 op_decl(lw) {
