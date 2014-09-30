@@ -148,7 +148,7 @@ static void r3051_stage_ex_00(struct r3051* processor, struct r3051_stage* stage
 }
 
 static void r3051_stage_ex_01(struct r3051* processor, struct r3051_stage* stage) {
-  switch (stage->fn) {
+  switch (stage->rt) {
   case 0x00: op_call(bltz); return;
   case 0x01: op_call(bgez); return;
 //case 0x02:

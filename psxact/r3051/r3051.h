@@ -25,7 +25,6 @@ struct r3051_stage {
   uint8_t rs;
   uint8_t rt;
   uint8_t rd;
-  uint8_t sa;
   uint8_t fn;
 };
 
