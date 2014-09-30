@@ -74,11 +74,11 @@ void r3051_store_word(uint32_t, uint32_t);
 enum {
   DCACHE_SIZE = 0x100,
   DCACHE_LINE = 1,
-  DCACHE_ITEM = DCACHE_SIZE / DCACHE_LINE
+  DCACHE_ELEM = DCACHE_SIZE / DCACHE_LINE
 };
 
 struct r3051_dcache {
-  uint32_t lines[DCACHE_ITEM][DCACHE_LINE];
+  uint32_t lines[DCACHE_ELEM][DCACHE_LINE];
 };
 
 uint32_t r3051_dcache_fetch(uint32_t);
@@ -90,13 +90,13 @@ void r3051_dcache_store(uint32_t, uint32_t);
 enum {
   ICACHE_SIZE = 0x400,
   ICACHE_LINE = 4,
-  ICACHE_ITEM = ICACHE_SIZE / ICACHE_LINE
+  ICACHE_ELEM = ICACHE_SIZE / ICACHE_LINE
 };
 
 struct r3051_icache {
-  uint32_t lines[ICACHE_ITEM][ICACHE_LINE];
-  uint32_t tag[ICACHE_ITEM];
-  uint32_t valid[ICACHE_ITEM];
+  uint32_t lines[ICACHE_ELEM][ICACHE_LINE];
+  uint32_t tag[ICACHE_ELEM];
+  uint32_t valid[ICACHE_ELEM];
 };
 
 uint32_t r3051_icache_fetch(uint32_t);
