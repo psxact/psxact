@@ -48,6 +48,11 @@ static void gpu_cmd_40(uint32_t color, uint32_t point1, uint32_t point2) {
   e.x = LO(point2);
   e.y = HI(point2);
 
+  if (point1 == point2) {
+    gpu_write_24bpp(s.x, s.y, color);
+    return;
+  }
+
   t.x = (s.x << 16) + (1 << 15);
   t.y = (s.y << 16) + (1 << 15);
   d.x = (e.x - s.x);
