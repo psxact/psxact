@@ -9,11 +9,11 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include <stdbool.h>
-#include <stdint.h>
+#include <cstdint>
 #include <stdlib.h>
 #include <string.h>
 #include <tchar.h>
 #include <math.h>
+#include <algorithm>
 
 #include "util.h"

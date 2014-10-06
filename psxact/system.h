@@ -1,5 +1,10 @@
+#pragma once
+
 #include "stdafx.h"
 
-void psx_init(void);
-void psx_kill(void);
-void psx_step(void);
+class Psx {
+public:
+  void init(void);
+  void kill(void);
+  void step(void);
+};

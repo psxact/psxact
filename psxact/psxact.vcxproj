@@ -88,25 +88,24 @@
     <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="bus\bus.c" />
-    <ClCompile Include="gpu\gpu.c" />
-    <ClCompile Include="psxact.c" />
-    <ClCompile Include="r3051\cop0.c" />
-    <ClCompile Include="r3051\dcache.c" />
-    <ClCompile Include="r3051\exception.c" />
-    <ClCompile Include="r3051\icache.c" />
-    <ClCompile Include="r3051\r3051.c" />
-    <ClCompile Include="r3051\stage-dc.c" />
-    <ClCompile Include="r3051\stage-ex.c" />
-    <ClCompile Include="r3051\stage-ic.c" />
-    <ClCompile Include="r3051\stage-rf.c" />
-    <ClCompile Include="r3051\stage-wb.c" />
-    <ClCompile Include="stdafx.c">
+    <ClCompile Include="bus\bus.cpp" />
+    <ClCompile Include="gpu\gpu.cpp" />
+    <ClCompile Include="psxact.cpp" />
+    <ClCompile Include="r3051\cop0.cpp" />
+    <ClCompile Include="r3051\dcache.cpp" />
+    <ClCompile Include="r3051\exception.cpp" />
+    <ClCompile Include="r3051\icache.cpp" />
+    <ClCompile Include="r3051\r3051.cpp" />
+    <ClCompile Include="r3051\stage-dc.cpp" />
+    <ClCompile Include="r3051\stage-ex.cpp" />
+    <ClCompile Include="r3051\stage-ic.cpp" />
+    <ClCompile Include="r3051\stage-rf.cpp" />
+    <ClCompile Include="r3051\stage-wb.cpp" />
+    <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="system.c" />
-    <ClCompile Include="util.c" />
+    <ClCompile Include="system.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cd-rom\stub.md" />

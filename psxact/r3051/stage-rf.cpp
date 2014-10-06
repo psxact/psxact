@@ -10,11 +10,11 @@
 #define DECODE_RS() ((stage->code >> 21) & 31)
 #define DECODE_OP() ((stage->code >> 26) & 63)
 
-static void decode_itype(struct r3051*, struct r3051_stage*);
-static void decode_jtype(struct r3051*, struct r3051_stage*);
-static void decode_rtype(struct r3051*, struct r3051_stage*);
+static void decode_itype(R3051*, R3051::Stage*);
+static void decode_jtype(R3051*, R3051::Stage*);
+static void decode_rtype(R3051*, R3051::Stage*);
 
-static void r3051_stage_rf_00(struct r3051* processor, struct r3051_stage* stage) {
+static void r3051_stage_rf_00(R3051* processor, R3051::Stage* stage) {
   switch (stage->fn = DECODE_FN()) {
   case 0x00: decode_rtype(processor, stage); return; // sll rd,rt,sa
 //case 0x01:
@@ -85,7 +85,7 @@ static void r3051_stage_rf_00(struct r3051* processor, struct r3051_stage* stage
   assert(0 && "Unimplemented instruction");
 }
 
-static void r3051_stage_rf_01(struct r3051* processor, struct r3051_stage* stage) {
+static void r3051_stage_rf_01(R3051* processor, R3051::Stage* stage) {
   switch (stage->rt = DECODE_RT()) {
   case 0x00: decode_itype(processor, stage); return; // bltz rs,immediate
   case 0x01: decode_itype(processor, stage); return; // bgez rs,immediate
@@ -124,30 +124,30 @@ static void r3051_stage_rf_01(struct r3051* processor, struct r3051_stage* stage
   assert(0 && "Unimplemented instruction");
 }
 
-void r3051_stage_rf(struct r3051* processor) {
-  struct r3051_stage* stage = &processor->rf;
+void R3051::r3051_stage_rf(void) {
+  R3051::Stage* stage = &this->rf;
 
   switch (stage->op = DECODE_OP()) {
-  case 0x00: r3051_stage_rf_00(processor, stage); return;
-  case 0x01: r3051_stage_rf_01(processor, stage); return;
-  case 0x02: decode_jtype(processor, stage); return; // j immediate
-  case 0x03: decode_jtype(processor, stage); return; // jal immediate
-  case 0x04: decode_itype(processor, stage); return; // beq rt,rs,immediate
-  case 0x05: decode_itype(processor, stage); return; // bne rt,rs,immediate
-  case 0x06: decode_itype(processor, stage); return; // blez rs,immediate
-  case 0x07: decode_itype(processor, stage); return; // bgtz rs,immediate
-  case 0x08: decode_itype(processor, stage); return; // addi rt,rs,immediate
-  case 0x09: decode_itype(processor, stage); return; // addiu rt,rs,immediate
-  case 0x0a: decode_itype(processor, stage); return; // slti rt,rs,immediate
-  case 0x0b: decode_itype(processor, stage); return; // sltiu rt,rs,immediate
-  case 0x0c: decode_itype(processor, stage); return; // andi rt,rs,immediate
-  case 0x0d: decode_itype(processor, stage); return; // ori rt,rs,immediate
-  case 0x0e: decode_itype(processor, stage); return; // xori rt,rs,immediate
-  case 0x0f: decode_itype(processor, stage); return; // lui rt,immediate
-  case 0x10: decode_rtype(processor, stage); return; // cop0
-  case 0x11: decode_rtype(processor, stage); return; // cop1
-  case 0x12: decode_rtype(processor, stage); return; // cop2
-  case 0x13: decode_rtype(processor, stage); return; // cop3
+  case 0x00: r3051_stage_rf_00(this, stage); return;
+  case 0x01: r3051_stage_rf_01(this, stage); return;
+  case 0x02: decode_jtype(this, stage); return; // j immediate
+  case 0x03: decode_jtype(this, stage); return; // jal immediate
+  case 0x04: decode_itype(this, stage); return; // beq rt,rs,immediate
+  case 0x05: decode_itype(this, stage); return; // bne rt,rs,immediate
+  case 0x06: decode_itype(this, stage); return; // blez rs,immediate
+  case 0x07: decode_itype(this, stage); return; // bgtz rs,immediate
+  case 0x08: decode_itype(this, stage); return; // addi rt,rs,immediate
+  case 0x09: decode_itype(this, stage); return; // addiu rt,rs,immediate
+  case 0x0a: decode_itype(this, stage); return; // slti rt,rs,immediate
+  case 0x0b: decode_itype(this, stage); return; // sltiu rt,rs,immediate
+  case 0x0c: decode_itype(this, stage); return; // andi rt,rs,immediate
+  case 0x0d: decode_itype(this, stage); return; // ori rt,rs,immediate
+  case 0x0e: decode_itype(this, stage); return; // xori rt,rs,immediate
+  case 0x0f: decode_itype(this, stage); return; // lui rt,immediate
+  case 0x10: decode_rtype(this, stage); return; // cop0
+  case 0x11: decode_rtype(this, stage); return; // cop1
+  case 0x12: decode_rtype(this, stage); return; // cop2
+  case 0x13: decode_rtype(this, stage); return; // cop3
 //case 0x14:
 //case 0x15:
 //case 0x16:
@@ -160,34 +160,34 @@ void r3051_stage_rf(struct r3051* processor) {
 //case 0x1d:
 //case 0x1e:
 //case 0x1f:
-  case 0x20: decode_itype(processor, stage); return; // lb rt,immediate(rs)
-  case 0x21: decode_itype(processor, stage); return; // lh rt,immediate(rs)
-  case 0x22: decode_itype(processor, stage); return; // lwl rt,immediate(rs)
-  case 0x23: decode_itype(processor, stage); return; // lw rt,immediate(rs)
-  case 0x24: decode_itype(processor, stage); return; // lbu rt,immediate(rs)
-  case 0x25: decode_itype(processor, stage); return; // lhu rt,immediate(rs)
-  case 0x26: decode_itype(processor, stage); return; // lwr rt,immediate(rs)
+  case 0x20: decode_itype(this, stage); return; // lb rt,immediate(rs)
+  case 0x21: decode_itype(this, stage); return; // lh rt,immediate(rs)
+  case 0x22: decode_itype(this, stage); return; // lwl rt,immediate(rs)
+  case 0x23: decode_itype(this, stage); return; // lw rt,immediate(rs)
+  case 0x24: decode_itype(this, stage); return; // lbu rt,immediate(rs)
+  case 0x25: decode_itype(this, stage); return; // lhu rt,immediate(rs)
+  case 0x26: decode_itype(this, stage); return; // lwr rt,immediate(rs)
 //case 0x27:
-  case 0x28: decode_itype(processor, stage); return; // sb rt,immediate(rs)
-  case 0x29: decode_itype(processor, stage); return; // sh rt,immediate(rs)
-  case 0x2a: decode_itype(processor, stage); return; // swl rt,immediate(rs)
-  case 0x2b: decode_itype(processor, stage); return; // sw rt,immediate(rs)
+  case 0x28: decode_itype(this, stage); return; // sb rt,immediate(rs)
+  case 0x29: decode_itype(this, stage); return; // sh rt,immediate(rs)
+  case 0x2a: decode_itype(this, stage); return; // swl rt,immediate(rs)
+  case 0x2b: decode_itype(this, stage); return; // sw rt,immediate(rs)
 //case 0x2c:
 //case 0x2d:
-  case 0x2e: decode_itype(processor, stage); return; // swr rt,immediate(rs)
+  case 0x2e: decode_itype(this, stage); return; // swr rt,immediate(rs)
 //case 0x2f:
-  case 0x30: decode_itype(processor, stage); return; // lwc0 rt,immediate(rs)
-  case 0x31: decode_itype(processor, stage); return; // lwc1 rt,immediate(rs)
-  case 0x32: decode_itype(processor, stage); return; // lwc2 rt,immediate(rs)
-  case 0x33: decode_itype(processor, stage); return; // lwc3 rt,immediate(rs)
+  case 0x30: decode_itype(this, stage); return; // lwc0 rt,immediate(rs)
+  case 0x31: decode_itype(this, stage); return; // lwc1 rt,immediate(rs)
+  case 0x32: decode_itype(this, stage); return; // lwc2 rt,immediate(rs)
+  case 0x33: decode_itype(this, stage); return; // lwc3 rt,immediate(rs)
 //case 0x34:
 //case 0x35:
 //case 0x36:
 //case 0x37:
-  case 0x38: decode_itype(processor, stage); return; // swc0 rt,immediate(rs)
-  case 0x39: decode_itype(processor, stage); return; // swc1 rt,immediate(rs)
-  case 0x3a: decode_itype(processor, stage); return; // swc2 rt,immediate(rs)
-  case 0x3b: decode_itype(processor, stage); return; // swc3 rt,immediate(rs)
+  case 0x38: decode_itype(this, stage); return; // swc0 rt,immediate(rs)
+  case 0x39: decode_itype(this, stage); return; // swc1 rt,immediate(rs)
+  case 0x3a: decode_itype(this, stage); return; // swc2 rt,immediate(rs)
+  case 0x3b: decode_itype(this, stage); return; // swc3 rt,immediate(rs)
 //case 0x3c:
 //case 0x3d:
 //case 0x3e:
@@ -197,17 +197,17 @@ void r3051_stage_rf(struct r3051* processor) {
   assert(0 && "Unimplemented instruction");
 }
 
-static void decode_itype(struct r3051* processor, struct r3051_stage* stage) {
+static void decode_itype(R3051* processor, R3051::Stage* stage) {
   stage->nn = DECODE_SI();
   stage->rt = DECODE_RT();
   stage->rs = DECODE_RS();
 }
 
-static void decode_jtype(struct r3051* processor, struct r3051_stage* stage) {
+static void decode_jtype(R3051* processor, R3051::Stage* stage) {
   stage->nn = DECODE_JT();
 }
 
-static void decode_rtype(struct r3051* processor, struct r3051_stage* stage) {
+static void decode_rtype(R3051* processor, R3051::Stage* stage) {
   stage->nn = DECODE_SA();
   stage->rd = DECODE_RD();
   stage->rt = DECODE_RT();

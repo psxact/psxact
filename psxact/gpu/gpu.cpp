@@ -41,26 +41,23 @@ static void gpu_write_24bpp(uint32_t x, uint32_t y, uint32_t color) {
 }
 
 static void gpu_cmd_40(uint32_t color, uint32_t point1, uint32_t point2) {
-  struct coordinate s, e, t, d;
-
-  s.x = LO(point1);
-  s.y = HI(point1);
-  e.x = LO(point2);
-  e.y = HI(point2);
+  coordinate s(LO(point1), HI(point1));
+  coordinate e(LO(point2), HI(point2));
 
   if (point1 == point2) {
     gpu_write_24bpp(s.x, s.y, color);
     return;
   }
 
+  coordinate t, d;
   t.x = (s.x << 16) + (1 << 15);
   t.y = (s.y << 16) + (1 << 15);
   d.x = (e.x - s.x);
   d.y = (e.y - s.y);
 
-  uint32_t adx = abs(d.x);
-  uint32_t ady = abs(d.y);
-  uint32_t div = max(adx, ady);
+  int16_t div = std::max(
+    std::abs(d.x),
+    std::abs(d.y));
 
   d.x = (d.x << 16) / div;
   d.y = (d.y << 16) / div;
@@ -87,15 +84,15 @@ static void gpu_cmd_48(uint32_t color, uint32_t *points) {
 }
 
 static void gpu_cmd_60(uint32_t color, uint32_t point, uint32_t bound) {
-  uint32_t x, y, w, h;
+  int32_t x, y, w, h;
 
   x = LO(point);
   y = HI(point);
   w = LO(bound) + x;
   h = HI(bound) + y;
 
-  w = min(w, FRAME_BUFFER_X);
-  h = min(h, FRAME_BUFFER_Y);
+  w = std::min(w, FRAME_BUFFER_X);
+  h = std::min(h, FRAME_BUFFER_Y);
 
   for (; y <= h; y++) {
     for (; x <= w; x++) {

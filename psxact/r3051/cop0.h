@@ -1,16 +1,19 @@
+#pragma once
+
 #include "stdafx.h"
+#include "r3051.h"
 
-struct r3051_cop0 {
+struct Cop0 {
   uint32_t registers[16];
+
+  void init(void);
+  void kill(void);
+
+  uint32_t fetch_sr(uint32_t);
+  void store_sr(uint32_t, uint32_t);
+
+  uint32_t fetch_cr(uint32_t);
+  void store_cr(uint32_t, uint32_t);
+
+  void syscall(R3051*);
 };
-
-void r3051_cop0_init(struct r3051_cop0*);
-void r3051_cop0_kill(struct r3051_cop0*);
-
-uint32_t r3051_cop0_fetch_sr(struct r3051_cop0*, uint32_t);
-void r3051_cop0_store_sr(struct r3051_cop0*, uint32_t, uint32_t);
-
-uint32_t r3051_cop0_fetch_cr(struct r3051_cop0*, uint32_t);
-void r3051_cop0_store_cr(struct r3051_cop0*, uint32_t, uint32_t);
-
-void r3051_syscall(struct r3051_cop0*, struct r3051*);

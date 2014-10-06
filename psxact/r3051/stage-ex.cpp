@@ -9,9 +9,9 @@
 
 #define ExLog(format, ...) //printf(format"\n", __VA_ARGS__)
 
-#define op_impl(name) static void r3051_stage_ex_##name(struct r3051*, struct r3051_stage*)
-#define op_decl(name) static void r3051_stage_ex_##name(struct r3051* processor, struct r3051_stage* stage)
-#define op_call(name) r3051_stage_ex_##name(processor, stage)
+#define op_impl(name) static void r3051_stage_ex_##name(R3051*, R3051::Stage*)
+#define op_decl(name) static void r3051_stage_ex_##name(R3051* processor, R3051::Stage* stage)
+#define op_call(name) r3051_stage_ex_##name(this, stage)
 
 op_impl(add);
 op_impl(addi);
@@ -74,9 +74,9 @@ op_impl(syscall);
 op_impl(xor);
 op_impl(xori);
 
-extern struct r3051_cop0* cop0;
+extern Cop0* cop0;
 
-static void r3051_stage_ex_00(struct r3051* processor, struct r3051_stage* stage) {
+void R3051::r3051_stage_ex_00(R3051::Stage* stage) {
   switch (stage->fn) {
   case 0x00: op_call(sll); return;
 //case 0x01:
@@ -147,7 +147,7 @@ static void r3051_stage_ex_00(struct r3051* processor, struct r3051_stage* stage
   assert(0 && "Unimplemented instruction");
 }
 
-static void r3051_stage_ex_01(struct r3051* processor, struct r3051_stage* stage) {
+void R3051::r3051_stage_ex_01(R3051::Stage* stage) {
   switch (stage->rt) {
   case 0x00: op_call(bltz); return;
   case 0x01: op_call(bgez); return;
@@ -186,14 +186,16 @@ static void r3051_stage_ex_01(struct r3051* processor, struct r3051_stage* stage
   assert(0 && "Unimplemented instruction");
 }
 
-static void r3051_stage_ex_cp(struct r3051* processor, struct r3051_stage* stage) {
+void R3051::r3051_stage_ex_cp(R3051::Stage* stage) {
+  auto processor = this;
+
   switch (stage->op & 3) {
   case 0:
     switch (stage->rs) {
-    case 0x00: Rt = r3051_cop0_fetch_sr(cop0, stage->rd); return; // mfc0 rd,rt
-    case 0x02: Rt = r3051_cop0_fetch_cr(cop0, stage->rd); return; // cfc0 rd,rt
-    case 0x04: r3051_cop0_store_sr(cop0, stage->rd, Rt); return; // mtc0 rd,rt
-    case 0x06: r3051_cop0_store_cr(cop0, stage->rd, Rt); return; // ctc0 rd,rt
+    case 0x00: Rt = cop0->fetch_sr(stage->rd); return; // mfc0 rd,rt
+    case 0x02: Rt = cop0->fetch_cr(stage->rd); return; // cfc0 rd,rt
+    case 0x04: cop0->store_sr(stage->rd, Rt); return; // mtc0 rd,rt
+    case 0x06: cop0->store_cr(stage->rd, Rt); return; // ctc0 rd,rt
     case 0x10: // cop0
       switch (stage->code & 0x1f) {
       case 0x10: // rfe
@@ -209,12 +211,12 @@ static void r3051_stage_ex_cp(struct r3051* processor, struct r3051_stage* stage
   assert(0 && "Unimplemented coprocessor instruction");
 }
 
-void r3051_stage_ex(struct r3051* processor) {
-  struct r3051_stage* stage = &processor->ex;
+void R3051::r3051_stage_ex(void) {
+  R3051::Stage* stage = &this->ex;
 
   switch (stage->op) {
-  case 0x00: r3051_stage_ex_00(processor, stage); return;
-  case 0x01: r3051_stage_ex_01(processor, stage); return;
+  case 0x00: this->r3051_stage_ex_00(stage); return;
+  case 0x01: this->r3051_stage_ex_01(stage); return;
   case 0x02: op_call(j); return;
   case 0x03: op_call(jal); return;
   case 0x04: op_call(beq); return;
@@ -229,10 +231,10 @@ void r3051_stage_ex(struct r3051* processor) {
   case 0x0d: op_call(ori); return;
   case 0x0e: op_call(xori); return;
   case 0x0f: op_call(lui); return;
-  case 0x10: op_call(cp); return;
-  case 0x11: op_call(cp); return;
-  case 0x12: op_call(cp); return;
-  case 0x13: op_call(cp); return;
+  case 0x10: this->r3051_stage_ex_cp(stage); return;
+  case 0x11: this->r3051_stage_ex_cp(stage); return;
+  case 0x12: this->r3051_stage_ex_cp(stage); return;
+  case 0x13: this->r3051_stage_ex_cp(stage); return;
 //case 0x14:
 //case 0x15:
 //case 0x16:
@@ -291,7 +293,7 @@ op_decl(add) {
 }
 
 op_decl(addi) {
-  uint32_t sum = Rs + ((int16_t) Cv);
+  uint32_t sum = Rs + util::signExtend<16>(Cv);
 
   // todo: integer overflow exception
 
@@ -299,7 +301,7 @@ op_decl(addi) {
 }
 
 op_decl(addiu) {
-  Rt = Rs + ((int16_t) Cv);
+  Rt = Rs + util::signExtend<16>(Cv);
 }
 
 op_decl(addu) {
@@ -317,14 +319,14 @@ op_decl(andi) {
 op_decl(beq) {
   if (Rt == Rs) {
     processor->pc -= 4;
-    processor->pc += sx(16, Cv) << 2;
+    processor->pc += util::signExtend<16>(Cv) << 2;
   }
 }
 
 op_decl(bgez) {
   if (((int32_t)Rs) >= 0) {
     processor->pc -= 4;
-    processor->pc += sx(16, Cv) << 2;
+    processor->pc += util::signExtend<16>(Cv) << 2;
   }
 }
 
@@ -335,21 +337,21 @@ op_decl(bgezal) {
 op_decl(bgtz) {
   if (((int32_t) Rs) > 0) {
     processor->pc -= 4;
-    processor->pc += sx(16, Cv) << 2;
+    processor->pc += util::signExtend<16>(Cv) << 2;
   }
 }
 
 op_decl(blez) {
   if (((int32_t)Rs) <= 0) {
     processor->pc -= 4;
-    processor->pc += sx(16, Cv) << 2;
+    processor->pc += util::signExtend<16>(Cv) << 2;
   }
 }
 
 op_decl(bltz) {
   if (((int32_t)Rs) < 0) {
     processor->pc -= 4;
-    processor->pc += sx(16, Cv) << 2;
+    processor->pc += util::signExtend<16>(Cv) << 2;
   }
 }
 
@@ -360,7 +362,7 @@ op_decl(bltzal) {
 op_decl(bne) {
   if (Rt != Rs) {
     processor->pc -= 4;
-    processor->pc += sx(16, Cv) << 2;
+    processor->pc += util::signExtend<16>(Cv) << 2;
   }
 }
 
@@ -427,23 +429,23 @@ op_decl(lui) {
 }
 
 op_decl(lb) {
-  stage->target = Rs + ((int16_t) Cv);
+  stage->target = Rs + util::signExtend<16>(Cv);
 }
 
 op_decl(lbu) {
-  stage->target = Rs + ((int16_t) Cv);
+  stage->target = Rs + util::signExtend<16>(Cv);
 }
 
 op_decl(lh) {
-  stage->target = Rs + ((int16_t) Cv);
+  stage->target = Rs + util::signExtend<16>(Cv);
 }
 
 op_decl(lhu) {
-  stage->target = Rs + ((int16_t) Cv);
+  stage->target = Rs + util::signExtend<16>(Cv);
 }
 
 op_decl(lw) {
-  stage->target = Rs + ((int16_t) Cv);
+  stage->target = Rs + util::signExtend<16>(Cv);
 }
 
 op_decl(lwc) {
@@ -552,15 +554,15 @@ op_decl(subu) {
 }
 
 op_decl(sb) {
-  stage->target = Rs + ((int16_t) Cv);
+  stage->target = Rs + util::signExtend<16>(Cv);
 }
 
 op_decl(sh) {
-  stage->target = Rs + ((int16_t) Cv);
+  stage->target = Rs + util::signExtend<16>(Cv);
 }
 
 op_decl(sw) {
-  stage->target = Rs + ((int16_t) Cv);
+  stage->target = Rs + util::signExtend<16>(Cv);
 }
 
 op_decl(swc) {
@@ -576,7 +578,7 @@ op_decl(swr) {
 }
 
 op_decl(syscall) {
-  r3051_syscall(cop0, processor);
+  cop0->syscall(processor);
 }
 
 op_decl(xor) {

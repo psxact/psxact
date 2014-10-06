@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "r3051.h"
 
-#define op_impl(name) static void r3051_stage_dc_##name(struct r3051*, struct r3051_stage*)
-#define op_decl(name) static void r3051_stage_dc_##name(struct r3051* processor, struct r3051_stage* stage)
-#define op_call(name) r3051_stage_dc_##name(processor, stage)
+#define op_impl(name) static void r3051_stage_dc_##name(R3051*, R3051::Stage*)
+#define op_decl(name) static void r3051_stage_dc_##name(R3051* processor, R3051::Stage* stage)
+#define op_call(name) r3051_stage_dc_##name(this, stage)
 
 op_impl(lb);
 op_impl(lbu);
@@ -14,8 +14,8 @@ op_impl(sb);
 op_impl(sh);
 op_impl(sw);
 
-void r3051_stage_dc(struct r3051* processor) {
-  struct r3051_stage* stage = &processor->dc;
+void R3051::r3051_stage_dc(void) {
+  R3051::Stage* stage = &this->dc;
 
   switch (stage->op) {
   case 0x00: return;
@@ -53,33 +53,33 @@ void r3051_stage_dc(struct r3051* processor) {
 }
 
 op_decl(lb) {
-  processor->registers[stage->rt] = r3051_fetch_byte(stage->target);
+  processor->registers[stage->rt] = processor->fetchByte(stage->target);
 }
 
 op_decl(lbu) {
-  processor->registers[stage->rt] = r3051_fetch_byte(stage->target) & 0xff;
+  processor->registers[stage->rt] = processor->fetchByte(stage->target) & 0xff;
 }
 
 op_decl(lh) {
-  processor->registers[stage->rt] = r3051_fetch_half(stage->target);
+  processor->registers[stage->rt] = processor->fetchHalf(stage->target);
 }
 
 op_decl(lhu) {
-  processor->registers[stage->rt] = r3051_fetch_half(stage->target) & 0xffff;
+  processor->registers[stage->rt] = processor->fetchHalf(stage->target) & 0xffff;
 }
 
 op_decl(lw) {
-  processor->registers[stage->rt] = r3051_fetch_word(stage->target);
+  processor->registers[stage->rt] = processor->fetchWord(stage->target);
 }
 
 op_decl(sb) {
-  r3051_store_byte(stage->target, processor->registers[stage->rt]);
+  processor->storeByte(stage->target, processor->registers[stage->rt]);
 }
 
 op_decl(sh) {
-  r3051_store_half(stage->target, processor->registers[stage->rt]);
+  processor->storeHalf(stage->target, processor->registers[stage->rt]);
 }
 
 op_decl(sw) {
-  r3051_store_word(stage->target, processor->registers[stage->rt]);
+  processor->storeWord(stage->target, processor->registers[stage->rt]);
 }
