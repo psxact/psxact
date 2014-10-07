@@ -124,7 +124,7 @@ static void r3051_stage_rf_01(R3051* processor, R3051::Stage* stage) {
   assert(0 && "Unimplemented instruction");
 }
 
-void R3051::r3051_stage_rf(void) {
+void R3051::StageRf(void) {
   R3051::Stage* stage = &this->rf;
 
   switch (stage->op = DECODE_OP()) {

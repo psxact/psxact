@@ -1,11 +1,11 @@
 #include "stdafx.h"
 #include "r3051.h"
 
-void R3051::r3051_stage_ic(void) {
+void R3051::StageIc(void) {
   R3051::Stage *stage = &this->ic;
 
   stage->address = this->pc;
-  stage->code = this->fetchInst(stage->address);
+  stage->code = this->FetchInst(stage->address);
 
   this->pc += 4;
 }

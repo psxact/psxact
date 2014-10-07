@@ -44,33 +44,33 @@ public:
   R3051(void);
   ~R3051(void);
 
-  void r3051_step(void);
+  void Step(void);
 
   //
   // Pipeline Stages
 
-  void r3051_stage_ic(void);
-  void r3051_stage_rf(void);
-  void r3051_stage_ex(void);
-  void r3051_stage_dc(void);
-  void r3051_stage_wb(void);
+  void StageIc(void);
+  void StageRf(void);
+  void StageEx(void);
+  void StageDc(void);
+  void StageWb(void);
 
   // Pipeline Stage Helpers
 
-  void r3051_stage_ex_00(R3051::Stage*);  
-  void r3051_stage_ex_01(R3051::Stage*);  
-  void r3051_stage_ex_cp(R3051::Stage*);
+  void StageEx00(R3051::Stage*);  
+  void StageEx01(R3051::Stage*);  
+  void StageExCp(R3051::Stage*);
 
   //
   // Memory Interfaces
 
-  uint32_t fetchByte(uint32_t);
-  uint32_t fetchHalf(uint32_t);
-  uint32_t fetchWord(uint32_t);
+  uint32_t FetchByte(uint32_t);
+  uint32_t FetchHalf(uint32_t);
+  uint32_t FetchWord(uint32_t);
 
-  void storeByte(uint32_t, uint32_t);
-  void storeHalf(uint32_t, uint32_t);
-  void storeWord(uint32_t, uint32_t);
+  void StoreByte(uint32_t, uint32_t);
+  void StoreHalf(uint32_t, uint32_t);
+  void StoreWord(uint32_t, uint32_t);
 
   //
   // D-Cache Functions
@@ -85,8 +85,8 @@ public:
     uint32_t lines[DCACHE_ELEM][DCACHE_LINE];
   };
 
-  uint32_t dcacheFetch(uint32_t);
-  void dcacheStore(uint32_t, uint32_t);
+  uint32_t DCacheFetch(uint32_t);
+  void DCacheStore(uint32_t, uint32_t);
 
   //
   // I-Cache Functions
@@ -103,11 +103,11 @@ public:
     uint32_t valid[ICACHE_ELEM];
   };
 
-  uint32_t icacheFetch(uint32_t);
-  void icacheStore(uint32_t, uint32_t);
+  uint32_t ICacheFetch(uint32_t);
+  void ICacheStore(uint32_t, uint32_t);
 
   //
   // I-Cache
 
-  uint32_t fetchInst(uint32_t);
+  uint32_t FetchInst(uint32_t);
 };

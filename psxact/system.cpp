@@ -22,5 +22,5 @@ void Psx::kill(void) {
 }
 
 void Psx::step(void) {
-  r3051->r3051_step();
+  r3051->Step();
 }

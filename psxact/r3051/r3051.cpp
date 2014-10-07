@@ -55,27 +55,27 @@ R3051::R3051(void) {
 R3051::~R3051(void) {
 }
 
-void R3051::r3051_step() {
-  this->r3051_stage_wb();
+void R3051::Step() {
+  this->StageWb();
 
-  this->r3051_stage_dc();
+  this->StageDc();
   this->wb = this->dc;
 
-  this->r3051_stage_ex();
+  this->StageEx();
   this->dc = this->ex;
 
-  this->r3051_stage_rf();
+  this->StageRf();
   this->ex = this->rf;
 
-  this->r3051_stage_ic();
+  this->StageIc();
   this->rf = this->ic;
 }
 
-uint32_t R3051::fetchByte(uint32_t address) {
+uint32_t R3051::FetchByte(uint32_t address) {
   uint32_t data;
 
   if (cop0->registers[12] & (1 << 16)) {
-    data = this->dcacheFetch(address);
+    data = this->DCacheFetch(address);
   }
   else {
     data = bus.Fetch(address);
@@ -84,7 +84,7 @@ uint32_t R3051::fetchByte(uint32_t address) {
   return (int8_t) (data >> (8 * (address & 3)));
 }
 
-uint32_t R3051::fetchHalf(uint32_t address) {
+uint32_t R3051::FetchHalf(uint32_t address) {
   if (address & 1) {
     assert(0 && "Address Exception");
   }
@@ -92,7 +92,7 @@ uint32_t R3051::fetchHalf(uint32_t address) {
   uint32_t data;
 
   if (cop0->registers[12] & (1 << 16)) {
-    data = this->dcacheFetch(address);
+    data = this->DCacheFetch(address);
   }
   else {
     data = bus.Fetch(address);
@@ -101,24 +101,24 @@ uint32_t R3051::fetchHalf(uint32_t address) {
   return (int16_t) (data >> (8 * (address & 2)));
 }
 
-uint32_t R3051::fetchWord(uint32_t address) {
+uint32_t R3051::FetchWord(uint32_t address) {
   if (address & 3) {
     assert(0 && "Address Exception");
   }
 
   if (cop0->registers[12] & (1 << 16)) {
-    return this->dcacheFetch(address);
+    return this->DCacheFetch(address);
   }
   else {
     return bus.Fetch(address);
   }
 }
 
-void R3051::storeByte(uint32_t address, uint32_t data) {
+void R3051::StoreByte(uint32_t address, uint32_t data) {
   data = data & 0xff;
 
   if (cop0->registers[12] & (1 << 16)) {
-    this->dcacheStore(address, data);
+    this->DCacheStore(address, data);
   }
   else {
     uint32_t mask = 0xff;
@@ -131,7 +131,7 @@ void R3051::storeByte(uint32_t address, uint32_t data) {
   }
 }
 
-void R3051::storeHalf(uint32_t address, uint32_t data) {
+void R3051::StoreHalf(uint32_t address, uint32_t data) {
   if (address & 1) {
     assert(0 && "Address Exception");
   }
@@ -139,7 +139,7 @@ void R3051::storeHalf(uint32_t address, uint32_t data) {
   data = data & 0xffff;
 
   if (cop0->registers[12] & (1 << 16)) {
-    this->dcacheStore(address, data);
+    this->DCacheStore(address, data);
   }
   else {
     uint32_t mask = 0xffff;
@@ -152,20 +152,20 @@ void R3051::storeHalf(uint32_t address, uint32_t data) {
   }
 }
 
-void R3051::storeWord(uint32_t address, uint32_t data) {
+void R3051::StoreWord(uint32_t address, uint32_t data) {
   if (address & 3) {
     assert(0 && "Address Exception");
   }
 
   if (cop0->registers[12] & (1 << 16)) {
-    this->dcacheStore(address, data);
+    this->DCacheStore(address, data);
   }
   else {
     bus.Store(address, data);
   }
 }
 
-uint32_t R3051::fetchInst(uint32_t address) {
+uint32_t R3051::FetchInst(uint32_t address) {
   if (address & 3) {
     assert(0 && "Address Exception");
   }
@@ -177,7 +177,7 @@ uint32_t R3051::fetchInst(uint32_t address) {
   }
 
   if (segment->cached) {
-    return this->icacheFetch(address);
+    return this->ICacheFetch(address);
   }
   else {
     return bus.Fetch(address);

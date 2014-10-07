@@ -76,7 +76,7 @@ op_impl(xori);
 
 extern Cop0* cop0;
 
-void R3051::r3051_stage_ex_00(R3051::Stage* stage) {
+void R3051::StageEx00(R3051::Stage* stage) {
   switch (stage->fn) {
   case 0x00: op_call(sll); return;
 //case 0x01:
@@ -147,7 +147,7 @@ void R3051::r3051_stage_ex_00(R3051::Stage* stage) {
   assert(0 && "Unimplemented instruction");
 }
 
-void R3051::r3051_stage_ex_01(R3051::Stage* stage) {
+void R3051::StageEx01(R3051::Stage* stage) {
   switch (stage->rt) {
   case 0x00: op_call(bltz); return;
   case 0x01: op_call(bgez); return;
@@ -186,7 +186,7 @@ void R3051::r3051_stage_ex_01(R3051::Stage* stage) {
   assert(0 && "Unimplemented instruction");
 }
 
-void R3051::r3051_stage_ex_cp(R3051::Stage* stage) {
+void R3051::StageExCp(R3051::Stage* stage) {
   auto processor = this;
 
   switch (stage->op & 3) {
@@ -211,12 +211,12 @@ void R3051::r3051_stage_ex_cp(R3051::Stage* stage) {
   assert(0 && "Unimplemented coprocessor instruction");
 }
 
-void R3051::r3051_stage_ex(void) {
+void R3051::StageEx(void) {
   R3051::Stage* stage = &this->ex;
 
   switch (stage->op) {
-  case 0x00: this->r3051_stage_ex_00(stage); return;
-  case 0x01: this->r3051_stage_ex_01(stage); return;
+  case 0x00: this->StageEx00(stage); return;
+  case 0x01: this->StageEx01(stage); return;
   case 0x02: op_call(j); return;
   case 0x03: op_call(jal); return;
   case 0x04: op_call(beq); return;
@@ -231,10 +231,10 @@ void R3051::r3051_stage_ex(void) {
   case 0x0d: op_call(ori); return;
   case 0x0e: op_call(xori); return;
   case 0x0f: op_call(lui); return;
-  case 0x10: this->r3051_stage_ex_cp(stage); return;
-  case 0x11: this->r3051_stage_ex_cp(stage); return;
-  case 0x12: this->r3051_stage_ex_cp(stage); return;
-  case 0x13: this->r3051_stage_ex_cp(stage); return;
+  case 0x10: this->StageExCp(stage); return;
+  case 0x11: this->StageExCp(stage); return;
+  case 0x12: this->StageExCp(stage); return;
+  case 0x13: this->StageExCp(stage); return;
 //case 0x14:
 //case 0x15:
 //case 0x16:

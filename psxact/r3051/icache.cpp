@@ -4,7 +4,7 @@
 
 R3051::ICache icache;
 
-uint32_t R3051::icacheFetch(uint32_t address) {
+uint32_t R3051::ICacheFetch(uint32_t address) {
   uint32_t index = (address >> 4) & 0xff;
   uint32_t tag = (address >> 0) & 0xfffff000;
   uint32_t* line = icache.lines[index];
@@ -22,6 +22,6 @@ uint32_t R3051::icacheFetch(uint32_t address) {
   return line[(address >> 2) & 3];
 }
 
-void R3051::icacheStore(uint32_t address, uint32_t data) {
+void R3051::ICacheStore(uint32_t address, uint32_t data) {
   assert(0 && "ICache Store");
 }
