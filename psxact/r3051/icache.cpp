@@ -10,10 +10,10 @@ uint32_t R3051::ICacheFetch(uint32_t address) {
   uint32_t* line = icache.lines[index];
 
   if (icache.tag[index] != tag || icache.valid[index] == 0) {
-    line[0] = bus.Fetch((address & ~15) | 0);
-    line[1] = bus.Fetch((address & ~15) | 4);
-    line[2] = bus.Fetch((address & ~15) | 8);
-    line[3] = bus.Fetch((address & ~15) | 12);
+    line[0] = bus->Fetch((address & ~15) | 0);
+    line[1] = bus->Fetch((address & ~15) | 4);
+    line[2] = bus->Fetch((address & ~15) | 8);
+    line[3] = bus->Fetch((address & ~15) | 12);
 
     icache.tag[index] = tag;
     icache.valid[index] = 1;

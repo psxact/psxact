@@ -1,7 +1,8 @@
 #pragma once
 
 #include "stdafx.h"
-#include "../bus/bus.h"
+
+class Bus;
 
 class R3051 {
 public:
@@ -30,7 +31,7 @@ public:
   uint32_t hi;
   uint32_t pc;
 
-  Bus bus;
+  Bus* bus;
 
   Stage ic;
   Stage rf;
@@ -44,6 +45,7 @@ public:
   R3051(void);
   ~R3051(void);
 
+  void AttachBus(Bus*);
   void Step(void);
 
   //

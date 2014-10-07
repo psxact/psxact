@@ -9,9 +9,9 @@
 
 #define ExLog(format, ...) //printf(format"\n", __VA_ARGS__)
 
-#define op_impl(name) static void r3051_stage_ex_##name(R3051*, R3051::Stage*)
-#define op_decl(name) static void r3051_stage_ex_##name(R3051* processor, R3051::Stage* stage)
-#define op_call(name) r3051_stage_ex_##name(this, stage)
+#define op_impl(name) static void StageEx##name(R3051*, R3051::Stage*)
+#define op_decl(name) static void StageEx##name(R3051* processor, R3051::Stage* stage)
+#define op_call(name) StageEx##name(this, stage)
 
 op_impl(add);
 op_impl(addi);

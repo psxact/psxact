@@ -1,25 +1,37 @@
+#pragma once
+
 #include "stdafx.h"
 
-#ifndef PSX_GPU_H
-#define PSX_GPU_H
+class Gpu {
+  void Write4bpp (uint32_t, uint32_t, uint32_t);
+  void Write8bpp (uint32_t, uint32_t, uint32_t);
+  void Write16bpp(uint32_t, uint32_t, uint32_t);
+  void Write24bpp(uint32_t, uint32_t, uint32_t);
 
-void gpu_write_gp0(uint32_t);
-void gpu_write_gp1(uint32_t);
+  void Cmd40(uint32_t, uint32_t, uint32_t);
+  void Cmd48(uint32_t, uint32_t*);
+  void Cmd60(uint32_t, uint32_t, uint32_t);
+  void Cmd68(uint32_t, uint32_t);
+  void Cmd70(uint32_t, uint32_t);
+  void Cmd78(uint32_t, uint32_t);
 
-uint32_t gpu_read_resp(void);
-uint32_t gpu_read_stat(void);
+public:
+  void WriteGp0(uint32_t);
+  void WriteGp1(uint32_t);
 
-struct coordinate {
-  int16_t x;
-  int16_t y;
+  uint32_t ReadResp(void);
+  uint32_t ReadStat(void);
 
-  coordinate(void) {
-  }
+  struct coordinate {
+    int16_t x;
+    int16_t y;
 
-  coordinate(int16_t x, int16_t y) {
-    this->x = x;
-    this->y = y;
-  }
+    coordinate(void) {
+    }
+
+    coordinate(int16_t x, int16_t y) {
+      this->x = x;
+      this->y = y;
+    }
+  };
 };
-
-#endif

@@ -11,7 +11,7 @@ uint8_t vram[FRAME_BUFFER_X * FRAME_BUFFER_Y * PIXEL_WIDTH];
 #define HI(a) (((a) >> 16) & 0xffff)
 #define MAKE_WORD(l, h) (((h) << 16) | (l))
 
-static void gpu_write_4bpp(uint32_t x, uint32_t y, uint32_t index) {
+void Gpu::Write4bpp(uint32_t x, uint32_t y, uint32_t index) {
   int nybble = (x & 1) * 4;
   int address = (y * 2048) + (x / 2);
 
@@ -19,20 +19,20 @@ static void gpu_write_4bpp(uint32_t x, uint32_t y, uint32_t index) {
   vram[address] |=  (0xf << nybble) & index;
 }
 
-static void gpu_write_8bpp(uint32_t x, uint32_t y, uint32_t index) {
+void Gpu::Write8bpp(uint32_t x, uint32_t y, uint32_t index) {
   int address = (y * 2048) + x;
 
   vram[address] = index;
 }
 
-static void gpu_write_16bpp(uint32_t x, uint32_t y, uint32_t color) {
+void Gpu::Write16bpp(uint32_t x, uint32_t y, uint32_t color) {
   int address = (y * 2048) + (x * 2);
 
   vram[address + 0] = (color >> 0);
   vram[address + 1] = (color >> 8);
 }
 
-static void gpu_write_24bpp(uint32_t x, uint32_t y, uint32_t color) {
+void Gpu::Write24bpp(uint32_t x, uint32_t y, uint32_t color) {
   int address = (y * 2048) + (x * 3);
 
   vram[address + 0] = (color >> 0);
@@ -40,12 +40,12 @@ static void gpu_write_24bpp(uint32_t x, uint32_t y, uint32_t color) {
   vram[address + 2] = (color >> 16);
 }
 
-static void gpu_cmd_40(uint32_t color, uint32_t point1, uint32_t point2) {
+void Gpu::Cmd40(uint32_t color, uint32_t point1, uint32_t point2) {
   coordinate s(LO(point1), HI(point1));
   coordinate e(LO(point2), HI(point2));
 
   if (point1 == point2) {
-    gpu_write_24bpp(s.x, s.y, color);
+    Write24bpp(s.x, s.y, color);
     return;
   }
 
@@ -63,27 +63,27 @@ static void gpu_cmd_40(uint32_t color, uint32_t point1, uint32_t point2) {
   d.y = (d.y << 16) / div;
 
   while (s.x != e.x || s.y != e.y) {
-    gpu_write_24bpp(s.x, s.y, color);
+    Write24bpp(s.x, s.y, color);
 
     if (s.x != e.x) s.x = (t.x += d.x) >> 16;
     if (s.y != e.y) s.y = (t.y += d.y) >> 16;
   }
 }
 
-static void gpu_cmd_48(uint32_t color, uint32_t *points) {
+void Gpu::Cmd48(uint32_t color, uint32_t *points) {
   uint32_t index = 0;
   uint32_t point1 = points[index++];
   uint32_t point2 = points[index++];
 
   while (point2 != 0x55555555) {
-    gpu_cmd_40(color, point1, point2);
+    Cmd40(color, point1, point2);
 
     point1 = point2;
     point2 = points[index++];
   }
 }
 
-static void gpu_cmd_60(uint32_t color, uint32_t point, uint32_t bound) {
+void Gpu::Cmd60(uint32_t color, uint32_t point, uint32_t bound) {
   int32_t x, y, w, h;
 
   x = LO(point);
@@ -96,24 +96,24 @@ static void gpu_cmd_60(uint32_t color, uint32_t point, uint32_t bound) {
 
   for (; y <= h; y++) {
     for (; x <= w; x++) {
-      gpu_write_24bpp(x, y, color);
+      Write24bpp(x, y, color);
     }
   }
 }
 
-static void gpu_cmd_68(uint32_t color, uint32_t point) {
-  gpu_cmd_60(color, point, MAKE_WORD(1, 1));
+void Gpu::Cmd68(uint32_t color, uint32_t point) {
+  Cmd60(color, point, MAKE_WORD(1, 1));
 }
 
-static void gpu_cmd_70(uint32_t color, uint32_t point) {
-  gpu_cmd_60(color, point, MAKE_WORD(8, 8));
+void Gpu::Cmd70(uint32_t color, uint32_t point) {
+  Cmd60(color, point, MAKE_WORD(8, 8));
 }
 
-static void gpu_cmd_78(uint32_t color, uint32_t point) {
-  gpu_cmd_60(color, point, MAKE_WORD(16, 16));
+void Gpu::Cmd78(uint32_t color, uint32_t point) {
+  Cmd60(color, point, MAKE_WORD(16, 16));
 }
 
-void gpu_write_gp0(uint32_t data) {
+void Gpu::WriteGp0(uint32_t data) {
   switch (data >> 24) {
   case 0x20: // Monochrome three - point polygon, opaque
   case 0x22: // Monochrome three - point polygon, semi - transparent
@@ -152,13 +152,13 @@ void gpu_write_gp0(uint32_t data) {
   }
 }
 
-void gpu_write_gp1(uint32_t data) {
+void Gpu::WriteGp1(uint32_t data) {
 }
 
-uint32_t gpu_read_resp(void) {
+uint32_t Gpu::ReadResp(void) {
   return 0;
 }
 
-uint32_t gpu_read_stat(void) {
+uint32_t Gpu::ReadStat(void) {
   return 0x14802000;
 }

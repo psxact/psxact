@@ -10,6 +10,10 @@ uint8_t  wram[0x200000];
 #define BusLog(format, ...) printf(format"\n", __VA_ARGS__)
 #define Within(a, b) ((address & ~((a) ^ (b))) == (a))
 
+Bus::Bus(Gpu& gpu)
+  : gpu(gpu) {
+}
+
 //
 // Read data from the bus
 
@@ -37,8 +41,8 @@ uint32_t Bus::Fetch(uint32_t address) {
 
   if (Within(0x1f801000, 0x1f801fff)) {
     switch (address) {
-    case 0x1f801810: return gpu_read_resp();
-    case 0x1f801814: return gpu_read_stat();
+    case 0x1f801810: return gpu.ReadResp();
+    case 0x1f801814: return gpu.ReadStat();
     }
 
     BusLog("[R] I/O $%08x", address);
@@ -91,8 +95,8 @@ void Bus::Store(uint32_t address, uint32_t data) {
 
   if (Within(0x1f801000, 0x1f801fff)) {
     switch (address) {
-    case 0x1f801810: gpu_write_gp0(data); return;
-    case 0x1f801814: gpu_write_gp1(data); return;
+    case 0x1f801810: gpu.WriteGp0(data); return;
+    case 0x1f801814: gpu.WriteGp1(data); return;
     }
 
     BusLog("[W] I/O $%08x <= $%08x", address, data);
