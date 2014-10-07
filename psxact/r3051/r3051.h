@@ -5,11 +5,6 @@
 
 class R3051 {
 public:
-  uint32_t registers[32];
-  uint32_t lo;
-  uint32_t hi;
-  uint32_t pc;
-
   struct Segment {
     uint32_t start;
     uint32_t length;
@@ -30,6 +25,11 @@ public:
     uint8_t fn;
   };
 
+  uint32_t registers[32];
+  uint32_t lo;
+  uint32_t hi;
+  uint32_t pc;
+
   Bus bus;
 
   Stage ic;
@@ -41,8 +41,9 @@ public:
   //
   // Processor State
 
-  void r3051_init(void);
-  void r3051_kill(void);
+  R3051(void);
+  ~R3051(void);
+
   void r3051_step(void);
 
   //
@@ -74,13 +75,13 @@ public:
   //
   // D-Cache Functions
 
-  enum {
-    DCACHE_SIZE = 0x100,
-    DCACHE_LINE = 1,
-    DCACHE_ELEM = DCACHE_SIZE / DCACHE_LINE
-  };
-
   struct DCache {
+    enum {
+      DCACHE_SIZE = 0x100,
+      DCACHE_LINE = 1,
+      DCACHE_ELEM = DCACHE_SIZE / DCACHE_LINE
+    };
+
     uint32_t lines[DCACHE_ELEM][DCACHE_LINE];
   };
 
@@ -90,13 +91,13 @@ public:
   //
   // I-Cache Functions
 
-  enum {
-    ICACHE_SIZE = 0x400,
-    ICACHE_LINE = 4,
-    ICACHE_ELEM = ICACHE_SIZE / ICACHE_LINE
-  };
-
   struct ICache {
+    enum {
+      ICACHE_SIZE = 0x400,
+      ICACHE_LINE = 4,
+      ICACHE_ELEM = ICACHE_SIZE / ICACHE_LINE
+    };
+
     uint32_t lines[ICACHE_ELEM][ICACHE_LINE];
     uint32_t tag[ICACHE_ELEM];
     uint32_t valid[ICACHE_ELEM];

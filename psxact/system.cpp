@@ -10,15 +10,14 @@ extern uint8_t* bios;
 extern uint8_t* disk;
 
 void Psx::init(void) {
-  r3051 = (R3051*) malloc(sizeof(R3051));
-  r3051->r3051_init();
+  r3051 = new R3051();
 
   cop0 = (Cop0*) malloc(sizeof(Cop0));
   cop0->init();
 }
 
 void Psx::kill(void) {
-  r3051->r3051_kill();
+  r3051->~R3051();
   cop0->kill();
 }
 

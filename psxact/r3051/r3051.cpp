@@ -46,13 +46,13 @@ static R3051::Segment* segments[8] = {
   &kseg2  // kernel segment
 };
 
-void R3051::r3051_init() {
+R3051::R3051(void) {
   memset(this, 0, sizeof(R3051));
 
   this->pc = 0xbfc00000;
 }
 
-void R3051::r3051_kill() {
+R3051::~R3051(void) {
 }
 
 void R3051::r3051_step() {
