@@ -1,14 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
-
-enum r3051_datatype {
-   BYTE = 0,
-  UBYTE = 1,
-   HALF = 2,
-  UHALF = 3,
-   WORD = 4
-};
+#include "../bus/bus.h"
 
 class R3051 {
 public:
@@ -36,6 +29,8 @@ public:
     uint8_t rd;
     uint8_t fn;
   };
+
+  Bus bus;
 
   Stage ic;
   Stage rf;

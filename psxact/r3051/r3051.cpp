@@ -78,7 +78,7 @@ uint32_t R3051::fetchByte(uint32_t address) {
     data = this->dcacheFetch(address);
   }
   else {
-    data = bus_fetch(address);
+    data = bus.Fetch(address);
   }
 
   return (int8_t) (data >> (8 * (address & 3)));
@@ -95,7 +95,7 @@ uint32_t R3051::fetchHalf(uint32_t address) {
     data = this->dcacheFetch(address);
   }
   else {
-    data = bus_fetch(address);
+    data = bus.Fetch(address);
   }
 
   return (int16_t) (data >> (8 * (address & 2)));
@@ -110,7 +110,7 @@ uint32_t R3051::fetchWord(uint32_t address) {
     return this->dcacheFetch(address);
   }
   else {
-    return bus_fetch(address);
+    return bus.Fetch(address);
   }
 }
 
@@ -122,12 +122,12 @@ void R3051::storeByte(uint32_t address, uint32_t data) {
   }
   else {
     uint32_t mask = 0xff;
-    uint32_t temp = bus_fetch(address & ~3u);
+    uint32_t temp = bus.Fetch(address & ~3u);
 
     temp &= ~(mask << (8 * (address & 3)));
     temp |=  (data << (8 * (address & 3)));
 
-    bus_store(address & ~3u, temp);
+    bus.Store(address & ~3u, temp);
   }
 }
 
@@ -143,12 +143,12 @@ void R3051::storeHalf(uint32_t address, uint32_t data) {
   }
   else {
     uint32_t mask = 0xffff;
-    uint32_t temp = bus_fetch(address & ~2u);
+    uint32_t temp = bus.Fetch(address & ~2u);
 
     temp &= ~(mask << (8 * (address & 2)));
     temp |=  (data << (8 * (address & 2)));
 
-    bus_store(address & ~2u, temp);
+    bus.Store(address & ~2u, temp);
   }
 }
 
@@ -161,7 +161,7 @@ void R3051::storeWord(uint32_t address, uint32_t data) {
     this->dcacheStore(address, data);
   }
   else {
-    bus_store(address, data);
+    bus.Store(address, data);
   }
 }
 
@@ -180,6 +180,6 @@ uint32_t R3051::fetchInst(uint32_t address) {
     return this->icacheFetch(address);
   }
   else {
-    return bus_fetch(address);
+    return bus.Fetch(address);
   }
 }

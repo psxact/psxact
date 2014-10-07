@@ -13,7 +13,7 @@ uint8_t  wram[0x200000];
 //
 // Read data from the bus
 
-uint32_t bus_fetch(uint32_t address) {
+uint32_t Bus::Fetch(uint32_t address) {
   if (address == 0xfffe0130) {
     BusLog("[R] Cache Control Register");
     return 0x00000000;
@@ -66,7 +66,7 @@ uint32_t bus_fetch(uint32_t address) {
 //
 // Write data to the bus
 
-void bus_store(uint32_t address, uint32_t data) {
+void Bus::Store(uint32_t address, uint32_t data) {
   if (address == 0xfffe0130) {
     BusLog("[W] Cache Control Register <= $%08x", data);
     return;

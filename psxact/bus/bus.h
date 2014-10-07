@@ -1,4 +1,9 @@
+#pragma once
+
 #include "stdafx.h"
 
-uint32_t bus_fetch(uint32_t);
-void bus_store(uint32_t, uint32_t);
+class Bus {
+public:
+  uint32_t Fetch(uint32_t);
+  void Store(uint32_t, uint32_t);
+};
