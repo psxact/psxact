@@ -11,14 +11,12 @@ extern uint8_t* disk;
 
 void Psx::init(void) {
   r3051 = new R3051();
-
-  cop0 = (Cop0*) malloc(sizeof(Cop0));
-  cop0->init();
+  cop0 = new Cop0();
 }
 
 void Psx::kill(void) {
   r3051->~R3051();
-  cop0->kill();
+  cop0->~Cop0();
 }
 
 void Psx::step(void) {

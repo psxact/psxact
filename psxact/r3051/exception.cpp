@@ -2,7 +2,7 @@
 #include "r3051.h"
 #include "cop0.h"
 
-void Cop0::syscall(R3051* processor) {
+void Cop0::SysCall(R3051* processor) {
   uint32_t cause = this->registers[13];
 
   // ExCode = 8

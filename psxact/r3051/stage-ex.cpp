@@ -192,10 +192,10 @@ void R3051::StageExCp(R3051::Stage* stage) {
   switch (stage->op & 3) {
   case 0:
     switch (stage->rs) {
-    case 0x00: Rt = cop0->fetch_sr(stage->rd); return; // mfc0 rd,rt
-    case 0x02: Rt = cop0->fetch_cr(stage->rd); return; // cfc0 rd,rt
-    case 0x04: cop0->store_sr(stage->rd, Rt); return; // mtc0 rd,rt
-    case 0x06: cop0->store_cr(stage->rd, Rt); return; // ctc0 rd,rt
+    case 0x00: Rt = cop0->FetchSr(stage->rd); return; // mfc0 rd,rt
+    case 0x02: Rt = cop0->FetchCr(stage->rd); return; // cfc0 rd,rt
+    case 0x04: cop0->StoreSr(stage->rd, Rt); return; // mtc0 rd,rt
+    case 0x06: cop0->StoreCr(stage->rd, Rt); return; // ctc0 rd,rt
     case 0x10: // cop0
       switch (stage->code & 0x1f) {
       case 0x10: // rfe
@@ -578,7 +578,7 @@ op_decl(swr) {
 }
 
 op_decl(syscall) {
-  cop0->syscall(processor);
+  cop0->SysCall(processor);
 }
 
 op_decl(xor) {
