@@ -22,16 +22,11 @@ public:
   uint32_t ReadResp(void);
   uint32_t ReadStat(void);
 
-  struct coordinate {
+  struct Coordinate {
     int16_t x;
     int16_t y;
 
-    coordinate(void) {
-    }
-
-    coordinate(int16_t x, int16_t y) {
-      this->x = x;
-      this->y = y;
-    }
+    Coordinate(void);
+    Coordinate(int16_t, int16_t);
   };
 };

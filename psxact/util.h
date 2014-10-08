@@ -2,37 +2,37 @@
 
 #include "stdafx.h"
 
-class util {
+class Util {
 public:
-  static int load_file(char* lpFileName, uint8_t** lpBuffer) {
-    FILE* lpFile;
+  static bool LoadFile(const char* fileName, uint8_t** buffer) {
+    FILE* file;
     size_t size;
 
-    if (fopen_s(&lpFile, lpFileName, "rb")) {
-      return -1;
+    if (fopen_s(&file, fileName, "rb")) {
+      return false;
     }
 
-    fseek(lpFile, 0, SEEK_END);
-    size = ftell(lpFile);
-    rewind(lpFile);
+    fseek(file, 0, SEEK_END);
+    size = ftell(file);
+    rewind(file);
 
-    *lpBuffer = (uint8_t*)malloc(size * sizeof(uint8_t));
-    if (!*lpBuffer) {
-      return -2;
+    *buffer = new uint8_t[size];
+    if (!*buffer) {
+      return false;
     }
 
-    if (!fread(*lpBuffer, size, sizeof(uint8_t), lpFile)) {
-      fclose(lpFile);
-      free(*lpBuffer);
-      return -3;
+    if (!fread(*buffer, size, sizeof(uint8_t), file)) {
+      fclose(file);
+      delete *buffer;
+      return false;
     }
 
-    fclose(lpFile);
-    return 0;
+    fclose(file);
+    return true;
   }
 
   template<int BITS>
-  static uint32_t signExtend(uint32_t value) {
+  static uint32_t Sign(uint32_t value) {
     enum {
       SIGN = 1U << (BITS - 1),
       MASK = (1U << BITS) - 1
@@ -42,7 +42,7 @@ public:
   }
 
   template<int BITS>
-  static uint32_t zeroExtend(uint32_t value) {
+  static uint32_t Mask(uint32_t value) {
     enum {
       SIGN = 0U << (BITS - 1),
       MASK = (1U << BITS) - 1

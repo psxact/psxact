@@ -74,8 +74,6 @@ op_impl(syscall);
 op_impl(xor);
 op_impl(xori);
 
-extern Cop0* cop0;
-
 void R3051::StageEx00(R3051::Stage* stage) {
   switch (stage->fn) {
   case 0x00: op_call(sll); return;
@@ -197,10 +195,7 @@ void R3051::StageExCp(R3051::Stage* stage) {
     case 0x04: cop0->StoreSr(stage->rd, Rt); return; // mtc0 rd,rt
     case 0x06: cop0->StoreCr(stage->rd, Rt); return; // ctc0 rd,rt
     case 0x10: // cop0
-      switch (stage->code & 0x1f) {
-      case 0x10: // rfe
-        cop0->registers[12] &= ~0x0f;
-        cop0->registers[12] |= (cop0->registers[12] >> 2) & 0x0f;
+      if (cop0->Execute(stage->code & 0x1f)) {
         return;
       }
       break;
@@ -293,7 +288,7 @@ op_decl(add) {
 }
 
 op_decl(addi) {
-  uint32_t sum = Rs + util::signExtend<16>(Cv);
+  uint32_t sum = Rs + Util::Sign<16>(Cv);
 
   // todo: integer overflow exception
 
@@ -301,7 +296,7 @@ op_decl(addi) {
 }
 
 op_decl(addiu) {
-  Rt = Rs + util::signExtend<16>(Cv);
+  Rt = Rs + Util::Sign<16>(Cv);
 }
 
 op_decl(addu) {
@@ -319,14 +314,14 @@ op_decl(andi) {
 op_decl(beq) {
   if (Rt == Rs) {
     processor->pc -= 4;
-    processor->pc += util::signExtend<16>(Cv) << 2;
+    processor->pc += Util::Sign<16>(Cv) << 2;
   }
 }
 
 op_decl(bgez) {
   if (((int32_t)Rs) >= 0) {
     processor->pc -= 4;
-    processor->pc += util::signExtend<16>(Cv) << 2;
+    processor->pc += Util::Sign<16>(Cv) << 2;
   }
 }
 
@@ -337,21 +332,21 @@ op_decl(bgezal) {
 op_decl(bgtz) {
   if (((int32_t) Rs) > 0) {
     processor->pc -= 4;
-    processor->pc += util::signExtend<16>(Cv) << 2;
+    processor->pc += Util::Sign<16>(Cv) << 2;
   }
 }
 
 op_decl(blez) {
   if (((int32_t)Rs) <= 0) {
     processor->pc -= 4;
-    processor->pc += util::signExtend<16>(Cv) << 2;
+    processor->pc += Util::Sign<16>(Cv) << 2;
   }
 }
 
 op_decl(bltz) {
   if (((int32_t)Rs) < 0) {
     processor->pc -= 4;
-    processor->pc += util::signExtend<16>(Cv) << 2;
+    processor->pc += Util::Sign<16>(Cv) << 2;
   }
 }
 
@@ -362,7 +357,7 @@ op_decl(bltzal) {
 op_decl(bne) {
   if (Rt != Rs) {
     processor->pc -= 4;
-    processor->pc += util::signExtend<16>(Cv) << 2;
+    processor->pc += Util::Sign<16>(Cv) << 2;
   }
 }
 
@@ -429,23 +424,23 @@ op_decl(lui) {
 }
 
 op_decl(lb) {
-  stage->target = Rs + util::signExtend<16>(Cv);
+  stage->target = Rs + Util::Sign<16>(Cv);
 }
 
 op_decl(lbu) {
-  stage->target = Rs + util::signExtend<16>(Cv);
+  stage->target = Rs + Util::Sign<16>(Cv);
 }
 
 op_decl(lh) {
-  stage->target = Rs + util::signExtend<16>(Cv);
+  stage->target = Rs + Util::Sign<16>(Cv);
 }
 
 op_decl(lhu) {
-  stage->target = Rs + util::signExtend<16>(Cv);
+  stage->target = Rs + Util::Sign<16>(Cv);
 }
 
 op_decl(lw) {
-  stage->target = Rs + util::signExtend<16>(Cv);
+  stage->target = Rs + Util::Sign<16>(Cv);
 }
 
 op_decl(lwc) {
@@ -554,15 +549,15 @@ op_decl(subu) {
 }
 
 op_decl(sb) {
-  stage->target = Rs + util::signExtend<16>(Cv);
+  stage->target = Rs + Util::Sign<16>(Cv);
 }
 
 op_decl(sh) {
-  stage->target = Rs + util::signExtend<16>(Cv);
+  stage->target = Rs + Util::Sign<16>(Cv);
 }
 
 op_decl(sw) {
-  stage->target = Rs + util::signExtend<16>(Cv);
+  stage->target = Rs + Util::Sign<16>(Cv);
 }
 
 op_decl(swc) {
@@ -578,7 +573,7 @@ op_decl(swr) {
 }
 
 op_decl(syscall) {
-  cop0->SysCall(processor);
+  processor->cop0->SysCall(processor);
 }
 
 op_decl(xor) {

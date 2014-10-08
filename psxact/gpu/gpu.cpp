@@ -41,15 +41,15 @@ void Gpu::Write24bpp(uint32_t x, uint32_t y, uint32_t color) {
 }
 
 void Gpu::Cmd40(uint32_t color, uint32_t point1, uint32_t point2) {
-  coordinate s(LO(point1), HI(point1));
-  coordinate e(LO(point2), HI(point2));
+  Coordinate s(LO(point1), HI(point1));
+  Coordinate e(LO(point2), HI(point2));
 
   if (point1 == point2) {
     Write24bpp(s.x, s.y, color);
     return;
   }
 
-  coordinate t, d;
+  Coordinate t, d;
   t.x = (s.x << 16) + (1 << 15);
   t.y = (s.y << 16) + (1 << 15);
   d.x = (e.x - s.x);
@@ -161,4 +161,13 @@ uint32_t Gpu::ReadResp(void) {
 
 uint32_t Gpu::ReadStat(void) {
   return 0x14802000;
+}
+
+Gpu::Coordinate::Coordinate(void)
+  : Coordinate(0, 0) {
+}
+
+Gpu::Coordinate::Coordinate(int16_t x, int16_t y)
+  : x(x)
+  , y(y) {
 }

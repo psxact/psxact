@@ -93,7 +93,6 @@
     <ClCompile Include="psxact.cpp" />
     <ClCompile Include="r3051\cop0.cpp" />
     <ClCompile Include="r3051\dcache.cpp" />
-    <ClCompile Include="r3051\exception.cpp" />
     <ClCompile Include="r3051\icache.cpp" />
     <ClCompile Include="r3051\r3051.cpp" />
     <ClCompile Include="r3051\stage-dc.cpp" />

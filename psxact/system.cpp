@@ -1,24 +1,31 @@
 #include "stdafx.h"
 #include "system.h"
 #include "r3051\r3051.h"
-#include "r3051\cop0.h"
+#include "bus\bus.h"
+#include "gpu\gpu.h"
 
-R3051* r3051;
-Cop0* cop0;
+PlayStation::PlayStation(void) {
+  cpu = new R3051();
+  gpu = new Gpu();
+  bus = new Bus(gpu);
 
-extern uint8_t* bios;
-extern uint8_t* disk;
-
-void Psx::init(void) {
-  r3051 = new R3051();
-  cop0 = new Cop0();
+  cpu->AttachBus(bus);
 }
 
-void Psx::kill(void) {
-  r3051->~R3051();
-  cop0->~Cop0();
+PlayStation::~PlayStation(void) {
+  delete cpu;
+  delete gpu;
+  delete bus;
 }
 
-void Psx::step(void) {
-  r3051->Step();
+void PlayStation::Step(void) {
+  cpu->Step();
+}
+
+bool PlayStation::LoadBiosImage(const char* fileName) {
+  return Util::LoadFile(fileName, bus->GetBios());
+}
+
+bool PlayStation::LoadDiskImage(const char* fileName) {
+  return Util::LoadFile(fileName, bus->GetDisk());
 }

@@ -1,10 +1,20 @@
 #pragma once
 
 #include "stdafx.h"
+#include "bus/bus.h"
+#include "gpu/gpu.h"
+#include "r3051/r3051.h"
 
-class Psx {
+class PlayStation {
+  Bus* bus;
+  Gpu* gpu;
+  R3051* cpu;
+
 public:
-  void init(void);
-  void kill(void);
-  void step(void);
+  PlayStation(void);
+  ~PlayStation(void);
+
+  bool LoadBiosImage(const char*);
+  bool LoadDiskImage(const char*);
+  void Step(void);
 };

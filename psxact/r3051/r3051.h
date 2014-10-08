@@ -3,6 +3,7 @@
 #include "stdafx.h"
 
 class Bus;
+class Cop0;
 
 class R3051 {
 public:
@@ -11,6 +12,8 @@ public:
     uint32_t length;
     uint32_t offset;
     bool cached;
+
+    Segment(uint32_t, uint32_t, uint32_t, bool);
   };
 
   struct Stage {
@@ -32,6 +35,7 @@ public:
   uint32_t pc;
 
   Bus* bus;
+  Cop0* cop0;
 
   Stage ic;
   Stage rf;

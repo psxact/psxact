@@ -1,8 +1,7 @@
 #include "stdafx.h"
 #include "system.h"
 
-extern uint8_t* bios;
-extern uint8_t* disk;
+static PlayStation* playStation;
 
 int main(int argc, char* argv[]) {
   if (argc <= 1 || argc >= 4) {
@@ -11,24 +10,23 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  if (argc > 1 && util::load_file(argv[1], &bios)) {
+  playStation = new PlayStation();
+  
+  if (argc > 1 && !playStation->LoadBiosImage(argv[1])) {
     printf("Unable to load file '%s'.", argv[1]);
     return 0;
   }
 
-  if (argc > 2 && util::load_file(argv[2], &disk)) {
+  if (argc > 2 && !playStation->LoadDiskImage(argv[2])) {
     printf("Unable to load disk '%s'.", argv[2]);
     return 0;
   }
 
-  Psx psx;
-  psx.init();
-  
   while (true) {
-    psx.step();
+    playStation->Step();
   }
 
-  psx.kill();
+  delete playStation;
 
   return 0;
 }
