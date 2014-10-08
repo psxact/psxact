@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "gpu.h"
+#include "stdafx.hpp"
+#include "gpu.hpp"
 
 #define FRAME_BUFFER_X 1024
 #define FRAME_BUFFER_Y 512

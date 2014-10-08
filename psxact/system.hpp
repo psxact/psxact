@@ -1,13 +1,15 @@
 #pragma once
 
-#include "stdafx.h"
-#include "bus/bus.h"
-#include "gpu/gpu.h"
-#include "r3051/r3051.h"
+#include "stdafx.hpp"
+#include "bus/bus.hpp"
+#include "gpu/gpu.hpp"
+#include "spu/spu.hpp"
+#include "r3051/r3051.hpp"
 
 class PlayStation {
   Bus* bus;
   Gpu* gpu;
+  Spu* spu;
   R3051* cpu;
 
 public:

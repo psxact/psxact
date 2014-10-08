@@ -1,7 +1,7 @@
-#include "stdafx.h"
-#include "r3051.h"
-#include "cop0.h"
-#include "..\bus\bus.h"
+#include "stdafx.hpp"
+#include "r3051.hpp"
+#include "cop0.hpp"
+#include "../bus/bus.hpp"
 
 static R3051::Segment kuseg(0x00000000, 0x80000000, 0x40000000, true);
 static R3051::Segment kseg0(0x80000000, 0x20000000, 0x00000000, true);

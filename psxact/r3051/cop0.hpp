@@ -1,7 +1,7 @@
 #pragma once
 
-#include "stdafx.h"
-#include "r3051.h"
+#include "stdafx.hpp"
+#include "r3051.hpp"
 
 class Cop0 {
   uint32_t registers[16];

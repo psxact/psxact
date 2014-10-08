@@ -1,6 +1,6 @@
-#include "stdafx.h"
-#include "cop0.h"
-#include "r3051.h"
+#include "stdafx.hpp"
+#include "cop0.hpp"
+#include "r3051.hpp"
 
 static uint32_t registers_mask[16] = {
   0xffffffff, // r0 - locked
@@ -46,7 +46,7 @@ void Cop0::StoreCr(uint32_t index, uint32_t data) {
 
 bool Cop0::Execute(uint32_t code) {
   switch (code) {
-  case 0x10: // rfe
+  case 0x10: // RFE
     this->registers[12] &= ~0x0f;
     this->registers[12] |= (this->registers[12] >> 2) & 0x0f;
     return true;

@@ -69,6 +69,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>
       </AdditionalOptions>
+      <PrecompiledHeaderFile>stdafx.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -78,14 +79,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="bus\bus.h" />
-    <ClInclude Include="gpu\gpu.h" />
-    <ClInclude Include="r3051\cop0.h" />
-    <ClInclude Include="r3051\r3051.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="system.h" />
-    <ClInclude Include="targetver.h" />
-    <ClInclude Include="util.h" />
+    <ClInclude Include="bus\bus.hpp" />
+    <ClInclude Include="gpu\gpu.hpp" />
+    <ClInclude Include="r3051\cop0.hpp" />
+    <ClInclude Include="r3051\r3051.hpp" />
+    <ClInclude Include="spu\spu.hpp" />
+    <ClInclude Include="stdafx.hpp" />
+    <ClInclude Include="system.hpp" />
+    <ClInclude Include="util.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bus\bus.cpp" />
@@ -100,6 +101,7 @@
     <ClCompile Include="r3051\stage-ic.cpp" />
     <ClCompile Include="r3051\stage-rf.cpp" />
     <ClCompile Include="r3051\stage-wb.cpp" />
+    <ClCompile Include="spu\spu.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -110,7 +112,6 @@
     <None Include="cd-rom\stub.md" />
     <None Include="gte\stub.md" />
     <None Include="mdec\stub.md" />
-    <None Include="spu\stub.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

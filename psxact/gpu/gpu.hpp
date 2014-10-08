@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stdafx.h"
+#include "stdafx.hpp"
 
 class Gpu {
   void Write4bpp (uint32_t, uint32_t, uint32_t);

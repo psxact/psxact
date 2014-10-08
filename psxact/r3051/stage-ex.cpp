@@ -1,6 +1,6 @@
-#include "stdafx.h"
-#include "r3051.h"
-#include "cop0.h"
+#include "stdafx.hpp"
+#include "r3051.hpp"
+#include "cop0.hpp"
 
 #define Cv stage->nn
 #define Rd processor->registers[stage->rd]

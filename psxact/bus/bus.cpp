@@ -1,17 +1,15 @@
-#include "stdafx.h"
-#include "bus.h"
-#include "../gpu/gpu.h"
-
-uint8_t* bios;
-uint8_t* disk;
-uint8_t  wram[0x200000];
+#include "stdafx.hpp"
+#include "bus.hpp"
+#include "../gpu/gpu.hpp"
+#include "../spu/spu.hpp"
 
 #define Access(memory, address) *((uint32_t*)(memory + (address)))
 #define BusLog(format, ...) printf(format"\n", __VA_ARGS__)
 #define Within(a, b) ((address & ~((a) ^ (b))) == (a))
 
-Bus::Bus(Gpu* gpu)
-  : gpu(gpu) {
+Bus::Bus(Gpu* gpu, Spu* spu)
+  : gpu(gpu)
+  , spu(spu) {
 }
 
 Bus::~Bus(void) {
@@ -46,6 +44,10 @@ uint32_t Bus::Fetch(uint32_t address) {
     switch (address) {
     case 0x1f801810: return gpu->ReadResp();
     case 0x1f801814: return gpu->ReadStat();
+    }
+
+    if (Within(0x1f801c00, 0x1f801fff)) {
+      return spu->Fetch(address);
     }
 
     BusLog("[R] I/O $%08x", address);
@@ -102,6 +104,10 @@ void Bus::Store(uint32_t address, uint32_t data) {
     case 0x1f801814: gpu->WriteGp1(data); return;
     }
 
+    if (Within(0x1f801c00, 0x1f801fff)) {
+      return spu->Store(address, data);
+    }
+
     BusLog("[W] I/O $%08x <= $%08x", address, data);
     return;
   }
@@ -125,9 +131,9 @@ void Bus::Store(uint32_t address, uint32_t data) {
 }
 
 uint8_t** Bus::GetBios(void) {
-  return &this->bios;
+  return &bios;
 }
 
 uint8_t** Bus::GetDisk(void) {
-  return &this->disk;
+  return &disk;
 }

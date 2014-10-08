@@ -1,17 +1,19 @@
 #pragma once
 
-#include "stdafx.h"
-
-class Gpu;
+#include "stdafx.hpp"
+#include "../gpu/gpu.hpp"
+#include "../spu/spu.hpp"
 
 class Bus {
   uint8_t* bios;
   uint8_t* disk;
+  uint8_t  wram[0x200000];
 
   Gpu* gpu;
+  Spu* spu;
 
 public:
-  Bus(Gpu*);
+  Bus(Gpu*, Spu*);
   ~Bus(void);
 
   uint32_t Fetch(uint32_t);

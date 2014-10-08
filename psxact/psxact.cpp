@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "system.h"
+#include "stdafx.hpp"
+#include "system.hpp"
 
 static PlayStation* playStation;
 

@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "r3051.h"
+#include "stdafx.hpp"
+#include "r3051.hpp"
 
 void R3051::StageWb(void) {
   // TODO: implement this.

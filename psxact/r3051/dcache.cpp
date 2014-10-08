@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "r3051.h"
+#include "stdafx.hpp"
+#include "r3051.hpp"
 
 R3051::DCache dcache;
 

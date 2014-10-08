@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stdafx.h"
+#include "stdafx.hpp"
 
 class Util {
 public:
@@ -32,7 +32,7 @@ public:
   }
 
   template<int BITS>
-  static uint32_t Sign(uint32_t value) {
+  inline static uint32_t Sign(uint32_t value) {
     enum {
       SIGN = 1U << (BITS - 1),
       MASK = (1U << BITS) - 1
@@ -42,7 +42,7 @@ public:
   }
 
   template<int BITS>
-  static uint32_t Mask(uint32_t value) {
+  inline static uint32_t Mask(uint32_t value) {
     enum {
       SIGN = 0U << (BITS - 1),
       MASK = (1U << BITS) - 1

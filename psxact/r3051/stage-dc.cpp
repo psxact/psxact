@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "r3051.h"
+#include "stdafx.hpp"
+#include "r3051.hpp"
 
 #define op_impl(name) static void StageDc##name(R3051*, R3051::Stage*)
 #define op_decl(name) static void StageDc##name(R3051* processor, R3051::Stage* stage)

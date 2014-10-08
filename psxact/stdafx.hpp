@@ -1,7 +1,5 @@
 #pragma once
 
-#include "targetver.h"
-
 #include <cassert>
 #include <cstdio>
 #include <cstdint>
@@ -11,4 +9,4 @@
 #include <cmath>
 #include <algorithm>
 
-#include "util.h"
+#include "util.hpp"

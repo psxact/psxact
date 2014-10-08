@@ -1,6 +1,6 @@
-#include "stdafx.h"
-#include "r3051.h"
-#include "..\bus\bus.h"
+#include "stdafx.hpp"
+#include "r3051.hpp"
+#include "../bus/bus.hpp"
 
 R3051::ICache icache;
 
