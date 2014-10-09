@@ -4,7 +4,10 @@ release/
 ipch/
 
 # Files
+*.dblite
+*.obj
 *.opensdf
+*.pch
 *.sdf
 *.suo
 *.user
