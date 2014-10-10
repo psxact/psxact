@@ -5,10 +5,10 @@
 class Util {
 public:
   static bool LoadFile(const char* fileName, uint8_t** buffer) {
-    FILE* file;
     size_t size;
+    FILE* file = fopen(fileName, "rb");
 
-    if (fopen_s(&file, fileName, "rb")) {
+    if (!file) {
       return false;
     }
 

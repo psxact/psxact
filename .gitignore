@@ -6,6 +6,7 @@ ipch/
 # Files
 *.dblite
 *.obj
+*.o
 *.opensdf
 *.pch
 *.sdf

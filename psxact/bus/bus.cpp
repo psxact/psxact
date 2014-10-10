@@ -4,7 +4,7 @@
 #include "../spu/spu.hpp"
 
 #define Access(memory, address) *((uint32_t*)(memory + (address)))
-#define BusLog(format, ...) printf(format"\n", __VA_ARGS__)
+#define BusLog(format, ...) printf(format"\n", ##__VA_ARGS__)
 #define Within(a, b) ((address & ~((a) ^ (b))) == (a))
 
 Bus::Bus(Gpu* gpu, Spu* spu)

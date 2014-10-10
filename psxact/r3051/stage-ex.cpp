@@ -185,7 +185,7 @@ void R3051::StageEx01(R3051::Stage* stage) {
 }
 
 void R3051::StageExCp(R3051::Stage* stage) {
-  auto processor = this;
+  R3051* processor = this;
 
   switch (stage->op & 3) {
   case 0:

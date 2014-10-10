@@ -2,10 +2,9 @@
 
 #include <cassert>
 #include <cstdio>
-#include <cstdint>
+#include <stdint.h>
 #include <cstdlib>
 #include <cstring>
-#include <tchar.h>
 #include <cmath>
 #include <algorithm>
 
