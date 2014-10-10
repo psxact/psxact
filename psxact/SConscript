@@ -1,0 +1,17 @@
+env = Environment()
+env['CPPPATH'] = Dir('.').abspath
+
+if env['PLATFORM'] == 'posix':
+  env['CCFLAGS'] = '-Wall -O2 -std=c++11'
+
+if env['PLATFORM'] == 'win32':
+  env['PCHSTOP'] = 'stdafx.hpp'
+  env['PCH'] = env.PCH('stdafx.cpp')[0]
+
+modules = ['bus', 'gpu', 'spu', 'r3051']
+sources = []
+
+for module in modules:
+  sources += Glob(module + '/*.cpp')
+
+env.Program('psxact', sources + ['psxact.cpp', 'system.cpp'])

@@ -3,9 +3,23 @@
 #include "../gpu/gpu.hpp"
 #include "../spu/spu.hpp"
 
-#define Access(memory, address) *((uint32_t*)(memory + (address)))
 #define BusLog(format, ...) printf(format"\n", ##__VA_ARGS__)
 #define Within(a, b) ((address & ~((a) ^ (b))) == (a))
+
+inline uint32_t Access(uint8_t* memory, uint32_t address) {
+  return (
+    (memory[address + 0] <<  0) |
+    (memory[address + 1] <<  8) |
+    (memory[address + 2] << 16) |
+    (memory[address + 3] << 24));
+}
+
+inline void Access(uint8_t* memory, uint32_t address, uint32_t data) {
+  memory[address + 0] = (data >>  0);
+  memory[address + 1] = (data >>  8);
+  memory[address + 2] = (data >> 16);
+  memory[address + 3] = (data >> 24);
+}
 
 Bus::Bus(Gpu* gpu, Spu* spu)
   : gpu(gpu)
@@ -84,7 +98,7 @@ void Bus::Store(uint32_t address, uint32_t data) {
   address = address & ~0xe0000000;
 
   if (Within(0x00000000, 0x001fffff)) {
-    Access(wram, address & 0x1ffffc) = data;
+    Access(wram, address & 0x1ffffc, data);
     return;
   }
 
