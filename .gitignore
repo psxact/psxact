@@ -2,6 +2,7 @@
 debug/
 release/
 ipch/
+build/
 
 # Files
 *.dblite

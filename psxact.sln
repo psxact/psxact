@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "psxact", "psxact\psxact.vcxproj", "{D506B48E-C55F-4C1F-A5CC-E8D69ACA6F18}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "psxact", "src\psxact.vcxproj", "{D506B48E-C55F-4C1F-A5CC-E8D69ACA6F18}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,17 +1,20 @@
 env = Environment()
 env['CPPPATH'] = Dir('.').abspath
 
+# Set up the linux environment
+# Ubuntu returned 'posix' when I ran "print env['PLATFORM']"
+# We'll assume that linux is using g++:
 if env['PLATFORM'] == 'posix':
   env['CCFLAGS'] = '-Wall -O2 -std=c++11'
 
+# We'll also assume that windows is using msvc:
 if env['PLATFORM'] == 'win32':
+  env['CCFLAGS'] = '/Ox /O2'
   env['PCHSTOP'] = 'stdafx.hpp'
   env['PCH'] = env.PCH('stdafx.cpp')[0]
 
+# modules to build
 modules = ['bus', 'gpu', 'spu', 'r3051']
-sources = []
-
-for module in modules:
-  sources += Glob(module + '/*.cpp')
+sources = [Glob(module + '/*.cpp') for module in modules]
 
 env.Program('psxact', sources + ['psxact.cpp', 'system.cpp'])
