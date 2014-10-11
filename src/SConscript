@@ -1,19 +1,27 @@
-env = Environment()
-env['CPPPATH'] = Dir('.').abspath
+# compiler configurations
 
-# Set up the linux environment
-# Ubuntu returned 'posix' when I ran "print env['PLATFORM']"
-# We'll assume that linux is using g++:
-if env['PLATFORM'] == 'posix':
-  env['CCFLAGS'] = '-Wall -O2 -std=c++11'
-
-# We'll also assume that windows is using msvc:
-if env['PLATFORM'] == 'win32':
+def clConfiguration(env):
   env['CCFLAGS'] = '/Ox /O2'
   env['PCHSTOP'] = 'stdafx.hpp'
   env['PCH'] = env.PCH('stdafx.cpp')[0]
 
+def gccConfiguration(env):
+  env['CCFLAGS'] = '-Wall -O2 -std=c++11'
+
+def mingwConfiguration(env):
+  return gccConfiguration(env)
+
+# environment initialization
+
+env = Environment()
+env['CPPPATH'] = Dir('.').abspath
+
+if env['CC'] == 'cl': clConfiguration(env)
+if env['CC'] == 'gcc': gccConfiguration(env)
+if env['CC'] == 'mingw': gccConfiguration(env)
+
 # modules to build
+
 modules = ['bus', 'gpu', 'spu', 'r3051']
 sources = [Glob(module + '/*.cpp') for module in modules]
 
