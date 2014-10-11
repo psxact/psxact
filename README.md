@@ -31,12 +31,24 @@ a better understanding.
 
 ## Building
 
-Currently, the build system is very lacking (only support for MSVC), but this
-will change. It is not currently a priority, since the project is still so
-young, and no one is demanding Linux (Or MINGW) support at this time.
+### Visual Studio 2013
 
-So in short, to build, just open the solution file provided in visual studio
-and press "Build".
+* Open `psxact.sln`
+* Build
+* Done!
+
+### GCC (And other compilers, see below)
+
+* Install `Python 2.7.8`
+* Install `SCons 2.3.4`
+* Run the `scons` command in the root directory (the same folder as the `SConstruct` file)
+
+### Other compilers
+
+I don't have other compilers such as Clang installed, so I can't test
+them to make sure they work. I will absolutely add support for them
+once I have a testing environment set up, and the instructions will be
+the exact same as the current GCC instructions.
 
 ## Contributing
 
