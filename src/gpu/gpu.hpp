@@ -2,7 +2,11 @@
 
 #include "stdafx.hpp"
 
+class Bus;
+
 class Gpu {
+  Bus* bus;
+
   void Write4bpp (uint32_t, uint32_t, uint32_t);
   void Write8bpp (uint32_t, uint32_t, uint32_t);
   void Write16bpp(uint32_t, uint32_t, uint32_t);
@@ -16,6 +20,8 @@ class Gpu {
   void Cmd78(uint32_t, uint32_t);
 
 public:
+  void AttachBus(Bus*);
+
   void WriteGp0(uint32_t);
   void WriteGp1(uint32_t);
 

@@ -1,10 +1,15 @@
 #include "stdafx.hpp"
 #include "spu.hpp"
+#include "../bus/bus.hpp"
 
 Spu::Spu(void) {
 }
 
 Spu::~Spu(void) {
+}
+
+void Spu::AttachBus(Bus* bus) {
+  this->bus = bus;
 }
 
 uint32_t Spu::Fetch(uint32_t address) {

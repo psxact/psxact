@@ -11,7 +11,7 @@ int main(int argc, char* argv[]) {
   }
 
   playStation = new PlayStation();
-  
+
   if (argc > 1 && !playStation->LoadBiosImage(argv[1])) {
     printf("Unable to load file '%s'.\n", argv[1]);
     return 0;

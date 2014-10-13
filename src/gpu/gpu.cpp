@@ -1,5 +1,6 @@
 #include "stdafx.hpp"
 #include "gpu.hpp"
+#include "../bus/bus.hpp"
 
 #define FRAME_BUFFER_X 1024
 #define FRAME_BUFFER_Y 512
@@ -111,6 +112,10 @@ void Gpu::Cmd70(uint32_t color, uint32_t point) {
 
 void Gpu::Cmd78(uint32_t color, uint32_t point) {
   Cmd60(color, point, MAKE_WORD(16, 16));
+}
+
+void Gpu::AttachBus(Bus* bus) {
+  this->bus = bus;
 }
 
 void Gpu::WriteGp0(uint32_t data) {

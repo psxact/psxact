@@ -21,8 +21,9 @@ inline void Access(uint8_t* memory, uint32_t address, uint32_t data) {
   memory[address + 3] = (data >> 24);
 }
 
-Bus::Bus(Gpu* gpu, Spu* spu)
-  : gpu(gpu)
+Bus::Bus(R3051* cpu, Gpu* gpu, Spu* spu)
+  : cpu(cpu)
+  , gpu(gpu)
   , spu(spu) {
 }
 

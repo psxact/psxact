@@ -8,15 +8,18 @@ PlayStation::PlayStation(void) {
   cpu = new R3051();
   gpu = new Gpu();
   spu = new Spu();
-  bus = new Bus(gpu, spu);
+  bus = new Bus(cpu, gpu, spu);
 
   cpu->AttachBus(bus);
+  gpu->AttachBus(bus);
+  spu->AttachBus(bus);
 }
 
 PlayStation::~PlayStation(void) {
+  delete bus;
   delete cpu;
   delete gpu;
-  delete bus;
+  delete spu;
 }
 
 void PlayStation::Step(void) {
