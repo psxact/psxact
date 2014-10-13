@@ -1,11 +1,12 @@
 #pragma once
 
-#include <cassert>
-#include <cstdio>
+#ifdef _MSC_VER
+#pragma warning(disable: 4351) // default initializer warnings
+#pragma warning(disable: 4996) // stupid "security" warnings
+#endif
+
+#include <assert.h>
 #include <stdint.h>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
 #include <algorithm>
 
 #include "util.hpp"
