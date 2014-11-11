@@ -119,6 +119,8 @@ void Gpu::AttachBus(Bus* bus) {
 }
 
 void Gpu::WriteGp0(uint32_t data) {
+  printf("[GPU] GP0 <= %08x\n", data);
+
   switch (data >> 24) {
   case 0x20: // Monochrome three - point polygon, opaque
   case 0x22: // Monochrome three - point polygon, semi - transparent
@@ -158,6 +160,10 @@ void Gpu::WriteGp0(uint32_t data) {
 }
 
 void Gpu::WriteGp1(uint32_t data) {
+  printf("[GPU] GP1 <= %08x\n", data);
+
+  switch ((data >> 24) & 0x3f) {
+  }
 }
 
 uint32_t Gpu::ReadResp(void) {
