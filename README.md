@@ -31,24 +31,15 @@ a better understanding.
 
 ## Building
 
-### Visual Studio 2013
+### Visual Studio 2015
 
 * Open `psxact.sln`
 * Build
 * Done!
 
-### GCC (And other compilers, see below)
-
-* Install `Python 2.7.8`
-* Install `SCons 2.3.4`
-* Run the `scons` command in the root directory (the same folder as the `SConstruct` file)
-
 ### Other compilers
 
-I don't have other compilers such as Clang installed, so I can't test
-them to make sure they work. I will absolutely add support for them
-once I have a testing environment set up, and the instructions will be
-the exact same as the current GCC instructions.
+Other compilers aren't currently supported.
 
 ## Contributing
 
