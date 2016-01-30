@@ -41,5 +41,8 @@
     <ClInclude Include="R3051\core_t.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="r3051\decoder.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

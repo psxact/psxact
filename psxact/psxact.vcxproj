@@ -153,6 +153,7 @@
     <ClInclude Include="R3051\cop0_t.hpp" />
     <ClInclude Include="R3051\core_t.hpp" />
     <ClInclude Include="R3051\bus_t.hpp" />
+    <ClInclude Include="r3051\decoder.hpp" />
     <ClInclude Include="utility.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
