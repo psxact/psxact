@@ -1,5 +1,5 @@
-#ifndef __UTILITY_HPP__
-#define __UTILITY_HPP__
+#ifndef __utility_hpp__
+#define __utility_hpp__
 
 #include <fstream>
 #include <string>
@@ -17,6 +17,11 @@ namespace utility {
         ifs.read(result, length);
 
         return length;
+    }
+
+    template<unsigned min, unsigned max>
+    inline bool between(unsigned value) {
+        return (value & ~(min ^ max)) == min;
     }
 }
 

@@ -1,5 +1,5 @@
-#ifndef __R3051_CORE_T_HPP__
-#define __R3051_CORE_T_HPP__
+#ifndef __r3051_core_t_hpp__
+#define __r3051_core_t_hpp__
 
 #include "bus_t.hpp"
 #include "cop0_t.hpp"
@@ -12,6 +12,8 @@ namespace r3051 {
         uint32_t hi;
         uint32_t pc;
         uint32_t next_pc;
+
+        inline uint32_t& operator[](uint32_t);
     };
 
     class core_t {
