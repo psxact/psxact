@@ -14,8 +14,6 @@ core_t::core_t(bus_t &bus, cop0_t &cop0)
 }
 
 void core_t::main(void) {
-    int64_t mult;
-    uint64_t multu;
     uint32_t code;
     uint32_t condition;
 
@@ -88,16 +86,20 @@ void core_t::main(void) {
                 break;
 
             case 0x18: // mult rs,rt
-                mult = int64_t(int32_t(regs[decoder::rs()])) * int64_t(int32_t(regs[decoder::rt()]));
-                regs.lo = uint32_t(mult >> 0);
-                regs.hi = uint32_t(mult >> 32);
+            {
+                int64_t result = int64_t(int32_t(regs[decoder::rs()])) * int64_t(int32_t(regs[decoder::rt()]));
+                regs.lo = uint32_t(result >> 0);
+                regs.hi = uint32_t(result >> 32);
                 break;
+            }
 
             case 0x19: // multu rs,rt
-                multu = uint64_t(regs[decoder::rs()]) * uint64_t(regs[decoder::rt()]);
-                regs.lo = uint32_t(multu >> 0);
-                regs.hi = uint32_t(multu >> 32);
+            {
+                uint64_t result = uint64_t(regs[decoder::rs()]) * uint64_t(regs[decoder::rt()]);
+                regs.lo = uint32_t(result >> 0);
+                regs.hi = uint32_t(result >> 32);
                 break;
+            }
 
             case 0x1a: // div rs,rt
                 if (regs[decoder::rt()]) {
