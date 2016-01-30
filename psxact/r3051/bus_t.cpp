@@ -4,8 +4,8 @@
 
 using namespace r3051;
 
-char* bios = new char[512 << 10];
-char* wram = new char[  2 << 20];
+char* bios;
+char* wram;
 
 static inline uint32_t read_byte(char* buffer, uint32_t address) {
     return buffer[address] & 0xff;
@@ -40,9 +40,16 @@ static inline void write_word(char* buffer, uint32_t address, uint32_t data) {
 bus_t::bus_t(cop0_t &cop0)
     : cop0(cop0) {
 
+    wram = new char[2 << 20];
+
     if (utility::read_all_bytes("bios.rom", bios) != 524288) {
         throw std::exception("bios must be 512KiB");
     }
+}
+
+r3051::bus_t::~bus_t(void) {
+    delete bios;
+    delete wram;
 }
 
 static inline uint32_t get_physical_address(uint32_t address) {

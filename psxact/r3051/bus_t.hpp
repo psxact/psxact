@@ -19,6 +19,8 @@ namespace r3051 {
     public:
         bus_t(cop0_t&);
 
+        ~bus_t(void);
+
         uint32_t read_code(uint32_t);
 
         uint32_t read_data(bus_size_t, uint32_t);
