@@ -11,7 +11,7 @@ namespace decoder {
         return ((code & 0xffff) ^ 0x0000) - 0x0000;
     }
 
-    inline uint32_t simmediate() {
+    inline int32_t simmediate() {
         return ((code & 0xffff) ^ 0x8000) - 0x8000;
     }
 

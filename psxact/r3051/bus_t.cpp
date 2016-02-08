@@ -1,50 +1,46 @@
 #include "bus_t.hpp"
 #include "cop0_t.hpp"
 #include "../utility.hpp"
+#include <exception>
 
 using namespace r3051;
 
-char* bios;
-char* wram;
+uint8_t *bios = new uint8_t[utility::kib<512>()];
+uint8_t *wram = new uint8_t[utility::mib<  2>()];
 
-static inline uint32_t read_byte(char* buffer, uint32_t address) {
-    return buffer[address] & 0xff;
+static inline uint32_t read_byte(uint8_t* buffer, uint32_t address) {
+    return buffer[address];
 }
 
-static inline uint32_t read_half(char* buffer, uint32_t address) {
+static inline uint32_t read_half(uint8_t* buffer, uint32_t address) {
     return
         (read_byte(buffer, address &~1) << 0) |
         (read_byte(buffer, address | 1) << 8);
 }
 
-static inline uint32_t read_word(char* buffer, uint32_t address) {
+static inline uint32_t read_word(uint8_t* buffer, uint32_t address) {
     return
         (read_half(buffer, address &~2) << 0) |
         (read_half(buffer, address | 2) << 16);
 }
 
-static inline void write_byte(char* buffer, uint32_t address, uint32_t data) {
+static inline void write_byte(uint8_t* buffer, uint32_t address, uint32_t data) {
     buffer[address] = data & 0xff;
 }
 
-static inline void write_half(char* buffer, uint32_t address, uint32_t data) {
+static inline void write_half(uint8_t* buffer, uint32_t address, uint32_t data) {
     write_byte(buffer, address &~1, data);
     write_byte(buffer, address | 1, data >> 8);
 }
 
-static inline void write_word(char* buffer, uint32_t address, uint32_t data) {
+static inline void write_word(uint8_t* buffer, uint32_t address, uint32_t data) {
     write_half(buffer, address &~2, data);
     write_half(buffer, address | 2, data >> 16);
 }
 
 bus_t::bus_t(cop0_t &cop0)
     : cop0(cop0) {
-
-    wram = new char[2 << 20];
-
-    if (utility::read_all_bytes("bios.rom", bios) != 524288) {
-        throw std::exception("bios must be 512KiB");
-    }
+    utility::read_all_bytes("bios.rom", bios, utility::kib<512>());
 }
 
 r3051::bus_t::~bus_t(void) {
