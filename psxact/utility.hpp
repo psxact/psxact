@@ -7,14 +7,21 @@
 namespace utility {
     using namespace std;
 
-    inline void read_all_bytes(const char *filename, uint8_t *result, int skip, int take) {
-        FILE* file;
+    void read_all_bytes(const char *, uint8_t *, int, int);
 
-        fopen_s(&file, filename, "rb+");
-        fseek(file, skip, SEEK_SET);
-        fread_s(result, take, 1, take, file);
-        fclose(file);
-    }
+    void debug(const char *, ...);
+
+    uint32_t read_byte(uint8_t *, uint32_t);
+
+    uint32_t read_half(uint8_t *, uint32_t);
+
+    uint32_t read_word(uint8_t *, uint32_t);
+
+    void write_byte(uint8_t *, uint32_t, uint32_t);
+
+    void write_half(uint8_t *, uint32_t, uint32_t);
+
+    void write_word(uint8_t *, uint32_t, uint32_t);
 
     template<unsigned min, unsigned max>
     inline bool between(unsigned value) {

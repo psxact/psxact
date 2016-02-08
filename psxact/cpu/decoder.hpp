@@ -1,5 +1,5 @@
-#ifndef __r3051_decoder_hpp__
-#define __r3051_decoder_hpp__
+#ifndef __cpu_decoder_hpp__
+#define __cpu_decoder_hpp__
 
 #include <stdint.h>
 

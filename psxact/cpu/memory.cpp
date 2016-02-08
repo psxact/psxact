@@ -24,6 +24,10 @@ uint32_t core_t::read_code() {
     regs.pc = regs.next_pc;
     regs.next_pc += 4;
 
+    if (segment->cached) {
+        // todo: read i-cache
+    }
+
     return bus.read(WORD, address);
 }
 

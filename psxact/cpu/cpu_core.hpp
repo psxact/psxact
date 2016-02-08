@@ -1,5 +1,5 @@
-#ifndef __r3051_core_t_hpp__
-#define __r3051_core_t_hpp__
+#ifndef __cpu_core_t_hpp__
+#define __cpu_core_t_hpp__
 
 #include <stdint.h>
 

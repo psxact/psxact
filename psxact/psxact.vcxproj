@@ -150,6 +150,7 @@
     <ClCompile Include="bus.cpp" />
     <ClCompile Include="cpu\memory.cpp" />
     <ClCompile Include="spu\spu_core.cpp" />
+    <ClCompile Include="utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gpu\gpu_core.hpp" />

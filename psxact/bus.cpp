@@ -8,36 +8,6 @@
 uint8_t *bios = new uint8_t[utility::kib<512>()];
 uint8_t *wram = new uint8_t[utility::mib<  2>()];
 
-static inline uint32_t read_byte(uint8_t* buffer, uint32_t address) {
-    return buffer[address];
-}
-
-static inline uint32_t read_half(uint8_t* buffer, uint32_t address) {
-    return
-        (read_byte(buffer, address &~1) << 0) |
-        (read_byte(buffer, address | 1) << 8);
-}
-
-static inline uint32_t read_word(uint8_t* buffer, uint32_t address) {
-    return
-        (read_half(buffer, address &~2) << 0) |
-        (read_half(buffer, address | 2) << 16);
-}
-
-static inline void write_byte(uint8_t* buffer, uint32_t address, uint32_t data) {
-    buffer[address] = data & 0xff;
-}
-
-static inline void write_half(uint8_t* buffer, uint32_t address, uint32_t data) {
-    write_byte(buffer, address &~1, data);
-    write_byte(buffer, address | 1, data >> 8);
-}
-
-static inline void write_word(uint8_t* buffer, uint32_t address, uint32_t data) {
-    write_half(buffer, address &~2, data);
-    write_half(buffer, address | 2, data >> 16);
-}
-
 bus_t::bus_t(gpu::core_t &gpu, spu::core_t &spu)
     : gpu(gpu)
     , spu(spu) {
@@ -55,9 +25,9 @@ bus_t::~bus_t() {
 uint32_t bus_t::read(int size, uint32_t address) {
     if (utility::between<0x00000000, 0x007fffff>(address)) { // wram
         switch (size) {
-        case BYTE: return read_byte(wram, address & 0x1fffff);
-        case HALF: return read_half(wram, address & 0x1ffffe);
-        case WORD: return read_word(wram, address & 0x1ffffc);
+        case BYTE: return utility::read_byte(wram, address & 0x1fffff);
+        case HALF: return utility::read_half(wram, address & 0x1ffffe);
+        case WORD: return utility::read_word(wram, address & 0x1ffffc);
         }
     }
 
@@ -88,9 +58,9 @@ uint32_t bus_t::read(int size, uint32_t address) {
 
     if (utility::between<0x1fc00000, 0x1fc7ffff>(address)) {
         switch (size) {
-        case BYTE: return read_byte(bios, address & 0x7ffff);
-        case HALF: return read_half(bios, address & 0x7fffe);
-        case WORD: return read_word(bios, address & 0x7fffc);
+        case BYTE: return utility::read_byte(bios, address & 0x7ffff);
+        case HALF: return utility::read_half(bios, address & 0x7fffe);
+        case WORD: return utility::read_word(bios, address & 0x7fffc);
         }
     }
 
@@ -100,9 +70,9 @@ uint32_t bus_t::read(int size, uint32_t address) {
 void bus_t::write(int size, uint32_t address, uint32_t data) {
     if (utility::between<0x00000000, 0x007fffff>(address)) {
         switch (size) {
-        case BYTE: return write_byte(wram, address & 0x1fffff, data);
-        case HALF: return write_half(wram, address & 0x1ffffe, data);
-        case WORD: return write_word(wram, address & 0x1ffffc, data);
+        case BYTE: return utility::write_byte(wram, address & 0x1fffff, data);
+        case HALF: return utility::write_half(wram, address & 0x1ffffe, data);
+        case WORD: return utility::write_word(wram, address & 0x1ffffc, data);
         }
     }
 
