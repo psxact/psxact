@@ -14,7 +14,6 @@ core_t::core_t(bus_t &bus, cop0_t &cop0)
 }
 
 void core_t::main(void) {
-    uint32_t code;
     uint32_t condition;
 
     regs.pc = 0xbfc00000;
@@ -62,11 +61,12 @@ void core_t::main(void) {
                 break;
 
             case 0x0c: // syscall
-                printf("syscall $%08x\n", ((code >> 6) & 0xfffff));
+                regs.pc = enter_exception(0x08, regs.pc - 4);
+                regs.next_pc = regs.pc + 4;
                 break;
 
             case 0x0d: // break
-                printf("break $%08x\n", ((code >> 6) & 0xfffff));
+                printf("break $%08x\n", ((decoder::code >> 6) & 0xfffff));
                 break;
 
             case 0x10: // mfhi rd
@@ -210,12 +210,12 @@ void core_t::main(void) {
             break;
 
         case 0x02: // j $3ffffff
-            regs.next_pc = (regs.pc & 0xf0000000) | ((code << 2) & 0x0ffffffc);
+            regs.next_pc = (regs.pc & 0xf0000000) | ((decoder::code << 2) & 0x0ffffffc);
             break;
 
         case 0x03: // jal $3ffffff
             regs[31] = regs.next_pc;
-            regs.next_pc = (regs.pc & 0xf0000000) | ((code << 2) & 0x0ffffffc);
+            regs.next_pc = (regs.pc & 0xf0000000) | ((decoder::code << 2) & 0x0ffffffc);
             break;
 
         case 0x04: // beq rs,rt,$nnnn
@@ -283,6 +283,10 @@ void core_t::main(void) {
 
             case 0x04: // mtc0 rt,rd
                 cop0.set_register(decoder::rd(), regs[decoder::rt()]);
+                break;
+
+            case 0x10: // rfe
+                printf("unimplemented rfe\n");
                 break;
 
             default:
@@ -374,4 +378,30 @@ void core_t::main(void) {
 
 uint32_t& registers_t::operator[](uint32_t index) {
     return all[index];
+}
+
+uint32_t core_t::enter_exception(uint32_t excode, uint32_t epc) {
+    uint32_t sr = cop0.get_register(12);
+    sr = (sr & ~0x3f) | ((sr << 2) & 0x3f);
+
+    uint32_t cause = cop0.get_register(13);
+    cause = (cause & ~0x3f) | ((excode << 2) & 0x3f);
+
+    cop0.set_register(12, sr);
+    cop0.set_register(13, cause);
+    cop0.set_register(14, epc);
+
+    return (sr & (1 << 22))
+        ? 0xbfc00180
+        : 0x80000080
+        ;
+}
+
+uint32_t core_t::leave_exception() {
+    uint32_t sr = cop0.get_register(12);
+    sr = (sr & ~0xf) | ((sr >> 2) & 0xf);
+
+    cop0.set_register(12, sr);
+
+    return cop0.get_register(14);
 }

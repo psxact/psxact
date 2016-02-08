@@ -26,6 +26,10 @@ namespace r3051 {
         core_t(bus_t&, cop0_t&);
 
         void main(void);
+
+        uint32_t enter_exception(uint32_t excode, uint32_t epc);
+
+        uint32_t leave_exception();
     };
 }
 
