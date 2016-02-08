@@ -18,13 +18,19 @@
     <ClCompile Include="psxact.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="r3051\memory.cpp">
+    <ClCompile Include="gpu\gpu_core.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="R3051\core.cpp">
+    <ClCompile Include="spu\spu_core.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="R3051\bus.cpp">
+    <ClCompile Include="bus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu\cpu_core.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu\memory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,13 +38,19 @@
     <ClInclude Include="utility.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="r3051\decoder.hpp">
+    <ClInclude Include="gpu\gpu_core.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="R3051\core.hpp">
+    <ClInclude Include="spu\spu_core.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="R3051\bus.hpp">
+    <ClInclude Include="bus.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\cpu_core.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\decoder.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+class bus_t;
+
 namespace r3051 {
     struct cop0_t {
         uint32_t regs[16];
@@ -24,8 +26,6 @@ namespace r3051 {
         uint32_t mask;
         bool cached;
     };
-
-    class bus_t;
 
     class core_t {
     private:

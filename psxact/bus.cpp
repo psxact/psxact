@@ -1,9 +1,9 @@
 #include "bus.hpp"
-#include "../utility.hpp"
+#include "gpu/gpu_core.hpp"
+#include "spu/spu_core.hpp"
+#include "utility.hpp"
 #include <exception>
 #include <string>
-
-using namespace r3051;
 
 uint8_t *bios = new uint8_t[utility::kib<512>()];
 uint8_t *wram = new uint8_t[utility::mib<  2>()];
@@ -38,7 +38,9 @@ static inline void write_word(uint8_t* buffer, uint32_t address, uint32_t data) 
     write_half(buffer, address | 2, data >> 16);
 }
 
-bus_t::bus_t() {
+bus_t::bus_t(gpu::core_t &gpu, spu::core_t &spu)
+    : gpu(gpu)
+    , spu(spu) {
     memset(bios, 0, utility::kib<512>());
     memset(wram, 0, utility::mib<  2>());
 

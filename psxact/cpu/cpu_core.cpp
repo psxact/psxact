@@ -1,7 +1,6 @@
-#include "core.hpp"
-#include "bus.hpp"
-//#include "cop0.hpp"
+#include "cpu_core.hpp"
 #include "decoder.hpp"
+#include "../bus.hpp"
 #include <stdio.h>
 
 using namespace r3051;

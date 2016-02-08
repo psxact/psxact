@@ -1,5 +1,5 @@
-#include "core.hpp"
-#include "bus.hpp"
+#include "cpu_core.hpp"
+#include "../bus.hpp"
 
 using namespace r3051;
 

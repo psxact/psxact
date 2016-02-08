@@ -2,6 +2,7 @@
 #define __utility_hpp__
 
 #include <stdio.h>
+#include <stdint.h>
 
 namespace utility {
     using namespace std;

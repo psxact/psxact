@@ -144,15 +144,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="R3051\core.cpp" />
+    <ClCompile Include="gpu\gpu_core.cpp" />
+    <ClCompile Include="cpu\cpu_core.cpp" />
     <ClCompile Include="psxact.cpp" />
-    <ClCompile Include="R3051\bus.cpp" />
-    <ClCompile Include="r3051\memory.cpp" />
+    <ClCompile Include="bus.cpp" />
+    <ClCompile Include="cpu\memory.cpp" />
+    <ClCompile Include="spu\spu_core.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="R3051\core.hpp" />
-    <ClInclude Include="R3051\bus.hpp" />
-    <ClInclude Include="r3051\decoder.hpp" />
+    <ClInclude Include="gpu\gpu_core.hpp" />
+    <ClInclude Include="cpu\cpu_core.hpp" />
+    <ClInclude Include="bus.hpp" />
+    <ClInclude Include="cpu\decoder.hpp" />
+    <ClInclude Include="spu\spu_core.hpp" />
     <ClInclude Include="utility.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

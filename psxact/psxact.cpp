@@ -1,10 +1,15 @@
-#include "r3051/bus.hpp"
-#include "r3051/core.hpp"
+#include "bus.hpp"
+#include "cpu/cpu_core.hpp"
+#include "gpu/gpu_core.hpp"
+#include "spu/spu_core.hpp"
 
 using namespace r3051;
 
 int main() {
-    bus_t bus = bus_t();
+    gpu::core_t gpu;
+    spu::core_t spu;
+
+    bus_t bus = bus_t(gpu, spu);
     core_t core(bus);
 
     core.main();
