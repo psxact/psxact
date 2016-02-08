@@ -1,8 +1,8 @@
-#include "cop0_t.hpp"
+#include "cop0.hpp"
 
 using namespace r3051;
 
-cop0_t::cop0_t(void)
+cop0_t::cop0_t()
     : registers() {
 }
 

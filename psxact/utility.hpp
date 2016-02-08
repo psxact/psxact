@@ -6,11 +6,12 @@
 namespace utility {
     using namespace std;
 
-    inline void read_all_bytes(const char *filename, uint8_t *result, int length) {
+    inline void read_all_bytes(const char *filename, uint8_t *result, int skip, int take) {
         FILE* file;
 
         fopen_s(&file, filename, "rb+");
-        fread_s(result, length, 1, length, file);
+        fseek(file, skip, SEEK_SET);
+        fread_s(result, take, 1, take, file);
         fclose(file);
     }
 

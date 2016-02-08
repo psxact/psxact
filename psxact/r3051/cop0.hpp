@@ -9,7 +9,7 @@ namespace r3051 {
         uint32_t registers[16];
 
     public:
-        cop0_t(void);
+        cop0_t();
 
         uint32_t get_register(uint32_t index);
 

@@ -144,15 +144,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="R3051\cop0_t.cpp" />
-    <ClCompile Include="R3051\core_t.cpp" />
+    <ClCompile Include="R3051\cop0.cpp" />
+    <ClCompile Include="R3051\core.cpp" />
     <ClCompile Include="psxact.cpp" />
-    <ClCompile Include="R3051\bus_t.cpp" />
+    <ClCompile Include="R3051\bus.cpp" />
+    <ClCompile Include="r3051\memory.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="R3051\cop0_t.hpp" />
-    <ClInclude Include="R3051\core_t.hpp" />
-    <ClInclude Include="R3051\bus_t.hpp" />
+    <ClInclude Include="R3051\cop0.hpp" />
+    <ClInclude Include="R3051\core.hpp" />
+    <ClInclude Include="R3051\bus.hpp" />
     <ClInclude Include="r3051\decoder.hpp" />
     <ClInclude Include="utility.hpp" />
   </ItemGroup>

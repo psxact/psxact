@@ -1,9 +1,8 @@
-#include "core_t.hpp"
-#include "cop0_t.hpp"
+#include "core.hpp"
+#include "bus.hpp"
+#include "cop0.hpp"
 #include "decoder.hpp"
 #include <stdio.h>
-#include <string>
-#include <exception>
 
 using namespace r3051;
 
@@ -13,16 +12,14 @@ core_t::core_t(bus_t &bus, cop0_t &cop0)
     , regs() {
 }
 
-void core_t::main(void) {
+void core_t::main() {
     uint32_t condition;
 
     regs.pc = 0xbfc00000;
     regs.next_pc = 0xbfc00004;
 
     while (1) {
-        decoder::code = bus.read_code(regs.pc);
-        regs.pc = regs.next_pc;
-        regs.next_pc += 4;
+        decoder::code = read_code();
 
         switch (decoder::op_hi()) {
         case 0x00: // special
@@ -66,7 +63,8 @@ void core_t::main(void) {
                 break;
 
             case 0x0d: // break
-                printf("break $%08x\n", ((decoder::code >> 6) & 0xfffff));
+                regs.pc = enter_exception(0x09, regs.pc - 4);
+                regs.next_pc = regs.pc + 4;
                 break;
 
             case 0x10: // mfhi rd
@@ -317,11 +315,11 @@ void core_t::main(void) {
             break;
 
         case 0x20: // lb rt,$nnnn(rs)
-            regs.i[decoder::rt()] = int8_t(bus.read_data(BYTE, regs.u[decoder::rs()] + decoder::simmediate()));
+            regs.i[decoder::rt()] = int8_t(read_data(BYTE, regs.u[decoder::rs()] + decoder::simmediate()));
             break;
 
         case 0x21: // lh rt,$nnnn(rs)
-            regs.i[decoder::rt()] = int16_t(bus.read_data(HALF, regs.u[decoder::rs()] + decoder::simmediate()));
+            regs.i[decoder::rt()] = int16_t(read_data(HALF, regs.u[decoder::rs()] + decoder::simmediate()));
             break;
 
         case 0x22: // lwl rt,$nnnn(rs)
@@ -329,15 +327,15 @@ void core_t::main(void) {
             return;
 
         case 0x23: // lw rt,$nnnn(rs)
-            regs.u[decoder::rt()] = bus.read_data(WORD, regs.u[decoder::rs()] + decoder::simmediate());
+            regs.u[decoder::rt()] = read_data(WORD, regs.u[decoder::rs()] + decoder::simmediate());
             break;
 
         case 0x24: // lbu rt,$nnnn(rs)
-            regs.u[decoder::rt()] = bus.read_data(BYTE, regs.u[decoder::rs()] + decoder::simmediate());
+            regs.u[decoder::rt()] = read_data(BYTE, regs.u[decoder::rs()] + decoder::simmediate());
             break;
 
         case 0x25: // lhu rt,$nnnn(rs)
-            regs.u[decoder::rt()] = bus.read_data(HALF, regs.u[decoder::rs()] + decoder::simmediate());
+            regs.u[decoder::rt()] = read_data(HALF, regs.u[decoder::rs()] + decoder::simmediate());
             break;
 
         case 0x26: // lwr rt,$nnnn(rs)
@@ -345,11 +343,11 @@ void core_t::main(void) {
             break;
 
         case 0x28: // sb rt,$nnnn(rs)
-            bus.write_data(BYTE, regs.u[decoder::rs()] + decoder::simmediate(), regs.u[decoder::rt()]);
+            write_data(BYTE, regs.u[decoder::rs()] + decoder::simmediate(), regs.u[decoder::rt()]);
             break;
 
         case 0x29: // sh rt,$nnnn(rs)
-            bus.write_data(HALF, regs.u[decoder::rs()] + decoder::simmediate(), regs.u[decoder::rt()]);
+            write_data(HALF, regs.u[decoder::rs()] + decoder::simmediate(), regs.u[decoder::rt()]);
             break;
 
         case 0x2a: // swl rt,$nnnn(rs)
@@ -357,7 +355,7 @@ void core_t::main(void) {
             break;
 
         case 0x2b: // sw rt,$nnnn(rs)
-            bus.write_data(WORD, regs.u[decoder::rs()] + decoder::simmediate(), regs.u[decoder::rt()]);
+            write_data(WORD, regs.u[decoder::rs()] + decoder::simmediate(), regs.u[decoder::rt()]);
             break;
 
         case 0x2e: // swr rt,$nnnn(rs)

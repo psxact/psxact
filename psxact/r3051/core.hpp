@@ -1,8 +1,6 @@
 #ifndef __r3051_core_t_hpp__
 #define __r3051_core_t_hpp__
 
-#include "bus_t.hpp"
-#include "cop0_t.hpp"
 #include <stdint.h>
 
 namespace r3051 {
@@ -18,6 +16,15 @@ namespace r3051 {
         uint32_t next_pc;
     };
 
+    struct segment_t {
+        uint32_t mask;
+        bool cached;
+    };
+
+    class bus_t;
+
+    class cop0_t;
+
     class core_t {
     private:
         registers_t regs;
@@ -27,11 +34,17 @@ namespace r3051 {
     public:
         core_t(bus_t&, cop0_t&);
 
-        void main(void);
+        void main();
 
         uint32_t enter_exception(uint32_t excode, uint32_t epc);
 
         uint32_t leave_exception();
+
+        uint32_t read_code();
+
+        uint32_t read_data(int, uint32_t);
+
+        void write_data(int, uint32_t, uint32_t);
     };
 }
 

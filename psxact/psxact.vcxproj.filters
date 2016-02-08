@@ -15,16 +15,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="R3051\bus_t.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="R3051\cop0_t.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="R3051\core_t.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="psxact.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="r3051\memory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="R3051\core.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="R3051\cop0.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="R3051\bus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,16 +35,16 @@
     <ClInclude Include="utility.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="R3051\bus_t.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="R3051\cop0_t.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="R3051\core_t.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="r3051\decoder.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="R3051\core.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="R3051\cop0.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="R3051\bus.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
