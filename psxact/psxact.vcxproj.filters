@@ -24,9 +24,6 @@
     <ClCompile Include="R3051\core.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="R3051\cop0.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="R3051\bus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -39,9 +36,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="R3051\core.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="R3051\cop0.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="R3051\bus.hpp">

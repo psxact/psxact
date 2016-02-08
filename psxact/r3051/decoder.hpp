@@ -7,11 +7,11 @@ namespace r3051 {
 namespace decoder {
     uint32_t code;
 
-    inline uint32_t uimmediate() {
+    inline uint32_t uconst() {
         return ((code & 0xffff) ^ 0x0000) - 0x0000;
     }
 
-    inline int32_t simmediate() {
+    inline int32_t iconst() {
         return ((code & 0xffff) ^ 0x8000) - 0x8000;
     }
 

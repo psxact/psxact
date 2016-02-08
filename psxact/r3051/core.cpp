@@ -1,16 +1,18 @@
 #include "core.hpp"
 #include "bus.hpp"
-#include "cop0.hpp"
+//#include "cop0.hpp"
 #include "decoder.hpp"
 #include <stdio.h>
 
 using namespace r3051;
 
-core_t::core_t(bus_t &bus, cop0_t &cop0)
+core_t::core_t(bus_t &bus)
     : bus(bus)
-    , cop0(cop0)
+    , cop0()
     , regs() {
 }
+
+static int cycles = 0;
 
 void core_t::main() {
     uint32_t condition;
@@ -173,13 +175,13 @@ void core_t::main() {
             switch (decoder::rt()) {
             case 0x00: // bltz rs,$nnnn
                 if (regs.i[decoder::rs()] < 0) {
-                    regs.next_pc = regs.pc + (decoder::simmediate() << 2);
+                    regs.next_pc = regs.pc + (decoder::iconst() << 2);
                 }
                 break;
 
             case 0x01: // bgez rs,$nnnn
                 if (regs.i[decoder::rs()] >= 0) {
-                    regs.next_pc = regs.pc + (decoder::simmediate() << 2);
+                    regs.next_pc = regs.pc + (decoder::iconst() << 2);
                 }
                 break;
 
@@ -188,7 +190,7 @@ void core_t::main() {
                 regs.u[31] = regs.next_pc;
 
                 if (condition) {
-                    regs.next_pc = regs.pc + (decoder::simmediate() << 2);
+                    regs.next_pc = regs.pc + (decoder::iconst() << 2);
                 }
                 break;
 
@@ -197,7 +199,7 @@ void core_t::main() {
                 regs.u[31] = regs.next_pc;
 
                 if (condition) {
-                    regs.next_pc = regs.pc + (decoder::simmediate() << 2);
+                    regs.next_pc = regs.pc + (decoder::iconst() << 2);
                 }
                 break;
 
@@ -218,69 +220,69 @@ void core_t::main() {
 
         case 0x04: // beq rs,rt,$nnnn
             if (regs.u[decoder::rs()] == regs.u[decoder::rt()]) {
-                regs.next_pc = regs.pc + (decoder::simmediate() << 2);
+                regs.next_pc = regs.pc + (decoder::iconst() << 2);
             }
             break;
 
         case 0x05: // bne rs,rt,$nnnn
             if (regs.u[decoder::rs()] != regs.u[decoder::rt()]) {
-                regs.next_pc = regs.pc + (decoder::simmediate() << 2);
+                regs.next_pc = regs.pc + (decoder::iconst() << 2);
             }
             break;
 
         case 0x06: // blez rs,$nnnn
             if (regs.i[decoder::rs()] <= 0) {
-                regs.next_pc = regs.pc + (decoder::simmediate() << 2);
+                regs.next_pc = regs.pc + (decoder::iconst() << 2);
             }
             break;
 
         case 0x07: // bgtz rs,$nnnn
             if (regs.i[decoder::rs()] > 0) {
-                regs.next_pc = regs.pc + (decoder::simmediate() << 2);
+                regs.next_pc = regs.pc + (decoder::iconst() << 2);
             }
             break;
 
         case 0x08: // addi rt,rs,$nnnn
-            regs.u[decoder::rt()] = regs.u[decoder::rs()] + decoder::simmediate();
+            regs.u[decoder::rt()] = regs.u[decoder::rs()] + decoder::iconst();
             // todo: overflow exception
             break;
 
         case 0x09: // addiu rt,rs,$nnnn
-            regs.u[decoder::rt()] = regs.u[decoder::rs()] + decoder::simmediate();
+            regs.u[decoder::rt()] = regs.u[decoder::rs()] + decoder::iconst();
             break;
 
         case 0x0a: // slti rt,rs,$nnnn
-            regs.u[decoder::rt()] = regs.i[decoder::rs()] < decoder::simmediate();
+            regs.u[decoder::rt()] = regs.i[decoder::rs()] < decoder::iconst();
             break;
 
         case 0x0b: // sltiu rt,rs,$nnnn
-            regs.u[decoder::rt()] = regs.u[decoder::rs()] < uint32_t(decoder::simmediate());
+            regs.u[decoder::rt()] = regs.u[decoder::rs()] < uint32_t(decoder::iconst());
             break;
 
         case 0x0c: // andi rt,rs,$nnnn
-            regs.u[decoder::rt()] = regs.u[decoder::rs()] & decoder::uimmediate();
+            regs.u[decoder::rt()] = regs.u[decoder::rs()] & decoder::uconst();
             break;
 
         case 0x0d: // ori rt,rs,$nnnn
-            regs.u[decoder::rt()] = regs.u[decoder::rs()] | decoder::uimmediate();
+            regs.u[decoder::rt()] = regs.u[decoder::rs()] | decoder::uconst();
             break;
 
         case 0x0e: // xori rt,rs,$nnnn
-            regs.u[decoder::rt()] = regs.u[decoder::rs()] ^ decoder::uimmediate();
+            regs.u[decoder::rt()] = regs.u[decoder::rs()] ^ decoder::uconst();
             break;
 
         case 0x0f: // lui rt,$nnnn
-            regs.u[decoder::rt()] = decoder::uimmediate() << 16;
+            regs.u[decoder::rt()] = decoder::uconst() << 16;
             break;
 
         case 0x10: // cop0
             switch (decoder::rs()) {
             case 0x00: // mfc0 rt,rd
-                regs.u[decoder::rt()] = cop0.get_register(decoder::rd());
+                regs.u[decoder::rt()] = cop0.regs[decoder::rd()];
                 break;
 
             case 0x04: // mtc0 rt,rd
-                cop0.set_register(decoder::rd(), regs.u[decoder::rt()]);
+                cop0.regs[decoder::rd()] = regs.u[decoder::rt()];
                 break;
 
             case 0x10:
@@ -315,11 +317,11 @@ void core_t::main() {
             break;
 
         case 0x20: // lb rt,$nnnn(rs)
-            regs.i[decoder::rt()] = int8_t(read_data(BYTE, regs.u[decoder::rs()] + decoder::simmediate()));
+            regs.i[decoder::rt()] = int8_t(read_data(BYTE, regs.u[decoder::rs()] + decoder::iconst()));
             break;
 
         case 0x21: // lh rt,$nnnn(rs)
-            regs.i[decoder::rt()] = int16_t(read_data(HALF, regs.u[decoder::rs()] + decoder::simmediate()));
+            regs.i[decoder::rt()] = int16_t(read_data(HALF, regs.u[decoder::rs()] + decoder::iconst()));
             break;
 
         case 0x22: // lwl rt,$nnnn(rs)
@@ -327,15 +329,15 @@ void core_t::main() {
             return;
 
         case 0x23: // lw rt,$nnnn(rs)
-            regs.u[decoder::rt()] = read_data(WORD, regs.u[decoder::rs()] + decoder::simmediate());
+            regs.u[decoder::rt()] = read_data(WORD, regs.u[decoder::rs()] + decoder::iconst());
             break;
 
         case 0x24: // lbu rt,$nnnn(rs)
-            regs.u[decoder::rt()] = read_data(BYTE, regs.u[decoder::rs()] + decoder::simmediate());
+            regs.u[decoder::rt()] = read_data(BYTE, regs.u[decoder::rs()] + decoder::iconst());
             break;
 
         case 0x25: // lhu rt,$nnnn(rs)
-            regs.u[decoder::rt()] = read_data(HALF, regs.u[decoder::rs()] + decoder::simmediate());
+            regs.u[decoder::rt()] = read_data(HALF, regs.u[decoder::rs()] + decoder::iconst());
             break;
 
         case 0x26: // lwr rt,$nnnn(rs)
@@ -343,11 +345,11 @@ void core_t::main() {
             break;
 
         case 0x28: // sb rt,$nnnn(rs)
-            write_data(BYTE, regs.u[decoder::rs()] + decoder::simmediate(), regs.u[decoder::rt()]);
+            write_data(BYTE, regs.u[decoder::rs()] + decoder::iconst(), regs.u[decoder::rt()]);
             break;
 
         case 0x29: // sh rt,$nnnn(rs)
-            write_data(HALF, regs.u[decoder::rs()] + decoder::simmediate(), regs.u[decoder::rt()]);
+            write_data(HALF, regs.u[decoder::rs()] + decoder::iconst(), regs.u[decoder::rt()]);
             break;
 
         case 0x2a: // swl rt,$nnnn(rs)
@@ -355,7 +357,7 @@ void core_t::main() {
             break;
 
         case 0x2b: // sw rt,$nnnn(rs)
-            write_data(WORD, regs.u[decoder::rs()] + decoder::simmediate(), regs.u[decoder::rt()]);
+            write_data(WORD, regs.u[decoder::rs()] + decoder::iconst(), regs.u[decoder::rt()]);
             break;
 
         case 0x2e: // swr rt,$nnnn(rs)
@@ -384,15 +386,15 @@ void core_t::main() {
 }
 
 uint32_t core_t::enter_exception(uint32_t excode, uint32_t epc) {
-    uint32_t sr = cop0.get_register(12);
+    uint32_t sr = cop0.regs[12];
     sr = (sr & ~0x3f) | ((sr << 2) & 0x3f);
 
-    uint32_t cause = cop0.get_register(13);
+    uint32_t cause = cop0.regs[13];
     cause = (cause & ~0x3f) | ((excode << 2) & 0x3f);
 
-    cop0.set_register(12, sr);
-    cop0.set_register(13, cause);
-    cop0.set_register(14, epc);
+    cop0.regs[12] = sr;
+    cop0.regs[13] = cause;
+    cop0.regs[14] = epc;
 
     return (sr & (1 << 22))
         ? 0xbfc00180
@@ -401,10 +403,10 @@ uint32_t core_t::enter_exception(uint32_t excode, uint32_t epc) {
 }
 
 uint32_t core_t::leave_exception() {
-    uint32_t sr = cop0.get_register(12);
+    uint32_t sr = cop0.regs[12];
     sr = (sr & ~0xf) | ((sr >> 2) & 0xf);
 
-    cop0.set_register(12, sr);
+    cop0.regs[12] = sr;
 
-    return cop0.get_register(14);
+    return cop0.regs[14];
 }

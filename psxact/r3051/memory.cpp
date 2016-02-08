@@ -1,6 +1,5 @@
 #include "core.hpp"
 #include "bus.hpp"
-#include "cop0.hpp"
 
 using namespace r3051;
 
@@ -29,7 +28,7 @@ uint32_t core_t::read_code() {
 }
 
 uint32_t core_t::read_data(int size, uint32_t address) {
-    if (cop0.get_register(12) & (1 << 16)) {
+    if (cop0.regs[12] & (1 << 16)) {
         return 0; // isc=1
     }
 
@@ -44,7 +43,7 @@ uint32_t core_t::read_data(int size, uint32_t address) {
 }
 
 void core_t::write_data(int size, uint32_t address, uint32_t data) {
-    if (cop0.get_register(12) & (1 << 16)) {
+    if (cop0.regs[12] & (1 << 16)) {
         return; // isc=1
     }
 

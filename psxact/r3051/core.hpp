@@ -4,6 +4,10 @@
 #include <stdint.h>
 
 namespace r3051 {
+    struct cop0_t {
+        uint32_t regs[16];
+    };
+
     struct registers_t {
         union {
             uint32_t u[32];
@@ -23,16 +27,14 @@ namespace r3051 {
 
     class bus_t;
 
-    class cop0_t;
-
     class core_t {
     private:
         registers_t regs;
         bus_t &bus;
-        cop0_t &cop0;
+        cop0_t cop0;
 
     public:
-        core_t(bus_t&, cop0_t&);
+        core_t(bus_t&);
 
         void main();
 
