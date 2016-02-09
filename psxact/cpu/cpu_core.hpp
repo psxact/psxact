@@ -40,7 +40,7 @@ namespace r3051 {
 
         uint32_t enter_exception(uint32_t excode, uint32_t epc);
 
-        uint32_t leave_exception();
+        void leave_exception();
 
         uint32_t read_code();
 

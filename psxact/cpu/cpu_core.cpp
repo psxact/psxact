@@ -281,8 +281,7 @@ void core_t::main() {
                 case 0x06: utility::debug("unimplemented tblwr\n"); return;
                 case 0x08: utility::debug("unimplemented tlbp\n"); return;
                 case 0x10: // rfe
-                    regs.pc = leave_exception();
-                    regs.next_pc = regs.pc + 4;
+                    leave_exception();
                     continue;
                 }
                 break;
@@ -383,11 +382,9 @@ uint32_t core_t::enter_exception(uint32_t excode, uint32_t epc) {
         ;
 }
 
-uint32_t core_t::leave_exception() {
+void core_t::leave_exception() {
     uint32_t sr = cop0.regs[12];
     sr = (sr & ~0xf) | ((sr >> 2) & 0xf);
 
     cop0.regs[12] = sr;
-
-    return cop0.regs[14];
 }
