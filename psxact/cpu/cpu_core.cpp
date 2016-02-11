@@ -12,7 +12,7 @@ core_t::core_t(bus_t &bus)
 }
 
 void core_t::main() {
-    uint32_t condition;
+    bool condition;
 
     regs.pc = 0xbfc00000;
     regs.next_pc = 0xbfc00004;
@@ -57,13 +57,11 @@ void core_t::main() {
                 continue;
 
             case 0x0c: // syscall
-                regs.pc = enter_exception(0x08, regs.pc - 4);
-                regs.next_pc = regs.pc + 4;
+                enter_exception(0x08, regs.pc - 4);
                 continue;
 
             case 0x0d: // break
-                regs.pc = enter_exception(0x09, regs.pc - 4);
-                regs.next_pc = regs.pc + 4;
+                enter_exception(0x09, regs.pc - 4);
                 continue;
 
             case 0x10: // mfhi rd
@@ -365,7 +363,7 @@ void core_t::main() {
     }
 }
 
-uint32_t core_t::enter_exception(uint32_t excode, uint32_t epc) {
+void core_t::enter_exception(uint32_t excode, uint32_t epc) {
     uint32_t sr = cop0.regs[12];
     sr = (sr & ~0x3f) | ((sr << 2) & 0x3f);
 
@@ -376,10 +374,12 @@ uint32_t core_t::enter_exception(uint32_t excode, uint32_t epc) {
     cop0.regs[13] = cause;
     cop0.regs[14] = epc;
 
-    return (sr & (1 << 22))
+    regs.pc = (sr & (1 << 22))
         ? 0xbfc00180
         : 0x80000080
         ;
+
+    regs.next_pc = regs.pc + 4;
 }
 
 void core_t::leave_exception() {

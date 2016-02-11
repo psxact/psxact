@@ -14,7 +14,7 @@ bus_t::bus_t(gpu::core_t &gpu, spu::core_t &spu)
     memset(bios, 0, utility::kib<512>());
     memset(wram, 0, utility::mib<  2>());
 
-    utility::read_all_bytes("bios.rom", bios + 0x00000000, 0x000, utility::kib<512>());
+    utility::read_all_bytes("bios.rom", bios, 0, utility::kib<512>());
 }
 
 bus_t::~bus_t() {
