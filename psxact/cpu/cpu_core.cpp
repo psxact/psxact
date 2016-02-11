@@ -3,7 +3,7 @@
 #include "../bus.hpp"
 #include "../utility.hpp"
 
-using namespace r3051;
+using namespace cpu;
 
 core_t::core_t(bus_t &bus)
     : bus(bus)

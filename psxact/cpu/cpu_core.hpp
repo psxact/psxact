@@ -5,7 +5,7 @@
 
 class bus_t;
 
-namespace r3051 {
+namespace cpu {
     struct cop0_t {
         uint32_t regs[16];
     };

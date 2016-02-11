@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-namespace r3051 {
+namespace cpu {
 namespace decoder {
     uint32_t code;
 

@@ -1,7 +1,7 @@
 #include "cpu_core.hpp"
 #include "../bus.hpp"
 
-using namespace r3051;
+using namespace cpu;
 
 static segment_t segments[8] = {
     { 0x7fffffff, true  }, // kuseg ($0000_0000 - $7fff_ffff)
