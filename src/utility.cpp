@@ -11,12 +11,11 @@ namespace utility {
     }
 
     void read_all_bytes(const char *filename, uint8_t *result, int skip, int take) {
-        FILE* file;
-
-        file = fopen(filename, "rb+");
-        fseek(file, skip, SEEK_SET);
-        fread(result, 1, take, file);
-        fclose(file);
+        if (FILE* file = fopen(filename, "rb+")) {
+            fseek(file, skip, SEEK_SET);
+            fread(result, 1, take, file);
+            fclose(file);
+        }
     }
 
     uint32_t read_byte(uint8_t *buffer, uint32_t address) {
