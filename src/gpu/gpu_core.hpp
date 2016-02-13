@@ -1,5 +1,5 @@
-#ifndef __gpu_core_t_hpp__
-#define __gpu_core_t_hpp__
+#ifndef __gpu_core_hpp__
+#define __gpu_core_hpp__
 
 #include <stdint.h>
 

@@ -1,5 +1,5 @@
-#ifndef __r3051_bus_t_hpp__
-#define __r3051_bus_t_hpp__
+#ifndef __r3051_bus_hpp__
+#define __r3051_bus_hpp__
 
 #include <stdint.h>
 

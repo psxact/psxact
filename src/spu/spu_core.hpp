@@ -1,5 +1,5 @@
-#ifndef __spu_core_t_hpp__
-#define __spu_core_t_hpp__
+#ifndef __spu_core_hpp__
+#define __spu_core_hpp__
 
 #include <stdint.h>
 
