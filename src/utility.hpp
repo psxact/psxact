@@ -5,8 +5,6 @@
 #include <stdint.h>
 
 namespace utility {
-    using namespace std;
-
     void read_all_bytes(const char *, uint8_t *, int, int);
 
     void debug(const char *, ...);

@@ -13,9 +13,9 @@ namespace utility {
     void read_all_bytes(const char *filename, uint8_t *result, int skip, int take) {
         FILE* file;
 
-        fopen_s(&file, filename, "rb+");
+        file = fopen(filename, "rb+");
         fseek(file, skip, SEEK_SET);
-        fread_s(result, take, 1, take, file);
+        fread(result, 1, take, file);
         fclose(file);
     }
 

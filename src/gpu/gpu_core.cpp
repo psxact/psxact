@@ -1,5 +1,5 @@
 #include "gpu_core.hpp"
-#include <exception>
+#include <stdexcept>
 #include <stdio.h>
 
 using namespace gpu;
@@ -18,7 +18,7 @@ uint32_t core_t::read(uint32_t address) {
     case 4: return read_stat();
     }
 
-    throw std::exception("invalid gpu read");
+    throw std::runtime_error("invalid gpu read");
 }
 
 void core_t::write(uint32_t address, uint32_t data) {
@@ -27,7 +27,7 @@ void core_t::write(uint32_t address, uint32_t data) {
     case 4: return write_gp1(data);
     }
 
-    throw std::exception("invalid gpu write");
+    throw std::runtime_error("invalid gpu write");
 }
 
 uint32_t core_t::read_resp() {

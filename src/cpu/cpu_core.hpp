@@ -29,9 +29,9 @@ namespace cpu {
 
     class core_t {
     private:
-        registers_t regs;
         bus_t &bus;
         cop0_t cop0;
+        registers_t regs;
 
     public:
         core_t(bus_t&);

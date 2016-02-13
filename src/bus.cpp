@@ -2,8 +2,8 @@
 #include "gpu/gpu_core.hpp"
 #include "spu/spu_core.hpp"
 #include "utility.hpp"
-#include <exception>
-#include <string>
+#include <stdexcept>
+#include <cstring>
 
 uint8_t *bios = new uint8_t[utility::kib<512>()];
 uint8_t *wram = new uint8_t[utility::mib<  2>()];
@@ -64,7 +64,7 @@ uint32_t bus_t::read(int size, uint32_t address) {
         }
     }
 
-    throw std::exception("unknown read");
+    throw std::runtime_error("unknown read");
 }
 
 void bus_t::write(int size, uint32_t address, uint32_t data) {
@@ -106,5 +106,5 @@ void bus_t::write(int size, uint32_t address, uint32_t data) {
         return;
     }
 
-    throw std::exception("unknown write");
+    throw std::runtime_error("unknown write");
 }
