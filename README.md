@@ -1,24 +1,24 @@
 # PSXACT
-## Cycle accurate PSX Emulator
+## Cycle-accurate PS1 Emulator
 
-Hello, and welcome to the PSXACT project page! For years, I've had a huge
+Hello, and welcome to the PSXACT GitHub repository! For years, I've had a huge
 fascination with emulation. I've written many emulators, from NES and GB/C
 to SNES and GBA. I've always wanted to make an emulator for a 3D capable
 system, but I could never decide on one.
 
-Years went on, and I made minor adjustments to my already working emulators,
+Years passed, and I made minor adjustments to my already working emulators,
 and I decided that I would finally set out and create an emulator for a 3D
 system. Inspired by the work that MarathonMan has been doing with his emulator
 [CEN64](http://www.cen64.com), I decided to target the main rival of that generation; the PS1.
 
-With it's small, but capable CPU (The MIPS R3051), Vector math coprocessor,
-and 3D GPU. It seemed to be exactly the kind of challenge I've been after..
+With it's small, but capable CPU (the MIPS R3051), vector math coprocessor,
+and 3D GPU, It seemed to be exactly the kind of challenge I've been after...
 
 Then I found the documentation. To say that it is lacking would be an
-understatement. "Where is all the low level documentation of the different
-components of the PS1?", I searched and searched, but alas.. nothing.
+understatement. "Where is all the low-level documentation of the different
+components of the PS1?", I searched and searched, but alas...nothing.
 
-It is my full intention to change that. I plan to run tests on the real
+It is my full intention to change that. I plan to run tests on real
 hardware, and fully document my findings. From how the data cache fully
 operates, to what each command in the GPU really does from one cycle to
 the next.
@@ -49,5 +49,5 @@ PS1 emulator available.
 
 ## I found a bug!
 
-That's a great thing! Please report any and all bugs using the project issue
+That's great! Please report any and all bugs using the project issue
 tracker. Be as precise as possible so that the bug can be found easier.
