@@ -1,5 +1,5 @@
 # PSXACT
-## Cycle-accurate original PlayStation emulator
+## Cycle-accurate PlayStation emulator
 
 Hello, and welcome to the PSXACT GitHub repository! For years, I've had a huge
 fascination with emulation. I've written many emulators, from NES and GB/C
