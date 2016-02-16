@@ -13,7 +13,6 @@ OBJS += obj/psxact.o
 FILE := bin/psxact.exe
 
 all: dirs $(FILE)
-	$(CC) $^ -o bin/psxact.exe
 
 dirs:
 	@mkdir -p bin/
