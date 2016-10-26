@@ -1,15 +1,12 @@
-#ifndef __spu_core_hpp__
-#define __spu_core_hpp__
+#ifndef __SPU_CORE_HPP__
+#define __SPU_CORE_HPP__
 
 #include <stdint.h>
 
 namespace spu {
-    class core_t {
-    public:
-        core_t();
+  uint32_t read(uint32_t address);
 
-        ~core_t();
-    };
+  void write(uint32_t address, uint32_t data);
 }
 
 #endif

@@ -1,9 +1,8 @@
 #include "spu_core.hpp"
 
-using namespace spu;
-
-core_t::core_t() {
+uint32_t spu::read(uint32_t address) {
+  return 0;
 }
 
-core_t::~core_t() {
+void spu::write(uint32_t address, uint32_t) {
 }

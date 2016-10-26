@@ -1,16 +1,19 @@
 #include "bus.hpp"
 #include "cpu/cpu_core.hpp"
-#include "gpu/gpu_core.hpp"
-#include "spu/spu_core.hpp"
 
-int main() {
-    gpu::core_t gpu;
-    spu::core_t spu;
+int main(int argc, char *argv[]) {
+  if (argc != 2) {
+    return -1;
+  }
 
-    bus_t bus = bus_t(gpu, spu);
-    cpu::core_t core(bus);
+  std::string file_name(argv[1]);
 
-    core.main();
+  bus::initialize(file_name);
 
-    return 0;
+  cpu::core_t core = cpu::core_t();
+
+  core.initialize();
+  core.main();
+
+  return 0;
 }
