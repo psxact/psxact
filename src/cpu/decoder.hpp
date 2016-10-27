@@ -1,7 +1,7 @@
-#ifndef __CPU_DECODER_HPP__
-#define __CPU_DECODER_HPP__
+#ifndef PSXACT_CPU_DECODER_HPP
+#define PSXACT_CPU_DECODER_HPP
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace cpu {
 namespace decoder {
@@ -41,4 +41,4 @@ namespace decoder {
 }
 }
 
-#endif
+#endif //PSXACT_CPU_DECODER_HPP

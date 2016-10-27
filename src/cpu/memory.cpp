@@ -1,7 +1,10 @@
 #include "cpu_core.hpp"
 #include "../bus.hpp"
 
-using namespace cpu;
+struct segment_t {
+  uint32_t mask;
+  bool cached;
+};
 
 static segment_t segments[8] = {
   { 0x7fffffff, true  }, // kuseg ($0000_0000 - $7fff_ffff)
@@ -18,36 +21,37 @@ static inline segment_t *get_segment(uint32_t address) {
   return &segments[address >> 29];
 }
 
-uint32_t core_t::read_code() {
-  auto segment = get_segment(regs.pc);
-  auto address = regs.pc & segment->mask;
-  regs.pc = regs.next_pc;
-  regs.next_pc += 4;
+uint32_t cpu::read_code() {
+  auto segment = get_segment(state.registers.pc);
+  auto address = state.registers.pc & segment->mask;
 
-  if (segment->cached) {
-    // todo: read i-cache
-  }
+  state.registers.pc = state.registers.next_pc;
+  state.registers.next_pc += 4;
+
+  // todo: read i-cache
+  // if (segment->cached) {
+  // }
 
   return bus::read(WORD, address);
 }
 
-uint32_t core_t::read_data(int size, uint32_t address) {
-  if (cop0.regs[12] & (1 << 16)) {
+uint32_t cpu::read_data(int size, uint32_t address) {
+  if (state.cop0.registers[12] & (1 << 16)) {
     return 0; // isc=1
   }
 
   auto segment = get_segment(address);
   address = address & segment->mask;
 
-  if (segment->cached) {
-    // todo: read d-cache
-  }
+  // todo: read d-cache
+  // if (segment->cached) {
+  // }
 
   return bus::read(size, address);
 }
 
-void core_t::write_data(int size, uint32_t address, uint32_t data) {
-  if (cop0.regs[12] & (1 << 16)) {
+void cpu::write_data(int size, uint32_t address, uint32_t data) {
+  if (state.cop0.registers[12] & (1 << 16)) {
     return; // isc=1
   }
 
@@ -58,9 +62,9 @@ void core_t::write_data(int size, uint32_t address, uint32_t data) {
   auto segment = get_segment(address);
   address = address & segment->mask;
 
-  if (segment->cached) {
-    // todo: write d-cache
-  }
+  // todo: write d-cache
+  // if (segment->cached) {
+  // }
 
   return bus::write(size, address, data);
 }

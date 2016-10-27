@@ -6,14 +6,13 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  std::string file_name(argv[1]);
+  std::string bios_file_name(argv[1]);
+//std::string game_file_name(argv[2]);
 
-  bus::initialize(file_name);
+  bus::initialize(bios_file_name);
+  cpu::initialize();
 
-  cpu::core_t core = cpu::core_t();
-
-  core.initialize();
-  core.main();
+  cpu::main();
 
   return 0;
 }

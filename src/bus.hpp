@@ -1,5 +1,5 @@
-#ifndef __R3051_BUS_HPP__
-#define __R3051_BUS_HPP__
+#ifndef PSXACT_BUS_HPP
+#define PSXACT_BUS_HPP
 
 #include <stdint.h>
 #include <string>
@@ -18,4 +18,4 @@ namespace bus {
   void write(int, uint32_t, uint32_t);
 }
 
-#endif
+#endif //PSXACT_BUS_HPP

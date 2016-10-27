@@ -1,50 +1,45 @@
-#ifndef __CPU_CORE_HPP__
-#define __CPU_CORE_HPP__
+#ifndef PSXACT_CPU_CORE_HPP
+#define PSXACT_CPU_CORE_HPP
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace cpu {
-  struct cop0_t {
-    uint32_t regs[16];
+  struct state_t {
+    struct {
+      uint32_t registers[16];
+    } cop0;
+
+    struct {
+      union {
+        uint32_t u[32];
+        int32_t i[32];
+      };
+
+      uint32_t lo;
+      uint32_t hi;
+      uint32_t pc;
+      uint32_t next_pc;
+    } registers;
+
+    bool is_branch;
+    bool is_branch_delay_slot;
   };
 
-  struct registers_t {
-    union {
-      uint32_t u[32];
-      int32_t i[32];
-    };
+  extern state_t state;
 
-    uint32_t lo;
-    uint32_t hi;
-    uint32_t pc;
-    uint32_t next_pc;
-  };
+  void initialize();
 
-  struct segment_t {
-    uint32_t mask;
-    bool cached;
-  };
+  void main();
 
-  class core_t {
-  private:
-    cop0_t cop0;
-    registers_t regs;
+  void enter_exception(uint32_t code, uint32_t epc);
 
-  public:
-    void initialize();
+  void leave_exception();
 
-    void main();
+  uint32_t read_code();
 
-    void enter_exception(uint32_t code, uint32_t epc);
+  uint32_t read_data(int, uint32_t);
 
-    void leave_exception();
-
-    uint32_t read_code();
-
-    uint32_t read_data(int, uint32_t);
-
-    void write_data(int, uint32_t, uint32_t);
-  };
+  void write_data(int, uint32_t, uint32_t);
 }
 
-#endif
+#endif //PSXACT_CPU_CORE_HPP
