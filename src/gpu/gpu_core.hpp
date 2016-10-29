@@ -4,9 +4,15 @@
 #include <cstdint>
 
 namespace gpu {
-  uint32_t read(uint32_t);
+  struct state_t {
+    uint32_t status;
+    bool textured_rectangle_x_flip;
+    bool textured_rectangle_y_flip;
+  };
 
-  void write(uint32_t, uint32_t);
+  uint32_t read(int size, uint32_t address);
+
+  void write(int size, uint32_t address, uint32_t data);
 }
 
 #endif //PSXACT_GPU_CORE_HPP

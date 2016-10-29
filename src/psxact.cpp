@@ -1,5 +1,6 @@
 #include "bus.hpp"
 #include "cpu/cpu_core.hpp"
+#include "dma/dma_core.hpp"
 
 int main(int argc, char *argv[]) {
   if (argc != 2) {
@@ -11,6 +12,7 @@ int main(int argc, char *argv[]) {
 
   bus::initialize(bios_file_name);
   cpu::initialize();
+  dma::initialize();
 
   cpu::main();
 

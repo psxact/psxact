@@ -3,7 +3,7 @@
 #include "../bus.hpp"
 #include "../utility.hpp"
 
-cpu::state_t cpu::state;
+static cpu::state_t state;
 
 void cpu::initialize() {
   state.registers.u[0] = 0;
@@ -165,12 +165,14 @@ void cpu::main() {
       case 0x00: // bltz rs,$nnnn
         if (state.registers.i[decoder::rs()] < 0) {
           state.registers.next_pc = state.registers.pc + (decoder::iconst() << 2);
+          state.is_branch = true;
         }
         continue;
 
       case 0x01: // bgez rs,$nnnn
         if (state.registers.i[decoder::rs()] >= 0) {
           state.registers.next_pc = state.registers.pc + (decoder::iconst() << 2);
+          state.is_branch = true;
         }
         continue;
 
@@ -180,6 +182,7 @@ void cpu::main() {
 
         if (condition) {
           state.registers.next_pc = state.registers.pc + (decoder::iconst() << 2);
+          state.is_branch = true;
         }
         continue;
       }
@@ -190,6 +193,7 @@ void cpu::main() {
 
         if (condition) {
           state.registers.next_pc = state.registers.pc + (decoder::iconst() << 2);
+          state.is_branch = true;
         }
         continue;
       }
@@ -208,24 +212,28 @@ void cpu::main() {
     case 0x04: // beq rs,rt,$nnnn
       if (state.registers.u[decoder::rs()] == state.registers.u[decoder::rt()]) {
         state.registers.next_pc = state.registers.pc + (decoder::iconst() << 2);
+        state.is_branch = true;
       }
       continue;
 
     case 0x05: // bne rs,rt,$nnnn
       if (state.registers.u[decoder::rs()] != state.registers.u[decoder::rt()]) {
         state.registers.next_pc = state.registers.pc + (decoder::iconst() << 2);
+        state.is_branch = true;
       }
       continue;
 
     case 0x06: // blez rs,$nnnn
       if (state.registers.i[decoder::rs()] <= 0) {
         state.registers.next_pc = state.registers.pc + (decoder::iconst() << 2);
+        state.is_branch = true;
       }
       continue;
 
     case 0x07: // bgtz rs,$nnnn
       if (state.registers.i[decoder::rs()] > 0) {
         state.registers.next_pc = state.registers.pc + (decoder::iconst() << 2);
+        state.is_branch = true;
       }
       continue;
 
@@ -399,4 +407,50 @@ void cpu::leave_exception() {
   sr = (sr & ~0xf) | ((sr >> 2) & 0xf);
 
   cop0[12] = sr;
+}
+
+static uint32_t segments[8] = {
+    0x7fffffff, // kuseg ($0000_0000 - $7fff_ffff)
+    0x7fffffff, //
+    0x7fffffff, //
+    0x7fffffff, //
+    0x1fffffff, // kseg0 ($8000_0000 - $9fff_ffff)
+    0x1fffffff, // kseg1 ($a000_0000 - $bfff_ffff)
+    0x3fffffff, // kseg2 ($c000_0000 - $ffff_ffff)
+    0xffffffff   //
+};
+
+static inline uint32_t map_address(uint32_t address) {
+  return address & segments[address >> 29];
+}
+
+uint32_t cpu::read_code() {
+  auto address = state.registers.pc;
+
+  state.registers.pc = state.registers.next_pc;
+  state.registers.next_pc += 4;
+
+  // todo: mmio_read i-cache
+
+  return bus::read(WORD, map_address(address));
+}
+
+uint32_t cpu::read_data(int size, uint32_t address) {
+  if (state.cop0.registers[12] & (1 << 16)) {
+    return 0; // isc=1
+  }
+
+  // todo: mmio_read d-cache
+
+  return bus::read(size, map_address(address));
+}
+
+void cpu::write_data(int size, uint32_t address, uint32_t data) {
+  if (state.cop0.registers[12] & (1 << 16)) {
+    return; // isc=1
+  }
+
+  // todo: mmio_write d-cache
+
+  return bus::write(size, map_address(address), data);
 }

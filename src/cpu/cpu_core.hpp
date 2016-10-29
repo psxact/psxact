@@ -25,8 +25,6 @@ namespace cpu {
     bool is_branch_delay_slot;
   };
 
-  extern state_t state;
-
   void initialize();
 
   void main();
