@@ -12,7 +12,7 @@ namespace cpu {
     struct {
       union {
         uint32_t u[32];
-        int32_t i[32];
+//      int32_t i[32];
       };
 
       uint32_t lo;

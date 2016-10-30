@@ -11,23 +11,41 @@ static inline uint32_t iconst() {
   return ((state.code & 0xffff) ^ 0x8000) - 0x8000;
 }
 
-static inline uint32_t op_lo() {
-  return (state.code >>  0) & 63;
-}
-
 static inline uint32_t sa() {
   return (state.code >>  6) & 31;
+}
+
+static inline void set_rd(uint32_t value) {
+  state.registers.u[(state.code >> 11) & 31] = value;
+  state.registers.u[0] = 0;
 }
 
 static inline uint32_t rd() {
   return (state.code >> 11) & 31;
 }
 
+static inline void set_rt(uint32_t value) {
+  state.registers.u[(state.code >> 16) & 31] = value;
+  state.registers.u[0] = 0;
+}
+
 static inline uint32_t rt() {
-  return (state.code >> 16) & 31;
+  return state.registers.u[(state.code >> 16) & 31];
 }
 
 static inline uint32_t rs() {
+  return state.registers.u[(state.code >> 21) & 31];
+}
+
+static inline uint32_t op_lo() {
+  return (state.code >>  0) & 63;
+}
+
+static inline uint32_t op_ri() {
+  return (state.code >> 16) & 31;
+}
+
+static inline uint32_t op_cp() {
   return (state.code >> 21) & 31;
 }
 
@@ -64,39 +82,43 @@ void cpu::main() {
             return;
 
           case 0x00: // sll rd,rt,sa
-            state.registers.u[rd()] = state.registers.u[rt()] << sa();
+            set_rd(rt() << sa());
             continue;
 
           case 0x02: // srl rd,rt,sa
-            state.registers.u[rd()] = state.registers.u[rt()] >> sa();
+            set_rd(rt() >> sa());
             continue;
 
           case 0x03: // sra rd,rt,sa
-            state.registers.i[rd()] = state.registers.i[rt()] >> sa();
+            set_rd(int32_t(rt()) >> sa());
             continue;
 
           case 0x04: // sllv rd,rt,rs
-            state.registers.u[rd()] = state.registers.u[rt()] << state.registers.u[rs()];
+            set_rd(rt() << rs());
             continue;
 
           case 0x06: // srlv rd,rt,rs
-            state.registers.u[rd()] = state.registers.u[rt()] >> state.registers.u[rs()];
+            set_rd(rt() >> rs());
             continue;
 
           case 0x07: // srav rd,rt,rs
-            state.registers.i[rd()] = state.registers.i[rt()] >> state.registers.u[rs()];
+            set_rd(int32_t(rt()) >> rs());
             continue;
 
           case 0x08: // jr rs
-            state.registers.next_pc = state.registers.u[rs()];
+            state.registers.next_pc = rs();
             state.is_branch = true;
             continue;
 
-          case 0x09: // jalr rd,rs
-            state.registers.u[rd()] = state.registers.next_pc;
-            state.registers.next_pc = state.registers.u[rs()];
+          case 0x09: { // jalr rd,rs
+            auto ra = state.registers.next_pc;
+
+            state.registers.next_pc = rs();
+            set_rd(ra);
+
             state.is_branch = true;
             continue;
+          }
 
           case 0x0c: // syscall
             enter_exception(0x08, state.registers.pc - 4);
@@ -107,122 +129,132 @@ void cpu::main() {
             continue;
 
           case 0x10: // mfhi rd
-            state.registers.u[rd()] = state.registers.hi;
+            set_rd(state.registers.hi);
             continue;
 
           case 0x11: // mthi rs
-            state.registers.hi = state.registers.u[rs()];
+            state.registers.hi = rs();
             continue;
 
           case 0x12: // mflo rd
-            state.registers.u[rd()] = state.registers.lo;
+            set_rd(state.registers.lo);
             continue;
 
           case 0x13: // mtlo rs
-            state.registers.lo = state.registers.u[rs()];
+            state.registers.lo = rs();
             continue;
 
-          case 0x18: // mult rs,rt
-          {
-            int64_t result = int64_t(state.registers.i[rs()]) * int64_t(state.registers.i[rt()]);
+          case 0x18: { // mult rs,rt
+            auto s = int32_t(rs());
+            auto t = int32_t(rt());
+
+            int64_t result = int64_t(s) * int64_t(t);
             state.registers.lo = uint32_t(result >> 0);
             state.registers.hi = uint32_t(result >> 32);
             continue;
           }
 
-          case 0x19: // multu rs,rt
-          {
-            uint64_t result = uint64_t(state.registers.u[rs()]) * uint64_t(state.registers.u[rt()]);
+          case 0x19: { // multu rs,rt
+            auto s = rs();
+            auto t = rt();
+
+            uint64_t result = uint64_t(s) * uint64_t(t);
             state.registers.lo = uint32_t(result >> 0);
             state.registers.hi = uint32_t(result >> 32);
             continue;
           }
 
-          case 0x1a: // div rs,rt
-            if (state.registers.u[rt()]) {
-              state.registers.lo = uint32_t(state.registers.i[rs()] / state.registers.i[rt()]);
-              state.registers.hi = uint32_t(state.registers.i[rs()] % state.registers.i[rt()]);
+          case 0x1a: { // div rs,rt
+            auto dividend = int32_t(rs());
+            auto divisor = int32_t(rt());
+            if (divisor) {
+              state.registers.lo = uint32_t(dividend / divisor);
+              state.registers.hi = uint32_t(dividend % divisor);
             } else {
-              state.registers.lo = ((state.registers.u[rs()] >> 30) & 2) - 1;
-              state.registers.hi = state.registers.u[rs()];
+              state.registers.lo = uint32_t((dividend >> 30) & 2) - 1;
+              state.registers.hi = uint32_t(dividend);
             }
             continue;
+          }
 
-          case 0x1b: // divu rs,rt
-            if (state.registers.u[rt()]) {
-              state.registers.lo = state.registers.u[rs()] / state.registers.u[rt()];
-              state.registers.hi = state.registers.u[rs()] % state.registers.u[rt()];
+          case 0x1b: { // divu rs,rt
+            auto dividend = rs();
+            auto divisor = rt();
+            if (divisor) {
+              state.registers.lo = dividend / divisor;
+              state.registers.hi = dividend % divisor;
             } else {
               state.registers.lo = 0xffffffff;
-              state.registers.hi = state.registers.u[rs()];
+              state.registers.hi = dividend;
             }
             continue;
+          }
 
           case 0x20: // add rd,rs,rt
-            state.registers.u[rd()] = state.registers.u[rs()] + state.registers.u[rt()];
+            set_rd(rs() + rt());
             // todo: overflow exception
             continue;
 
           case 0x21: // addu rd,rs,rt
-            state.registers.u[rd()] = state.registers.u[rs()] + state.registers.u[rt()];
+            set_rd(rs() + rt());
             continue;
 
           case 0x22: // sub rd,rs,rt
-            state.registers.u[rd()] = state.registers.u[rs()] - state.registers.u[rt()];
+            set_rd(rs() - rt());
             // todo: overflow exception
             continue;
 
           case 0x23: // subu rd,rs,rt
-            state.registers.u[rd()] = state.registers.u[rs()] - state.registers.u[rt()];
+            set_rd(rs() - rt());
             continue;
 
           case 0x24: // and rd,rs,rt
-            state.registers.u[rd()] = state.registers.u[rs()] & state.registers.u[rt()];
+            set_rd(rs() & rt());
             continue;
 
           case 0x25: // or rd,rs,rt
-            state.registers.u[rd()] = state.registers.u[rs()] | state.registers.u[rt()];
+            set_rd(rs() | rt());
             continue;
 
           case 0x26: // xor rd,rs,rt
-            state.registers.u[rd()] = state.registers.u[rs()] ^ state.registers.u[rt()];
+            set_rd(rs() ^ rt());
             continue;
 
           case 0x27: // nor rd,rs,rt
-            state.registers.u[rd()] = ~(state.registers.u[rs()] | state.registers.u[rt()]);
+            set_rd(~(rs() | rt()));
             continue;
 
           case 0x2a: // slt rd,rs,rt
-            state.registers.i[rd()] = state.registers.i[rs()] < state.registers.i[rt()];
+            set_rd(int32_t(rs()) < int32_t(rt()) ? 1 : 0);
             continue;
 
           case 0x2b: // sltu rd,rs,rt
-            state.registers.i[rd()] = state.registers.u[rs()] < state.registers.u[rt()];
+            set_rd(rs() < rt() ? 1 : 0);
             continue;
         }
 
       case 0x01: // reg-imm
-        switch (rt()) {
+        switch (op_ri()) {
           default:
             invalid_instruction();
             return;
 
           case 0x00: // bltz rs,$nnnn
-            if (state.registers.i[rs()] < 0) {
+            if (int32_t(rs()) < 0) {
               state.registers.next_pc = state.registers.pc + (iconst() << 2);
               state.is_branch = true;
             }
             continue;
 
           case 0x01: // bgez rs,$nnnn
-            if (state.registers.i[rs()] >= 0) {
+            if (int32_t(rs()) >= 0) {
               state.registers.next_pc = state.registers.pc + (iconst() << 2);
               state.is_branch = true;
             }
             continue;
 
           case 0x10: { // bltzal rs,$nnnn
-            bool condition = state.registers.i[rs()] < 0;
+            bool condition = int32_t(rs()) < 0;
             state.registers.u[31] = state.registers.next_pc;
 
             if (condition) {
@@ -233,7 +265,7 @@ void cpu::main() {
           }
 
           case 0x11: { // bgezal rs,$nnnn
-            bool condition = state.registers.i[rs()] >= 0;
+            bool condition = int32_t(rs()) >= 0;
             state.registers.u[31] = state.registers.next_pc;
 
             if (condition) {
@@ -256,78 +288,78 @@ void cpu::main() {
         continue;
 
       case 0x04: // beq rs,rt,$nnnn
-        if (state.registers.u[rs()] == state.registers.u[rt()]) {
+        if (rs() == rt()) {
           state.registers.next_pc = state.registers.pc + (iconst() << 2);
           state.is_branch = true;
         }
         continue;
 
       case 0x05: // bne rs,rt,$nnnn
-        if (state.registers.u[rs()] != state.registers.u[rt()]) {
+        if (rs() != rt()) {
           state.registers.next_pc = state.registers.pc + (iconst() << 2);
           state.is_branch = true;
         }
         continue;
 
       case 0x06: // blez rs,$nnnn
-        if (state.registers.i[rs()] <= 0) {
+        if (int32_t(rs()) <= 0) {
           state.registers.next_pc = state.registers.pc + (iconst() << 2);
           state.is_branch = true;
         }
         continue;
 
       case 0x07: // bgtz rs,$nnnn
-        if (state.registers.i[rs()] > 0) {
+        if (int32_t(rs()) > 0) {
           state.registers.next_pc = state.registers.pc + (iconst() << 2);
           state.is_branch = true;
         }
         continue;
 
       case 0x08: // addi rt,rs,$nnnn
-        state.registers.u[rt()] = state.registers.u[rs()] + iconst();
+        set_rt(rs() + iconst());
         // todo: overflow exception
         continue;
 
       case 0x09: // addiu rt,rs,$nnnn
-        state.registers.u[rt()] = state.registers.u[rs()] + iconst();
+        set_rt(rs() + iconst());
         continue;
 
       case 0x0a: // slti rt,rs,$nnnn
-        state.registers.i[rt()] = state.registers.i[rs()] < int32_t(iconst());
+        set_rt(int32_t(rs()) < int32_t(iconst()) ? 1 : 0);
         continue;
 
       case 0x0b: // sltiu rt,rs,$nnnn
-        state.registers.i[rt()] = state.registers.u[rs()] < iconst();
+        set_rt(rs() < iconst() ? 1 : 0);
         continue;
 
       case 0x0c: // andi rt,rs,$nnnn
-        state.registers.u[rt()] = state.registers.u[rs()] & uconst();
+        set_rt(rs() & uconst());
         continue;
 
       case 0x0d: // ori rt,rs,$nnnn
-        state.registers.u[rt()] = state.registers.u[rs()] | uconst();
+        set_rt(rs() | uconst());
         continue;
 
       case 0x0e: // xori rt,rs,$nnnn
-        state.registers.u[rt()] = state.registers.u[rs()] ^ uconst();
+        set_rt(rs() ^ uconst());
         continue;
 
       case 0x0f: // lui rt,$nnnn
-        state.registers.u[rt()] = uconst() << 16;
+        set_rt(uconst() << 16);
         continue;
 
       case 0x10: // cop0
-        switch (rs()) {
+        switch (op_cp()) {
           default:
             invalid_instruction();
             return;
 
           case 0x00: // mfc0 rt,rd
-            state.registers.u[rt()] = state.cop0.registers[rd()];
+            set_rt(state.cop0.registers[rd()]);
             continue;
 
           case 0x04: // mtc0 rt,rd
-            state.cop0.registers[rd()] = state.registers.u[rt()];
+            state.cop0.registers[rd()] = rt();
             continue;
 
           case 0x10:
@@ -354,28 +386,36 @@ void cpu::main() {
         printf("unimplemented cop3\n");
         return;
 
-      case 0x20: // lb rt,$nnnn(rs)
-        state.registers.i[rt()] = int8_t(read_data(BYTE, state.registers.u[rs()] + iconst()));
-        continue;
+      case 0x20: { // lb rt,$nnnn(rs)
+        auto data = read_data(BYTE, rs() + iconst());
+        data = ((data & 0xff) ^ 0x80) - 0x80;
 
-      case 0x21: // lh rt,$nnnn(rs)
-        state.registers.i[rt()] = int16_t(read_data(HALF, state.registers.u[rs()] + iconst()));
+        set_rt(data);
         continue;
+      }
+
+      case 0x21: { // lh rt,$nnnn(rs)
+        auto data = read_data(HALF, rs() + iconst());
+        data = ((data & 0xffff) ^ 0x8000) - 0x8000;
+
+        set_rt(data);
+        continue;
+      }
 
       case 0x22: // lwl rt,$nnnn(rs)
         printf("unimplemented lwl\n");
         return;
 
       case 0x23: // lw rt,$nnnn(rs)
-        state.registers.u[rt()] = read_data(WORD, state.registers.u[rs()] + iconst());
+        set_rt(read_data(WORD, rs() + iconst()));
         continue;
 
       case 0x24: // lbu rt,$nnnn(rs)
-        state.registers.u[rt()] = read_data(BYTE, state.registers.u[rs()] + iconst());
+        set_rt(read_data(BYTE, rs() + iconst()));
         continue;
 
       case 0x25: // lhu rt,$nnnn(rs)
-        state.registers.u[rt()] = read_data(HALF, state.registers.u[rs()] + iconst());
+        set_rt(read_data(HALF, rs() + iconst()));
         continue;
 
       case 0x26: // lwr rt,$nnnn(rs)
@@ -383,11 +423,11 @@ void cpu::main() {
         return;
 
       case 0x28: // sb rt,$nnnn(rs)
-        write_data(BYTE, state.registers.u[rs()] + iconst(), state.registers.u[rt()]);
+        write_data(BYTE, rs() + iconst(), rt());
         continue;
 
       case 0x29: // sh rt,$nnnn(rs)
-        write_data(HALF, state.registers.u[rs()] + iconst(), state.registers.u[rt()]);
+        write_data(HALF, rs() + iconst(), rt());
         continue;
 
       case 0x2a: // swl rt,$nnnn(rs)
@@ -395,7 +435,7 @@ void cpu::main() {
         return;
 
       case 0x2b: // sw rt,$nnnn(rs)
-        write_data(WORD, state.registers.u[rs()] + iconst(), state.registers.u[rt()]);
+        write_data(WORD, rs() + iconst(), rt());
         continue;
 
       case 0x2e: // swr rt,$nnnn(rs)
