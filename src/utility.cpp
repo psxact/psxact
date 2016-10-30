@@ -3,13 +3,6 @@
 #include <stdarg.h>
 
 namespace utility {
-  void debug(const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    vprintf(format, args);
-    va_end(args);
-  }
-
   void read_all_bytes(const char *filename, uint8_t *result, int skip, int take) {
     if (FILE* file = fopen(filename, "rb+")) {
       fseek(file, skip, SEEK_SET);
@@ -35,7 +28,7 @@ namespace utility {
   }
 
   void write_byte(uint8_t *buffer, uint32_t address, uint32_t data) {
-    buffer[address] = data & 0xff;
+    buffer[address] = uint8_t(data);
   }
 
   void write_half(uint8_t *buffer, uint32_t address, uint32_t data) {

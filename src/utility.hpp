@@ -7,8 +7,6 @@
 namespace utility {
   void read_all_bytes(const char *, uint8_t *, int, int);
 
-  void debug(const char *, ...);
-
   uint32_t read_byte(uint8_t *, uint32_t);
 
   uint32_t read_half(uint8_t *, uint32_t);

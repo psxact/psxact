@@ -21,6 +21,8 @@ namespace cpu {
       uint32_t next_pc;
     } registers;
 
+    uint32_t code;
+
     bool is_branch;
     bool is_branch_delay_slot;
   };
