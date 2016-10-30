@@ -1,8 +1,28 @@
 #include "gpu_core.hpp"
+#include "../utility.hpp"
 #include <stdexcept>
 #include <stdio.h>
 
 static gpu::state_t state;
+
+static int gp0_command_size[256] = {
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $00
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $10
+  1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, // $20
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $30
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $40
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $50
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $60
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $70
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $80
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $90
+  3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $a0
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $b0
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $c0
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $d0
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $e0
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $f0
+};
 
 static inline uint32_t read_resp() {
   printf("gpu::read_resp()\n");
@@ -42,45 +62,138 @@ static inline uint32_t read_stat() {
 
   printf("gpu::read_stat()\n");
 
-  return state.status |
+  return state.status & ~(1 << 19) |
+      (1 << 13) |
       (1 << 26) |
       (1 << 27) |
       (1 << 28);
 }
 
-static inline void write_gp0(uint32_t command) {
-  switch ((command >> 24) & 0xff) {
-    case 0x00: /* nop */ break;
-    case 0xe1:
-      // 0-3   Texture page X Base   (N*64) (ie. in 64-halfword steps)    ;GPUSTAT.0-3
-      // 4     Texture page Y Base   (N*256) (ie. 0 or 256)               ;GPUSTAT.4
-      // 5-6   Semi Transparency     (0=B/2+F/2, 1=B+F, 2=B-F, 3=B+F/4)   ;GPUSTAT.5-6
-      // 7-8   Texture page colors   (0=4bit, 1=8bit, 2=15bit, 3=Reserved);GPUSTAT.7-8
-      // 9     Dither 24bit to 15bit (0=Off/strip LSBs, 1=Dither Enabled) ;GPUSTAT.9
-      // 10    Drawing to display area (0=Prohibited, 1=Allowed)          ;GPUSTAT.10
-      // 11    Texture Disable (0=Normal, 1=Disable if GP1(09h).Bit0=1)   ;GPUSTAT.15
-      state.status &= ~0x87ff;
-      state.status |= (command << 0) & 0x7ff;
-      state.status |= (command << 4) & 0x8000;
+static inline uint32_t get_gp0_data() {
+  auto param = state.gp0_fifo.front();
+  state.gp0_fifo.pop();
 
-      // 12    Textured Rectangle X-Flip   (BIOS does set this bit on power-up...?)
-      // 13    Textured Rectangle Y-Flip   (BIOS does set it equal to GPUSTAT.13...?)
-      state.textured_rectangle_x_flip = (command >> 12) & 1;
-      state.textured_rectangle_y_flip = (command >> 13) & 1;
-      break;
+  return param;
+}
 
-    default:
-      printf("unhandled gp0 command: 0x%08x\n", command);
-      break;
+static inline void write_gp0(uint32_t data) {
+  if (state.gp0_fifo.size() == 0) {
+    state.gp0_command = data >> 24;
+  }
+
+  state.gp0_fifo.push(data);
+
+  if (state.gp0_fifo.size() == gp0_command_size[state.gp0_command]) {
+    auto command = get_gp0_data();
+
+    switch (state.gp0_command) {
+      case 0x00: break; // nop
+      case 0x01: break; // clear texture cache
+
+      case 0x28: {
+        auto vertex1 = get_gp0_data();
+        auto vertex2 = get_gp0_data();
+        auto vertex3 = get_gp0_data();
+        auto vertex4 = get_gp0_data();
+
+        printf("gpu::draw_monochrome_quad()\n");
+        printf("  command: $%08x\n", command);
+        printf("  vertex1: (%03d, %03d)\n", vertex1 & 0xffff, vertex1 >> 16);
+        printf("  vertex2: (%03d, %03d)\n", vertex2 & 0xffff, vertex2 >> 16);
+        printf("  vertex3: (%03d, %03d)\n", vertex3 & 0xffff, vertex3 >> 16);
+        printf("  vertex4: (%03d, %03d)\n", vertex4 & 0xffff, vertex4 >> 16);
+        break;
+      }
+
+      case 0xa0: {
+        auto param1 = get_gp0_data();
+        auto param2 = get_gp0_data();
+
+        auto x = param1 & 0xffff;
+        auto y = param1 >> 16;
+        auto w = param2 & 0xffff;
+        auto h = param2 >> 16;
+
+        printf("gp0::texture_upload()\n");
+        printf("  x, y: (%03d, %03d)\n", x, y);
+        printf("  w, h: (%03d, %03d)\n", w, h);
+        break;
+      }
+
+      case 0xe1:
+        state.status &= ~0x87ff;
+        state.status |= (command << 0) & 0x7ff;
+        state.status |= (command << 4) & 0x8000;
+
+        state.textured_rectangle_x_flip = ((command >> 12) & 1) != 0;
+        state.textured_rectangle_y_flip = ((command >> 13) & 1) != 0;
+        break;
+
+      case 0xe2:
+        state.texture_window_mask_x   = utility::uclip<5>(command >>  0);
+        state.texture_window_mask_y   = utility::uclip<5>(command >>  5);
+        state.texture_window_offset_x = utility::uclip<5>(command >> 10);
+        state.texture_window_offset_y = utility::uclip<5>(command >> 15);
+        break;
+
+      case 0xe3:
+        state.drawing_area_x1 = utility::uclip<10>(command >>  0);
+        state.drawing_area_y1 = utility::uclip<10>(command >> 10);
+        break;
+
+      case 0xe4:
+        state.drawing_area_x2 = utility::uclip<10>(command >>  0);
+        state.drawing_area_y2 = utility::uclip<10>(command >> 10);
+        break;
+
+      case 0xe5:
+        state.x_offset = utility::sclip<11>(command >>  0);
+        state.y_offset = utility::sclip<11>(command >> 11);
+        break;
+
+      case 0xe6:
+        state.status &= ~0x1800;
+        state.status |= (command << 11) & 0x1800;
+        break;
+
+      default:
+        printf("unhandled gp0 command: 0x%08x\n", command);
+        break;
+    }
   }
 }
 
-static inline void write_gp1(uint32_t command) {
-  switch ((command >> 24) & 0xff) {
+static inline void write_gp1(uint32_t data) {
+  switch ((data >> 24) & 0xff) {
     case 0x00:
       state.status = 0x14802000;
       state.textured_rectangle_x_flip = 0;
       state.textured_rectangle_y_flip = 0;
+      break;
+
+    case 0x03:
+      state.status &= ~0x00800000;
+      state.status |= (data << 23) & 0x00800000;
+      break;
+
+    case 0x04:
+      state.status &= ~0x60000000;
+      state.status |= (data << 29) & 0x60000000;
+      break;
+
+    case 0x05:
+      state.display_area_x = utility::uclip<10>(data >>  0);
+      state.display_area_y = utility::uclip< 9>(data >> 10);
+      break;
+
+    case 0x06:
+      state.display_area_x1 = utility::uclip<12>(data >>  0);
+      state.display_area_x2 = utility::uclip<12>(data >> 12);
+      break;
+
+    case 0x07:
+      state.display_area_y1 = utility::uclip<10>(data >>  0);
+      state.display_area_y2 = utility::uclip<10>(data >> 10);
       break;
 
     case 0x08:
@@ -93,13 +206,13 @@ static inline void write_gp1(uint32_t command) {
       // 7     "Reverseflag"               (0=Normal, 1=Distorted)      ;GPUSTAT.14
 
       state.status &= ~0x7f4000;
-      state.status |= (command << 17) & 0x7e0000;
-      state.status |= (command << 10) & 0x10000;
-      state.status |= (command <<  7) & 0x4000;
+      state.status |= (data << 17) & 0x7e0000;
+      state.status |= (data << 10) & 0x10000;
+      state.status |= (data <<  7) & 0x4000;
       break;
 
     default:
-      printf("unhandled gp1 command: 0x%08x\n", command);
+      printf("unhandled gp1 command: 0x%08x\n", data);
       break;
   }
 }

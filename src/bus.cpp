@@ -1,4 +1,5 @@
 #include "bus.hpp"
+#include "cpu/cpu_core.hpp"
 #include "dma/dma_core.hpp"
 #include "gpu/gpu_core.hpp"
 #include "spu/spu_core.hpp"
@@ -41,6 +42,10 @@ uint32_t bus::read(int size, uint32_t address) {
   }
 
   if (utility::between<0x1f801000, 0x1f801fff>(address)) {
+    if (utility::between<0x1f801070, 0x1f80107f>(address)) {
+      return cpu::mmio_read(size, address);
+    }
+
     if (utility::between<0x1f801080, 0x1f8010ff>(address)) {
       return dma::mmio_read(size, address);
     }
@@ -97,6 +102,10 @@ void bus::write(int size, uint32_t address, uint32_t data) {
   }
 
   if (utility::between<0x1f801000, 0x1f801fff>(address)) {
+    if (utility::between<0x1f801070, 0x1f80107f>(address)) {
+      return cpu::mmio_write(size, address, data);
+    }
+
     if (utility::between<0x1f801080, 0x1f8010ff>(address)) {
       return dma::mmio_write(size, address, data);
     }

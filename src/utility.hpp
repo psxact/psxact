@@ -19,6 +19,22 @@ namespace utility {
 
   void write_word(uint8_t *, uint32_t, uint32_t);
 
+  template<int bits>
+  inline uint32_t sclip(uint32_t value) {
+    enum { mask = (1 << bits) - 1 };
+    enum { sign = 1 << (bits - 1) };
+
+    return ((value & mask) ^ sign) - sign;
+  }
+
+  template<int bits>
+  inline uint32_t uclip(uint32_t value) {
+    enum { mask = (1 << bits) - 1 };
+    enum { sign = 0 };
+
+    return ((value & mask) ^ sign) - sign;
+  }
+
   template<unsigned min, unsigned max>
   inline bool between(unsigned value) {
     return (value & ~(min ^ max)) == min;
