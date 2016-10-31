@@ -5,7 +5,8 @@
 
 namespace dma {
   struct channel_t {
-    uint32_t address;
+    uint32_t dst_address;
+    uint32_t base_address;
     uint32_t block_control;
     uint32_t channel_control;
   };

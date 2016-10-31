@@ -18,13 +18,18 @@ static int gp0_command_size[256] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $90
   3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $a0
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $b0
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $c0
+  3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $c0
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $d0
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $e0
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $f0
 };
 
 static inline uint32_t read_resp() {
+  if (state.gp0_texture_download_size) {
+    state.gp0_texture_download_size--;
+    return 0;
+  }
+
   printf("gpu::read_resp()\n");
   return 0;
 }
@@ -60,8 +65,6 @@ static inline uint32_t read_stat() {
   //  29-30 DMA Direction (0=Off, 1=?, 2=CPUtoGP0, 3=GPUREADtoCPU)    ;GP1(04h).0-1
   //  31    Drawing even/odd lines in interlace mode (0=Even or Vblank, 1=Odd)
 
-  printf("gpu::read_stat()\n");
-
   return state.status & ~(1 << 19) |
       (1 << 13) |
       (1 << 26) |
@@ -77,6 +80,11 @@ static inline uint32_t get_gp0_data() {
 }
 
 static inline void write_gp0(uint32_t data) {
+  if (state.gp0_texture_upload_size) {
+    state.gp0_texture_upload_size--;
+    return;
+  }
+
   if (state.gp0_fifo.size() == 0) {
     state.gp0_command = data >> 24;
   }
@@ -96,12 +104,12 @@ static inline void write_gp0(uint32_t data) {
         auto vertex3 = get_gp0_data();
         auto vertex4 = get_gp0_data();
 
-        printf("gpu::draw_monochrome_quad()\n");
-        printf("  command: $%08x\n", command);
-        printf("  vertex1: (%03d, %03d)\n", vertex1 & 0xffff, vertex1 >> 16);
-        printf("  vertex2: (%03d, %03d)\n", vertex2 & 0xffff, vertex2 >> 16);
-        printf("  vertex3: (%03d, %03d)\n", vertex3 & 0xffff, vertex3 >> 16);
-        printf("  vertex4: (%03d, %03d)\n", vertex4 & 0xffff, vertex4 >> 16);
+        // printf("gpu::draw_monochrome_quad()\n");
+        // printf("  command: $%08x\n", command);
+        // printf("  vertex1: (%03d, %03d)\n", vertex1 & 0xffff, vertex1 >> 16);
+        // printf("  vertex2: (%03d, %03d)\n", vertex2 & 0xffff, vertex2 >> 16);
+        // printf("  vertex3: (%03d, %03d)\n", vertex3 & 0xffff, vertex3 >> 16);
+        // printf("  vertex4: (%03d, %03d)\n", vertex4 & 0xffff, vertex4 >> 16);
         break;
       }
 
@@ -114,9 +122,20 @@ static inline void write_gp0(uint32_t data) {
         auto w = param2 & 0xffff;
         auto h = param2 >> 16;
 
-        printf("gp0::texture_upload()\n");
-        printf("  x, y: (%03d, %03d)\n", x, y);
-        printf("  w, h: (%03d, %03d)\n", w, h);
+        state.gp0_texture_upload_size = ((w * h) + 1) / 2;
+        break;
+      }
+
+      case 0xc0: {
+        auto param1 = get_gp0_data();
+        auto param2 = get_gp0_data();
+
+        auto x = param1 & 0xffff;
+        auto y = param1 >> 16;
+        auto w = param2 & 0xffff;
+        auto h = param2 >> 16;
+
+        state.gp0_texture_download_size = ((w * h) + 1) / 2;
         break;
       }
 
@@ -169,6 +188,19 @@ static inline void write_gp1(uint32_t data) {
       state.status = 0x14802000;
       state.textured_rectangle_x_flip = 0;
       state.textured_rectangle_y_flip = 0;
+      break;
+
+    case 0x01: {
+      state.gp0_command = 0;
+      state.gp0_texture_upload_size = 0;
+
+      std::queue<uint32_t> empty;
+      state.gp0_fifo.swap(empty);
+      break;
+    }
+
+    case 0x02:
+      state.status &= ~0x01000000;
       break;
 
     case 0x03:

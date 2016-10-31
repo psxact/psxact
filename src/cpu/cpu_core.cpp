@@ -435,13 +435,12 @@ void cpu::main() {
         auto data = read_data(WORD, address & ~3);
 
         switch (address & 3) {
-          case 0: data = (data << 24) | (rt() & 0x00ffffff); break;
-          case 1: data = (data << 16) | (rt() & 0x0000ffff); break;
-          case 2: data = (data <<  8) | (rt() & 0x000000ff); break;
-          case 3: data = (data <<  0) | (rt() & 0x00000000); break;
+          case 0: set_rt((data << 24) | (rt() & 0x00ffffff)); break;
+          case 1: set_rt((data << 16) | (rt() & 0x0000ffff)); break;
+          case 2: set_rt((data <<  8) | (rt() & 0x000000ff)); break;
+          case 3: set_rt((data <<  0) | (rt() & 0x00000000)); break;
         }
 
-        set_rt(data);
         continue;
       }
 
@@ -462,13 +461,12 @@ void cpu::main() {
         auto data = read_data(WORD, address & ~3);
 
         switch (address & 3) {
-          case 0: data = (data >>  0) | (rt() & 0x00000000); break;
-          case 1: data = (data >>  8) | (rt() & 0xff000000); break;
-          case 2: data = (data >> 16) | (rt() & 0xffff0000); break;
-          case 3: data = (data >> 24) | (rt() & 0xffffff00); break;
+          case 0: set_rt((data >>  0) | (rt() & 0x00000000)); break;
+          case 1: set_rt((data >>  8) | (rt() & 0xff000000)); break;
+          case 2: set_rt((data >> 16) | (rt() & 0xffff0000)); break;
+          case 3: set_rt((data >> 24) | (rt() & 0xffffff00)); break;
         }
 
-        set_rt(data);
         continue;
       }
 

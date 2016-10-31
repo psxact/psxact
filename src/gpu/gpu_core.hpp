@@ -30,6 +30,9 @@ namespace gpu {
     uint32_t display_area_y1;
     uint32_t display_area_x2;
     uint32_t display_area_y2;
+
+    uint32_t gp0_texture_upload_size;
+    uint32_t gp0_texture_download_size;
   };
 
   uint32_t read(int size, uint32_t address);
