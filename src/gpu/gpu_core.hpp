@@ -10,8 +10,8 @@ namespace gpu {
     bool textured_rectangle_x_flip;
     bool textured_rectangle_y_flip;
 
-    std::queue<uint32_t> gp0_fifo;
-    std::queue<uint32_t> gp1_fifo;
+    std::deque<uint32_t> gp0_fifo;
+    std::deque<uint32_t> gp1_fifo;
 
     uint32_t gp0_command;
     uint32_t texture_window_mask_x;

@@ -66,36 +66,48 @@ static void dma_sync_mode_0(dma::channel_t &channel) {
   }
 
   auto count = channel.block_control & 0xffff;
-  auto index = 0;
 
   auto address = channel.base_address & 0xffffff;
   auto address_step = (channel.channel_control & 2) ? 0xfffffffc : 0x00000004;
 
-  while (true) {
-    bus::write(WORD, address, 0x00ffffff);
+  do {
+    if (count == 1) {
+      bus::write(WORD, address, 0x00ffffff);
+    } else {
+      bus::write(WORD, address, address - 4);
+    }
+
     address += address_step;
 
-    index = (index + 1) & 0xffff;
-
-    if (index == count) {
+    count = (count - 1) & 0xffff;
+    if (count == 0) {
       break;
     }
   }
+  while (true);
 
   channel.channel_control &= ~0x11000000;
 }
 
 static void dma_sync_mode_1(dma::channel_t &channel) {
+  if ((channel.channel_control & 0x01000000) == 0) {
+    return;
+  }
+
   auto bs = channel.block_control & 0xffff;
   auto ba = channel.block_control >> 16;
 
-  bs = ((bs - 1) & 0xffff) + 1;
-  ba = ((ba - 1) & 0xffff) + 1;
+  bs = bs ? bs : 0x10000;
+  ba = ba ? ba : 0x10000;
 
   auto length = bs * ba;
+  auto address = channel.base_address & 0x00ffffff;
+  auto address_step = (channel.channel_control & 2) ? 0xfffffffc : 0x00000004;
 
   for (int i = 0; i < length; i++) {
-    bus::write(WORD, channel.dst_address, 0);
+    auto data = bus::read(WORD, address);
+    bus::write(WORD, channel.dst_address, data);
+    address += address_step;
   }
 
   channel.channel_control &= ~0x11000000;
