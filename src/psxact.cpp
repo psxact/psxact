@@ -1,6 +1,17 @@
 #include "bus.hpp"
 #include "cpu/cpu_core.hpp"
 #include "dma/dma_core.hpp"
+#include "gpu/gpu_core.hpp"
+
+#include <SDL2/SDL.h>
+
+uint32_t color_16_to_24(uint32_t color) {
+  auto r = ((color << 3) & 0xf8);
+  auto g = ((color >> 2) & 0xf8);
+  auto b = ((color >> 7) & 0xf8);
+
+  return (0xff << 24) | (r << 16) | (g << 8) | (b << 0);
+}
 
 int main(int argc, char *argv[]) {
   if (argc != 2) {
@@ -14,7 +25,40 @@ int main(int argc, char *argv[]) {
   cpu::initialize();
   dma::initialize();
 
-  cpu::main();
+  SDL_Init(SDL_INIT_VIDEO);
+
+  auto window = SDL_CreateWindow("psxact",
+                                 SDL_WINDOWPOS_CENTERED,
+                                 SDL_WINDOWPOS_CENTERED, 1024, 512, 0);
+
+  SDL_Event event;
+
+  while (true) {
+    if (!cpu::run(33868800 / 60)) {
+      break;
+    }
+
+    // put the frame buffer on the screen
+    //
+
+    auto surface = SDL_GetWindowSurface(window);
+    SDL_LockSurface(surface);
+
+    auto pixels = (uint32_t *)surface->pixels;
+
+    for (uint32_t i = 0; i < 1024 * 512; i++) {
+      *pixels++ = color_16_to_24( gpu::vram.h[i] );
+    }
+
+    SDL_UnlockSurface(surface);
+    SDL_UpdateWindowSurface(window);
+
+    if (SDL_PollEvent(&event) && event.type == SDL_QUIT) {
+      break;
+    }
+  }
+
+  SDL_DestroyWindow(window);
 
   return 0;
 }

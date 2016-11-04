@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 3.6)
 project(psxact)
 
+find_package(SDL2 REQUIRED)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(SOURCE_FILES
     src/cpu/cpu_core.cpp
     src/cpu/cpu_core.hpp
-        src/dma/dma_core.cpp
+    src/dma/dma_core.cpp
     src/dma/dma_core.hpp
     src/gpu/gpu_core.cpp
     src/gpu/gpu_core.hpp
@@ -21,3 +23,5 @@ set(SOURCE_FILES
     src/utility.hpp)
 
 add_executable(psxact ${SOURCE_FILES})
+
+target_link_libraries(psxact ${SDL2_LIBRARIES})

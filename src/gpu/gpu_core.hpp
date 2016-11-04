@@ -3,8 +3,17 @@
 
 #include <cstdint>
 #include <queue>
+#include "../utility.hpp"
 
 namespace gpu {
+  union vram_t {
+    uint8_t  b[utility::mib<1>() / 1];
+    uint16_t h[utility::mib<1>() / 2];
+    uint32_t w[utility::mib<1>() / 4];
+  };
+
+  extern vram_t vram;
+
   struct state_t {
     uint32_t status;
     bool textured_rectangle_x_flip;

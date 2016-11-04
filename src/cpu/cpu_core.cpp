@@ -67,8 +67,8 @@ static inline uint32_t overflow(uint32_t x, uint32_t y, uint32_t z) {
   return (~(x ^ y) & (x ^ z) & 0x80000000);
 }
 
-void cpu::main() {
-  while (1) {
+bool cpu::run(int count) {
+  for (int i = 0; i < count; i++) {
     state.code = cpu::read_code();
 
     state.is_branch_delay_slot = state.is_branch;
@@ -77,13 +77,13 @@ void cpu::main() {
     switch (op_hi()) {
       default:
         invalid_instruction();
-        return;
+        return false;
 
       case 0x00: // special
         switch (op_lo()) {
           default:
             invalid_instruction();
-            return;
+            return false;
 
           case 0x00: // sll rd,rt,sa
             set_rd(rt() << sa());
@@ -257,7 +257,7 @@ void cpu::main() {
         switch (op_ri()) {
           default:
             invalid_instruction();
-            return;
+            return false;
 
           case 0x00: // bltz rs,$nnnn
             if (int32_t(rs()) < 0) {
@@ -380,7 +380,7 @@ void cpu::main() {
         switch (op_cp()) {
           default:
             invalid_instruction();
-            return;
+            return false;
 
           case 0x00: // mfc0 rt,rd
             set_rt(state.cop0.regs[rd()]);
@@ -394,7 +394,7 @@ void cpu::main() {
             switch (op_lo()) {
               default:
                 invalid_instruction();
-                return;
+                return false;
 
               case 0x10: // rfe
                 leave_exception();
@@ -404,15 +404,15 @@ void cpu::main() {
 
       case 0x11: // cop1
         printf("unimplemented cop1\n");
-        return;
+        return false;
 
       case 0x12: // cop2
         printf("unimplemented cop2\n");
-        return;
+        return false;
 
       case 0x13: // cop3
         printf("unimplemented cop3\n");
-        return;
+        return false;
 
       case 0x20: { // lb rt,$nnnn(rs)
         auto data = read_data(BYTE, rs() + iconst());
@@ -517,16 +517,18 @@ void cpu::main() {
       case 0x32: // lwc2 rt,$nnnn(rs)
       case 0x33: // lwc3 rt,$nnnn(rs)
         printf("unimplemented lwc\n");
-        return;
+        return false;
 
       case 0x38: // swc0 rt,$nnnn(rs)
       case 0x39: // swc1 rt,$nnnn(rs)
       case 0x3a: // swc2 rt,$nnnn(rs)
       case 0x3b: // swc3 rt,$nnnn(rs)
         printf("unimplemented swc\n");
-        return;
+        return false;
     }
   }
+
+  return true;
 }
 
 void cpu::enter_exception(uint32_t code, uint32_t epc) {

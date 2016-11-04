@@ -31,7 +31,7 @@ namespace cpu {
 
   void initialize();
 
-  void main();
+  bool run(int count);
 
   void enter_exception(uint32_t code, uint32_t epc);
 
