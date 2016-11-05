@@ -12,6 +12,14 @@ I will not be optimizing or accepting optimization PRs until the core is
 accurate. There are plenty of other very fast, very inaccurate emulators
 available, use one of them if you wish.
 
+## Current Status
+
+Currently, the emulator hangs after drawing the Sony&trade; logo while trying
+to communicate with the CD-ROM drive. Textured primitives are not implemented,
+nor are they attempted.
+
+![Current status](images/current.png)
+
 ## Building
 
 This project uses CMake for builds, and requires SDL2.
