@@ -40,7 +40,16 @@ namespace gpu {
     uint32_t display_area_x2;
     uint32_t display_area_y2;
 
-    uint32_t gp0_texture_upload_size;
+    struct {
+      int remaining;
+      int x;
+      int y;
+      int w;
+      int h;
+      int current_x;
+      int current_y;
+    } texture_upload;
+
     uint32_t gp0_texture_download_size;
   };
 

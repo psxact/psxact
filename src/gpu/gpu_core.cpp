@@ -24,14 +24,16 @@ static int gp0_command_size[256] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $f0
 };
 
+static int dither_lut[4][4] = {
+  { -4,  0, -3,  1 },
+  {  2, -2,  3, -1 },
+  { -3,  1, -4,  0 },
+  {  3, -1,  2, -2 }
+};
+
 // --=================--
 //   Drawing Functions
 // --=================--
-
-struct ratio_t {
-  int n;
-  int d;
-};
 
 struct point_t {
   int x;
@@ -54,12 +56,28 @@ struct quad_t {
 
 gpu::vram_t gpu::vram;
 
+template<int min, int max>
+int clip(int value) {
+  if (value < min)
+    return min;
+  if (value > max)
+    return max;
+  return value;
+};
+
 void draw_point(const int &x, const int &y, const int &r, const int &g, const int &b) {
   auto address = (y << 10) + x;
+
+  auto dither = dither_lut[y & 3][x & 3];
+
+  auto r_ = clip<0, 255>(r + dither);
+  auto g_ = clip<0, 255>(g + dither);
+  auto b_ = clip<0, 255>(b + dither);
+
   auto color =
-      (((r >> 3) & 0x1f) <<  0) |
-      (((g >> 3) & 0x1f) <<  5) |
-      (((b >> 3) & 0x1f) << 10);
+      (((r_ >> 3) & 0x1f) <<  0) |
+      (((g_ >> 3) & 0x1f) <<  5) |
+      (((b_ >> 3) & 0x1f) << 10);
 
   gpu::vram.h[address] = uint16_t(color);
 }
@@ -80,6 +98,7 @@ constexpr int precision = 8;
 
 void draw_span(int y, int x1, int r1, int g1, int b1, int x2, int r2, int g2, int b2) {
   if (x1 == x2) {
+    draw_point(x1, y, r1, g1, b1);
     return;
   }
 
@@ -125,12 +144,6 @@ void draw_span(int y, int x1, int r1, int g1, int b1, int x2, int r2, int g2, in
     }
   }
 }
-
-struct color_t {
-  int r;
-  int g;
-  int b;
-};
 
 void draw_upper_triangle(const point_t &v1, const point_t &v2, const point_t &v3) {
   auto dx1 = ((v2.x - v1.x) << precision) / (v2.y - v1.y);
@@ -305,9 +318,29 @@ static inline uint32_t get_gp0_data() {
   return data;
 }
 
+static inline void write_texture(int data) {
+  auto &upload = state.texture_upload;
+
+  if (!upload.remaining) {
+    return;
+  }
+
+  auto address = (upload.current_y * 1024) + upload.current_x;
+  gpu::vram.h[address] = uint16_t(data);
+
+  upload.remaining--;
+  upload.current_x++;
+
+  if (upload.current_x == (upload.x + upload.w)) {
+    upload.current_x = upload.x;
+    upload.current_y++;
+  }
+}
+
 static inline void write_gp0(uint32_t data) {
-  if (state.gp0_texture_upload_size) {
-    state.gp0_texture_upload_size--;
+  if (state.texture_upload.remaining) {
+    write_texture(data);
+    write_texture(data >> 16);
     return;
   }
 
@@ -339,7 +372,7 @@ static inline void write_gp0(uint32_t data) {
       }
 
       case 0x2c: { // textured quad, opaque
-        auto color   = get_gp0_data() & 0xffffff;
+        auto color   = get_gp0_data();
         auto vertex1 = get_gp0_data();
         auto tcoord1 = get_gp0_data();
         auto vertex2 = get_gp0_data();
@@ -375,13 +408,13 @@ static inline void write_gp0(uint32_t data) {
       }
 
       case 0x38: { // shaded quad, opaque
-        auto color1  = get_gp0_data() & 0xffffff;
+        auto color1  = get_gp0_data();
         auto vertex1 = get_gp0_data();
-        auto color2  = get_gp0_data() & 0xffffff;
+        auto color2  = get_gp0_data();
         auto vertex2 = get_gp0_data();
-        auto color3  = get_gp0_data() & 0xffffff;
+        auto color3  = get_gp0_data();
         auto vertex3 = get_gp0_data();
-        auto color4  = get_gp0_data() & 0xffffff;
+        auto color4  = get_gp0_data();
         auto vertex4 = get_gp0_data();
 
         auto v0 = gp0_to_point(vertex1, color1);
@@ -398,12 +431,15 @@ static inline void write_gp0(uint32_t data) {
         auto param1 = get_gp0_data();
         auto param2 = get_gp0_data();
 
-        auto x = param1 & 0xffff;
-        auto y = param1 >> 16;
-        auto w = param2 & 0xffff;
-        auto h = param2 >> 16;
+        auto &upload = state.texture_upload;
+        upload.x = param1 & 0xffff;
+        upload.y = param1 >> 16;
+        upload.w = param2 & 0xffff;
+        upload.h = param2 >> 16;
 
-        state.gp0_texture_upload_size = ((w * h) + 1) / 2;
+        upload.current_x = upload.x;
+        upload.current_y = upload.y;
+        upload.remaining = upload.w * upload.h;
         break;
       }
 
@@ -495,8 +531,8 @@ static inline void write_gp1(uint32_t data) {
 
     case 0x01: {
       state.gp0_command = 0;
-      state.gp0_texture_upload_size = 0;
       state.gp0_fifo.clear();
+      state.texture_upload.remaining = 0;
       break;
     }
 
