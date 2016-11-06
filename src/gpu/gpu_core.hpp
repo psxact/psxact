@@ -56,6 +56,29 @@ namespace gpu {
   uint32_t read(int size, uint32_t address);
 
   void write(int size, uint32_t address, uint32_t data);
+
+  struct point_t {
+    int x;
+    int y;
+    int r;
+    int g;
+    int b;
+  };
+
+  struct triangle_t {
+    point_t v[3];
+  };
+
+  struct quad_t {
+    point_t v0;
+    point_t v1;
+    point_t v2;
+    point_t v3;
+  };
+
+  void draw_triangle(const gpu::triangle_t &tri);
+
+  void draw_quad(const gpu::quad_t &quad);
 }
 
 #endif //PSXACT_GPU_CORE_HPP
