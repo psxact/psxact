@@ -124,7 +124,7 @@ static inline void write_gp0(uint32_t data) {
         auto v2 = gp0_to_point(vertex3, color);
         auto v3 = gp0_to_point(vertex4, color);
 
-        gpu::draw_quad({ v0, v1, v2, v3 });
+        gpu::draw_poly4(v0, v1, v2, v3);
         break;
       }
 
@@ -144,7 +144,7 @@ static inline void write_gp0(uint32_t data) {
         auto v2 = gp0_to_point(vertex3, color);
         auto v3 = gp0_to_point(vertex4, color);
 
-        gpu::draw_quad({ v0, v1, v2, v3 });
+        gpu::draw_poly4(v0, v1, v2, v3);
         break;
       }
 
@@ -160,7 +160,7 @@ static inline void write_gp0(uint32_t data) {
         auto v1 = gp0_to_point(vertex2, color2);
         auto v2 = gp0_to_point(vertex3, color3);
 
-        gpu::draw_triangle({ v0, v1, v2 });
+        gpu::draw_poly3(v0, v1, v2);
         break;
       }
 
@@ -179,7 +179,7 @@ static inline void write_gp0(uint32_t data) {
         auto v2 = gp0_to_point(vertex3, color3);
         auto v3 = gp0_to_point(vertex4, color4);
 
-        gpu::draw_quad({ v0, v1, v2, v3 });
+        gpu::draw_poly4(v0, v1, v2, v3);
         break;
       }
 

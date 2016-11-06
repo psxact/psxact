@@ -76,9 +76,9 @@ namespace gpu {
     point_t v3;
   };
 
-  void draw_triangle(const gpu::triangle_t &tri);
+  void draw_poly3(const gpu::point_t &v0, const gpu::point_t &v1, const gpu::point_t &v2);
 
-  void draw_quad(const gpu::quad_t &quad);
+  void draw_poly4(const gpu::point_t &v0, const gpu::point_t &v1, const gpu::point_t &v2, const gpu::point_t &v3);
 }
 
 #endif //PSXACT_GPU_CORE_HPP

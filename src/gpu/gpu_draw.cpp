@@ -31,193 +31,92 @@ void draw_point(const int &x, const int &y, const int &r, const int &g, const in
   gpu::vram.h[address] = uint16_t(color);
 }
 
-static int get_min_point(const gpu::triangle_t &tri) {
-  if (tri.v[0].y < tri.v[1].y && tri.v[0].y < tri.v[2].y) { return 0; }
-  if (tri.v[1].y < tri.v[0].y && tri.v[1].y < tri.v[2].y) { return 1; }
-  return 2;
+static int min3(int a, int b, int c) {
+  if (a <= b && a <= c) return a;
+  if (b <= a && b <= c) return b;
+  return c;
 }
 
-static int get_max_point(const gpu::triangle_t &tri) {
-  if (tri.v[0].y > tri.v[1].y && tri.v[0].y > tri.v[2].y) { return 0; }
-  if (tri.v[1].y > tri.v[0].y && tri.v[1].y > tri.v[2].y) { return 1; }
-  return 2;
+static int max3(int a, int b, int c) {
+  if (a >= b && a >= c) return a;
+  if (b >= a && b >= c) return b;
+  return c;
 }
 
-constexpr int precision = 8;
+static int edge(const gpu::point_t& a, const gpu::point_t& b, const gpu::point_t& c) {
+  return ((b.x - a.x) * (c.y - a.y)) - ((b.y - a.y) * (c.x - a.x));
+}
 
-void draw_span(int y, int x1, int r1, int g1, int b1, int x2, int r2, int g2, int b2) {
-  if (x1 == x2) {
-    draw_point(x1, y, r1, g1, b1);
-    return;
-  }
+static bool is_top_left(const gpu::point_t &a, const gpu::point_t &b) {
+  return (b.y == a.y && b.x > a.x) || b.y < a.y;
+}
 
-  if (x1 < x2) {
-    int dr = ((r2 - r1) << precision) / (x2 - x1);
-    int dg = ((g2 - g1) << precision) / (x2 - x1);
-    int db = ((b2 - b1) << precision) / (x2 - x1);
+static void draw_poly3_(const gpu::point_t &v0, const gpu::point_t &v1, const gpu::point_t &v2) {
+  int min_x = min3(v0.x, v1.x, v2.x);
+  int min_y = min3(v0.y, v1.y, v2.y);
+  int max_x = max3(v0.x, v1.x, v2.x);
+  int max_y = max3(v0.y, v1.y, v2.y);
 
-    int r = r1 << precision;
-    int g = g1 << precision;
-    int b = b1 << precision;
+  bool is_top_left_12 = is_top_left(v1, v2);
+  bool is_top_left_20 = is_top_left(v2, v0);
+  bool is_top_left_01 = is_top_left(v0, v1);
 
-    for (int x = x1; x <= x2; x++) {
-      draw_point(x,
-                 y,
-                 r >> precision,
-                 g >> precision,
-                 b >> precision);
+  int A01 = v0.y - v1.y, B01 = v1.x - v0.x;
+  int A12 = v1.y - v2.y, B12 = v2.x - v1.x;
+  int A20 = v2.y - v0.y, B20 = v0.x - v2.x;
 
-      r += dr;
-      g += dg;
-      b += db;
+  gpu::point_t p = { min_x, min_y };
+  int w0_row = edge(v1, v2, p);
+  int w1_row = edge(v2, v0, p);
+  int w2_row = edge(v0, v1, p);
+
+  for (p.y = min_y; p.y <= max_y; p.y++) {
+    int w0 = w0_row;
+    int w1 = w1_row;
+    int w2 = w2_row;
+
+    for (p.x = min_x; p.x <= max_x; p.x++) {
+      bool draw =
+          (w0 > 0 || (w0 == 0 && is_top_left_12)) &&
+          (w1 > 0 || (w1 == 0 && is_top_left_20)) &&
+          (w2 > 0 || (w2 == 0 && is_top_left_01));
+
+      if (draw) {
+        auto r = ((v0.r * w0) + (v1.r * w1) + (v2.r * w2)) / (w0 + w1 + w2);
+        auto g = ((v0.g * w0) + (v1.g * w1) + (v2.g * w2)) / (w0 + w1 + w2);
+        auto b = ((v0.b * w0) + (v1.b * w1) + (v2.b * w2)) / (w0 + w1 + w2);
+
+        draw_point(p.x, p.y, r, g, b);
+      }
+
+      w0 += A12;
+      w1 += A20;
+      w2 += A01;
     }
+
+    w0_row += B12;
+    w1_row += B20;
+    w2_row += B01;
+  }
+}
+
+static inline int double_area(const gpu::point_t &v0, const gpu::point_t &v1, const gpu::point_t &v2) {
+  auto e0 = (v1.x - v0.x) * (v1.y + v0.y);
+  auto e1 = (v2.x - v1.x) * (v2.y + v1.y);
+  auto e2 = (v0.x - v2.x) * (v0.y + v2.y);
+
+  return e0 + e1 + e2;
+}
+
+void gpu::draw_poly3(const gpu::point_t &v0, const gpu::point_t &v1, const gpu::point_t &v2) {
+  if (double_area(v0, v1, v2) < 0) {
+    draw_poly3_(v0, v1, v2);
   } else {
-    int dr = ((r1 - r2) << precision) / (x1 - x2);
-    int dg = ((g1 - g2) << precision) / (x1 - x2);
-    int db = ((b1 - b2) << precision) / (x1 - x2);
-
-    int r = r2 << precision;
-    int g = g2 << precision;
-    int b = b2 << precision;
-
-    for (int x = x2; x <= x1; x++) {
-      draw_point(x,
-                 y,
-                 r >> precision,
-                 g >> precision,
-                 b >> precision);
-
-      r += dr;
-      g += dg;
-      b += db;
-    }
+    draw_poly3_(v0, v2, v1);
   }
 }
 
-void draw_upper_triangle(const gpu::point_t &v1, const gpu::point_t &v2, const gpu::point_t &v3) {
-  auto dx1 = ((v2.x - v1.x) << precision) / (v2.y - v1.y);
-  auto dr1 = ((v2.r - v1.r) << precision) / (v2.y - v1.y);
-  auto dg1 = ((v2.g - v1.g) << precision) / (v2.y - v1.y);
-  auto db1 = ((v2.b - v1.b) << precision) / (v2.y - v1.y);
-
-  auto x1 = v1.x << precision;
-  auto r1 = v1.r << precision;
-  auto g1 = v1.g << precision;
-  auto b1 = v1.b << precision;
-
-  auto dx2 = ((v3.x - v1.x) << precision) / (v3.y - v1.y);
-  auto dr2 = ((v3.r - v1.r) << precision) / (v3.y - v1.y);
-  auto dg2 = ((v3.g - v1.g) << precision) / (v3.y - v1.y);
-  auto db2 = ((v3.b - v1.b) << precision) / (v3.y - v1.y);
-
-  auto x2 = v1.x << precision;
-  auto r2 = v1.r << precision;
-  auto g2 = v1.g << precision;
-  auto b2 = v1.b << precision;
-
-  for (int y = v1.y; y <= v2.y; y++) {
-    draw_span(y,
-              x1 >> precision,
-              r1 >> precision,
-              g1 >> precision,
-              b1 >> precision,
-              x2 >> precision,
-              r2 >> precision,
-              g2 >> precision,
-              b2 >> precision);
-
-    x1 += dx1;
-    r1 += dr1;
-    g1 += dg1;
-    b1 += db1;
-
-    x2 += dx2;
-    r2 += dr2;
-    g2 += dg2;
-    b2 += db2;
-  }
-}
-
-void draw_lower_triangle(const gpu::point_t &v1, const gpu::point_t &v2, const gpu::point_t &v3) {
-  auto dx1 = ((v3.x - v1.x) << precision) / (v3.y - v1.y);
-  auto dr1 = ((v3.r - v1.r) << precision) / (v3.y - v1.y);
-  auto dg1 = ((v3.g - v1.g) << precision) / (v3.y - v1.y);
-  auto db1 = ((v3.b - v1.b) << precision) / (v3.y - v1.y);
-
-  auto x1 = v3.x << precision;
-  auto r1 = v3.r << precision;
-  auto g1 = v3.g << precision;
-  auto b1 = v3.b << precision;
-
-  auto dx2 = ((v3.x - v2.x) << precision) / (v3.y - v2.y);
-  auto dr2 = ((v3.r - v2.r) << precision) / (v3.y - v2.y);
-  auto dg2 = ((v3.g - v2.g) << precision) / (v3.y - v2.y);
-  auto db2 = ((v3.b - v2.b) << precision) / (v3.y - v2.y);
-
-  auto x2 = v3.x << precision;
-  auto r2 = v3.r << precision;
-  auto g2 = v3.g << precision;
-  auto b2 = v3.b << precision;
-
-  for (int y = v3.y; y > v1.y; y--) {
-    draw_span(y,
-              x1 >> precision,
-              r1 >> precision,
-              g1 >> precision,
-              b1 >> precision,
-              x2 >> precision,
-              r2 >> precision,
-              g2 >> precision,
-              b2 >> precision);
-
-    x1 -= dx1;
-    r1 -= dr1;
-    g1 -= dg1;
-    b1 -= db1;
-
-    x2 -= dx2;
-    r2 -= dr2;
-    g2 -= dg2;
-    b2 -= db2;
-  }
-}
-
-void gpu::draw_triangle(const gpu::triangle_t &tri) {
-  // sort the points by y-value
-  //
-
-  int v1_point = get_min_point(tri);
-  int v3_point = get_max_point(tri);
-  int v2_point = 3 - (v1_point + v3_point);
-
-  const auto &v1 = tri.v[v1_point];
-  const auto &v2 = tri.v[v2_point];
-  const auto &v3 = tri.v[v3_point];
-
-  if (v2.y == v3.y) {
-    return draw_upper_triangle(v1, v2, v3);
-  }
-
-  if (v2.y == v1.y) {
-    return draw_lower_triangle(v1, v2, v3);
-  }
-
-  if (v3.y == v1.y) {
-    return;
-  }
-
-  gpu::point_t v4;
-  v4.x = v1.x + (((v2.y - v1.y) * (v3.x - v1.x)) / (v3.y - v1.y));
-  v4.y = v2.y;
-  v4.r = v3.r + (((v2.y - v1.y) * (v3.r - v1.r)) / (v3.y - v1.y));
-  v4.g = v3.g + (((v2.y - v1.y) * (v3.g - v1.g)) / (v3.y - v1.y));
-  v4.b = v3.b + (((v2.y - v1.y) * (v3.b - v1.b)) / (v3.y - v1.y));
-
-  draw_upper_triangle(v1, v2, v4);
-  draw_lower_triangle(v2, v4, v3);
-}
-
-void gpu::draw_quad(const gpu::quad_t &quad) {
-  gpu::draw_triangle({ quad.v0, quad.v2, quad.v1 });
-  gpu::draw_triangle({ quad.v1, quad.v2, quad.v3 });
+void gpu::draw_poly4(const gpu::point_t &v0, const gpu::point_t &v1, const gpu::point_t &v2, const gpu::point_t &v3) {
+  gpu::draw_poly3(v0, v1, v2);
+  gpu::draw_poly3(v1, v2, v3);
 }
