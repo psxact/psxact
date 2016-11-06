@@ -15,8 +15,8 @@ available, use one of them if you wish.
 ## Current Status
 
 Currently, the emulator hangs after drawing the Sony&trade; logo while trying
-to communicate with the CD-ROM drive. Textured primitives are not implemented,
-nor are they attempted.
+to communicate with the CD-ROM drive. Textured primitives are partially
+implemented.
 
 ![Current status](images/current.png)
 

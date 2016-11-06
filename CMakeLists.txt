@@ -21,7 +21,7 @@ set(SOURCE_FILES
     src/bus.hpp
     src/psxact.cpp
     src/utility.cpp
-    src/utility.hpp)
+    src/utility.hpp src/gpu/gpu_draw_gouraud.cpp src/gpu/gpu_draw_texture.cpp)
 
 add_executable(psxact ${SOURCE_FILES})
 

@@ -57,28 +57,75 @@ namespace gpu {
 
   void write(int size, uint32_t address, uint32_t data);
 
-  struct point_t {
-    int x;
-    int y;
+  uint16_t read_vram(int x, int y);
+
+  void write_vram(int x, int y, uint16_t color);
+
+  struct color_t {
     int r;
     int g;
     int b;
   };
 
-  struct triangle_t {
-    point_t v[3];
+  struct point_t {
+    int x;
+    int y;
   };
 
-  struct quad_t {
-    point_t v0;
-    point_t v1;
-    point_t v2;
-    point_t v3;
-  };
+  void draw_point(int x, int y, int r, int g, int b);
 
-  void draw_poly3(const gpu::point_t &v0, const gpu::point_t &v1, const gpu::point_t &v2);
+  namespace gouraud {
+    struct pixel_t {
+      point_t point;
+      color_t color;
+    };
 
-  void draw_poly4(const gpu::point_t &v0, const gpu::point_t &v1, const gpu::point_t &v2, const gpu::point_t &v3);
+    struct poly3_t {
+      pixel_t v[3];
+    };
+
+    struct poly4_t {
+      pixel_t v[4];
+    };
+
+    void draw_poly3(const gpu::gouraud::poly3_t &p);
+
+    void draw_poly4(const gpu::gouraud::poly4_t &p);
+  }
+
+  namespace texture {
+    struct pixel_t {
+      point_t point;
+      color_t color;
+      int u;
+      int v;
+    };
+
+    struct poly3_t {
+      pixel_t v0;
+      pixel_t v1;
+      pixel_t v2;
+      int clut_x;
+      int clut_y;
+      int base_u;
+      int base_v;
+    };
+
+    struct poly4_t {
+      pixel_t v0;
+      pixel_t v1;
+      pixel_t v2;
+      pixel_t v3;
+      int clut_x;
+      int clut_y;
+      int base_u;
+      int base_v;
+    };
+
+    void draw_poly3(const poly3_t &p);
+
+    void draw_poly4(const poly4_t &p);
+  }
 }
 
 #endif //PSXACT_GPU_CORE_HPP
