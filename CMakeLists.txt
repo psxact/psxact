@@ -11,6 +11,8 @@ set(SOURCE_FILES
     src/dma/dma_core.cpp
     src/dma/dma_core.hpp
     src/gpu/gpu_core.cpp
+    src/gpu/gpu_draw_gouraud.cpp
+    src/gpu/gpu_draw_texture.cpp
     src/gpu/gpu_draw.cpp
     src/gpu/gpu_core.hpp
     src/spu/spu_core.cpp
@@ -21,7 +23,7 @@ set(SOURCE_FILES
     src/bus.hpp
     src/psxact.cpp
     src/utility.cpp
-    src/utility.hpp src/gpu/gpu_draw_gouraud.cpp src/gpu/gpu_draw_texture.cpp)
+    src/utility.hpp src/cpu/disassembler.cpp)
 
 add_executable(psxact ${SOURCE_FILES})
 

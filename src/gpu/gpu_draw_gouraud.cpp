@@ -54,8 +54,13 @@ static void fill_poly3_gouraud(const gpu::gouraud::pixel_t &v0, const gpu::goura
 
   for (p.y = min_y; p.y <= max_y; p.y++) {
     int w0 = w0_row;
+    w0_row += y12;
+
     int w1 = w1_row;
+    w1_row += y20;
+
     int w2 = w2_row;
+    w2_row += y01;
 
     for (p.x = min_x; p.x <= max_x; p.x++) {
       bool draw =
@@ -71,10 +76,6 @@ static void fill_poly3_gouraud(const gpu::gouraud::pixel_t &v0, const gpu::goura
       w1 += x20;
       w2 += x01;
     }
-
-    w0_row += y12;
-    w1_row += y20;
-    w2_row += y01;
   }
 }
 

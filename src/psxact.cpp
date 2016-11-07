@@ -14,16 +14,16 @@ uint32_t color_16_to_24(uint32_t color) {
 }
 
 int main(int argc, char *argv[]) {
-  if (argc != 2) {
+  if (argc != 3) {
     return -1;
   }
 
   std::string bios_file_name(argv[1]);
-//std::string game_file_name(argv[2]);
+  std::string game_file_name(argv[2]);
 
-  bus::initialize(bios_file_name);
   cpu::initialize();
   dma::initialize();
+  bus::initialize(bios_file_name, game_file_name);
 
   SDL_Init(SDL_INIT_VIDEO);
 

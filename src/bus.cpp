@@ -11,12 +11,43 @@
 
 uint8_t *bios = new uint8_t[utility::kib<512>()];
 uint8_t *wram = new uint8_t[utility::mib<  2>()];
+uint8_t *game = new uint8_t[utility::kib<  2>() * 495];
+uint8_t *dmem = new uint8_t[1024];
 
-void bus::initialize(std::string file_name) {
+void bus::initialize(const std::string &bios_file_name, const std::string &game_file_name) {
   memset(bios, 0, utility::kib<512>());
   memset(wram, 0, utility::mib<  2>());
 
-  utility::read_all_bytes(file_name.c_str(), bios, 0, utility::kib<512>());
+  utility::read_all_bytes(bios_file_name.c_str(), bios, 0, utility::kib<512>());
+  utility::read_all_bytes(game_file_name.c_str(), game, 0, utility::kib<  2>() * 495);
+
+  bios[0x6990] = 0;
+  bios[0x6991] = 0;
+  bios[0x6992] = 0;
+  bios[0x6993] = 0;
+}
+
+void bus::bootstrap_exe() {
+  cpu::state.regs.pc      = utility::read_word(game, 0x10);
+  cpu::state.regs.gp[ 4]  = 1;
+  cpu::state.regs.gp[ 5]  = 0;
+  cpu::state.regs.gp[28]  = utility::read_word(game, 0x14);
+  cpu::state.regs.gp[29]  = utility::read_word(game, 0x30) + utility::read_word(game, 0x34);
+  cpu::state.regs.gp[30]  = utility::read_word(game, 0x30) + utility::read_word(game, 0x34);
+  cpu::state.regs.next_pc = cpu::state.regs.pc + 4;
+
+  int text_start = utility::read_word(game, 0x18);
+  int text_count = utility::read_word(game, 0x1c);
+
+  printf("Loading executable into WRAM..\n");
+  printf("  PC: $%08x\n", cpu::state.regs.pc);
+  printf("  GP: $%08x\n", cpu::state.regs.gp[28]);
+  printf("  SP: $%08x\n", cpu::state.regs.gp[29]);
+  printf("  FP: $%08x\n", cpu::state.regs.gp[30]);
+
+  for (int i = 0; i < text_count; i++) {
+    wram[(text_start + i) & 0x1fffff] = game[0x800 + i];
+  }
 }
 
 uint32_t bus::read(int size, uint32_t address) {
@@ -37,7 +68,11 @@ uint32_t bus::read(int size, uint32_t address) {
   }
 
   if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
-    printf("scratchpad read: $%08x\n", address);
+    switch (size) {
+      case BYTE: return utility::read_byte(dmem, address & 0x7ffff);
+      case HALF: return utility::read_half(dmem, address & 0x7fffe);
+      case WORD: return utility::read_word(dmem, address & 0x7fffc);
+    }
     return 0;
   }
 
@@ -97,7 +132,11 @@ void bus::write(int size, uint32_t address, uint32_t data) {
   }
 
   if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
-    printf("scratchpad write: $%08x <- $%08x\n", address, data);
+    switch (size) {
+      case BYTE: return utility::write_byte(dmem, address & 0x1fffff, data);
+      case HALF: return utility::write_half(dmem, address & 0x1ffffe, data);
+      case WORD: return utility::write_word(dmem, address & 0x1ffffc, data);
+    }
     return;
   }
 
@@ -114,6 +153,10 @@ void bus::write(int size, uint32_t address, uint32_t data) {
         utility::between<0x1f801110, 0x1f80111f>(address) ||
         utility::between<0x1f801120, 0x1f80112f>(address)) {
       return timer::mmio_write(size, address, data);
+    }
+
+    if (utility::between<0x1f801800, 0x1f801803>(address)) {
+      return bootstrap_exe();
     }
 
     if (utility::between<0x1f801810, 0x1f801817>(address)) {

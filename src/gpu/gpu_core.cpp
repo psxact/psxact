@@ -10,7 +10,7 @@ static int gp0_command_size[256] = {
   6, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 1, // $30
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $40
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $50
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $60
+  1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, // $60
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $70
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $80
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $90
@@ -75,14 +75,27 @@ static gpu::gouraud::pixel_t gp0_to_gouraud_pixel(uint32_t vertex, uint32_t colo
   return p;
 }
 
-static gpu::texture::pixel_t gp0_to_texture_pixel(uint32_t vertex, uint32_t color, uint32_t texcoord) {
-  gpu::texture::pixel_t p;
-  p.point.x = int(vertex & 0xffff);
-  p.point.y = int(vertex >> 16);
+static inline gpu::point_t gp0_to_point(uint32_t point) {
+  gpu::point_t result;
+  result.x = int(point & 0xffff);
+  result.y = int(point >> 16);
 
-  p.color.r = (color >>  0) & 0xff;
-  p.color.g = (color >>  8) & 0xff;
-  p.color.b = (color >> 16) & 0xff;
+  return result;
+}
+
+static gpu::color_t gp0_to_color(uint32_t color) {
+  gpu::color_t result;
+  result.r = (color >> 0) & 0xff;
+  result.g = (color >> 8) & 0xff;
+  result.b = (color >> 16) & 0xff;
+
+  return result;
+}
+
+static gpu::texture::pixel_t gp0_to_texture_pixel(uint32_t point, uint32_t color, uint32_t texcoord) {
+  gpu::texture::pixel_t p;
+  p.point = gp0_to_point(point);
+  p.color = gp0_to_color(color);
 
   p.u = (texcoord >> 0) & 0xff;
   p.v = (texcoord >> 8) & 0xff;
@@ -135,38 +148,38 @@ static inline void write_gp0(uint32_t data) {
       case 0x01: get_gp0_data(); break; // clear texture cache
 
       case 0x28: { // monochrome quad, opaque
-        auto color   = get_gp0_data();
-        auto vertex1 = get_gp0_data();
-        auto vertex2 = get_gp0_data();
-        auto vertex3 = get_gp0_data();
-        auto vertex4 = get_gp0_data();
+        auto color  = get_gp0_data();
+        auto point1 = get_gp0_data();
+        auto point2 = get_gp0_data();
+        auto point3 = get_gp0_data();
+        auto point4 = get_gp0_data();
 
-        auto v0 = gp0_to_gouraud_pixel(vertex1, color);
-        auto v1 = gp0_to_gouraud_pixel(vertex2, color);
-        auto v2 = gp0_to_gouraud_pixel(vertex3, color);
-        auto v3 = gp0_to_gouraud_pixel(vertex4, color);
+        auto v0 = gp0_to_gouraud_pixel(point1, color);
+        auto v1 = gp0_to_gouraud_pixel(point2, color);
+        auto v2 = gp0_to_gouraud_pixel(point3, color);
+        auto v3 = gp0_to_gouraud_pixel(point4, color);
 
         gpu::gouraud::draw_poly4({v0, v1, v2, v3});
         break;
       }
 
       case 0x2c: { // textured quad, opaque
-        auto color   = get_gp0_data();
-        auto vertex1 = get_gp0_data();
+        auto color  = get_gp0_data();
+        auto point1 = get_gp0_data();
         auto tcoord1 = get_gp0_data();
-        auto vertex2 = get_gp0_data();
+        auto point2 = get_gp0_data();
         auto tcoord2 = get_gp0_data();
-        auto vertex3 = get_gp0_data();
+        auto point3 = get_gp0_data();
         auto tcoord3 = get_gp0_data();
-        auto vertex4 = get_gp0_data();
+        auto point4 = get_gp0_data();
         auto tcoord4 = get_gp0_data();
 
         gpu::texture::poly4_t p;
 
-        p.v0 = gp0_to_texture_pixel(vertex1, color, tcoord1);
-        p.v1 = gp0_to_texture_pixel(vertex2, color, tcoord2);
-        p.v2 = gp0_to_texture_pixel(vertex3, color, tcoord3);
-        p.v3 = gp0_to_texture_pixel(vertex4, color, tcoord4);
+        p.v0 = gp0_to_texture_pixel(point1, color, tcoord1);
+        p.v1 = gp0_to_texture_pixel(point2, color, tcoord2);
+        p.v2 = gp0_to_texture_pixel(point3, color, tcoord3);
+        p.v3 = gp0_to_texture_pixel(point4, color, tcoord4);
         p.clut_x = ((tcoord1 >> 16) & 0x03f) * 16;
         p.clut_y = ((tcoord1 >> 22) & 0x1ff) * 1;
         p.base_u = ((tcoord2 >> 16) & 0x00f) * 64;
@@ -177,37 +190,49 @@ static inline void write_gp0(uint32_t data) {
       }
 
       case 0x30: { // shaded triangle, opaque
-        auto color1  = get_gp0_data();
-        auto vertex1 = get_gp0_data();
-        auto color2  = get_gp0_data();
-        auto vertex2 = get_gp0_data();
-        auto color3  = get_gp0_data();
-        auto vertex3 = get_gp0_data();
+        auto color1 = get_gp0_data();
+        auto point1 = get_gp0_data();
+        auto color2 = get_gp0_data();
+        auto point2 = get_gp0_data();
+        auto color3 = get_gp0_data();
+        auto point3 = get_gp0_data();
 
-        auto v0 = gp0_to_gouraud_pixel(vertex1, color1);
-        auto v1 = gp0_to_gouraud_pixel(vertex2, color2);
-        auto v2 = gp0_to_gouraud_pixel(vertex3, color3);
+        auto v0 = gp0_to_gouraud_pixel(point1, color1);
+        auto v1 = gp0_to_gouraud_pixel(point2, color2);
+        auto v2 = gp0_to_gouraud_pixel(point3, color3);
 
         gpu::gouraud::draw_poly3({v0, v1, v2});
         break;
       }
 
       case 0x38: { // shaded quad, opaque
-        auto color1  = get_gp0_data();
-        auto vertex1 = get_gp0_data();
-        auto color2  = get_gp0_data();
-        auto vertex2 = get_gp0_data();
-        auto color3  = get_gp0_data();
-        auto vertex3 = get_gp0_data();
-        auto color4  = get_gp0_data();
-        auto vertex4 = get_gp0_data();
+        auto color1 = get_gp0_data();
+        auto point1 = get_gp0_data();
+        auto color2 = get_gp0_data();
+        auto point2 = get_gp0_data();
+        auto color3 = get_gp0_data();
+        auto point3 = get_gp0_data();
+        auto color4 = get_gp0_data();
+        auto point4 = get_gp0_data();
 
-        auto v0 = gp0_to_gouraud_pixel(vertex1, color1);
-        auto v1 = gp0_to_gouraud_pixel(vertex2, color2);
-        auto v2 = gp0_to_gouraud_pixel(vertex3, color3);
-        auto v3 = gp0_to_gouraud_pixel(vertex4, color4);
+        auto v0 = gp0_to_gouraud_pixel(point1, color1);
+        auto v1 = gp0_to_gouraud_pixel(point2, color2);
+        auto v2 = gp0_to_gouraud_pixel(point3, color3);
+        auto v3 = gp0_to_gouraud_pixel(point4, color4);
 
         gpu::gouraud::draw_poly4({v0, v1, v2, v3});
+        break;
+      }
+
+      case 0x68: {
+        auto color = gp0_to_color(get_gp0_data());
+        auto point = gp0_to_point(get_gp0_data());
+
+        gpu::draw_point(point.x,
+                        point.y,
+                        color.r,
+                        color.g,
+                        color.b);
         break;
       }
 
@@ -314,12 +339,11 @@ static inline void write_gp1(uint32_t data) {
       state.textured_rectangle_y_flip = 0;
       break;
 
-    case 0x01: {
+    case 0x01:
       state.gp0_command = 0;
       state.gp0_fifo.clear();
       state.texture_upload.remaining = 0;
       break;
-    }
 
     case 0x02:
       state.status &= ~0x01000000;
