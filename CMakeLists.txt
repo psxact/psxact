@@ -6,8 +6,10 @@ find_package(SDL2 REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(SOURCE_FILES
+    src/cpu/cpu_code.cpp
     src/cpu/cpu_core.cpp
     src/cpu/cpu_core.hpp
+    src/cpu/disassembler.cpp
     src/dma/dma_core.cpp
     src/dma/dma_core.hpp
     src/gpu/gpu_core.cpp
@@ -23,7 +25,7 @@ set(SOURCE_FILES
     src/bus.hpp
     src/psxact.cpp
     src/utility.cpp
-    src/utility.hpp src/cpu/disassembler.cpp)
+    src/utility.hpp)
 
 add_executable(psxact ${SOURCE_FILES})
 

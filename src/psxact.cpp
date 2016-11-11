@@ -34,9 +34,7 @@ int main(int argc, char *argv[]) {
   SDL_Event event;
 
   while (true) {
-    if (!cpu::run(33868800 / 60)) {
-      break;
-    }
+    cpu::run(33868800 / 60);
 
     // put the frame buffer on the screen
     //

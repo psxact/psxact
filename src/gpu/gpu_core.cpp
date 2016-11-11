@@ -1,5 +1,7 @@
 #include "gpu_core.hpp"
+#include "../bus.hpp"
 #include <stdexcept>
+#include <cassert>
 
 static gpu::state_t state;
 
@@ -396,19 +398,25 @@ static inline void write_gp1(uint32_t data) {
 }
 
 uint32_t gpu::read(int size, uint32_t address) {
-  switch (address) {
-  case 0x1f801810: return read_resp();
-  case 0x1f801814: return read_stat();
-  }
+  assert(size == WORD);
 
-  throw std::runtime_error("invalid gpu mmio_read");
+  switch (address - 0x1f801810) {
+    case 0: return read_resp();
+    case 4: return read_stat();
+
+    default:
+      throw std::runtime_error("invalid gpu mmio_read");
+  }
 }
 
 void gpu::write(int size, uint32_t address, uint32_t data) {
-  switch (address) {
-  case 0x1f801810: return write_gp0(data);
-  case 0x1f801814: return write_gp1(data);
-  }
+  assert(size == WORD);
 
-  throw std::runtime_error("invalid gpu mmio_write");
+  switch (address - 0x1f801810) {
+    case 0: return write_gp0(data);
+    case 4: return write_gp1(data);
+
+    default:
+      throw std::runtime_error("invalid gpu mmio_write");
+  }
 }

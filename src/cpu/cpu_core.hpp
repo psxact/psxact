@@ -41,7 +41,7 @@ namespace cpu {
 
   void disassemble();
 
-  bool run(int count);
+  void run(int count);
 
   void enter_exception(uint32_t code);
 
@@ -56,6 +56,82 @@ namespace cpu {
   uint32_t mmio_read(int size, uint32_t address);
 
   void mmio_write(int size, uint32_t address, uint32_t data);
+
+  // --============--
+  //   Instructions
+  // --============--
+
+  void op_add();
+  void op_addi();
+  void op_addiu();
+  void op_addu();
+  void op_and();
+  void op_andi();
+  void op_beq();
+  void op_reg_imm();
+  void op_bgtz();
+  void op_blez();
+  void op_bne();
+  void op_break();
+  void op_cop0();
+  void op_cop1();
+  void op_cop2();
+  void op_cop3();
+  void op_div();
+  void op_divu();
+  void op_j();
+  void op_jal();
+  void op_jalr();
+  void op_jr();
+  void op_lb();
+  void op_lbu();
+  void op_lh();
+  void op_lhu();
+  void op_lui();
+  void op_lw();
+  void op_lwc0();
+  void op_lwc1();
+  void op_lwc2();
+  void op_lwc3();
+  void op_lwl();
+  void op_lwr();
+  void op_mfhi();
+  void op_mflo();
+  void op_mthi();
+  void op_mtlo();
+  void op_mult();
+  void op_multu();
+  void op_nor();
+  void op_or();
+  void op_ori();
+  void op_sb();
+  void op_sh();
+  void op_sll();
+  void op_sllv();
+  void op_slt();
+  void op_slti();
+  void op_sltiu();
+  void op_sltu();
+  void op_special();
+  void op_sra();
+  void op_srav();
+  void op_srl();
+  void op_srlv();
+  void op_sub();
+  void op_subu();
+  void op_sw();
+  void op_swc0();
+  void op_swc1();
+  void op_swc2();
+  void op_swc3();
+  void op_swl();
+  void op_swr();
+  void op_syscall();
+  void op_xor();
+  void op_xori();
+
+  // undefined instruction
+  void op_und();
 }
 
 #endif //PSXACT_CPU_CORE_HPP
