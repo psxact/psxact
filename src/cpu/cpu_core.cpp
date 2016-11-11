@@ -10,7 +10,7 @@ void cpu::initialize() {
   state.regs.next_pc = state.regs.pc + 4;
 }
 
-static void (*op[64])() = {
+static void (*op_table[64])() = {
   cpu::op_special, cpu::op_reg_imm, cpu::op_j,    cpu::op_jal,   cpu::op_beq,  cpu::op_bne, cpu::op_blez, cpu::op_bgtz,
   cpu::op_addi,    cpu::op_addiu,   cpu::op_slti, cpu::op_sltiu, cpu::op_andi, cpu::op_ori, cpu::op_xori, cpu::op_lui,
   cpu::op_cop0,    cpu::op_cop1,    cpu::op_cop2, cpu::op_cop3,  cpu::op_und,  cpu::op_und, cpu::op_und,  cpu::op_und,
@@ -31,7 +31,7 @@ void cpu::run(int count) {
     state.is_load_delay_slot = state.is_load;
     state.is_load = false;
 
-    op[(cpu::state.code >> 26) & 63]();
+    op_table[(cpu::state.code >> 26) & 63]();
   }
 }
 

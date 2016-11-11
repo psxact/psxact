@@ -30,30 +30,14 @@ static inline uint32_t get_register(uint32_t index) {
   }
 }
 
-static inline uint32_t uconst() {
-  return ((cpu::state.code & 0xffff) ^ 0x0000) - 0x0000;
-}
-
-static inline uint32_t iconst() {
-  return ((cpu::state.code & 0xffff) ^ 0x8000) - 0x8000;
-}
-
-static inline uint32_t sa() {
-  return (cpu::state.code >>  6) & 31;
-}
-
 static inline void set_rd(uint32_t value) {
-  cpu::state.regs.gp[(cpu::state.code >> 11) & 31] = value;
+  cpu::state.regs.gp[cpu::decoder::rd()] = value;
   cpu::state.regs.gp[0] = 0;
-}
-
-static inline uint32_t rd() {
-  return (cpu::state.code >> 11) & 31;
 }
 
 template<bool load = false>
 static inline void set_rt(uint32_t value) {
-  auto t = (cpu::state.code >> 16) & 31;
+  auto t = cpu::decoder::rt();
 
   if (load) {
     if (cpu::state.is_load_delay_slot && cpu::state.load_index == t) {
@@ -71,19 +55,11 @@ static inline void set_rt(uint32_t value) {
 
 template<bool forwarded = false>
 static inline uint32_t rt() {
-  return get_register<forwarded>((cpu::state.code >> 16) & 31);
+  return get_register<forwarded>(cpu::decoder::rt());
 }
 
 static inline uint32_t rs() {
-  return get_register((cpu::state.code >> 21) & 31);
-}
-
-static inline uint32_t op_lo() {
-  return (cpu::state.code >>  0) & 63;
-}
-
-static inline uint32_t op_cp() {
-  return (cpu::state.code >> 21) & 31;
+  return get_register(cpu::decoder::rs());
 }
 
 // --============--
@@ -104,7 +80,7 @@ void cpu::op_add() {
 
 void cpu::op_addi() {
   auto x = rs();
-  auto y = iconst();
+  auto y = decoder::iconst();
   auto z = x + y;
 
   if (overflow(x, y, z)) {
@@ -115,7 +91,7 @@ void cpu::op_addi() {
 }
 
 void cpu::op_addiu() {
-  set_rt(rs() + iconst());
+  set_rt(rs() + decoder::iconst());
 }
 
 void cpu::op_addu() {
@@ -127,12 +103,12 @@ void cpu::op_and() {
 }
 
 void cpu::op_andi() {
-  set_rt(rs() & uconst());
+  set_rt(rs() & decoder::uconst());
 }
 
 void cpu::op_beq() {
   if (rs() == rt()) {
-    state.regs.next_pc = state.regs.pc + (iconst() << 2);
+    state.regs.next_pc = state.regs.pc + (decoder::iconst() << 2);
     state.is_branch = true;
   }
 }
@@ -151,28 +127,28 @@ void cpu::op_reg_imm() {
   }
 
   if (condition) {
-    state.regs.next_pc = state.regs.pc + (iconst() << 2);
+    state.regs.next_pc = state.regs.pc + (decoder::iconst() << 2);
     state.is_branch = true;
   }
 }
 
 void cpu::op_bgtz() {
   if (int32_t(rs()) > 0) {
-    state.regs.next_pc = state.regs.pc + (iconst() << 2);
+    state.regs.next_pc = state.regs.pc + (decoder::iconst() << 2);
     state.is_branch = true;
   }
 }
 
 void cpu::op_blez() {
   if (int32_t(rs()) <= 0) {
-    state.regs.next_pc = state.regs.pc + (iconst() << 2);
+    state.regs.next_pc = state.regs.pc + (decoder::iconst() << 2);
     state.is_branch = true;
   }
 }
 
 void cpu::op_bne() {
   if (rs() != rt()) {
-    state.regs.next_pc = state.regs.pc + (iconst() << 2);
+    state.regs.next_pc = state.regs.pc + (decoder::iconst() << 2);
     state.is_branch = true;
   }
 }
@@ -182,14 +158,14 @@ void cpu::op_break() {
 }
 
 void cpu::op_cop0() {
-  switch (op_cp()) {
+  switch ((cpu::state.code >> 21) & 31) {
     default: op_und(); return;
 
-    case 0x00: set_rt(state.cop0.regs[rd()]); return; // mfc0 rt,rd
-    case 0x04: state.cop0.regs[rd()] = rt(); return; // mtc0 rt,rd
+    case 0x00: set_rt(state.cop0.regs[decoder::rd()]); return; // mfc0 rt,rd
+    case 0x04: state.cop0.regs[decoder::rd()] = rt(); return; // mtc0 rt,rd
 
     case 0x10:
-      switch (op_lo()) {
+      switch (cpu::state.code & 63) {
         default: op_und(); return;
 
         case 0x10: leave_exception(); return; // rfe
@@ -267,7 +243,7 @@ void cpu::op_jr() {
 }
 
 void cpu::op_lb() {
-  auto address = rs() + iconst();
+  auto address = rs() + decoder::iconst();
   auto data = read_data(BYTE, address);
   data = utility::sclip<8>(data);
 
@@ -275,14 +251,14 @@ void cpu::op_lb() {
 }
 
 void cpu::op_lbu() {
-  auto address = rs() + iconst();
+  auto address = rs() + decoder::iconst();
   auto data = read_data(BYTE, address);
 
   set_rt<1>(data);
 }
 
 void cpu::op_lh() {
-  auto address = rs() + iconst();
+  auto address = rs() + decoder::iconst();
   if (address & 1) {
     enter_exception(0x4);
   } else {
@@ -294,7 +270,7 @@ void cpu::op_lh() {
 }
 
 void cpu::op_lhu() {
-  auto address = rs() + iconst();
+  auto address = rs() + decoder::iconst();
   if (address & 1) {
     enter_exception(0x4);
   } else {
@@ -305,11 +281,11 @@ void cpu::op_lhu() {
 }
 
 void cpu::op_lui() {
-  set_rt(uconst() << 16);
+  set_rt(decoder::uconst() << 16);
 }
 
 void cpu::op_lw() {
-  auto address = rs() + iconst();
+  auto address = rs() + decoder::iconst();
   if (address & 3) {
     enter_exception(0x4);
   } else {
@@ -336,7 +312,7 @@ void cpu::op_lwc3() {
 }
 
 void cpu::op_lwl() {
-  auto address = rs() + iconst();
+  auto address = rs() + decoder::iconst();
   auto data = read_data(WORD, address & ~3);
 
   switch (address & 3) {
@@ -350,7 +326,7 @@ void cpu::op_lwl() {
 }
 
 void cpu::op_lwr() {
-  auto address = rs() + iconst();
+  auto address = rs() + decoder::iconst();
   auto data = read_data(WORD, address & ~3);
 
   switch (address & 3) {
@@ -406,18 +382,18 @@ void cpu::op_or() {
 }
 
 void cpu::op_ori() {
-  set_rt(rs() | uconst());
+  set_rt(rs() | decoder::uconst());
 }
 
 void cpu::op_sb() {
-  auto address = rs() + iconst();
+  auto address = rs() + decoder::iconst();
   auto data = rt();
 
   write_data(BYTE, address, data);
 }
 
 void cpu::op_sh() {
-  auto address = rs() + iconst();
+  auto address = rs() + decoder::iconst();
   if (address & 1) {
     enter_exception(0x5);
   } else {
@@ -428,7 +404,7 @@ void cpu::op_sh() {
 }
 
 void cpu::op_sll() {
-  set_rd(rt() << sa());
+  set_rd(rt() << decoder::sa());
 }
 
 void cpu::op_sllv() {
@@ -440,11 +416,11 @@ void cpu::op_slt() {
 }
 
 void cpu::op_slti() {
-  set_rt(int32_t(rs()) < int32_t(iconst()) ? 1 : 0);
+  set_rt(int32_t(rs()) < int32_t(decoder::iconst()) ? 1 : 0);
 }
 
 void cpu::op_sltiu() {
-  set_rt(rs() < iconst() ? 1 : 0);
+  set_rt(rs() < decoder::iconst() ? 1 : 0);
 }
 
 void cpu::op_sltu() {
@@ -456,7 +432,7 @@ void cpu::op_special() {
 }
 
 void cpu::op_sra() {
-  set_rd(int32_t(rt()) >> sa());
+  set_rd(int32_t(rt()) >> decoder::sa());
 }
 
 void cpu::op_srav() {
@@ -464,7 +440,7 @@ void cpu::op_srav() {
 }
 
 void cpu::op_srl() {
-  set_rd(rt() >> sa());
+  set_rd(rt() >> decoder::sa());
 }
 
 void cpu::op_srlv() {
@@ -488,7 +464,7 @@ void cpu::op_subu() {
 }
 
 void cpu::op_sw() {
-  auto address = rs() + iconst();
+  auto address = rs() + decoder::iconst();
   if (address & 3) {
     enter_exception(0x5);
   } else {
@@ -515,7 +491,7 @@ void cpu::op_swc3() {
 }
 
 void cpu::op_swl() {
-  auto address = rs() + iconst();
+  auto address = rs() + decoder::iconst();
   auto data = read_data(WORD, address & ~3);
 
   switch (address & 3) {
@@ -529,7 +505,7 @@ void cpu::op_swl() {
 }
 
 void cpu::op_swr() {
-  auto address = rs() + iconst();
+  auto address = rs() + decoder::iconst();
   auto data = read_data(WORD, address & ~3);
 
   switch (address & 3) {
@@ -551,7 +527,7 @@ void cpu::op_xor() {
 }
 
 void cpu::op_xori() {
-  set_rt(rs() ^ uconst());
+  set_rt(rs() ^ decoder::uconst());
 }
 
 void cpu::op_und() {

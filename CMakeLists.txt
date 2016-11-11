@@ -9,6 +9,7 @@ set(SOURCE_FILES
     src/cpu/cpu_code.cpp
     src/cpu/cpu_core.cpp
     src/cpu/cpu_core.hpp
+    src/cpu/decoder.cpp
     src/cpu/disassembler.cpp
     src/dma/dma_core.cpp
     src/dma/dma_core.hpp

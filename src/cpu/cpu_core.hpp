@@ -10,10 +10,7 @@ namespace cpu {
     } cop0;
 
     struct {
-      union {
-        uint32_t gp[32];
-      };
-
+      uint32_t gp[32];
       uint32_t lo;
       uint32_t hi;
       uint32_t pc;
@@ -132,6 +129,15 @@ namespace cpu {
 
   // undefined instruction
   void op_und();
+
+  namespace decoder {
+    uint32_t iconst();
+    uint32_t uconst();
+    uint32_t sa();
+    uint32_t rd();
+    uint32_t rt();
+    uint32_t rs();
+  }
 }
 
 #endif //PSXACT_CPU_CORE_HPP
