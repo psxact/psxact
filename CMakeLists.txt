@@ -6,6 +6,8 @@ find_package(SDL2 REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(SOURCE_FILES
+    src/cdrom/cdrom_core.cpp
+    src/cdrom/cdrom_core.hpp
     src/cpu/cpu_code.cpp
     src/cpu/cpu_core.cpp
     src/cpu/cpu_core.hpp

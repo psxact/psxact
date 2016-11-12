@@ -5,6 +5,7 @@
 #include "spu/spu_core.hpp"
 #include "utility.hpp"
 #include "timer/timer_core.hpp"
+#include "cdrom/cdrom_core.hpp"
 #include <stdexcept>
 #include <cstring>
 #include <cassert>
@@ -67,6 +68,10 @@ uint32_t bus::read(int size, uint32_t address) {
         utility::between<0x1f801110, 0x1f80111f>(address) ||
         utility::between<0x1f801120, 0x1f80112f>(address)) {
       return timer::mmio_read(size, address);
+    }
+
+    if (utility::between<0x1f801800, 0x1f801803>(address)) {
+      return cdrom::mmio_read(size, address);
     }
 
     if (utility::between<0x1f801810, 0x1f801817>(address)) {
@@ -136,6 +141,10 @@ void bus::write(int size, uint32_t address, uint32_t data) {
         utility::between<0x1f801110, 0x1f80111f>(address) ||
         utility::between<0x1f801120, 0x1f80112f>(address)) {
       return timer::mmio_write(size, address, data);
+    }
+
+    if (utility::between<0x1f801800, 0x1f801803>(address)) {
+      return cdrom::mmio_write(size, address, data);
     }
 
     if (utility::between<0x1f801810, 0x1f801817>(address)) {
