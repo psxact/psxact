@@ -31,6 +31,8 @@ int main(int argc, char *argv[]) {
                                  SDL_WINDOWPOS_CENTERED,
                                  SDL_WINDOWPOS_CENTERED, 1024, 512, 0);
 
+  auto surface = SDL_GetWindowSurface(window);
+
   SDL_Event event;
 
   while (true) {
@@ -39,7 +41,6 @@ int main(int argc, char *argv[]) {
     // put the frame buffer on the screen
     //
 
-    auto surface = SDL_GetWindowSurface(window);
     SDL_LockSurface(surface);
 
     auto pixels = (uint32_t *)surface->pixels;

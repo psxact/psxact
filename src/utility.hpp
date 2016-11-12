@@ -5,19 +5,55 @@
 #include <stdint.h>
 
 namespace utility {
-  void read_all_bytes(const char *, uint8_t *, int, int);
+  template<int bits>
+  struct memory_t {
+    static constexpr int mask = (1 << bits) - 1;
+    static constexpr int size = (1 << bits);
 
-  uint32_t read_byte(uint8_t *, uint32_t);
+    union {
+      uint8_t  b[size];
+      uint16_t h[size / 2];
+      uint32_t w[size / 4];
+    };
+  };
 
-  uint32_t read_half(uint8_t *, uint32_t);
+  template<int bits>
+  void read_all_bytes(const char *filename, memory_t<bits> &memory) {
+    if (FILE* file = fopen(filename, "rb+")) {
+      fread(memory.b, 1, memory.size, file);
+      fclose(file);
+    }
+  }
 
-  uint32_t read_word(uint8_t *, uint32_t);
+  template<int bits>
+  uint32_t read_byte(const memory_t<bits> &memory, uint32_t address) {
+    return memory.b[(address & memory.mask) / 1];
+  }
 
-  void write_byte(uint8_t *, uint32_t, uint32_t);
+  template<int bits>
+  uint32_t read_half(const memory_t<bits> &memory, uint32_t address) {
+    return memory.h[(address & memory.mask) / 2];
+  }
 
-  void write_half(uint8_t *, uint32_t, uint32_t);
+  template<int bits>
+  uint32_t read_word(const memory_t<bits> &memory, uint32_t address) {
+    return memory.w[(address & memory.mask) / 4];
+  }
 
-  void write_word(uint8_t *, uint32_t, uint32_t);
+  template<int bits>
+  void write_byte(memory_t<bits> &memory, uint32_t address, uint32_t data) {
+    memory.b[(address & memory.mask) / 1] = uint8_t(data);
+  }
+
+  template<int bits>
+  void write_half(memory_t<bits> &memory, uint32_t address, uint32_t data) {
+    memory.h[(address & memory.mask) / 2] = uint16_t(data);
+  }
+
+  template<int bits>
+  void write_word(memory_t<bits> &memory, uint32_t address, uint32_t data) {
+    memory.w[(address & memory.mask) / 4] = data;
+  }
 
   template<int bits>
   inline uint32_t sclip(uint32_t value) {

@@ -9,71 +9,49 @@
 #include <cstring>
 #include <cassert>
 
-uint8_t *bios = new uint8_t[utility::kib<512>()];
-uint8_t *wram = new uint8_t[utility::mib<  2>()];
-uint8_t *game = new uint8_t[utility::kib<  2>() * 495];
-uint8_t *dmem = new uint8_t[1024];
+utility::memory_t<19> bios;
+utility::memory_t<21> wram;
+utility::memory_t<10> dmem;
 
 void bus::initialize(const std::string &bios_file_name, const std::string &game_file_name) {
-  memset(bios, 0, utility::kib<512>());
-  memset(wram, 0, utility::mib<  2>());
+  memset(bios.b, 0, bios.size);
+  memset(wram.b, 0, wram.size);
 
-  utility::read_all_bytes(bios_file_name.c_str(), bios, 0, utility::kib<512>());
-  utility::read_all_bytes(game_file_name.c_str(), game, 0, utility::kib<  2>() * 495);
-
-  bios[0x6990] = 0;
-  bios[0x6991] = 0;
-  bios[0x6992] = 0;
-  bios[0x6993] = 0;
-}
-
-void bus::bootstrap_exe() {
-  cpu::state.regs.pc      = utility::read_word(game, 0x10);
-  cpu::state.regs.gp[ 4]  = 1;
-  cpu::state.regs.gp[ 5]  = 0;
-  cpu::state.regs.gp[28]  = utility::read_word(game, 0x14);
-  cpu::state.regs.gp[29]  = utility::read_word(game, 0x30) + utility::read_word(game, 0x34);
-  cpu::state.regs.gp[30]  = utility::read_word(game, 0x30) + utility::read_word(game, 0x34);
-  cpu::state.regs.next_pc = cpu::state.regs.pc + 4;
-
-  int text_start = utility::read_word(game, 0x18);
-  int text_count = utility::read_word(game, 0x1c);
-
-  printf("Loading executable into WRAM..\n");
-  printf("  PC: $%08x\n", cpu::state.regs.pc);
-  printf("  GP: $%08x\n", cpu::state.regs.gp[28]);
-  printf("  SP: $%08x\n", cpu::state.regs.gp[29]);
-  printf("  FP: $%08x\n", cpu::state.regs.gp[30]);
-
-  for (int i = 0; i < text_count; i++) {
-    wram[(text_start + i) & 0x1fffff] = game[0x800 + i];
-  }
+  utility::read_all_bytes(bios_file_name.c_str(), bios);
 }
 
 uint32_t bus::read(int size, uint32_t address) {
   if (utility::between<0x00000000, 0x007fffff>(address)) {
     switch (size) {
-    case BYTE: return utility::read_byte(wram, address & 0x1fffff);
-    case HALF: return utility::read_half(wram, address & 0x1ffffe);
-    case WORD: return utility::read_word(wram, address & 0x1ffffc);
+      case BYTE: return utility::read_byte(wram, address);
+      case HALF: return utility::read_half(wram, address);
+      case WORD: return utility::read_word(wram, address);
+
+      default:
+        throw "unknown width";
     }
   }
 
   if (utility::between<0x1fc00000, 0x1fc7ffff>(address)) {
     switch (size) {
-      case BYTE: return utility::read_byte(bios, address & 0x7ffff);
-      case HALF: return utility::read_half(bios, address & 0x7fffe);
-      case WORD: return utility::read_word(bios, address & 0x7fffc);
+      case BYTE: return utility::read_byte(bios, address);
+      case HALF: return utility::read_half(bios, address);
+      case WORD: return utility::read_word(bios, address);
+
+      default:
+        throw "unknown width";
     }
   }
 
   if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
     switch (size) {
-      case BYTE: return utility::read_byte(dmem, address & 0x7ffff);
-      case HALF: return utility::read_half(dmem, address & 0x7fffe);
-      case WORD: return utility::read_word(dmem, address & 0x7fffc);
+      case BYTE: return utility::read_byte(dmem, address);
+      case HALF: return utility::read_half(dmem, address);
+      case WORD: return utility::read_word(dmem, address);
+
+      default:
+        throw "unknown width";
     }
-    return 0;
   }
 
   if (utility::between<0x1f801000, 0x1f801fff>(address)) {
@@ -120,9 +98,12 @@ uint32_t bus::read(int size, uint32_t address) {
 void bus::write(int size, uint32_t address, uint32_t data) {
   if (utility::between<0x00000000, 0x007fffff>(address)) {
     switch (size) {
-    case BYTE: return utility::write_byte(wram, address & 0x1fffff, data);
-    case HALF: return utility::write_half(wram, address & 0x1ffffe, data);
-    case WORD: return utility::write_word(wram, address & 0x1ffffc, data);
+      case BYTE: return utility::write_byte(wram, address, data);
+      case HALF: return utility::write_half(wram, address, data);
+      case WORD: return utility::write_word(wram, address, data);
+
+      default:
+        throw "unknown width";
     }
   }
 
@@ -133,11 +114,13 @@ void bus::write(int size, uint32_t address, uint32_t data) {
 
   if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
     switch (size) {
-      case BYTE: return utility::write_byte(dmem, address & 0x1fffff, data);
-      case HALF: return utility::write_half(dmem, address & 0x1ffffe, data);
-      case WORD: return utility::write_word(dmem, address & 0x1ffffc, data);
+      case BYTE: return utility::write_byte(dmem, address, data);
+      case HALF: return utility::write_half(dmem, address, data);
+      case WORD: return utility::write_word(dmem, address, data);
+
+      default:
+        throw "unknown width";
     }
-    return;
   }
 
   if (utility::between<0x1f801000, 0x1f801fff>(address)) {
@@ -153,10 +136,6 @@ void bus::write(int size, uint32_t address, uint32_t data) {
         utility::between<0x1f801110, 0x1f80111f>(address) ||
         utility::between<0x1f801120, 0x1f80112f>(address)) {
       return timer::mmio_write(size, address, data);
-    }
-
-    if (utility::between<0x1f801800, 0x1f801803>(address)) {
-      return bootstrap_exe();
     }
 
     if (utility::between<0x1f801810, 0x1f801817>(address)) {

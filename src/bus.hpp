@@ -16,8 +16,6 @@ namespace bus {
   uint32_t read(int, uint32_t);
 
   void write(int, uint32_t, uint32_t);
-
-  void bootstrap_exe();
 }
 
 #endif //PSXACT_BUS_HPP

@@ -25,7 +25,6 @@ set(SOURCE_FILES
     src/bus.cpp
     src/bus.hpp
     src/psxact.cpp
-    src/utility.cpp
     src/utility.hpp)
 
 add_executable(psxact ${SOURCE_FILES})
