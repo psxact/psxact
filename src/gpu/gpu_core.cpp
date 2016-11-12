@@ -397,7 +397,7 @@ static inline void write_gp1(uint32_t data) {
   }
 }
 
-uint32_t gpu::read(int size, uint32_t address) {
+uint32_t gpu::mmio_read(int size, uint32_t address) {
   assert(size == WORD);
 
   switch (address - 0x1f801810) {
@@ -409,7 +409,7 @@ uint32_t gpu::read(int size, uint32_t address) {
   }
 }
 
-void gpu::write(int size, uint32_t address, uint32_t data) {
+void gpu::mmio_write(int size, uint32_t address, uint32_t data) {
   assert(size == WORD);
 
   switch (address - 0x1f801810) {

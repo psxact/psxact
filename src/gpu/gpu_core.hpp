@@ -53,9 +53,9 @@ namespace gpu {
     uint32_t gp0_texture_download_size;
   };
 
-  uint32_t read(int size, uint32_t address);
+  uint32_t mmio_read(int size, uint32_t address);
 
-  void write(int size, uint32_t address, uint32_t data);
+  void mmio_write(int size, uint32_t address, uint32_t data);
 
   uint16_t read_vram(int x, int y);
 

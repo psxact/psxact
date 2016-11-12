@@ -70,11 +70,11 @@ uint32_t bus::read(int size, uint32_t address) {
     }
 
     if (utility::between<0x1f801810, 0x1f801817>(address)) {
-      return gpu::read(size, address);
+      return gpu::mmio_read(size, address);
     }
 
     if (utility::between<0x1f801c00, 0x1f801fff>(address)) {
-      return spu::read(size, address);
+      return spu::mmio_read(size, address);
     }
 
     printf("unhandled mmio read: $%08x\n", address);
@@ -139,11 +139,11 @@ void bus::write(int size, uint32_t address, uint32_t data) {
     }
 
     if (utility::between<0x1f801810, 0x1f801817>(address)) {
-      return gpu::write(size, address, data);
+      return gpu::mmio_write(size, address, data);
     }
 
     if (utility::between<0x1f801c00, 0x1f801fff>(address)) {
-      return spu::write(size, address, data);
+      return spu::mmio_write(size, address, data);
     }
 
     switch (address) {
