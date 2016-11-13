@@ -17,69 +17,99 @@ utility::memory_t<10> dmem;
 void bus::initialize(const std::string &bios_file_name, const std::string &game_file_name) {
   memset(bios.b, 0, bios.size);
   memset(wram.b, 0, wram.size);
+  memset(dmem.b, 0, dmem.size);
 
   utility::read_all_bytes(bios_file_name.c_str(), bios);
 }
 
-uint32_t bus::read(int size, uint32_t address) {
+uint32_t bus::read_byte(uint32_t address) {
   if (utility::between<0x00000000, 0x007fffff>(address)) {
-    switch (size) {
-      case BYTE: return utility::read_byte(wram, address);
-      case HALF: return utility::read_half(wram, address);
-      case WORD: return utility::read_word(wram, address);
-
-      default:
-        throw "unknown width";
-    }
+    return utility::read_byte(wram, address);
   }
 
   if (utility::between<0x1fc00000, 0x1fc7ffff>(address)) {
-    switch (size) {
-      case BYTE: return utility::read_byte(bios, address);
-      case HALF: return utility::read_half(bios, address);
-      case WORD: return utility::read_word(bios, address);
-
-      default:
-        throw "unknown width";
-    }
+    return utility::read_byte(bios, address);
   }
 
   if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
-    switch (size) {
-      case BYTE: return utility::read_byte(dmem, address);
-      case HALF: return utility::read_half(dmem, address);
-      case WORD: return utility::read_word(dmem, address);
+    return utility::read_byte(dmem, address);
+  }
 
-      default:
-        throw "unknown width";
-    }
+  if (address == 0x1f000084) {
+    return 0;
+  }
+
+  if (utility::between<0x1f801800, 0x1f801803>(address)) {
+    return cdrom::mmio_read(BYTE, address);
+  }
+
+  printf("unknown read: $%08x\n", address);
+  throw std::runtime_error("unknown read");
+}
+
+uint32_t bus::read_half(uint32_t address) {
+  if (utility::between<0x00000000, 0x007fffff>(address)) {
+    return utility::read_half(wram, address);
+  }
+
+  if (utility::between<0x1fc00000, 0x1fc7ffff>(address)) {
+    return utility::read_half(bios, address);
+  }
+
+  if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
+    return utility::read_half(dmem, address);
+  }
+
+  if (utility::between<0x1f801070, 0x1f801077>(address)) {
+    return cpu::mmio_read(HALF, address);
+  }
+
+  if (utility::between<0x1f801c00, 0x1f801fff>(address)) {
+    return spu::mmio_read(HALF, address);
+  }
+
+  printf("unknown read: $%08x\n", address);
+  throw std::runtime_error("unknown read");
+}
+
+uint32_t bus::read_word(uint32_t address) {
+  if (utility::between<0x00000000, 0x007fffff>(address)) {
+    return utility::read_word(wram, address);
+  }
+
+  if (utility::between<0x1fc00000, 0x1fc7ffff>(address)) {
+    return utility::read_word(bios, address);
+  }
+
+  if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
+    return utility::read_word(dmem, address);
   }
 
   if (utility::between<0x1f801000, 0x1f801fff>(address)) {
     if (utility::between<0x1f801070, 0x1f80107f>(address)) {
-      return cpu::mmio_read(size, address);
+      return cpu::mmio_read(WORD, address);
     }
 
     if (utility::between<0x1f801080, 0x1f8010ff>(address)) {
-      return dma::mmio_read(size, address);
+      return dma::mmio_read(WORD, address);
     }
 
     if (utility::between<0x1f801100, 0x1f80110f>(address) ||
         utility::between<0x1f801110, 0x1f80111f>(address) ||
         utility::between<0x1f801120, 0x1f80112f>(address)) {
-      return timer::mmio_read(size, address);
+      return timer::mmio_read(WORD, address);
     }
 
     if (utility::between<0x1f801800, 0x1f801803>(address)) {
-      return cdrom::mmio_read(size, address);
+      return cdrom::mmio_read(WORD, address);
     }
 
     if (utility::between<0x1f801810, 0x1f801817>(address)) {
-      return gpu::mmio_read(size, address);
+      return gpu::mmio_read(WORD, address);
     }
 
     if (utility::between<0x1f801c00, 0x1f801fff>(address)) {
-      return spu::mmio_read(size, address);
+      return spu::mmio_read(WORD, address);
     }
 
     printf("unhandled mmio read: $%08x\n", address);

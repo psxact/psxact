@@ -95,27 +95,67 @@ void cpu::read_code() {
 
   // todo: read i-cache
 
-  state.code = bus::read(WORD, map_address(state.regs.this_pc));
+  state.code = bus::read_word(map_address(state.regs.this_pc));
 }
 
-uint32_t cpu::read_data(int size, uint32_t address) {
+uint32_t cpu::read_data_byte(uint32_t address) {
   if (state.cop0.regs[12] & (1 << 16)) {
     return 0; // isc=1
   }
 
   // todo: read d-cache?
 
-  return bus::read(size, map_address(address));
+  return bus::read_byte(map_address(address));
 }
 
-void cpu::write_data(int size, uint32_t address, uint32_t data) {
+uint32_t cpu::read_data_half(uint32_t address) {
+  if (state.cop0.regs[12] & (1 << 16)) {
+    return 0; // isc=1
+  }
+
+  // todo: read d-cache?
+
+  return bus::read_half(map_address(address));
+}
+
+uint32_t cpu::read_data_word(uint32_t address) {
+  if (state.cop0.regs[12] & (1 << 16)) {
+    return 0; // isc=1
+  }
+
+  // todo: read d-cache?
+
+  return bus::read_word(map_address(address));
+}
+
+void cpu::write_data_byte(uint32_t address, uint32_t data) {
   if (state.cop0.regs[12] & (1 << 16)) {
     return; // isc=1
   }
 
   // todo: write d-cache?
 
-  return bus::write(size, map_address(address), data);
+  return bus::write(BYTE, map_address(address), data);
+}
+
+void cpu::write_data_half(uint32_t address, uint32_t data) {
+  if (state.cop0.regs[12] & (1 << 16)) {
+    return; // isc=1
+  }
+
+  // todo: write d-cache?
+
+  return bus::write(HALF, map_address(address), data);
+}
+
+void cpu::write_data_word(uint32_t address, uint32_t data) {
+  if (state.cop0.regs[12] & (1 << 16)) {
+    return; // isc=1
+  }
+
+  // todo: write d-cache?
+
+  return bus::write(WORD, map_address(address), data);
 }
 
 uint32_t cpu::mmio_read(int, uint32_t address) {
