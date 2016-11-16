@@ -6,9 +6,14 @@
 
 namespace cdrom {
   struct state_t {
+    uint32_t interrupt_enable;
+    uint32_t interrupt_request;
+
     int index;
 
-    std::deque<uint8_t> parameter_fifo;
+    std::deque<uint8_t> args_fifo;
+    std::deque<uint8_t> resp_fifo;
+    std::deque<uint8_t> data_fifo;
   };
 
   extern state_t state;

@@ -130,16 +130,9 @@ uint32_t bus::read_word(uint32_t address) {
   throw std::runtime_error("unknown read");
 }
 
-void bus::write(int size, uint32_t address, uint32_t data) {
+void bus::write_byte(uint32_t address, uint32_t data) {
   if (utility::between<0x00000000, 0x007fffff>(address)) {
-    switch (size) {
-      case BYTE: return utility::write_byte(wram, address, data);
-      case HALF: return utility::write_half(wram, address, data);
-      case WORD: return utility::write_word(wram, address, data);
-
-      default:
-        throw "unknown width";
-    }
+    return utility::write_byte(wram, address, data);
   }
 
   if (utility::between<0x1fc00000, 0x1fc7ffff>(address)) {
@@ -148,41 +141,96 @@ void bus::write(int size, uint32_t address, uint32_t data) {
   }
 
   if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
-    switch (size) {
-      case BYTE: return utility::write_byte(dmem, address, data);
-      case HALF: return utility::write_half(dmem, address, data);
-      case WORD: return utility::write_word(dmem, address, data);
+    return utility::write_byte(dmem, address, data);
+  }
 
-      default:
-        throw "unknown width";
-    }
+  if (utility::between<0x1f801800, 0x1f801803>(address)) {
+    return cdrom::mmio_write(BYTE, address, data);
+  }
+
+  if (address == 0x1f802041) {
+    return;
+  }
+
+  throw std::runtime_error("unknown write");
+}
+
+void bus::write_half(uint32_t address, uint32_t data) {
+  if (utility::between<0x00000000, 0x007fffff>(address)) {
+    return utility::write_half(wram, address, data);
+  }
+
+  if (utility::between<0x1fc00000, 0x1fc7ffff>(address)) {
+    printf("bios write: $%08x <- $%08x\n", address, data);
+    return;
+  }
+
+  if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
+    return utility::write_half(dmem, address, data);
+  }
+
+  if (utility::between<0x1f801070, 0x1f801077>(address)) {
+    return cpu::mmio_write(HALF, address, data);
+  }
+
+  if (utility::between<0x1f801c00, 0x1f801fff>(address)) {
+    return spu::mmio_write(HALF, address, data);
+  }
+
+  if (address == 0x1f801100 ||
+      address == 0x1f801104 ||
+      address == 0x1f801108 ||
+      address == 0x1f801110 ||
+      address == 0x1f801114 ||
+      address == 0x1f801118 ||
+      address == 0x1f801120 ||
+      address == 0x1f801124 ||
+      address == 0x1f801128) {
+    return;
+  }
+
+  throw std::runtime_error("unknown write");
+}
+
+void bus::write_word(uint32_t address, uint32_t data) {
+  if (utility::between<0x00000000, 0x007fffff>(address)) {
+    return utility::write_word(wram, address, data);
+  }
+
+  if (utility::between<0x1fc00000, 0x1fc7ffff>(address)) {
+    printf("bios write: $%08x <- $%08x\n", address, data);
+    return;
+  }
+
+  if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
+    return utility::write_word(dmem, address, data);
   }
 
   if (utility::between<0x1f801000, 0x1f801fff>(address)) {
     if (utility::between<0x1f801070, 0x1f80107f>(address)) {
-      return cpu::mmio_write(size, address, data);
+      return cpu::mmio_write(WORD, address, data);
     }
 
     if (utility::between<0x1f801080, 0x1f8010ff>(address)) {
-      return dma::mmio_write(size, address, data);
+      return dma::mmio_write(WORD, address, data);
     }
 
     if (utility::between<0x1f801100, 0x1f80110f>(address) ||
         utility::between<0x1f801110, 0x1f80111f>(address) ||
         utility::between<0x1f801120, 0x1f80112f>(address)) {
-      return timer::mmio_write(size, address, data);
+      return timer::mmio_write(WORD, address, data);
     }
 
     if (utility::between<0x1f801800, 0x1f801803>(address)) {
-      return cdrom::mmio_write(size, address, data);
+      return cdrom::mmio_write(WORD, address, data);
     }
 
     if (utility::between<0x1f801810, 0x1f801817>(address)) {
-      return gpu::mmio_write(size, address, data);
+      return gpu::mmio_write(WORD, address, data);
     }
 
     if (utility::between<0x1f801c00, 0x1f801fff>(address)) {
-      return spu::mmio_write(size, address, data);
+      return spu::mmio_write(WORD, address, data);
     }
 
     switch (address) {

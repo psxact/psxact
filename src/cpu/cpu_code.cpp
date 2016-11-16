@@ -2,17 +2,6 @@
 #include "../bus.hpp"
 #include "../utility.hpp"
 
-static void (*op_table_special[64])() = {
-  cpu::op_sll,  cpu::op_und,   cpu::op_srl,  cpu::op_sra,  cpu::op_sllv,    cpu::op_und,   cpu::op_srlv, cpu::op_srav,
-  cpu::op_jr,   cpu::op_jalr,  cpu::op_und,  cpu::op_und,  cpu::op_syscall, cpu::op_break, cpu::op_und,  cpu::op_und,
-  cpu::op_mfhi, cpu::op_mthi,  cpu::op_mflo, cpu::op_mtlo, cpu::op_und,     cpu::op_und,   cpu::op_und,  cpu::op_und,
-  cpu::op_mult, cpu::op_multu, cpu::op_div,  cpu::op_divu, cpu::op_und,     cpu::op_und,   cpu::op_und,  cpu::op_und,
-  cpu::op_add,  cpu::op_addu,  cpu::op_sub,  cpu::op_subu, cpu::op_and,     cpu::op_or,    cpu::op_xor,  cpu::op_nor,
-  cpu::op_und,  cpu::op_und,   cpu::op_slt,  cpu::op_sltu, cpu::op_und,     cpu::op_und,   cpu::op_und,  cpu::op_und,
-  cpu::op_und,  cpu::op_und,   cpu::op_und,  cpu::op_und,  cpu::op_und,     cpu::op_und,   cpu::op_und,  cpu::op_und,
-  cpu::op_und,  cpu::op_und,   cpu::op_und,  cpu::op_und,  cpu::op_und,     cpu::op_und,   cpu::op_und,  cpu::op_und
-};
-
 // --========--
 //   Decoding
 // --========--
@@ -113,25 +102,6 @@ void cpu::op_beq() {
   }
 }
 
-void cpu::op_reg_imm() {
-  // bgez rs,$nnnn
-  // bgezal rs,$nnnn
-  // bltz rs,$nnnn
-  // bltzal rs,$nnnn
-  bool condition = (state.code & (1 << 16))
-                   ? int32_t(rs()) >= 0
-                   : int32_t(rs()) <  0;
-
-  if ((state.code & 0x1e0000) == 0x100000) {
-    state.regs.gp[31] = state.regs.next_pc;
-  }
-
-  if (condition) {
-    state.regs.next_pc = state.regs.pc + (decoder::iconst() << 2);
-    state.is_branch = true;
-  }
-}
-
 void cpu::op_bgtz() {
   if (int32_t(rs()) > 0) {
     state.regs.next_pc = state.regs.pc + (decoder::iconst() << 2);
@@ -155,6 +125,25 @@ void cpu::op_bne() {
 
 void cpu::op_break() {
   enter_exception(0x09);
+}
+
+void cpu::op_bxx() {
+  // bgez rs,$nnnn
+  // bgezal rs,$nnnn
+  // bltz rs,$nnnn
+  // bltzal rs,$nnnn
+  bool condition = (state.code & (1 << 16))
+                   ? int32_t(rs()) >= 0
+                   : int32_t(rs()) <  0;
+
+  if ((state.code & 0x1e0000) == 0x100000) {
+    state.regs.gp[31] = state.regs.next_pc;
+  }
+
+  if (condition) {
+    state.regs.next_pc = state.regs.pc + (decoder::iconst() << 2);
+    state.is_branch = true;
+  }
 }
 
 void cpu::op_cop0() {
@@ -425,10 +414,6 @@ void cpu::op_sltiu() {
 
 void cpu::op_sltu() {
   set_rd(rs() < rt() ? 1 : 0);
-}
-
-void cpu::op_special() {
-  op_table_special[cpu::state.code & 63]();
 }
 
 void cpu::op_sra() {

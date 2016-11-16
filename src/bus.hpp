@@ -19,7 +19,11 @@ namespace bus {
 
   uint32_t read_word(uint32_t address);
 
-  void write(int, uint32_t, uint32_t);
+  void write_byte(uint32_t, uint32_t);
+
+  void write_half(uint32_t, uint32_t);
+
+  void write_word(uint32_t, uint32_t);
 }
 
 #endif //PSXACT_BUS_HPP

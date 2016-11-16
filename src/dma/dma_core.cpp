@@ -72,9 +72,9 @@ static void dma_sync_mode_0(dma::channel_t &channel) {
 
   do {
     if (count == 1) {
-      bus::write(WORD, address, 0x00ffffff);
+      bus::write_word(address, 0x00ffffff);
     } else {
-      bus::write(WORD, address, address - 4);
+      bus::write_word(address, address - 4);
     }
 
     address += address_step;
@@ -106,7 +106,7 @@ static void dma_sync_mode_1(dma::channel_t &channel) {
 
   for (int i = 0; i < length; i++) {
     auto data = bus::read_word(address);
-    bus::write(WORD, channel.dst_address, data);
+    bus::write_word(channel.dst_address, data);
     address += address_step;
   }
 
@@ -128,7 +128,7 @@ static void dma_sync_mode_2(dma::channel_t &channel) {
       address += 4;
       auto command = bus::read_word(address);
 
-      bus::write(WORD, channel.dst_address, command);
+      bus::write_word(channel.dst_address, command);
     }
 
     address = header & 0xffffff;

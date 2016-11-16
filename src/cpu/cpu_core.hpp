@@ -4,6 +4,11 @@
 #include <cstdint>
 
 namespace cpu {
+  typedef void (*opcode)();
+
+  extern opcode op_table[64];
+  extern opcode op_table_special[64];
+
   struct state_t {
     struct {
       uint32_t regs[16];
@@ -73,11 +78,11 @@ namespace cpu {
   void op_and();
   void op_andi();
   void op_beq();
-  void op_reg_imm();
   void op_bgtz();
   void op_blez();
   void op_bne();
   void op_break();
+  void op_bxx();
   void op_cop0();
   void op_cop1();
   void op_cop2();
@@ -117,7 +122,6 @@ namespace cpu {
   void op_slti();
   void op_sltiu();
   void op_sltu();
-  void op_special();
   void op_sra();
   void op_srav();
   void op_srl();

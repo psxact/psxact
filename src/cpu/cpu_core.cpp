@@ -4,22 +4,33 @@
 
 cpu::state_t cpu::state;
 
+cpu::opcode cpu::op_table[64] = {
+  nullptr, op_bxx,   op_j,    op_jal,   op_beq,  op_bne, op_blez, op_bgtz,
+  op_addi, op_addiu, op_slti, op_sltiu, op_andi, op_ori, op_xori, op_lui,
+  op_cop0, op_cop1,  op_cop2, op_cop3,  op_und,  op_und, op_und,  op_und,
+  op_und,  op_und,   op_und,  op_und,   op_und,  op_und, op_und,  op_und,
+  op_lb,   op_lh,    op_lwl,  op_lw,    op_lbu,  op_lhu, op_lwr,  op_und,
+  op_sb,   op_sh,    op_swl,  op_sw,    op_und,  op_und, op_swr,  op_und,
+  op_lwc0, op_lwc1,  op_lwc2, op_lwc3,  op_und,  op_und, op_und,  op_und,
+  op_swc0, op_swc1,  op_swc2, op_swc3,  op_und,  op_und, op_und,  op_und
+};
+
+cpu::opcode cpu::op_table_special[64] = {
+  op_sll,  op_und,   op_srl,  op_sra,  op_sllv,    op_und,   op_srlv, op_srav,
+  op_jr,   op_jalr,  op_und,  op_und,  op_syscall, op_break, op_und,  op_und,
+  op_mfhi, op_mthi,  op_mflo, op_mtlo, op_und,     op_und,   op_und,  op_und,
+  op_mult, op_multu, op_div,  op_divu, op_und,     op_und,   op_und,  op_und,
+  op_add,  op_addu,  op_sub,  op_subu, op_and,     op_or,    op_xor,  op_nor,
+  op_und,  op_und,   op_slt,  op_sltu, op_und,     op_und,   op_und,  op_und,
+  op_und,  op_und,   op_und,  op_und,  op_und,     op_und,   op_und,  op_und,
+  op_und,  op_und,   op_und,  op_und,  op_und,     op_und,   op_und,  op_und
+};
+
 void cpu::initialize() {
   state.regs.gp[0] = 0;
   state.regs.pc = 0xbfc00000;
   state.regs.next_pc = state.regs.pc + 4;
 }
-
-static void (*op_table[64])() = {
-  cpu::op_special, cpu::op_reg_imm, cpu::op_j,    cpu::op_jal,   cpu::op_beq,  cpu::op_bne, cpu::op_blez, cpu::op_bgtz,
-  cpu::op_addi,    cpu::op_addiu,   cpu::op_slti, cpu::op_sltiu, cpu::op_andi, cpu::op_ori, cpu::op_xori, cpu::op_lui,
-  cpu::op_cop0,    cpu::op_cop1,    cpu::op_cop2, cpu::op_cop3,  cpu::op_und,  cpu::op_und, cpu::op_und,  cpu::op_und,
-  cpu::op_und,     cpu::op_und,     cpu::op_und,  cpu::op_und,   cpu::op_und,  cpu::op_und, cpu::op_und,  cpu::op_und,
-  cpu::op_lb,      cpu::op_lh,      cpu::op_lwl,  cpu::op_lw,    cpu::op_lbu,  cpu::op_lhu, cpu::op_lwr,  cpu::op_und,
-  cpu::op_sb,      cpu::op_sh,      cpu::op_swl,  cpu::op_sw,    cpu::op_und,  cpu::op_und, cpu::op_swr,  cpu::op_und,
-  cpu::op_lwc0,    cpu::op_lwc1,    cpu::op_lwc2, cpu::op_lwc3,  cpu::op_und,  cpu::op_und, cpu::op_und,  cpu::op_und,
-  cpu::op_swc0,    cpu::op_swc1,    cpu::op_swc2, cpu::op_swc3,  cpu::op_und,  cpu::op_und, cpu::op_und,  cpu::op_und
-};
 
 void cpu::run(int count) {
   for (int i = 0; i < count; i++) {
@@ -31,7 +42,11 @@ void cpu::run(int count) {
     state.is_load_delay_slot = state.is_load;
     state.is_load = false;
 
-    op_table[(cpu::state.code >> 26) & 63]();
+    auto code = (cpu::state.code >> 26) & 63;
+    if (code)
+      op_table[code]();
+    else
+      op_table_special[(cpu::state.code >> 0) & 63]();
   }
 }
 
@@ -42,12 +57,13 @@ void cpu::enter_exception(uint32_t code) {
   uint32_t cause = state.cop0.regs[13];
   cause = (cause & ~0x7f) | ((code << 2) & 0x7f);
 
-  auto epc = state.regs.this_pc;
+  uint32_t epc;
 
   if (state.is_branch_delay_slot) {
-    epc -= 4;
+    epc = state.regs.this_pc - 4;
     cause |= (1 << 31);
   } else {
+    epc = state.regs.this_pc;
     cause &= ~(1 << 31);
   }
 
@@ -135,7 +151,7 @@ void cpu::write_data_byte(uint32_t address, uint32_t data) {
 
   // todo: write d-cache?
 
-  return bus::write(BYTE, map_address(address), data);
+  return bus::write_byte(map_address(address), data);
 }
 
 void cpu::write_data_half(uint32_t address, uint32_t data) {
@@ -145,7 +161,7 @@ void cpu::write_data_half(uint32_t address, uint32_t data) {
 
   // todo: write d-cache?
 
-  return bus::write(HALF, map_address(address), data);
+  return bus::write_half(map_address(address), data);
 }
 
 void cpu::write_data_word(uint32_t address, uint32_t data) {
@@ -155,7 +171,7 @@ void cpu::write_data_word(uint32_t address, uint32_t data) {
 
   // todo: write d-cache?
 
-  return bus::write(WORD, map_address(address), data);
+  return bus::write_word(map_address(address), data);
 }
 
 uint32_t cpu::mmio_read(int, uint32_t address) {
