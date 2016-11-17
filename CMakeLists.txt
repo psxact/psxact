@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.0)
 project(psxact)
 
 find_package(SDL2 REQUIRED)
@@ -29,4 +29,4 @@ set(SOURCE_FILES
 
 add_executable(psxact ${SOURCE_FILES})
 
-target_link_libraries(psxact ${SDL2_LIBRARIES})
+target_link_libraries(psxact ${SDL2_LIBRARY})
