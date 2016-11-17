@@ -19,8 +19,7 @@ namespace gpu {
     bool textured_rectangle_x_flip;
     bool textured_rectangle_y_flip;
 
-    std::deque<uint32_t> gp0_fifo;
-    std::deque<uint32_t> gp1_fifo;
+    std::deque<uint32_t> fifo;
 
     uint32_t gp0_command;
     uint32_t texture_window_mask_x;
@@ -80,17 +79,14 @@ namespace gpu {
       color_t color;
     };
 
-    struct poly3_t {
-      pixel_t v[3];
+    template<int size>
+    struct polygon_t {
+      pixel_t v[size];
     };
 
-    struct poly4_t {
-      pixel_t v[4];
-    };
+    void draw_poly3(const gpu::gouraud::polygon_t<3> &p);
 
-    void draw_poly3(const gpu::gouraud::poly3_t &p);
-
-    void draw_poly4(const gpu::gouraud::poly4_t &p);
+    void draw_poly4(const gpu::gouraud::polygon_t<4> &p);
   }
 
   namespace texture {
@@ -101,30 +97,18 @@ namespace gpu {
       int v;
     };
 
-    struct poly3_t {
-      pixel_t v0;
-      pixel_t v1;
-      pixel_t v2;
+    template<int size>
+    struct polygon_t {
+      pixel_t v[size];
       int clut_x;
       int clut_y;
       int base_u;
       int base_v;
     };
 
-    struct poly4_t {
-      pixel_t v0;
-      pixel_t v1;
-      pixel_t v2;
-      pixel_t v3;
-      int clut_x;
-      int clut_y;
-      int base_u;
-      int base_v;
-    };
+    void draw_poly3(const polygon_t<3> &p);
 
-    void draw_poly3(const poly3_t &p);
-
-    void draw_poly4(const poly4_t &p);
+    void draw_poly4(const polygon_t<4> &p);
   }
 }
 

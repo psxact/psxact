@@ -106,8 +106,8 @@ static gpu::texture::pixel_t gp0_to_texture_pixel(uint32_t point, uint32_t color
 }
 
 static inline uint32_t get_gp0_data() {
-  auto data = state.gp0_fifo.front();
-  state.gp0_fifo.pop_front();
+  auto data = state.fifo.front();
+  state.fifo.pop_front();
 
   return data;
 }
@@ -138,13 +138,13 @@ static inline void write_gp0(uint32_t data) {
     return;
   }
 
-  if (state.gp0_fifo.size() == 0) {
+  if (state.fifo.size() == 0) {
     state.gp0_command = data >> 24;
   }
 
-  state.gp0_fifo.push_back(data);
+  state.fifo.push_back(data);
 
-  if (state.gp0_fifo.size() == gp0_command_size[state.gp0_command]) {
+  if (state.fifo.size() == gp0_command_size[state.gp0_command]) {
     switch (state.gp0_command) {
       case 0x00: get_gp0_data(); break; // nop
       case 0x01: get_gp0_data(); break; // clear texture cache
@@ -176,12 +176,12 @@ static inline void write_gp0(uint32_t data) {
         auto point4 = get_gp0_data();
         auto tcoord4 = get_gp0_data();
 
-        gpu::texture::poly4_t p;
+        gpu::texture::polygon_t<4> p;
 
-        p.v0 = gp0_to_texture_pixel(point1, color, tcoord1);
-        p.v1 = gp0_to_texture_pixel(point2, color, tcoord2);
-        p.v2 = gp0_to_texture_pixel(point3, color, tcoord3);
-        p.v3 = gp0_to_texture_pixel(point4, color, tcoord4);
+        p.v[0] = gp0_to_texture_pixel(point1, color, tcoord1);
+        p.v[1] = gp0_to_texture_pixel(point2, color, tcoord2);
+        p.v[2] = gp0_to_texture_pixel(point3, color, tcoord3);
+        p.v[3] = gp0_to_texture_pixel(point4, color, tcoord4);
         p.clut_x = ((tcoord1 >> 16) & 0x03f) * 16;
         p.clut_y = ((tcoord1 >> 22) & 0x1ff) * 1;
         p.base_u = ((tcoord2 >> 16) & 0x00f) * 64;
@@ -343,7 +343,7 @@ static inline void write_gp1(uint32_t data) {
 
     case 0x01:
       state.gp0_command = 0;
-      state.gp0_fifo.clear();
+      state.fifo.clear();
       state.texture_upload.remaining = 0;
       break;
 

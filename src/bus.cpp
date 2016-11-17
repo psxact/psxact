@@ -15,9 +15,9 @@ utility::memory_t<21> wram;
 utility::memory_t<10> dmem;
 
 void bus::initialize(const std::string &bios_file_name, const std::string &game_file_name) {
-  memset(bios.b, 0, bios.size);
-  memset(wram.b, 0, wram.size);
-  memset(dmem.b, 0, dmem.size);
+  memset(bios.b, 0, size_t(bios.size));
+  memset(wram.b, 0, size_t(wram.size));
+  memset(dmem.b, 0, size_t(dmem.size));
 
   utility::read_all_bytes(bios_file_name.c_str(), bios);
 }

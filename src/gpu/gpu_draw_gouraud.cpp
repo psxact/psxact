@@ -87,7 +87,7 @@ static inline int double_area(const gpu::point_t &v0, const gpu::point_t &v1, co
   return e0 + e1 + e2;
 }
 
-void gpu::gouraud::draw_poly3(const poly3_t &p) {
+void gpu::gouraud::draw_poly3(const polygon_t<3> &p) {
   const auto &p0 = p.v[0];
   const auto &p1 = p.v[1];
   const auto &p2 = p.v[2];
@@ -99,7 +99,7 @@ void gpu::gouraud::draw_poly3(const poly3_t &p) {
   }
 }
 
-void gpu::gouraud::draw_poly4(const poly4_t &p) {
+void gpu::gouraud::draw_poly4(const polygon_t<4> &p) {
   auto &v0 = p.v[0];
   auto &v1 = p.v[1];
   auto &v2 = p.v[2];
