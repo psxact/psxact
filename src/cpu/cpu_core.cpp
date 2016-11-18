@@ -42,11 +42,24 @@ void cpu::run(int count) {
     state.is_load_delay_slot = state.is_load;
     state.is_load = false;
 
-    auto code = (cpu::state.code >> 26) & 63;
-    if (code)
-      op_table[code]();
-    else
-      op_table_special[(cpu::state.code >> 0) & 63]();
+    if (state.i_stat & state.i_mask) {
+      state.cop0.regs[13] |= (1 << 10);
+    } else {
+      state.cop0.regs[13] &= ~(1 << 10);
+    }
+
+    auto iec = state.cop0.regs[12] & 1;
+    auto irq = state.cop0.regs[12] & state.cop0.regs[13] & 0xf0;
+
+    if (iec && irq) {
+      enter_exception(0x0);
+    } else {
+      auto code = (cpu::state.code >> 26) & 63;
+      if (code)
+        op_table[code]();
+      else
+        op_table_special[(cpu::state.code >> 0) & 63]();
+    }
   }
 }
 
@@ -184,6 +197,6 @@ uint32_t cpu::mmio_read(int, uint32_t address) {
 void cpu::mmio_write(int, uint32_t address, uint32_t data) {
   switch (address - 0x1f801070) {
     case 0: state.i_stat = state.i_stat & data; break;
-    case 4: state.i_mask = data; break;
+    case 4: state.i_mask = data & 0x7ff; break;
   }
 }
