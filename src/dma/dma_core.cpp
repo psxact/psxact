@@ -44,7 +44,13 @@ void dma::mmio_write(int size, uint32_t address, uint32_t data) {
   if (channel == 7) {
     switch (get_register_index(address)) {
       case 0: state.dpcr = data & 0xffffffff; break;
-      case 1: state.dicr = data & 0x0fff803f; break;
+
+      case 1:
+        state.dicr &=  (0xff000000       );
+        state.dicr |=  (0x00ff803f & data);
+        state.dicr &= ~(0x7f000000 & data);
+        break;
+
       case 2: break;
       case 3: break;
     }
@@ -141,10 +147,23 @@ static void dma_sync_mode_2(dma::channel_t &channel) {
   channel.channel_control &= ~0x11000000;
 }
 
+static void dma_irq(int level) {
+  if (!(state.dicr & 0x80000000) && level) {
+    bus::irq_req(3);
+  }
+
+  state.dicr &= ~0x80000000;
+  state.dicr |= level << 31;
+}
+
 void dma::main() {
+  auto channel_irq_enable = 1 << 16;
+  auto channel_irq_request = 1 << 24;
   auto mask = 0x00000008;
 
-  for (auto &channel : state.channels) {
+  for (int i = 0; i < 7; i++) {
+    auto &channel = state.channels[i];
+
     if (state.dpcr & mask) {
       switch ((channel.channel_control >> 9) & 3) {
         case 0: dma_sync_mode_0(channel); break;
@@ -152,8 +171,25 @@ void dma::main() {
         case 2: dma_sync_mode_2(channel); break;
         case 3: break;
       }
+
+      if (state.dicr & channel_irq_enable) {
+        state.dicr |= channel_irq_request;
+      }
     }
 
-    mask = (mask << 4);
+    channel_irq_enable <<= 1;
+    channel_irq_request <<= 1;
+    mask <<= 4;
+  }
+
+  int force   = (state.dicr >> 15) & 1;
+  int enable  = (state.dicr >> 16) & 0x7f;
+  int master  = (state.dicr >> 23) & 1;
+  int request = (state.dicr >> 24) & 0x7f;
+
+  if (force || (master && (enable & request) != 0)) {
+    dma_irq(1);
+  } else {
+    dma_irq(0);
   }
 }

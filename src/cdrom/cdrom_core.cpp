@@ -44,9 +44,7 @@ uint32_t cdrom::mmio_read(int size, uint32_t address) {
 
   switch (address - 0x1f801800) {
     case 0: { // status register
-      uint32_t result = 0x18;
-
-      result |= state.index;
+      uint32_t result = state.index;
 
       if (state.args_fifo.size() ==  0) { result |= 1 << 3; }
       if (state.args_fifo.size() != 16) { result |= 1 << 4; }
@@ -68,15 +66,50 @@ uint32_t cdrom::mmio_read(int size, uint32_t address) {
   return 0;
 }
 
+static void (*response2)();
+
+static void get_id_response_no_disk() {
+  set_resp(0x08); set_resp(0x40);
+  set_resp(0x00); set_resp(0x00);
+  // the bios isn't interested in these, and the current fifo implementation
+  // could cause memory leaks.
+  //
+  // set_resp(0x00); set_resp(0x00); set_resp(0x00); set_resp(0x00);
+
+  cdrom::state.interrupt_request = 5;
+  bus::irq_req(2);
+
+  response2 = nullptr;
+}
+
+static void command_get_stat() {
+  set_resp(0);
+
+  cdrom::state.interrupt_request = 3;
+  bus::irq_req(2);
+}
+
 static void command_test() {
   switch (get_arg()) {
     case 0x20:
       set_resp(96);
-      set_resp(01);
-      set_resp(01);
-      set_resp(02);
+      set_resp(1);
+      set_resp(1);
+      set_resp(2);
+
+      cdrom::state.interrupt_request = 3;
+      bus::irq_req(2);
       break;
   }
+}
+
+static void command_get_id() {
+  set_resp(0);
+
+  cdrom::state.interrupt_request = 3;
+  bus::irq_req(2);
+
+  response2 = &get_id_response_no_disk;
 }
 
 void cdrom::mmio_write(int size, uint32_t address, uint32_t data) {
@@ -93,7 +126,14 @@ void cdrom::mmio_write(int size, uint32_t address, uint32_t data) {
       switch (state.index) {
         case 0: // command register
           switch (data & 0xff) {
-            case 0x19: return command_test();
+            case 0x01:
+              return command_get_stat();
+
+            case 0x19:
+              return command_test();
+
+            case 0x1a:
+              return command_get_id();
 
             default:
               printf("cd-rom command: $%02x\n", data);
@@ -101,27 +141,53 @@ void cdrom::mmio_write(int size, uint32_t address, uint32_t data) {
           }
           break;
 
-        case 1: break; // sound map data out
-        case 2: break; // sound map coding info
-        case 3: break; // audio volume for cd-right to spu-right
+        case 1: // sound map data out
+          break;
+
+        case 2: // sound map coding info
+          break;
+
+        case 3: // audio volume for cd-right to spu-right
+          break;
       }
       break;
 
     case 2:
       switch (state.index) {
-        case 0: set_arg(uint8_t(data)); break; // parameter fifo
-        case 1: state.interrupt_enable = data; break; // interrupt enable register
-        case 2: break; // audio volume for cd-left to spu-left
-        case 3: break; // audio volume for cd-right to spu-left
+        case 0: // parameter fifo
+          set_arg(uint8_t(data));
+          break;
+
+        case 1: // interrupt enable register
+          state.interrupt_enable = data;
+          break;
+
+        case 2: // audio volume for cd-left to spu-left
+          break;
+
+        case 3: // audio volume for cd-right to spu-left
+          break;
       }
       break;
 
     case 3:
       switch (state.index) {
-        case 0: break; // request register
-        case 1: state.interrupt_request &= ~data; break; // interrupt flag register
-        case 2: break; // audio volume for cd-left to spu-right
-        case 3: break; // apply volume changes
+        case 0: // request register
+          break;
+
+        case 1: // interrupt flag register
+          state.interrupt_request &= ~data;
+
+          if (response2) {
+            response2();
+          }
+          break;
+
+        case 2: // audio volume for cd-left to spu-right
+          break;
+
+        case 3: // apply volume changes
+          break;
       }
       break;
   }

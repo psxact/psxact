@@ -167,7 +167,20 @@ void cpu::op_cop1() {
 }
 
 void cpu::op_cop2() {
-  throw "unimplemented cop2\n";
+  if (state.code & (1 << 25)) {
+    printf("cop2 $%08x\n", state.code);
+  } else {
+    switch (decoder::rs()) {
+      case 0: printf("mfc2 r%02d, r%02d\n", decoder::rt(), decoder::rd()); break;
+      case 2: printf("cfc2 r%02d, r%02d\n", decoder::rt(), decoder::rd()); break;
+      case 4: printf("mtc2 r%02d, r%02d\n", decoder::rt(), decoder::rd()); break;
+      case 6: printf("ctc2 r%02d, r%02d\n", decoder::rt(), decoder::rd()); break;
+
+      default:
+        printf("unimplemented cop2\n");
+        throw "unimplemented cop2\n";
+    }
+  }
 }
 
 void cpu::op_cop3() {

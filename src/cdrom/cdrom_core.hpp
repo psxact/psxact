@@ -8,8 +8,7 @@ namespace cdrom {
   struct state_t {
     uint32_t interrupt_enable;
     uint32_t interrupt_request;
-
-    int index;
+    uint32_t index;
 
     std::deque<uint8_t> args_fifo;
     std::deque<uint8_t> resp_fifo;

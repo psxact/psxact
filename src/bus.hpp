@@ -13,6 +13,10 @@ enum bus_width_t {
 namespace bus {
   void initialize(const std::string &bios_file_name, const std::string &game_file_name);
 
+  void irq_ack(int interrupt);
+
+  void irq_req(int interrupt);
+
   uint32_t read_byte(uint32_t address);
 
   uint32_t read_half(uint32_t address);
