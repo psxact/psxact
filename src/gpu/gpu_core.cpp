@@ -6,7 +6,7 @@
 static gpu::state_t state;
 
 static int gp0_command_size[256] = {
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $00
+  1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $00
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $10
   1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 9, 1, 1, 1, // $20
   6, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 1, // $30
@@ -148,6 +148,27 @@ static inline void write_gp0(uint32_t data) {
     switch (state.gp0_command) {
       case 0x00: get_gp0_data(); break; // nop
       case 0x01: get_gp0_data(); break; // clear texture cache
+
+      case 0x02: { // fill rectangle
+        auto color  = gp0_to_color(get_gp0_data());
+        auto point1 = gp0_to_point(get_gp0_data());
+        auto point2 = gp0_to_point(get_gp0_data());
+
+        point1.x = (point1.x + 0x0) & ~0xf;
+        point2.x = (point2.x + 0xf) & ~0xf;
+
+        for (int y = 0; y < point2.y; y++) {
+          for (int x = 0; x < point2.x; x++) {
+            gpu::draw_point(point1.x + x,
+                            point1.y + y,
+                            color.r,
+                            color.g,
+                            color.b);
+          }
+        }
+
+        break;
+      }
 
       case 0x28: { // monochrome quad, opaque
         auto color  = get_gp0_data();

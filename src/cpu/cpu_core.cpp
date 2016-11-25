@@ -48,8 +48,8 @@ void cpu::run(int count) {
       state.cop0.regs[13] &= ~(1 << 10);
     }
 
-    auto iec = state.cop0.regs[12] & 1;
-    auto irq = state.cop0.regs[12] & state.cop0.regs[13] & 0xf0;
+    auto iec = (state.cop0.regs[12] & 1) != 0;
+    auto irq = (state.cop0.regs[12] & state.cop0.regs[13] & 0xff00) != 0;
 
     if (iec && irq) {
       enter_exception(0x0);
@@ -74,10 +74,10 @@ void cpu::enter_exception(uint32_t code) {
 
   if (state.is_branch_delay_slot) {
     epc = state.regs.this_pc - 4;
-    cause |= (1 << 31);
+    cause |= 0x80000000;
   } else {
     epc = state.regs.this_pc;
-    cause &= ~(1 << 31);
+    cause &= ~0x80000000;
   }
 
   state.cop0.regs[12] = status;
@@ -105,7 +105,7 @@ static uint32_t segments[8] = {
   0x7fffffff, //
   0x1fffffff, // kseg0 ($8000_0000 - $9fff_ffff)
   0x1fffffff, // kseg1 ($a000_0000 - $bfff_ffff)
-  0x3fffffff, // kseg2 ($c000_0000 - $ffff_ffff)
+  0xffffffff, // kseg2 ($c000_0000 - $ffff_ffff)
   0xffffffff  //
 };
 
@@ -188,15 +188,23 @@ void cpu::write_data_word(uint32_t address, uint32_t data) {
 }
 
 uint32_t cpu::mmio_read(int, uint32_t address) {
-  switch (address - 0x1f801070) {
-    case 0: return state.i_stat;
-    case 4: return state.i_mask;
+  switch (address) {
+    case 0x1f801070:
+      return state.i_stat;
+
+    case 0x1f801074:
+      return state.i_mask;
   }
 }
 
 void cpu::mmio_write(int, uint32_t address, uint32_t data) {
-  switch (address - 0x1f801070) {
-    case 0: state.i_stat = state.i_stat & data; break;
-    case 4: state.i_mask = data & 0x7ff; break;
+  switch (address) {
+    case 0x1f801070:
+      state.i_stat = state.i_stat & data;
+      break;
+
+    case 0x1f801074:
+      state.i_mask = data & 0x7ff;
+      break;
   }
 }

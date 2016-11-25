@@ -4,27 +4,24 @@
 #include <cstdint>
 
 namespace dma {
-  struct channel_t {
-    uint32_t dst_address;
-    uint32_t base_address;
-    uint32_t block_control;
-    uint32_t channel_control;
-  };
-
   struct state_t {
     uint32_t dpcr = 0x07654321;
-    uint32_t dicr;
+    uint32_t dicr = 0x00000000;
 
-    channel_t channels[7];
+    struct {
+      uint32_t address;
+      uint32_t counter;
+      uint32_t control;
+    } channels[7];
   };
-
-  void initialize();
 
   uint32_t mmio_read(int size, uint32_t address);
 
   void mmio_write(int size, uint32_t address, uint32_t data);
 
   void main();
+
+  void run_channel(int n);
 }
 
 #endif //PSXACT_DMA_CORE_HPP

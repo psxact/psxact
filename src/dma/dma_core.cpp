@@ -11,13 +11,6 @@ static inline uint32_t get_register_index(uint32_t address) {
   return (address >> 2) & 3;
 }
 
-void dma::initialize() {
-  state.dpcr = 0x07654321;
-  state.dicr = 0x00000000;
-
-  state.channels[2].dst_address = 0x1f801810;
-}
-
 uint32_t dma::mmio_read(int size, uint32_t address) {
   auto channel = get_channel_index(address);
   if (channel == 7) {
@@ -30,9 +23,9 @@ uint32_t dma::mmio_read(int size, uint32_t address) {
   }
   else {
     switch ((address >> 2) & 3) {
-      case 0: return state.channels[channel].base_address;
-      case 1: return state.channels[channel].block_control;
-      case 2: return state.channels[channel].channel_control;
+      case 0: return state.channels[channel].address;
+      case 1: return state.channels[channel].counter;
+      case 2: return state.channels[channel].control;
     }
   }
 
@@ -46,9 +39,9 @@ void dma::mmio_write(int size, uint32_t address, uint32_t data) {
       case 0: state.dpcr = data & 0xffffffff; break;
 
       case 1:
-        state.dicr &=  (0xff000000       );
-        state.dicr |=  (0x00ff803f & data);
-        state.dicr &= ~(0x7f000000 & data);
+        state.dicr &=  (       0xff000000);
+        state.dicr |=  (data & 0x00ff803f);
+        state.dicr &= ~(data & 0x7f000000);
         break;
 
       case 2: break;
@@ -57,139 +50,100 @@ void dma::mmio_write(int size, uint32_t address, uint32_t data) {
   }
   else {
     switch ((address >> 2) & 3) {
-      case 0: state.channels[channel].base_address = data; break;
-      case 1: state.channels[channel].block_control = data; break;
-      case 2: state.channels[channel].channel_control = data; break;
+      case 0: state.channels[channel].address = data & 0x00ffffff; break;
+      case 1: state.channels[channel].counter = data & 0xffffffff; break;
+      case 2: state.channels[channel].control = data & 0x71770703; break;
     }
   }
 
   dma::main();
 }
 
-static void dma_sync_mode_0(dma::channel_t &channel) {
-  if ((channel.channel_control & 0x10000000) == 0) {
-    return;
-  }
-
-  auto count = channel.block_control & 0xffff;
-
-  auto address = channel.base_address & 0xffffff;
-  auto address_step = (channel.channel_control & 2) ? 0xfffffffc : 0x00000004;
-
-  do {
-    if (count == 1) {
-      bus::write_word(address, 0x00ffffff);
-    } else {
-      bus::write_word(address, address - 4);
-    }
-
-    address += address_step;
-
-    count = (count - 1) & 0xffff;
-    if (count == 0) {
-      break;
-    }
-  }
-  while (true);
-
-  channel.channel_control &= ~0x11000000;
+void dma::main() {
+  if (state.dpcr & 0x08000000) { run_channel(6); }
+  if (state.dpcr & 0x00800000) { run_channel(5); }
+  if (state.dpcr & 0x00080000) { run_channel(4); }
+  if (state.dpcr & 0x00008000) { run_channel(3); }
+  if (state.dpcr & 0x00000800) { run_channel(2); }
+  if (state.dpcr & 0x00000080) { run_channel(1); }
+  if (state.dpcr & 0x00000008) { run_channel(0); }
 }
 
-static void dma_sync_mode_1(dma::channel_t &channel) {
-  if ((channel.channel_control & 0x01000000) == 0) {
-    return;
-  }
-
-  auto bs = channel.block_control & 0xffff;
-  auto ba = channel.block_control >> 16;
+static void run_channel_2_data_read() {
+  auto address = state.channels[2].address & 0x00ffffff;
+  auto bs = (state.channels[2].counter >>  0) & 0xffff;
+  auto ba = (state.channels[2].counter >> 16) & 0xffff;
 
   bs = bs ? bs : 0x10000;
   ba = ba ? ba : 0x10000;
 
-  auto length = bs * ba;
-  auto address = channel.base_address & 0x00ffffff;
-  auto address_step = (channel.channel_control & 2) ? 0xfffffffc : 0x00000004;
-
-  for (int i = 0; i < length; i++) {
-    auto data = bus::read_word(address);
-    bus::write_word(channel.dst_address, data);
-    address += address_step;
+  for (int a = 0; a < ba; a++) {
+    for (int s = 0; s < bs; s++) {
+      auto data = bus::read_word(0x1f801810);
+      bus::write_word(address, data);
+      address += 4;
+    }
   }
 
-  channel.channel_control &= ~0x11000000;
+  state.channels[2].control &= ~0x01000000;
 }
 
-static void dma_sync_mode_2(dma::channel_t &channel) {
-  if ((channel.channel_control & 0x01000000) == 0) {
-    return;
+static void run_channel_2_data_write() {
+  auto address = state.channels[2].address & 0x00ffffff;
+  auto bs = (state.channels[2].counter >>  0) & 0xffff;
+  auto ba = (state.channels[2].counter >> 16) & 0xffff;
+
+  bs = bs ? bs : 0x10000;
+  ba = ba ? ba : 0x10000;
+
+  for (int a = 0; a < ba; a++) {
+    for (int s = 0; s < bs; s++) {
+      auto data = bus::read_word(address);
+      bus::write_word(0x1f801810, data);
+      address += 4;
+    }
   }
 
-  auto address = channel.base_address & 0xffffff;
+  state.channels[2].control &= ~0x01000000;
+}
 
-  while (true) {
-    auto header = bus::read_word(address);
-    auto count = header >> 24;
+static void run_channel_2_list() {
+  auto address = state.channels[2].address & 0xffffff;
+
+  while (address != 0xffffff) {
+    auto value = bus::read_word(address);
+    auto count = value >> 24;
 
     for (auto index = 0; index < count; index++) {
-      address += 4;
-      auto command = bus::read_word(address);
-
-      bus::write_word(channel.dst_address, command);
+      auto command = bus::read_word(address += 4);
+      bus::write_word(0x1f801810, command);
     }
 
-    address = header & 0xffffff;
-
-    if (address == 0xffffff) {
-      break;
-    }
+    address = value & 0xffffff;
   }
 
-  channel.channel_control &= ~0x11000000;
+  state.channels[2].control &= ~0x01000000;
 }
 
-static void dma_irq(int level) {
-  if (!(state.dicr & 0x80000000) && level) {
-    bus::irq_req(3);
+static void run_channel_6() {
+  auto address = state.channels[6].address & 0xffffff;
+  auto counter = state.channels[6].counter & 0xffff;
+
+  counter = counter ? counter : 0x10000;
+
+  for (int i = 1; i < counter; i++) {
+    bus::write_word(address, address - 4);
+    address -= 4;
   }
 
-  state.dicr &= ~0x80000000;
-  state.dicr |= level << 31;
+  bus::write_word(address, 0x00ffffff);
+
+  state.channels[6].control &= ~0x11000000;
 }
 
-void dma::main() {
-  auto channel_irq_enable = 1 << 16;
-  auto channel_irq_request = 1 << 24;
-  auto mask = 0x00000008;
-
-  for (int i = 0; i < 7; i++) {
-    auto &channel = state.channels[i];
-
-    if (state.dpcr & mask) {
-      switch ((channel.channel_control >> 9) & 3) {
-        case 0: dma_sync_mode_0(channel); break;
-        case 1: dma_sync_mode_1(channel); break;
-        case 2: dma_sync_mode_2(channel); break;
-        case 3: break;
-      }
-
-      if (state.dicr & channel_irq_enable) {
-        state.dicr |= channel_irq_request;
-      }
-    }
-
-    channel_irq_enable <<= 1;
-    channel_irq_request <<= 1;
-    mask <<= 4;
-  }
-
-  int force   = (state.dicr >> 15) & 1;
-  int enable  = (state.dicr >> 16) & 0x7f;
-  int master  = (state.dicr >> 23) & 1;
-  int request = (state.dicr >> 24) & 0x7f;
-
-  if (force || (master && (enable & request) != 0)) {
-    dma_irq(1);
-  } else {
-    dma_irq(0);
-  }
+void dma::run_channel(int n) {
+  if (n == 2 && state.channels[2].control == 0x01000200) { return run_channel_2_data_read(); }
+  if (n == 2 && state.channels[2].control == 0x01000201) { return run_channel_2_data_write(); }
+  if (n == 2 && state.channels[2].control == 0x01000401) { return run_channel_2_list(); }
+  if (n == 6 && state.channels[6].control == 0x11000002) { return run_channel_6(); }
 }
