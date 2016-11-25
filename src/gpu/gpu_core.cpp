@@ -45,7 +45,7 @@ void gpu::write_vram(int x, int y, uint16_t color) {
 //   I/O Functions
 // --=============--
 
-static inline uint32_t read_texture() {
+static uint32_t read_texture() {
   auto &download = state.texture_download;
 
   if (!download.remaining) {
@@ -66,7 +66,7 @@ static inline uint32_t read_texture() {
   return data;
 }
 
-static inline uint32_t read_resp() {
+static uint32_t read_resp() {
   if (state.texture_download.remaining) {
     auto lower = read_texture();
     auto upper = read_texture();
@@ -78,17 +78,17 @@ static inline uint32_t read_resp() {
   return 0;
 }
 
-static inline uint32_t read_stat() {
+static uint32_t read_stat() {
   //  19    Vertical Resolution         (0=240, 1=480, when Bit22=1)  ;GP1(08h).2
   //  26    Ready to receive Cmd Word   (0=No, 1=Ready)  ;GP0(...) ;via GP0
   //  27    Ready to send VRAM to CPU   (0=No, 1=Ready)  ;GP0(C0h) ;via GPUREAD
   //  28    Ready to receive DMA Block  (0=No, 1=Ready)  ;GP0(...) ;via GP0
 
-  return state.status & ~(1 << 19) |
-      (1 << 13) |
-      (1 << 26) |
-      (1 << 27) |
-      (1 << 28);
+  auto result = (state.status & ~0x00080000) | 0x1c002000;
+
+  printf("gpu::stat(0x%08x)\n", result);
+
+  return result;
 }
 
 static gpu::gouraud::pixel_t gp0_to_gouraud_pixel(uint32_t vertex, uint32_t color) {
@@ -103,7 +103,7 @@ static gpu::gouraud::pixel_t gp0_to_gouraud_pixel(uint32_t vertex, uint32_t colo
   return p;
 }
 
-static inline gpu::point_t gp0_to_point(uint32_t point) {
+static gpu::point_t gp0_to_point(uint32_t point) {
   gpu::point_t result;
   result.x = int(point & 0xffff);
   result.y = int(point >> 16);
@@ -131,14 +131,7 @@ static gpu::texture::pixel_t gp0_to_texture_pixel(uint32_t point, uint32_t color
   return p;
 }
 
-static inline uint32_t get_gp0_data() {
-  auto data = state.fifo.front();
-  state.fifo.pop_front();
-
-  return data;
-}
-
-static inline void write_texture(int data) {
+static void write_texture(int data) {
   auto &upload = state.texture_upload;
 
   if (!upload.remaining) {
@@ -157,28 +150,29 @@ static inline void write_texture(int data) {
   }
 }
 
-static inline void write_gp0(uint32_t data) {
+static void write_gp0(uint32_t data) {
   if (state.texture_upload.remaining) {
     write_texture(data);
     write_texture(data >> 16);
     return;
   }
 
-  if (state.fifo.size() == 0) {
-    state.gp0_command = data >> 24;
-  }
+  state.fifo.buffer[state.fifo.wr] = data;
+  state.fifo.wr = (state.fifo.wr + 1) & 0xf;
 
-  state.fifo.push_back(data);
+  auto command = state.fifo.buffer[0] >> 24;
 
-  if (state.fifo.size() == gp0_command_size[state.gp0_command]) {
-    switch (state.gp0_command) {
-      case 0x00: get_gp0_data(); break; // nop
-      case 0x01: get_gp0_data(); break; // clear texture cache
+  if (state.fifo.wr == gp0_command_size[command]) {
+    state.fifo.wr = 0;
+
+    switch (command) {
+      case 0x00: break; // nop
+      case 0x01: break; // clear texture cache
 
       case 0x02: { // fill rectangle
-        auto color  = gp0_to_color(get_gp0_data());
-        auto point1 = gp0_to_point(get_gp0_data());
-        auto point2 = gp0_to_point(get_gp0_data());
+        auto color  = gp0_to_color(state.fifo.buffer[0]);
+        auto point1 = gp0_to_point(state.fifo.buffer[1]);
+        auto point2 = gp0_to_point(state.fifo.buffer[2]);
 
         point1.x = (point1.x + 0x0) & ~0xf;
         point2.x = (point2.x + 0xf) & ~0xf;
@@ -197,11 +191,11 @@ static inline void write_gp0(uint32_t data) {
       }
 
       case 0x28: { // monochrome quad, opaque
-        auto color  = get_gp0_data();
-        auto point1 = get_gp0_data();
-        auto point2 = get_gp0_data();
-        auto point3 = get_gp0_data();
-        auto point4 = get_gp0_data();
+        auto color  = state.fifo.buffer[0];
+        auto point1 = state.fifo.buffer[1];
+        auto point2 = state.fifo.buffer[2];
+        auto point3 = state.fifo.buffer[3];
+        auto point4 = state.fifo.buffer[4];
 
         auto v0 = gp0_to_gouraud_pixel(point1, color);
         auto v1 = gp0_to_gouraud_pixel(point2, color);
@@ -213,38 +207,38 @@ static inline void write_gp0(uint32_t data) {
       }
 
       case 0x2c: { // textured quad, opaque
-        auto color  = get_gp0_data();
-        auto point1 = get_gp0_data();
-        auto tcoord1 = get_gp0_data();
-        auto point2 = get_gp0_data();
-        auto tcoord2 = get_gp0_data();
-        auto point3 = get_gp0_data();
-        auto tcoord3 = get_gp0_data();
-        auto point4 = get_gp0_data();
-        auto tcoord4 = get_gp0_data();
+        auto color  = state.fifo.buffer[0];
+        auto point1 = state.fifo.buffer[1];
+        auto coord1 = state.fifo.buffer[2];
+        auto point2 = state.fifo.buffer[3];
+        auto coord2 = state.fifo.buffer[4];
+        auto point3 = state.fifo.buffer[5];
+        auto coord3 = state.fifo.buffer[6];
+        auto point4 = state.fifo.buffer[7];
+        auto coord4 = state.fifo.buffer[8];
 
         gpu::texture::polygon_t<4> p;
 
-        p.v[0] = gp0_to_texture_pixel(point1, color, tcoord1);
-        p.v[1] = gp0_to_texture_pixel(point2, color, tcoord2);
-        p.v[2] = gp0_to_texture_pixel(point3, color, tcoord3);
-        p.v[3] = gp0_to_texture_pixel(point4, color, tcoord4);
-        p.clut_x = ((tcoord1 >> 16) & 0x03f) * 16;
-        p.clut_y = ((tcoord1 >> 22) & 0x1ff) * 1;
-        p.base_u = ((tcoord2 >> 16) & 0x00f) * 64;
-        p.base_v = ((tcoord2 >> 20) & 0x001) * 256;
+        p.v[0] = gp0_to_texture_pixel(point1, color, coord1);
+        p.v[1] = gp0_to_texture_pixel(point2, color, coord2);
+        p.v[2] = gp0_to_texture_pixel(point3, color, coord3);
+        p.v[3] = gp0_to_texture_pixel(point4, color, coord4);
+        p.clut_x = ((coord1 >> 16) & 0x03f) * 16;
+        p.clut_y = ((coord1 >> 22) & 0x1ff) * 1;
+        p.base_u = ((coord2 >> 16) & 0x00f) * 64;
+        p.base_v = ((coord2 >> 20) & 0x001) * 256;
 
         gpu::texture::draw_poly4(p);
         break;
       }
 
       case 0x30: { // shaded triangle, opaque
-        auto color1 = get_gp0_data();
-        auto point1 = get_gp0_data();
-        auto color2 = get_gp0_data();
-        auto point2 = get_gp0_data();
-        auto color3 = get_gp0_data();
-        auto point3 = get_gp0_data();
+        auto color1 = state.fifo.buffer[0];
+        auto point1 = state.fifo.buffer[1];
+        auto color2 = state.fifo.buffer[2];
+        auto point2 = state.fifo.buffer[3];
+        auto color3 = state.fifo.buffer[4];
+        auto point3 = state.fifo.buffer[5];
 
         auto v0 = gp0_to_gouraud_pixel(point1, color1);
         auto v1 = gp0_to_gouraud_pixel(point2, color2);
@@ -255,14 +249,14 @@ static inline void write_gp0(uint32_t data) {
       }
 
       case 0x38: { // shaded quad, opaque
-        auto color1 = get_gp0_data();
-        auto point1 = get_gp0_data();
-        auto color2 = get_gp0_data();
-        auto point2 = get_gp0_data();
-        auto color3 = get_gp0_data();
-        auto point3 = get_gp0_data();
-        auto color4 = get_gp0_data();
-        auto point4 = get_gp0_data();
+        auto color1 = state.fifo.buffer[0];
+        auto point1 = state.fifo.buffer[1];
+        auto color2 = state.fifo.buffer[2];
+        auto point2 = state.fifo.buffer[3];
+        auto color3 = state.fifo.buffer[4];
+        auto point3 = state.fifo.buffer[5];
+        auto color4 = state.fifo.buffer[6];
+        auto point4 = state.fifo.buffer[7];
 
         auto v0 = gp0_to_gouraud_pixel(point1, color1);
         auto v1 = gp0_to_gouraud_pixel(point2, color2);
@@ -274,8 +268,8 @@ static inline void write_gp0(uint32_t data) {
       }
 
       case 0x68: {
-        auto color = gp0_to_color(get_gp0_data());
-        auto point = gp0_to_point(get_gp0_data());
+        auto color = gp0_to_color(state.fifo.buffer[0]);
+        auto point = gp0_to_point(state.fifo.buffer[1]);
 
         gpu::draw_point(point.x,
                         point.y,
@@ -286,15 +280,11 @@ static inline void write_gp0(uint32_t data) {
       }
 
       case 0xa0: {
-        auto command = get_gp0_data();
-        auto param1 = get_gp0_data();
-        auto param2 = get_gp0_data();
-
         auto &ul = state.texture_upload;
-        ul.x = param1 & 0xffff;
-        ul.y = param1 >> 16;
-        ul.w = param2 & 0xffff;
-        ul.h = param2 >> 16;
+        ul.x = state.fifo.buffer[1] & 0xffff;
+        ul.y = state.fifo.buffer[1] >> 16;
+        ul.w = state.fifo.buffer[2] & 0xffff;
+        ul.h = state.fifo.buffer[2] >> 16;
 
         ul.current_x = ul.x;
         ul.current_y = ul.y;
@@ -303,15 +293,11 @@ static inline void write_gp0(uint32_t data) {
       }
 
       case 0xc0: {
-        auto command = get_gp0_data();
-        auto param1 = get_gp0_data();
-        auto param2 = get_gp0_data();
-
         auto &dl = state.texture_download;
-        dl.x = param1 & 0xffff;
-        dl.y = param1 >> 16;
-        dl.w = param2 & 0xffff;
-        dl.h = param2 >> 16;
+        dl.x = state.fifo.buffer[1] & 0xffff;
+        dl.y = state.fifo.buffer[1] >> 16;
+        dl.w = state.fifo.buffer[2] & 0xffff;
+        dl.h = state.fifo.buffer[2] >> 16;
 
         dl.current_x = dl.x;
         dl.current_y = dl.y;
@@ -319,71 +305,50 @@ static inline void write_gp0(uint32_t data) {
         break;
       }
 
-      case 0xe1: {
-        auto command = get_gp0_data();
-
+      case 0xe1:
         state.status &= ~0x87ff;
-        state.status |= (command << 0) & 0x7ff;
-        state.status |= (command << 4) & 0x8000;
+        state.status |= (state.fifo.buffer[0] << 0) & 0x7ff;
+        state.status |= (state.fifo.buffer[0] << 4) & 0x8000;
 
-        state.textured_rectangle_x_flip = ((command >> 12) & 1) != 0;
-        state.textured_rectangle_y_flip = ((command >> 13) & 1) != 0;
+        state.textured_rectangle_x_flip = ((state.fifo.buffer[0] >> 12) & 1) != 0;
+        state.textured_rectangle_y_flip = ((state.fifo.buffer[0] >> 13) & 1) != 0;
         break;
-      }
 
-      case 0xe2: {
-        auto command = get_gp0_data();
-
-        state.texture_window_mask_x = utility::uclip<5>(command >> 0);
-        state.texture_window_mask_y = utility::uclip<5>(command >> 5);
-        state.texture_window_offset_x = utility::uclip<5>(command >> 10);
-        state.texture_window_offset_y = utility::uclip<5>(command >> 15);
+      case 0xe2:
+        state.texture_window_mask_x = utility::uclip<5>(state.fifo.buffer[0] >> 0);
+        state.texture_window_mask_y = utility::uclip<5>(state.fifo.buffer[0] >> 5);
+        state.texture_window_offset_x = utility::uclip<5>(state.fifo.buffer[0] >> 10);
+        state.texture_window_offset_y = utility::uclip<5>(state.fifo.buffer[0] >> 15);
         break;
-      }
 
-      case 0xe3: {
-        auto command = get_gp0_data();
-
-        state.drawing_area_x1 = utility::uclip<10>(command >> 0);
-        state.drawing_area_y1 = utility::uclip<10>(command >> 10);
+      case 0xe3:
+        state.drawing_area_x1 = utility::uclip<10>(state.fifo.buffer[0] >> 0);
+        state.drawing_area_y1 = utility::uclip<10>(state.fifo.buffer[0] >> 10);
         break;
-      }
 
-      case 0xe4: {
-        auto command = get_gp0_data();
-
-        state.drawing_area_x2 = utility::uclip<10>(command >> 0);
-        state.drawing_area_y2 = utility::uclip<10>(command >> 10);
+      case 0xe4:
+        state.drawing_area_x2 = utility::uclip<10>(state.fifo.buffer[0] >> 0);
+        state.drawing_area_y2 = utility::uclip<10>(state.fifo.buffer[0] >> 10);
         break;
-      }
 
-      case 0xe5: {
-        auto command = get_gp0_data();
-
-        state.x_offset = utility::sclip<11>(command >> 0);
-        state.y_offset = utility::sclip<11>(command >> 11);
+      case 0xe5:
+        state.x_offset = utility::sclip<11>(state.fifo.buffer[0] >> 0);
+        state.y_offset = utility::sclip<11>(state.fifo.buffer[0] >> 11);
         break;
-      }
 
-      case 0xe6: {
-        auto command = get_gp0_data();
-
+      case 0xe6:
         state.status &= ~0x1800;
-        state.status |= (command << 11) & 0x1800;
+        state.status |= (state.fifo.buffer[0] << 11) & 0x1800;
         break;
-      }
 
-      default: {
-        auto command = get_gp0_data();
-
-        printf("unhandled gp0 command: 0x%08x\n", command);
+      default:
+        printf("unhandled gp0 command: 0x%08x\n", state.fifo.buffer[0]);
         break;
-      }
     }
   }
 }
 
-static inline void write_gp1(uint32_t data) {
+static void write_gp1(uint32_t data) {
   switch ((data >> 24) & 0xff) {
     case 0x00:
       state.status = 0x14802000;
@@ -392,9 +357,8 @@ static inline void write_gp1(uint32_t data) {
       break;
 
     case 0x01:
-      state.gp0_command = 0;
-      state.fifo.clear();
-      state.texture_upload.remaining = 0;
+      state.fifo.wr = 0;
+      state.fifo.rd = 0;
       break;
 
     case 0x02:

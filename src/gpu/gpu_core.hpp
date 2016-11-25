@@ -15,13 +15,16 @@ namespace gpu {
   extern vram_t vram;
 
   struct state_t {
-    uint32_t status;
+    uint32_t status = 0x14802000;
     bool textured_rectangle_x_flip;
     bool textured_rectangle_y_flip;
 
-    std::deque<uint32_t> fifo;
+    struct {
+      uint32_t buffer[16];
+      int wr;
+      int rd;
+    } fifo;
 
-    uint32_t gp0_command;
     uint32_t texture_window_mask_x;
     uint32_t texture_window_mask_y;
     uint32_t texture_window_offset_x;
