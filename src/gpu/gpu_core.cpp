@@ -6,22 +6,25 @@
 static gpu::state_t state;
 
 static int gp0_command_size[256] = {
-  1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $00
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $10
-  1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 9, 1, 1, 1, // $20
-  6, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 1, // $30
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $40
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $50
-  1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, // $60
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $70
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $80
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $90
-  3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $a0
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $b0
-  3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $c0
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $d0
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $e0
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $f0
+  1, 1, 3, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $00
+  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $10
+  1, 1, 1, 1,  1, 1, 1, 1,  5, 1, 1, 1,  9, 1, 1, 1, // $20
+  6, 1, 1, 1,  1, 1, 1, 1,  8, 1, 1, 1,  1, 1, 1, 1, // $30
+
+  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $40
+  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $50
+  1, 1, 1, 1,  1, 1, 1, 1,  2, 1, 1, 1,  1, 1, 1, 1, // $60
+  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $70
+
+  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $80
+  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $90
+  3, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $a0
+  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $b0
+
+  3, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $c0
+  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $d0
+  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $e0
+  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $f0
 };
 
 // --=================--
@@ -42,10 +45,33 @@ void gpu::write_vram(int x, int y, uint16_t color) {
 //   I/O Functions
 // --=============--
 
-static inline uint32_t read_resp() {
-  if (state.gp0_texture_download_size) {
-    state.gp0_texture_download_size--;
+static inline uint32_t read_texture() {
+  auto &download = state.texture_download;
+
+  if (!download.remaining) {
     return 0;
+  }
+
+  auto address = (download.current_y * 1024) + download.current_x;
+  auto data = gpu::vram.h[address];
+
+  download.remaining--;
+  download.current_x++;
+
+  if (download.current_x == (download.x + download.w)) {
+    download.current_x = download.x;
+    download.current_y++;
+  }
+
+  return data;
+}
+
+static inline uint32_t read_resp() {
+  if (state.texture_download.remaining) {
+    auto lower = read_texture();
+    auto upper = read_texture();
+
+    return (upper << 16) | lower;
   }
 
   printf("gpu::read_resp()\n");
@@ -264,15 +290,15 @@ static inline void write_gp0(uint32_t data) {
         auto param1 = get_gp0_data();
         auto param2 = get_gp0_data();
 
-        auto &upload = state.texture_upload;
-        upload.x = param1 & 0xffff;
-        upload.y = param1 >> 16;
-        upload.w = param2 & 0xffff;
-        upload.h = param2 >> 16;
+        auto &ul = state.texture_upload;
+        ul.x = param1 & 0xffff;
+        ul.y = param1 >> 16;
+        ul.w = param2 & 0xffff;
+        ul.h = param2 >> 16;
 
-        upload.current_x = upload.x;
-        upload.current_y = upload.y;
-        upload.remaining = upload.w * upload.h;
+        ul.current_x = ul.x;
+        ul.current_y = ul.y;
+        ul.remaining = ul.w * ul.h;
         break;
       }
 
@@ -281,12 +307,15 @@ static inline void write_gp0(uint32_t data) {
         auto param1 = get_gp0_data();
         auto param2 = get_gp0_data();
 
-        auto x = param1 & 0xffff;
-        auto y = param1 >> 16;
-        auto w = param2 & 0xffff;
-        auto h = param2 >> 16;
+        auto &dl = state.texture_download;
+        dl.x = param1 & 0xffff;
+        dl.y = param1 >> 16;
+        dl.w = param2 & 0xffff;
+        dl.h = param2 >> 16;
 
-        state.gp0_texture_download_size = ((w * h) + 1) / 2;
+        dl.current_x = dl.x;
+        dl.current_y = dl.y;
+        dl.remaining = dl.w * dl.h;
         break;
       }
 

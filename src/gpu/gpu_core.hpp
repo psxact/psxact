@@ -49,7 +49,15 @@ namespace gpu {
       int current_y;
     } texture_upload;
 
-    uint32_t gp0_texture_download_size;
+    struct {
+      int remaining;
+      int x;
+      int y;
+      int w;
+      int h;
+      int current_x;
+      int current_y;
+    } texture_download;
   };
 
   uint32_t mmio_read(int size, uint32_t address);
