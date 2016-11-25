@@ -37,10 +37,10 @@ static void set_data(uint8_t data) {
   cdrom::state.data_fifo.push_back(data);
 }
 
-uint32_t cdrom::mmio_read(int size, uint32_t address) {
-  assert(size == BYTE);
+uint32_t cdrom::bus_read(int width, uint32_t address) {
+  assert(width == BYTE);
 
-  printf("cdrom::bus_read(0x%08x)\n", address);
+  printf("cdrom::bus_read(%d, 0x%08x)\n", width, address);
 
   switch (address - 0x1f801800) {
     case 0: { // status register
@@ -66,10 +66,10 @@ uint32_t cdrom::mmio_read(int size, uint32_t address) {
   return 0;
 }
 
-void cdrom::mmio_write(int size, uint32_t address, uint32_t data) {
-  assert(size == BYTE);
+void cdrom::bus_write(int width, uint32_t address, uint32_t data) {
+  assert(width == BYTE);
 
-  printf("cdrom::bus_write(0x%08x, 0x%02x)\n", address, data);
+  printf("cdrom::bus_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
 
   switch (address - 0x1f801800) {
     case 0:
@@ -83,14 +83,9 @@ void cdrom::mmio_write(int size, uint32_t address, uint32_t data) {
           state.has_command = true;
           break;
 
-        case 1: // sound map data out
-          break;
-
-        case 2: // sound map coding info
-          break;
-
-        case 3: // audio volume for cd-right to spu-right
-          break;
+        case 1: break; // sound map data out
+        case 2: break; // sound map coding info
+        case 3: break; // audio volume for cd-right to spu-right
       }
       break;
 
@@ -104,28 +99,21 @@ void cdrom::mmio_write(int size, uint32_t address, uint32_t data) {
           state.interrupt_enable = data;
           break;
 
-        case 2: // audio volume for cd-left to spu-left
-          break;
-
-        case 3: // audio volume for cd-right to spu-left
-          break;
+        case 2: break; // audio volume for cd-right to spu-left
+        case 3: break; // audio volume for cd-right to spu-left
       }
       break;
 
     case 3:
       switch (state.index) {
-        case 0: // request register
-          break;
+        case 0: break; // request register
 
         case 1: // interrupt flag register
           state.interrupt_request &= ~data;
           break;
 
-        case 2: // audio volume for cd-left to spu-right
-          break;
-
-        case 3: // apply volume changes
-          break;
+        case 2: break; // audio volume for cd-left to spu-right
+        case 3: break; // apply volume changes
       }
       break;
   }

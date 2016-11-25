@@ -1,14 +1,15 @@
+#include <cassert>
+#include <cstring>
+#include <exception>
 #include "bus.hpp"
+#include "cdrom/cdrom_core.hpp"
 #include "cpu/cpu_core.hpp"
 #include "dma/dma_core.hpp"
 #include "gpu/gpu_core.hpp"
+#include "input/input.hpp"
 #include "spu/spu_core.hpp"
-#include "utility.hpp"
 #include "timer/timer_core.hpp"
-#include "cdrom/cdrom_core.hpp"
-#include <stdexcept>
-#include <cstring>
-#include <cassert>
+#include "utility.hpp"
 
 utility::memory_t<19> bios;
 utility::memory_t<21> wram;
@@ -23,111 +24,63 @@ void bus::initialize(const std::string &bios_file_name, const std::string &game_
 }
 
 void bus::irq(int interrupt) {
+  printf("bus::irq(%d)\n", interrupt);
   cpu::state.i_stat |= (1 << interrupt);
 }
 
-uint32_t bus::read_byte(uint32_t address) {
+uint32_t bus::read(int width, uint32_t address) {
   if (utility::between<0x00000000, 0x007fffff>(address)) {
-    return utility::read_byte(wram, address);
+    switch (width) {
+      case BYTE: return utility::read_byte(wram, address);
+      case HALF: return utility::read_half(wram, address);
+      case WORD: return utility::read_word(wram, address);
+    }
   }
 
   if (utility::between<0x1fc00000, 0x1fc7ffff>(address)) {
-    return utility::read_byte(bios, address);
+    switch (width) {
+      case BYTE: return utility::read_byte(bios, address);
+      case HALF: return utility::read_half(bios, address);
+      case WORD: return utility::read_word(bios, address);
+    }
   }
 
   if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
-    return utility::read_byte(dmem, address);
+    switch (width) {
+      case BYTE: return utility::read_byte(dmem, address);
+      case HALF: return utility::read_half(dmem, address);
+      case WORD: return utility::read_word(dmem, address);
+    }
   }
 
-  if (address == 0x1f000084 ||
-      address == 0x1f801040) {
-    return 0;
-  }
-
-  if (utility::between<0x1f801800, 0x1f801803>(address)) {
-    return cdrom::mmio_read(BYTE, address);
-  }
-
-  printf("bus::read_byte(0x%08x)\n", address);
-  throw std::exception();
-}
-
-uint32_t bus::read_half(uint32_t address) {
-  if (utility::between<0x00000000, 0x007fffff>(address)) {
-    return utility::read_half(wram, address);
-  }
-
-  if (utility::between<0x1fc00000, 0x1fc7ffff>(address)) {
-    return utility::read_half(bios, address);
-  }
-
-  if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
-    return utility::read_half(dmem, address);
+  if (utility::between<0x1f801040, 0x1f80104f>(address)) {
+    return input::bus_read(width, address);
   }
 
   if (utility::between<0x1f801070, 0x1f801077>(address)) {
-    return cpu::mmio_read(HALF, address);
+    return cpu::bus_read(width, address);
+  }
+
+  if (utility::between<0x1f801080, 0x1f8010ff>(address)) {
+    return dma::bus_read(width, address);
+  }
+
+  if (utility::between<0x1f801100, 0x1f80110f>(address) ||
+      utility::between<0x1f801110, 0x1f80111f>(address) ||
+      utility::between<0x1f801120, 0x1f80112f>(address)) {
+    return timer::bus_read(width, address);
+  }
+
+  if (utility::between<0x1f801800, 0x1f801803>(address)) {
+    return cdrom::bus_read(width, address);
+  }
+
+  if (utility::between<0x1f801810, 0x1f801817>(address)) {
+    return gpu::bus_read(width, address);
   }
 
   if (utility::between<0x1f801c00, 0x1f801fff>(address)) {
-    return spu::mmio_read(HALF, address);
-  }
-
-  if (address == 0x1f801120 ||
-      address == 0x1f801044) {
-    return 0;
-  }
-
-  printf("bus::read_half(0x%08x)\n", address);
-  throw std::exception();
-}
-
-uint32_t bus::read_word(uint32_t address) {
-  if (utility::between<0x00000000, 0x007fffff>(address)) {
-    return utility::read_word(wram, address);
-  }
-
-  if (utility::between<0x1fc00000, 0x1fc7ffff>(address)) {
-    return utility::read_word(bios, address);
-  }
-
-  if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
-    return utility::read_word(dmem, address);
-  }
-
-  if (utility::between<0x1f801000, 0x1f801fff>(address)) {
-    if (utility::between<0x1f801070, 0x1f80107f>(address)) {
-      return cpu::mmio_read(WORD, address);
-    }
-
-    if (utility::between<0x1f801080, 0x1f8010ff>(address)) {
-      return dma::mmio_read(WORD, address);
-    }
-
-    if (utility::between<0x1f801100, 0x1f80110f>(address) ||
-        utility::between<0x1f801110, 0x1f80111f>(address) ||
-        utility::between<0x1f801120, 0x1f80112f>(address)) {
-      return timer::bus_read(WORD, address);
-    }
-
-    if (utility::between<0x1f801800, 0x1f801803>(address)) {
-      return cdrom::mmio_read(WORD, address);
-    }
-
-    if (utility::between<0x1f801810, 0x1f801817>(address)) {
-      return gpu::mmio_read(WORD, address);
-    }
-
-    if (utility::between<0x1f801c00, 0x1f801fff>(address)) {
-      return spu::mmio_read(WORD, address);
-    }
-
-    printf("unhandled mmio read: $%08x\n", address);
-    return 0;
-  }
-
-  if (address == 0xfffe0130) {
-    return 0;
+    return spu::bus_read(width, address);
   }
 
   if (utility::between<0x1f000000, 0x1f7fffff>(address) || // expansion region 1
@@ -136,13 +89,21 @@ uint32_t bus::read_word(uint32_t address) {
     return 0;
   }
 
-  printf("bus::read_word(0x%08x)\n", address);
+  if (address == 0xfffe0130) {
+    return 0;
+  }
+
+  printf("bus::read(%d, 0x%08x)\n", width, address);
   throw std::exception();
 }
 
-void bus::write_byte(uint32_t address, uint32_t data) {
+void bus::write(int width, uint32_t address, uint32_t data) {
   if (utility::between<0x00000000, 0x007fffff>(address)) {
-    return utility::write_byte(wram, address, data);
+    switch (width) {
+      case BYTE: return utility::write_byte(wram, address, data);
+      case HALF: return utility::write_half(wram, address, data);
+      case WORD: return utility::write_word(wram, address, data);
+    }
   }
 
   if (utility::between<0x1fc00000, 0x1fc7ffff>(address)) {
@@ -151,123 +112,41 @@ void bus::write_byte(uint32_t address, uint32_t data) {
   }
 
   if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
-    return utility::write_byte(dmem, address, data);
+    switch (width) {
+      case BYTE: return utility::write_byte(dmem, address, data);
+      case HALF: return utility::write_half(dmem, address, data);
+      case WORD: return utility::write_word(dmem, address, data);
+    }
   }
 
-  if (utility::between<0x1f801800, 0x1f801803>(address)) {
-    return cdrom::mmio_write(BYTE, address, data);
-  }
-
-  if (address == 0x1f802041) {
-    return;
-  }
-
-  printf("unknown byte write: $%08x <- $%08x\n", address, data);
-  throw std::exception();
-}
-
-void bus::write_half(uint32_t address, uint32_t data) {
-  if (utility::between<0x00000000, 0x007fffff>(address)) {
-    return utility::write_half(wram, address, data);
-  }
-
-  if (utility::between<0x1fc00000, 0x1fc7ffff>(address)) {
-    printf("bios write: $%08x <- $%08x\n", address, data);
-    return;
-  }
-
-  if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
-    return utility::write_half(dmem, address, data);
+  if (utility::between<0x1f801040, 0x1f80104f>(address)) {
+    return input::bus_write(width, address, data);
   }
 
   if (utility::between<0x1f801070, 0x1f801077>(address)) {
-    return cpu::mmio_write(HALF, address, data);
+    return cpu::bus_write(width, address, data);
+  }
+
+  if (utility::between<0x1f801080, 0x1f8010ff>(address)) {
+    return dma::bus_write(width, address, data);
+  }
+
+  if (utility::between<0x1f801100, 0x1f80110f>(address) ||
+      utility::between<0x1f801110, 0x1f80111f>(address) ||
+      utility::between<0x1f801120, 0x1f80112f>(address)) {
+    return timer::bus_write(width, address, data);
+  }
+
+  if (utility::between<0x1f801800, 0x1f801803>(address)) {
+    return cdrom::bus_write(width, address, data);
+  }
+
+  if (utility::between<0x1f801810, 0x1f801817>(address)) {
+    return gpu::bus_write(width, address, data);
   }
 
   if (utility::between<0x1f801c00, 0x1f801fff>(address)) {
-    return spu::mmio_write(HALF, address, data);
-  }
-
-  if (address == 0x1f801048 || // joy_mode
-      address == 0x1f80104a || // joy_ctrl
-      address == 0x1f80104e || // joy_baud
-      address == 0x1f801100 ||
-      address == 0x1f801104 ||
-      address == 0x1f801108 ||
-      address == 0x1f801110 ||
-      address == 0x1f801114 ||
-      address == 0x1f801118 ||
-      address == 0x1f801120 ||
-      address == 0x1f801124 ||
-      address == 0x1f801128) {
-    return;
-  }
-
-  printf("unknown half write: $%08x <- $%08x\n", address, data);
-  throw std::exception();
-}
-
-void bus::write_word(uint32_t address, uint32_t data) {
-  if (utility::between<0x00000000, 0x007fffff>(address)) {
-    return utility::write_word(wram, address, data);
-  }
-
-  if (utility::between<0x1fc00000, 0x1fc7ffff>(address)) {
-    printf("bios write: $%08x <- $%08x\n", address, data);
-    return;
-  }
-
-  if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
-    return utility::write_word(dmem, address, data);
-  }
-
-  if (utility::between<0x1f801000, 0x1f801fff>(address)) {
-    if (utility::between<0x1f801070, 0x1f80107f>(address)) {
-      return cpu::mmio_write(WORD, address, data);
-    }
-
-    if (utility::between<0x1f801080, 0x1f8010ff>(address)) {
-      return dma::mmio_write(WORD, address, data);
-    }
-
-    if (utility::between<0x1f801100, 0x1f80110f>(address) ||
-        utility::between<0x1f801110, 0x1f80111f>(address) ||
-        utility::between<0x1f801120, 0x1f80112f>(address)) {
-      return timer::bus_write(WORD, address, data);
-    }
-
-    if (utility::between<0x1f801800, 0x1f801803>(address)) {
-      return cdrom::mmio_write(WORD, address, data);
-    }
-
-    if (utility::between<0x1f801810, 0x1f801817>(address)) {
-      return gpu::mmio_write(WORD, address, data);
-    }
-
-    if (utility::between<0x1f801c00, 0x1f801fff>(address)) {
-      return spu::mmio_write(WORD, address, data);
-    }
-
-    switch (address) {
-      case 0x1f801000: assert(data == 0x1f000000); return;
-      case 0x1f801004: assert(data == 0x1f802000); return;
-      case 0x1f801008: assert(data == 0x0013243f); return;
-      case 0x1f80100c: assert(data == 0x00003022); return;
-      case 0x1f801010: assert(data == 0x0013243f); return;
-      case 0x1f801014: assert(data == 0x200931e1); return;
-      case 0x1f801018: assert(data == 0x00020843); return;
-      case 0x1f80101c: assert(data == 0x00070777); return;
-      case 0x1f801020: assert(data == 0x00031125); return;
-
-      case 0x1f801060: assert(data == 0x00000b88); return;
-    }
-
-    printf("unhandled mmio write: $%08x <- $%08x\n", address, data);
-    return;
-  }
-
-  if (address == 0xfffe0130) {
-    return;
+    return spu::bus_write(width, address, data);
   }
 
   if (utility::between<0x1f000000, 0x1f7fffff>(address) || // expansion region 1 bus_write
@@ -276,6 +155,24 @@ void bus::write_word(uint32_t address, uint32_t data) {
     return;
   }
 
-  printf("unknown word write: $%08x <- $%08x\n", address, data);
+  switch (address) {
+    case 0x1f801000: assert(data == 0x1f000000); return;
+    case 0x1f801004: assert(data == 0x1f802000); return;
+    case 0x1f801008: assert(data == 0x0013243f); return;
+    case 0x1f80100c: assert(data == 0x00003022); return;
+    case 0x1f801010: assert(data == 0x0013243f); return;
+    case 0x1f801014: assert(data == 0x200931e1); return;
+    case 0x1f801018: assert(data == 0x00020843); return;
+    case 0x1f80101c: assert(data == 0x00070777); return;
+    case 0x1f801020: assert(data == 0x00031125); return;
+
+    case 0x1f801060: assert(data == 0x00000b88); return;
+  }
+
+  if (address == 0xfffe0130) {
+    return;
+  }
+
+  printf("bus::write(%d, 0x%08x, 0x%08x)\n", width, address, data);
   throw std::exception();
 }

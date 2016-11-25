@@ -1,7 +1,7 @@
 #include <string>
 #include "cpu_core.hpp"
 
-void disassemble_special(uint32_t pc) {
+void disassemble_special() {
   switch (cpu::state.code & 0x3f) {
     case 0x00: printf("sll    r%02d, r%02d, #%d\n", cpu::decoder::rd(), cpu::decoder::rt(), cpu::decoder::sa()); break;
 
@@ -40,12 +40,14 @@ void disassemble_special(uint32_t pc) {
     case 0x2b: printf("sltu   r%02d, r%02d, r%02d\n", cpu::decoder::rd(), cpu::decoder::rs(), cpu::decoder::rt()); break;
 
     default:
-      printf("0x%08x | unknown (0x%08x)\n", pc, cpu::state.code);
+      printf("unknown (0x%08x)\n", cpu::state.code);
       break;
   }
 }
 
-void disassemble_reg_imm(uint32_t pc) {
+void disassemble_reg_imm() {
+  auto pc = cpu::state.regs.this_pc;
+
   switch (cpu::decoder::rt()) {
     case 0x00: printf("bltz   r%02d, #0x%08x\n", cpu::decoder::rs(), pc + 4 + (cpu::decoder::iconst() << 2)); break;
     case 0x01: printf("bgez   r%02d, #0x%08x\n", cpu::decoder::rs(), pc + 4 + (cpu::decoder::iconst() << 2)); break;
@@ -54,7 +56,7 @@ void disassemble_reg_imm(uint32_t pc) {
     case 0x11: printf("bgezal r%02d, #0x%08x\n", cpu::decoder::rs(), pc + 4 + (cpu::decoder::iconst() << 2)); break;
 
     default:
-      printf("0x%08x | unknown (0x%08x)\n", pc, cpu::state.code);
+      printf("unknown (0x%08x)\n", cpu::state.code);
       break;
   }
 }
@@ -62,9 +64,11 @@ void disassemble_reg_imm(uint32_t pc) {
 void cpu::disassemble() {
   auto pc = state.regs.this_pc;
 
+  printf("0x%08x | ", pc);
+
   switch ((cpu::state.code >> 26) & 0x3f) {
-    case 0x00: return disassemble_special(pc);
-    case 0x01: return disassemble_reg_imm(pc);
+    case 0x00: return disassemble_special();
+    case 0x01: return disassemble_reg_imm();
 
     case 0x02: printf("j      0x%08x\n", (pc & ~0x0fffffff) | ((cpu::state.code << 2) & 0x0fffffff)); break;
     case 0x03: printf("jal    0x%08x\n", (pc & ~0x0fffffff) | ((cpu::state.code << 2) & 0x0fffffff)); break;
@@ -98,13 +102,13 @@ void cpu::disassemble() {
             case 0x10: printf("rfe\n"); break;
 
             default:
-              printf("0x%08x | unknown (0x%08x)\n", pc, cpu::state.code);
+              printf("unknown (0x%08x)\n", cpu::state.code);
               break;
           }
           break;
 
         default:
-          printf("0x%08x | unknown (0x%08x)\n", pc, cpu::state.code);
+          printf("unknown (0x%08x)\n", cpu::state.code);
           break;
       }
 
@@ -127,7 +131,7 @@ void cpu::disassemble() {
     case 0x2e: printf("swr    r%02d, #%08x(r%02d)\n", cpu::decoder::rt(), cpu::decoder::iconst(), cpu::decoder::rs()); break;
 
     default:
-      printf("0x%08x | unknown (0x%08x)\n", pc, cpu::state.code);
+      printf("unknown (0x%08x)\n", cpu::state.code);
       break;
   }
 }

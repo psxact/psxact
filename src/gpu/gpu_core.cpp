@@ -14,7 +14,7 @@ uint32_t gpu::data() {
     return (upper << 16) | lower;
   }
 
-  printf("gpu::read_data()\n");
+  printf("gpu::data()\n");
   return 0;
 }
 
@@ -24,11 +24,14 @@ uint32_t gpu::stat() {
   //  27    Ready to send VRAM to CPU   (0=No, 1=Ready)  ;GP0(C0h) ;via GPUREAD
   //  28    Ready to receive DMA Block  (0=No, 1=Ready)  ;GP0(...) ;via GP0
 
+  printf("gpu::stat()\n");
   return (gpu::state.status & ~0x00080000) | 0x1c002000;
 }
 
-uint32_t gpu::mmio_read(int size, uint32_t address) {
-  assert(size == WORD);
+uint32_t gpu::bus_read(int width, uint32_t address) {
+  assert(width == WORD);
+
+  printf("gpu::bus_read(%d, 0x%08x)\n", width, address);
 
   switch (address) {
     case 0x1f801810: return data();
@@ -36,8 +39,10 @@ uint32_t gpu::mmio_read(int size, uint32_t address) {
   }
 }
 
-void gpu::mmio_write(int size, uint32_t address, uint32_t data) {
-  assert(size == WORD);
+void gpu::bus_write(int width, uint32_t address, uint32_t data) {
+  assert(width == WORD);
+
+  printf("gpu::bus_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
 
   switch (address) {
     case 0x1f801810: return gp0(data);

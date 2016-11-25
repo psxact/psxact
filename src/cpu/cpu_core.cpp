@@ -33,8 +33,14 @@ void cpu::initialize() {
 }
 
 void cpu::run(int count) {
+  bool dis = false;
+
   for (int i = 0; i < count; i++) {
     cpu::read_code();
+
+    if (dis) {
+      disassemble();
+    }
 
     state.is_branch_delay_slot = state.is_branch;
     state.is_branch = false;
@@ -124,70 +130,32 @@ void cpu::read_code() {
 
   // todo: read i-cache
 
-  state.code = bus::read_word(map_address(state.regs.this_pc));
+  state.code = bus::read(WORD, map_address(state.regs.this_pc));
 }
 
-uint32_t cpu::read_data_byte(uint32_t address) {
+uint32_t cpu::read_data(int width, uint32_t address) {
   if (state.cop0.regs[12] & (1 << 16)) {
     return 0; // isc=1
   }
 
   // todo: read d-cache?
 
-  return bus::read_byte(map_address(address));
+  return bus::read(width, map_address(address));
 }
 
-uint32_t cpu::read_data_half(uint32_t address) {
-  if (state.cop0.regs[12] & (1 << 16)) {
-    return 0; // isc=1
-  }
-
-  // todo: read d-cache?
-
-  return bus::read_half(map_address(address));
-}
-
-uint32_t cpu::read_data_word(uint32_t address) {
-  if (state.cop0.regs[12] & (1 << 16)) {
-    return 0; // isc=1
-  }
-
-  // todo: read d-cache?
-
-  return bus::read_word(map_address(address));
-}
-
-void cpu::write_data_byte(uint32_t address, uint32_t data) {
+void cpu::write_data(int width, uint32_t address, uint32_t data) {
   if (state.cop0.regs[12] & (1 << 16)) {
     return; // isc=1
   }
 
   // todo: write d-cache?
 
-  return bus::write_byte(map_address(address), data);
+  return bus::write(width, map_address(address), data);
 }
 
-void cpu::write_data_half(uint32_t address, uint32_t data) {
-  if (state.cop0.regs[12] & (1 << 16)) {
-    return; // isc=1
-  }
+uint32_t cpu::bus_read(int width, uint32_t address) {
+  printf("cpu::bus_read(%d, 0x%08x)\n", width, address);
 
-  // todo: write d-cache?
-
-  return bus::write_half(map_address(address), data);
-}
-
-void cpu::write_data_word(uint32_t address, uint32_t data) {
-  if (state.cop0.regs[12] & (1 << 16)) {
-    return; // isc=1
-  }
-
-  // todo: write d-cache?
-
-  return bus::write_word(map_address(address), data);
-}
-
-uint32_t cpu::mmio_read(int, uint32_t address) {
   switch (address) {
     case 0x1f801070:
       return state.i_stat;
@@ -197,7 +165,9 @@ uint32_t cpu::mmio_read(int, uint32_t address) {
   }
 }
 
-void cpu::mmio_write(int, uint32_t address, uint32_t data) {
+void cpu::bus_write(int width, uint32_t address, uint32_t data) {
+  printf("cpu::bus_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
+
   switch (address) {
     case 0x1f801070:
       state.i_stat = state.i_stat & data;

@@ -15,17 +15,9 @@ namespace bus {
 
   void irq(int interrupt);
 
-  uint32_t read_byte(uint32_t address);
+  uint32_t read(int width, uint32_t address);
 
-  uint32_t read_half(uint32_t address);
-
-  uint32_t read_word(uint32_t address);
-
-  void write_byte(uint32_t, uint32_t);
-
-  void write_half(uint32_t, uint32_t);
-
-  void write_word(uint32_t, uint32_t);
+  void write(int width, uint32_t address, uint32_t data);
 }
 
 #endif //PSXACT_BUS_HPP

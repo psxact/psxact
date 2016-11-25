@@ -171,10 +171,10 @@ void cpu::op_cop2() {
     printf("cop2 $%08x\n", state.code);
   } else {
     switch (decoder::rs()) {
-      case 0: printf("mfc2 r%02d, r%02d\n", decoder::rt(), decoder::rd()); break;
-      case 2: printf("cfc2 r%02d, r%02d\n", decoder::rt(), decoder::rd()); break;
-      case 4: printf("mtc2 r%02d, r%02d\n", decoder::rt(), decoder::rd()); break;
-      case 6: printf("ctc2 r%02d, r%02d\n", decoder::rt(), decoder::rd()); break;
+      case 0: /*printf("mfc2 r%02d, r%02d\n", decoder::rt(), decoder::rd());*/ break;
+      case 2: /*printf("cfc2 r%02d, r%02d\n", decoder::rt(), decoder::rd());*/ break;
+      case 4: /*printf("mtc2 r%02d, r%02d\n", decoder::rt(), decoder::rd());*/ break;
+      case 6: /*printf("ctc2 r%02d, r%02d\n", decoder::rt(), decoder::rd());*/ break;
 
       default:
         printf("unimplemented cop2\n");
@@ -246,7 +246,7 @@ void cpu::op_jr() {
 
 void cpu::op_lb() {
   auto address = rs() + decoder::iconst();
-  auto data = read_data_byte(address);
+  auto data = read_data(BYTE, address);
   data = utility::sclip<8>(data);
 
   set_rt<1>(data);
@@ -254,7 +254,7 @@ void cpu::op_lb() {
 
 void cpu::op_lbu() {
   auto address = rs() + decoder::iconst();
-  auto data = read_data_byte(address);
+  auto data = read_data(BYTE, address);
 
   set_rt<1>(data);
 }
@@ -264,7 +264,7 @@ void cpu::op_lh() {
   if (address & 1) {
     enter_exception(0x4);
   } else {
-    auto data = read_data_half(address);
+    auto data = read_data(HALF, address);
     data = utility::sclip<16>(data);
 
     set_rt<1>(data);
@@ -276,7 +276,7 @@ void cpu::op_lhu() {
   if (address & 1) {
     enter_exception(0x4);
   } else {
-    auto data = read_data_half(address);
+    auto data = read_data(HALF, address);
 
     set_rt<1>(data);
   }
@@ -291,7 +291,7 @@ void cpu::op_lw() {
   if (address & 3) {
     enter_exception(0x4);
   } else {
-    auto data = read_data_word(address);
+    auto data = read_data(WORD, address);
 
     set_rt<1>(data);
   }
@@ -315,7 +315,7 @@ void cpu::op_lwc3() {
 
 void cpu::op_lwl() {
   auto address = rs() + decoder::iconst();
-  auto data = read_data_word(address & ~3);
+  auto data = read_data(WORD, address & ~3);
 
   switch (address & 3) {
     default: data = (data << 24) | (rt<1>() & 0x00ffffff); break;
@@ -329,7 +329,7 @@ void cpu::op_lwl() {
 
 void cpu::op_lwr() {
   auto address = rs() + decoder::iconst();
-  auto data = read_data_word(address & ~3);
+  auto data = read_data(WORD, address & ~3);
 
   switch (address & 3) {
     default: data = (data >>  0) | (rt<1>() & 0x00000000); break;
@@ -391,7 +391,7 @@ void cpu::op_sb() {
   auto address = rs() + decoder::iconst();
   auto data = rt();
 
-  write_data_byte(address, data);
+  write_data(BYTE, address, data);
 }
 
 void cpu::op_sh() {
@@ -401,7 +401,7 @@ void cpu::op_sh() {
   } else {
     auto data = rt();
 
-    write_data_half(address, data);
+    write_data(HALF, address, data);
   }
 }
 
@@ -468,7 +468,7 @@ void cpu::op_sw() {
   } else {
     auto data = rt();
 
-    write_data_word(address, data);
+    write_data(WORD, address, data);
   }
 }
 
@@ -490,7 +490,7 @@ void cpu::op_swc3() {
 
 void cpu::op_swl() {
   auto address = rs() + decoder::iconst();
-  auto data = read_data_word(address & ~3);
+  auto data = read_data(WORD, address & ~3);
 
   switch (address & 3) {
     default: data = (data & 0xffffff00) | (rt() >> 24); break;
@@ -499,12 +499,12 @@ void cpu::op_swl() {
     case  3: data = (data & 0x00000000) | (rt() >>  0); break;
   }
 
-  write_data_word(address & ~3, data);
+  write_data(WORD, address & ~3, data);
 }
 
 void cpu::op_swr() {
   auto address = rs() + decoder::iconst();
-  auto data = read_data_word(address & ~3);
+  auto data = read_data(WORD, address & ~3);
 
   switch (address & 3) {
     default: data = (data & 0x00000000) | (rt() <<  0); break;
@@ -513,7 +513,7 @@ void cpu::op_swr() {
     case  3: data = (data & 0x00ffffff) | (rt() << 24); break;
   }
 
-  write_data_word(address & ~3, data);
+  write_data(WORD, address & ~3, data);
 }
 
 void cpu::op_syscall() {

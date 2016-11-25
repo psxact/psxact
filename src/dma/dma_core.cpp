@@ -29,7 +29,9 @@ static uint32_t get_register_index(uint32_t address) {
   return (address >> 2) & 3;
 }
 
-uint32_t dma::mmio_read(int size, uint32_t address) {
+uint32_t dma::bus_read(int width, uint32_t address) {
+  printf("dma::bus_read(%d, 0x%08x)\n", width, address);
+
   auto channel = get_channel_index(address);
   if (channel == 7) {
     switch (get_register_index(address)) {
@@ -50,7 +52,9 @@ uint32_t dma::mmio_read(int size, uint32_t address) {
   return 0;
 }
 
-void dma::mmio_write(int size, uint32_t address, uint32_t data) {
+void dma::bus_write(int width, uint32_t address, uint32_t data) {
+  printf("dma::bus_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
+
   auto channel = get_channel_index(address);
   if (channel == 7) {
     switch (get_register_index(address)) {
@@ -98,7 +102,7 @@ static void run_channel_2_data_read() {
 
   for (int a = 0; a < ba; a++) {
     for (int s = 0; s < bs; s++) {
-      bus::write_word(address, gpu::data());
+      bus::write(WORD, address, gpu::data());
       address += 4;
     }
   }
@@ -118,7 +122,7 @@ static void run_channel_2_data_write() {
 
   for (int a = 0; a < ba; a++) {
     for (int s = 0; s < bs; s++) {
-      gpu::gp0(bus::read_word(address));
+      gpu::gp0(bus::read(WORD, address));
       address += 4;
     }
   }
@@ -132,13 +136,13 @@ static void run_channel_2_list() {
   auto address = state.channels[2].address;
 
   while (address != 0xffffff) {
-    auto value = bus::read_word(address);
+    auto value = bus::read(WORD, address);
     address += 4;
 
     auto count = value >> 24;
 
     for (auto index = 0; index < count; index++) {
-      gpu::gp0(bus::read_word(address));
+      gpu::gp0(bus::read(WORD, address));
       address += 4;
     }
 
@@ -157,11 +161,11 @@ static void run_channel_6() {
   counter = counter ? counter : 0x10000;
 
   for (int i = 1; i < counter; i++) {
-    bus::write_word(address, address - 4);
+    bus::write(WORD, address, address - 4);
     address -= 4;
   }
 
-  bus::write_word(address, 0x00ffffff);
+  bus::write(WORD, address, 0x00ffffff);
 
   state.channels[6].control &= ~0x11000000;
 

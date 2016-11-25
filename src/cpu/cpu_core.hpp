@@ -51,21 +51,13 @@ namespace cpu {
 
   void read_code();
 
-  uint32_t read_data_byte(uint32_t address);
+  uint32_t read_data(int width, uint32_t address);
 
-  uint32_t read_data_half(uint32_t address);
+  void write_data(int width, uint32_t address, uint32_t data);
 
-  uint32_t read_data_word(uint32_t address);
+  uint32_t bus_read(int width, uint32_t address);
 
-  void write_data_byte(uint32_t address, uint32_t data);
-
-  void write_data_half(uint32_t address, uint32_t data);
-
-  void write_data_word(uint32_t address, uint32_t data);
-
-  uint32_t mmio_read(int size, uint32_t address);
-
-  void mmio_write(int size, uint32_t address, uint32_t data);
+  void bus_write(int width, uint32_t address, uint32_t data);
 
   // --============--
   //   Instructions
