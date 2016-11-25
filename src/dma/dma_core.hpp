@@ -21,6 +21,8 @@ namespace dma {
 
   void main();
 
+  void irq_channel(int n);
+
   void run_channel(int n);
 }
 

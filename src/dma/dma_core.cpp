@@ -22,7 +22,7 @@ uint32_t dma::mmio_read(int size, uint32_t address) {
     }
   }
   else {
-    switch ((address >> 2) & 3) {
+    switch (get_register_index(address)) {
       case 0: return state.channels[channel].address;
       case 1: return state.channels[channel].counter;
       case 2: return state.channels[channel].control;
@@ -36,7 +36,7 @@ void dma::mmio_write(int size, uint32_t address, uint32_t data) {
   auto channel = get_channel_index(address);
   if (channel == 7) {
     switch (get_register_index(address)) {
-      case 0: state.dpcr = data & 0xffffffff; break;
+      case 0: state.dpcr = data; break;
 
       case 1:
         state.dicr &=  (       0xff000000);
@@ -49,7 +49,7 @@ void dma::mmio_write(int size, uint32_t address, uint32_t data) {
     }
   }
   else {
-    switch ((address >> 2) & 3) {
+    switch (get_register_index(address)) {
       case 0: state.channels[channel].address = data & 0x00ffffff; break;
       case 1: state.channels[channel].counter = data & 0xffffffff; break;
       case 2: state.channels[channel].control = data & 0x71770703; break;
@@ -86,6 +86,8 @@ static void run_channel_2_data_read() {
   }
 
   state.channels[2].control &= ~0x01000000;
+
+  dma::irq_channel(2);
 }
 
 static void run_channel_2_data_write() {
@@ -105,6 +107,8 @@ static void run_channel_2_data_write() {
   }
 
   state.channels[2].control &= ~0x01000000;
+
+  dma::irq_channel(2);
 }
 
 static void run_channel_2_list() {
@@ -123,6 +127,8 @@ static void run_channel_2_list() {
   }
 
   state.channels[2].control &= ~0x01000000;
+
+  dma::irq_channel(2);
 }
 
 static void run_channel_6() {
@@ -139,11 +145,40 @@ static void run_channel_6() {
   bus::write_word(address, 0x00ffffff);
 
   state.channels[6].control &= ~0x11000000;
+
+  dma::irq_channel(6);
 }
 
 void dma::run_channel(int n) {
-  if (n == 2 && state.channels[2].control == 0x01000200) { return run_channel_2_data_read(); }
-  if (n == 2 && state.channels[2].control == 0x01000201) { return run_channel_2_data_write(); }
-  if (n == 2 && state.channels[2].control == 0x01000401) { return run_channel_2_list(); }
+  if (n == 2) {
+    if (state.channels[2].control == 0x01000200) { return run_channel_2_data_read(); }
+    if (state.channels[2].control == 0x01000201) { return run_channel_2_data_write(); }
+    if (state.channels[2].control == 0x01000401) { return run_channel_2_list(); }
+  }
+
   if (n == 6 && state.channels[6].control == 0x11000002) { return run_channel_6(); }
+}
+
+void dma::irq_channel(int n) {
+  int flag = 1 << (n + 24);
+  int mask = 1 << (n + 16);
+
+  if (state.dicr & mask) {
+    state.dicr |= flag;
+  }
+
+  auto forced = ((state.dicr >> 15) & 1) != 0;
+  auto master = ((state.dicr >> 23) & 1) != 0;
+  auto signal = ((state.dicr >> 16) & (state.dicr >> 24) & 0x7f) != 0;
+  auto active = forced || (master && signal);
+
+  if (active) {
+    if (!(state.dicr & 0x80000000)) {
+      bus::irq_req(3);
+    }
+
+    state.dicr |= 0x80000000;
+  } else {
+    state.dicr &= ~0x80000000;
+  }
 }

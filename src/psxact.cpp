@@ -1,6 +1,5 @@
 #include "bus.hpp"
 #include "cpu/cpu_core.hpp"
-#include "dma/dma_core.hpp"
 #include "gpu/gpu_core.hpp"
 #include "renderer.hpp"
 

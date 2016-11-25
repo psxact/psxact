@@ -27,6 +27,8 @@ void bus::irq_ack(int interrupt) {
 }
 
 void bus::irq_req(int interrupt) {
+  printf("bus::irq_req(%d)\n", interrupt);
+
   cpu::state.i_stat |= (1 << interrupt);
 }
 

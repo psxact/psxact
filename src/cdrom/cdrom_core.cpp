@@ -66,24 +66,8 @@ uint32_t cdrom::mmio_read(int size, uint32_t address) {
   return 0;
 }
 
-static void (*response2)();
-
-static void get_id_response_no_disk() {
-  set_resp(0x08); set_resp(0x40);
-  set_resp(0x00); set_resp(0x00);
-  // the bios isn't interested in these, and the current fifo implementation
-  // could cause memory leaks.
-  //
-  // set_resp(0x00); set_resp(0x00); set_resp(0x00); set_resp(0x00);
-
-  cdrom::state.interrupt_request = 5;
-  bus::irq_req(2);
-
-  response2 = nullptr;
-}
-
 static void command_get_stat() {
-  set_resp(0);
+  set_resp(0x02);
 
   cdrom::state.interrupt_request = 3;
   bus::irq_req(2);
@@ -92,24 +76,15 @@ static void command_get_stat() {
 static void command_test() {
   switch (get_arg()) {
     case 0x20:
-      set_resp(96);
-      set_resp(1);
-      set_resp(1);
-      set_resp(2);
+      set_resp(0x99);
+      set_resp(0x02);
+      set_resp(0x01);
+      set_resp(0xc3);
 
       cdrom::state.interrupt_request = 3;
       bus::irq_req(2);
       break;
   }
-}
-
-static void command_get_id() {
-  set_resp(0);
-
-  cdrom::state.interrupt_request = 3;
-  bus::irq_req(2);
-
-  response2 = &get_id_response_no_disk;
 }
 
 void cdrom::mmio_write(int size, uint32_t address, uint32_t data) {
@@ -131,9 +106,6 @@ void cdrom::mmio_write(int size, uint32_t address, uint32_t data) {
 
             case 0x19:
               return command_test();
-
-            case 0x1a:
-              return command_get_id();
 
             default:
               printf("cd-rom command: $%02x\n", data);
@@ -177,10 +149,6 @@ void cdrom::mmio_write(int size, uint32_t address, uint32_t data) {
 
         case 1: // interrupt flag register
           state.interrupt_request &= ~data;
-
-          if (response2) {
-            response2();
-          }
           break;
 
         case 2: // audio volume for cd-left to spu-right
