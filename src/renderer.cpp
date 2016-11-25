@@ -1,5 +1,6 @@
 #include "renderer.hpp"
 #include "gpu/gpu_core.hpp"
+#include "memory/vram.hpp"
 
 SDL_Window *window;
 SDL_Surface *surface;
@@ -31,9 +32,10 @@ bool renderer::render() {
   SDL_LockSurface(surface);
 
   auto pixels = (uint32_t *)surface->pixels;
+  auto colors = vram::get_pointer();
 
   for (uint32_t i = 0; i < 1024 * 512; i++) {
-    *pixels++ = color_16_to_24( gpu::vram.h[i] );
+    *pixels++ = color_16_to_24( colors[i] );
   }
 
   SDL_UnlockSurface(surface);

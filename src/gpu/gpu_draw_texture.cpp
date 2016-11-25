@@ -1,4 +1,5 @@
 #include "gpu_core.hpp"
+#include "../memory/vram.hpp"
 
 void fill_texture(const gpu::texture::polygon_t<3> &p,
                   const int &w0,
@@ -9,7 +10,7 @@ void fill_texture(const gpu::texture::polygon_t<3> &p,
   int u = ((p.v[0].u * w0) + (p.v[1].u * w1) + (p.v[2].u * w2)) / area;
   int v = ((p.v[0].v * w0) + (p.v[1].v * w1) + (p.v[2].v * w2)) / area;
 
-  auto texel = gpu::read_vram(p.base_u + (u / 4), p.base_v + v);
+  auto texel = vram::read(p.base_u + (u / 4), p.base_v + v);
   int index = 0;
 
   switch (u & 3) {
@@ -19,12 +20,12 @@ void fill_texture(const gpu::texture::polygon_t<3> &p,
     case 3: index = (texel >> 12) & 0xf; break;
   }
 
-  auto color = gpu::read_vram(p.clut_x + index, p.clut_y);
+  auto color = vram::read(p.clut_x + index, p.clut_y);
   if (color == 0) {
     return;
   }
 
-  gpu::write_vram(x, y, color);
+  vram::write(x, y, color);
 }
 
 static int min3(int a, int b, int c) {

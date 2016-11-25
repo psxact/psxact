@@ -1,4 +1,5 @@
 #include "gpu_core.hpp"
+#include "../memory/vram.hpp"
 
 template<int min, int max>
 int clip(int value) {
@@ -15,8 +16,6 @@ static int dither_lut[4][4] = {
 };
 
 void gpu::draw_point(int x, int y, int r, int g, int b) {
-  auto address = (y << 10) + x;
-
   auto dither = dither_lut[y & 3][x & 3];
 
   r = clip<0, 255>(r + dither);
@@ -28,5 +27,5 @@ void gpu::draw_point(int x, int y, int r, int g, int b) {
       (((g >> 3) & 0x1f) <<  5) |
       (((b >> 3) & 0x1f) << 10);
 
-  gpu::vram.h[address] = uint16_t(color);
+  vram::write(x, y, uint16_t(color));
 }

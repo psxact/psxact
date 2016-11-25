@@ -1,5 +1,6 @@
 #include "dma_core.hpp"
 #include "../bus.hpp"
+#include "../gpu/gpu_core.hpp"
 
 static dma::state_t state;
 
@@ -70,7 +71,7 @@ void dma::main() {
 }
 
 static void run_channel_2_data_read() {
-  auto address = state.channels[2].address & 0x00ffffff;
+  auto address = state.channels[2].address;
   auto bs = (state.channels[2].counter >>  0) & 0xffff;
   auto ba = (state.channels[2].counter >> 16) & 0xffff;
 
@@ -79,8 +80,7 @@ static void run_channel_2_data_read() {
 
   for (int a = 0; a < ba; a++) {
     for (int s = 0; s < bs; s++) {
-      auto data = bus::read_word(0x1f801810);
-      bus::write_word(address, data);
+      bus::write_word(address, gpu::data());
       address += 4;
     }
   }
@@ -91,7 +91,7 @@ static void run_channel_2_data_read() {
 }
 
 static void run_channel_2_data_write() {
-  auto address = state.channels[2].address & 0x00ffffff;
+  auto address = state.channels[2].address;
   auto bs = (state.channels[2].counter >>  0) & 0xffff;
   auto ba = (state.channels[2].counter >> 16) & 0xffff;
 
@@ -100,8 +100,7 @@ static void run_channel_2_data_write() {
 
   for (int a = 0; a < ba; a++) {
     for (int s = 0; s < bs; s++) {
-      auto data = bus::read_word(address);
-      bus::write_word(0x1f801810, data);
+      gpu::gp0(bus::read_word(address));
       address += 4;
     }
   }
@@ -112,15 +111,17 @@ static void run_channel_2_data_write() {
 }
 
 static void run_channel_2_list() {
-  auto address = state.channels[2].address & 0xffffff;
+  auto address = state.channels[2].address;
 
   while (address != 0xffffff) {
     auto value = bus::read_word(address);
+    address += 4;
+
     auto count = value >> 24;
 
     for (auto index = 0; index < count; index++) {
-      auto command = bus::read_word(address += 4);
-      bus::write_word(0x1f801810, command);
+      gpu::gp0(bus::read_word(address));
+      address += 4;
     }
 
     address = value & 0xffffff;
@@ -132,7 +133,7 @@ static void run_channel_2_list() {
 }
 
 static void run_channel_6() {
-  auto address = state.channels[6].address & 0xffffff;
+  auto address = state.channels[6].address;
   auto counter = state.channels[6].counter & 0xffff;
 
   counter = counter ? counter : 0x10000;

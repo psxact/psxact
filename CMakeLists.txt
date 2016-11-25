@@ -15,11 +15,15 @@ set(SOURCE_FILES
     src/cpu/disassembler.cpp
     src/dma/dma_core.cpp
     src/dma/dma_core.hpp
+    src/gpu/gpu_gp0.cpp
+    src/gpu/gpu_gp1.cpp
     src/gpu/gpu_core.cpp
     src/gpu/gpu_core.hpp
     src/gpu/gpu_draw.cpp
     src/gpu/gpu_draw_gouraud.cpp
     src/gpu/gpu_draw_texture.cpp
+    src/memory/vram.cpp
+    src/memory/vram.hpp
     src/spu/spu_core.cpp
     src/spu/spu_core.hpp
     src/timer/timer_core.cpp

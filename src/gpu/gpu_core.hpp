@@ -6,14 +6,6 @@
 #include "../utility.hpp"
 
 namespace gpu {
-  union vram_t {
-    uint8_t  b[utility::mib<1>() / 1];
-    uint16_t h[utility::mib<1>() / 2];
-    uint32_t w[utility::mib<1>() / 4];
-  };
-
-  extern vram_t vram;
-
   struct state_t {
     uint32_t status = 0x14802000;
     bool textured_rectangle_x_flip;
@@ -43,33 +35,49 @@ namespace gpu {
     uint32_t display_area_y2;
 
     struct {
-      int remaining;
-      int x;
-      int y;
-      int w;
-      int h;
-      int current_x;
-      int current_y;
+      struct {
+        int x;
+        int y;
+        int w;
+        int h;
+      } reg;
+
+      struct {
+        int remaining;
+        int x;
+        int y;
+      } run;
     } texture_upload;
 
     struct {
-      int remaining;
-      int x;
-      int y;
-      int w;
-      int h;
-      int current_x;
-      int current_y;
+      struct {
+        int x;
+        int y;
+        int w;
+        int h;
+      } reg;
+
+      struct {
+        int remaining;
+        int x;
+        int y;
+      } run;
     } texture_download;
   };
+
+  extern state_t state;
 
   uint32_t mmio_read(int size, uint32_t address);
 
   void mmio_write(int size, uint32_t address, uint32_t data);
 
-  uint16_t read_vram(int x, int y);
+  uint32_t data();
 
-  void write_vram(int x, int y, uint16_t color);
+  uint32_t stat();
+
+  void gp0(uint32_t data);
+
+  void gp1(uint32_t data);
 
   struct color_t {
     int r;
