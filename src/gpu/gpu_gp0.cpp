@@ -1,7 +1,7 @@
 #include "gpu_core.hpp"
 #include "../memory/vram.hpp"
 
-static int gp0_command_size[256] = {
+static int command_size[256] = {
     1, 1, 3, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $00
     1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $10
     1, 1, 1, 1,  1, 1, 1, 1,  5, 1, 1, 1,  9, 1, 1, 1, // $20
@@ -23,18 +23,6 @@ static int gp0_command_size[256] = {
     1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $f0
 };
 
-static gpu::gouraud::pixel_t gp0_to_gouraud_pixel(uint32_t vertex, uint32_t color) {
-  gpu::gouraud::pixel_t p;
-  p.point.x = int(vertex & 0xffff);
-  p.point.y = int(vertex >> 16);
-
-  p.color.r = (color >>  0) & 0xff;
-  p.color.g = (color >>  8) & 0xff;
-  p.color.b = (color >> 16) & 0xff;
-
-  return p;
-}
-
 static gpu::point_t gp0_to_point(uint32_t point) {
   gpu::point_t result;
   result.x = int(point & 0xffff);
@@ -52,39 +40,32 @@ static gpu::color_t gp0_to_color(uint32_t color) {
   return result;
 }
 
-static gpu::texture::pixel_t gp0_to_texture_pixel(uint32_t point, uint32_t color, uint32_t texcoord) {
-  gpu::texture::pixel_t p;
+static gpu::gouraud::pixel_t gp0_to_gouraud_pixel(uint32_t point, uint32_t color) {
+  gpu::gouraud::pixel_t p;
   p.point = gp0_to_point(point);
   p.color = gp0_to_color(color);
-
-  p.u = (texcoord >> 0) & 0xff;
-  p.v = (texcoord >> 8) & 0xff;
 
   return p;
 }
 
-static void write_texture(int data) {
-  auto &upload = gpu::state.texture_upload;
+static gpu::texture::pixel_t gp0_to_texture_pixel(uint32_t point, uint32_t color, uint32_t coord) {
+  gpu::texture::pixel_t p;
+  p.point = gp0_to_point(point);
+  p.color = gp0_to_color(color);
 
-  if (!upload.run.remaining) {
-    return;
-  }
+  p.u = (coord >> 0) & 0xff;
+  p.v = (coord >> 8) & 0xff;
 
-  vram::write(upload.run.x, upload.run.y, uint16_t(data));
-
-  upload.run.remaining--;
-  upload.run.x++;
-
-  if (upload.run.x == (upload.reg.x + upload.reg.w)) {
-    upload.run.x = upload.reg.x;
-    upload.run.y++;
-  }
+  return p;
 }
 
 void gpu::gp0(uint32_t data) {
-  if (state.texture_upload.run.remaining) {
-    write_texture(data);
-    write_texture(data >> 16);
+  if (state.cpu_to_gpu_transfer.run.active) {
+    auto lower = uint16_t(data >>  0);
+    auto upper = uint16_t(data >> 16);
+
+    vram_transfer(lower);
+    vram_transfer(upper);
     return;
   }
 
@@ -93,7 +74,7 @@ void gpu::gp0(uint32_t data) {
 
   auto command = state.fifo.buffer[0] >> 24;
 
-  if (state.fifo.wr == gp0_command_size[command]) {
+  if (state.fifo.wr == command_size[command]) {
     state.fifo.wr = 0;
 
     switch (command) {
@@ -211,28 +192,28 @@ void gpu::gp0(uint32_t data) {
       }
 
       case 0xa0: {
-        auto &ul = state.texture_upload;
-        ul.reg.x = state.fifo.buffer[1] & 0xffff;
-        ul.reg.y = state.fifo.buffer[1] >> 16;
-        ul.reg.w = state.fifo.buffer[2] & 0xffff;
-        ul.reg.h = state.fifo.buffer[2] >> 16;
+        auto &transfer = state.cpu_to_gpu_transfer;
+        transfer.reg.x = state.fifo.buffer[1] & 0xffff;
+        transfer.reg.y = state.fifo.buffer[1] >> 16;
+        transfer.reg.w = state.fifo.buffer[2] & 0xffff;
+        transfer.reg.h = state.fifo.buffer[2] >> 16;
 
-        ul.run.x = ul.reg.x;
-        ul.run.y = ul.reg.y;
-        ul.run.remaining = ul.reg.w * ul.reg.h;
+        transfer.run.x = 0;
+        transfer.run.y = 0;
+        transfer.run.active = true;
         break;
       }
 
       case 0xc0: {
-        auto &dl = state.texture_download;
-        dl.reg.x = state.fifo.buffer[1] & 0xffff;
-        dl.reg.y = state.fifo.buffer[1] >> 16;
-        dl.reg.w = state.fifo.buffer[2] & 0xffff;
-        dl.reg.h = state.fifo.buffer[2] >> 16;
+        auto &transfer = state.gpu_to_cpu_transfer;
+        transfer.reg.x = state.fifo.buffer[1] & 0xffff;
+        transfer.reg.y = state.fifo.buffer[1] >> 16;
+        transfer.reg.w = state.fifo.buffer[2] & 0xffff;
+        transfer.reg.h = state.fifo.buffer[2] >> 16;
 
-        dl.run.x = dl.reg.x;
-        dl.run.y = dl.reg.y;
-        dl.run.remaining = dl.reg.w * dl.reg.h;
+        transfer.run.x = 0;
+        transfer.run.y = 0;
+        transfer.run.active = true;
         break;
       }
 

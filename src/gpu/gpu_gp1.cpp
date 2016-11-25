@@ -1,7 +1,7 @@
 #include "gpu_core.hpp"
 
 void gpu::gp1(uint32_t data) {
-  switch ((data >> 24) & 0xff) {
+  switch ((data >> 24) & 0x3f) {
     case 0x00:
       state.status = 0x14802000;
       state.textured_rectangle_x_flip = 0;
@@ -43,14 +43,6 @@ void gpu::gp1(uint32_t data) {
       break;
 
     case 0x08:
-      // 0-1   Horizontal Resolution 1     (0=256, 1=320, 2=512, 3=640) ;GPUSTAT.17-18
-      // 2     Vertical Resolution         (0=240, 1=480, when Bit5=1)  ;GPUSTAT.19
-      // 3     Video Mode                  (0=NTSC/60Hz, 1=PAL/50Hz)    ;GPUSTAT.20
-      // 4     Display Area Color Depth    (0=15bit, 1=24bit)           ;GPUSTAT.21
-      // 5     Vertical Interlace          (0=Off, 1=On)                ;GPUSTAT.22
-      // 6     Horizontal Resolution 2     (0=256/320/512/640, 1=368)   ;GPUSTAT.16
-      // 7     "Reverseflag"               (0=Normal, 1=Distorted)      ;GPUSTAT.14
-
       state.status &= ~0x7f4000;
       state.status |= (data << 17) & 0x7e0000;
       state.status |= (data << 10) & 0x10000;

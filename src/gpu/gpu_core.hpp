@@ -8,15 +8,6 @@
 namespace gpu {
   struct state_t {
     uint32_t status = 0x14802000;
-    bool textured_rectangle_x_flip;
-    bool textured_rectangle_y_flip;
-
-    struct {
-      uint32_t buffer[16];
-      int wr;
-      int rd;
-    } fifo;
-
     uint32_t texture_window_mask_x;
     uint32_t texture_window_mask_y;
     uint32_t texture_window_offset_x;
@@ -33,6 +24,14 @@ namespace gpu {
     uint32_t display_area_y1;
     uint32_t display_area_x2;
     uint32_t display_area_y2;
+    bool textured_rectangle_x_flip;
+    bool textured_rectangle_y_flip;
+
+    struct {
+      uint32_t buffer[16];
+      int wr;
+      int rd;
+    } fifo;
 
     struct {
       struct {
@@ -43,11 +42,11 @@ namespace gpu {
       } reg;
 
       struct {
-        int remaining;
+        bool active;
         int x;
         int y;
       } run;
-    } texture_upload;
+    } cpu_to_gpu_transfer;
 
     struct {
       struct {
@@ -58,11 +57,11 @@ namespace gpu {
       } reg;
 
       struct {
-        int remaining;
+        bool active;
         int x;
         int y;
       } run;
-    } texture_download;
+    } gpu_to_cpu_transfer;
   };
 
   extern state_t state;
@@ -78,6 +77,10 @@ namespace gpu {
   void gp0(uint32_t data);
 
   void gp1(uint32_t data);
+
+  void vram_transfer(uint16_t data);
+
+  uint16_t vram_transfer();
 
   struct color_t {
     int r;

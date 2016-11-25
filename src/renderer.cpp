@@ -1,5 +1,4 @@
 #include "renderer.hpp"
-#include "gpu/gpu_core.hpp"
 #include "memory/vram.hpp"
 
 SDL_Window *window;

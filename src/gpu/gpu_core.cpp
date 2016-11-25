@@ -6,29 +6,10 @@
 
 gpu::state_t gpu::state;
 
-static uint32_t read_texture() {
-  auto &download = gpu::state.texture_download;
-  if (!download.run.remaining) {
-    return 0;
-  }
-
-  auto data = vram::read(download.run.x, download.run.y);
-
-  download.run.remaining--;
-  download.run.x++;
-
-  if (download.run.x == (download.reg.x + download.reg.w)) {
-    download.run.x = download.reg.x;
-    download.run.y++;
-  }
-
-  return data;
-}
-
 uint32_t gpu::data() {
-  if (gpu::state.texture_download.run.remaining) {
-    auto lower = read_texture();
-    auto upper = read_texture();
+  if (gpu::state.gpu_to_cpu_transfer.run.active) {
+    auto lower = vram_transfer();
+    auto upper = vram_transfer();
 
     return (upper << 16) | lower;
   }
@@ -43,11 +24,7 @@ uint32_t gpu::stat() {
   //  27    Ready to send VRAM to CPU   (0=No, 1=Ready)  ;GP0(C0h) ;via GPUREAD
   //  28    Ready to receive DMA Block  (0=No, 1=Ready)  ;GP0(...) ;via GP0
 
-  auto result = (gpu::state.status & ~0x00080000) | 0x1c002000;
-
-  printf("gpu::stat(0x%08x)\n", result);
-
-  return result;
+  return (gpu::state.status & ~0x00080000) | 0x1c002000;
 }
 
 uint32_t gpu::mmio_read(int size, uint32_t address) {
@@ -65,5 +42,51 @@ void gpu::mmio_write(int size, uint32_t address, uint32_t data) {
   switch (address) {
     case 0x1f801810: return gp0(data);
     case 0x1f801814: return gp1(data);
+  }
+}
+
+uint16_t gpu::vram_transfer() {
+  auto &transfer = gpu::state.gpu_to_cpu_transfer;
+  if (!transfer.run.active) {
+    return 0;
+  }
+
+  auto data = vram::read(transfer.reg.x + transfer.run.x,
+                         transfer.reg.y + transfer.run.y);
+
+  transfer.run.x++;
+
+  if (transfer.run.x == transfer.reg.w) {
+    transfer.run.x = transfer.reg.x;
+    transfer.run.y++;
+
+    if (transfer.run.y == transfer.reg.h) {
+      transfer.run.y = 0;
+      transfer.run.active = false;
+    }
+  }
+
+  return data;
+}
+
+void gpu::vram_transfer(uint16_t data) {
+  auto &transfer = gpu::state.cpu_to_gpu_transfer;
+  if (!transfer.run.active) {
+    return;
+  }
+
+  vram::write(transfer.reg.x + transfer.run.x,
+              transfer.reg.y + transfer.run.y, uint16_t(data));
+
+  transfer.run.x++;
+
+  if (transfer.run.x == transfer.reg.w) {
+    transfer.run.x = 0;
+    transfer.run.y++;
+
+    if (transfer.run.y == transfer.reg.h) {
+      transfer.run.y = 0;
+      transfer.run.active = false;
+    }
   }
 }
