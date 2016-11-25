@@ -9,6 +9,8 @@ namespace cdrom {
     uint32_t interrupt_enable;
     uint32_t interrupt_request;
     uint32_t index;
+    uint32_t command;
+    bool has_command;
 
     std::deque<uint8_t> args_fifo;
     std::deque<uint8_t> resp_fifo;
@@ -20,6 +22,8 @@ namespace cdrom {
   uint32_t mmio_read(int size, uint32_t address);
 
   void mmio_write(int size, uint32_t address, uint32_t data);
+
+  void run();
 }
 
 #endif //PSXACT_CDROM_CORE_HPP

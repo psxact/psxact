@@ -40,7 +40,7 @@ static void set_data(uint8_t data) {
 uint32_t cdrom::mmio_read(int size, uint32_t address) {
   assert(size == BYTE);
 
-  printf("cdrom::mmio_read(0x%08x)\n", address);
+  printf("cdrom::bus_read(0x%08x)\n", address);
 
   switch (address - 0x1f801800) {
     case 0: { // status register
@@ -66,31 +66,10 @@ uint32_t cdrom::mmio_read(int size, uint32_t address) {
   return 0;
 }
 
-static void command_get_stat() {
-  set_resp(0x02);
-
-  cdrom::state.interrupt_request = 3;
-  bus::irq_req(2);
-}
-
-static void command_test() {
-  switch (get_arg()) {
-    case 0x20:
-      set_resp(0x99);
-      set_resp(0x02);
-      set_resp(0x01);
-      set_resp(0xc3);
-
-      cdrom::state.interrupt_request = 3;
-      bus::irq_req(2);
-      break;
-  }
-}
-
 void cdrom::mmio_write(int size, uint32_t address, uint32_t data) {
   assert(size == BYTE);
 
-  printf("cdrom::mmio_write(0x%08x, 0x%02x)\n", address, data);
+  printf("cdrom::bus_write(0x%08x, 0x%02x)\n", address, data);
 
   switch (address - 0x1f801800) {
     case 0:
@@ -100,17 +79,8 @@ void cdrom::mmio_write(int size, uint32_t address, uint32_t data) {
     case 1:
       switch (state.index) {
         case 0: // command register
-          switch (data & 0xff) {
-            case 0x01:
-              return command_get_stat();
-
-            case 0x19:
-              return command_test();
-
-            default:
-              printf("cd-rom command: $%02x\n", data);
-              break;
-          }
+          state.command = uint8_t(data);
+          state.has_command = true;
           break;
 
         case 1: // sound map data out
@@ -158,5 +128,79 @@ void cdrom::mmio_write(int size, uint32_t address, uint32_t data) {
           break;
       }
       break;
+  }
+}
+
+static void (*second_response)() = nullptr;
+
+static void command_get_stat() {
+  set_resp(0x02);
+
+  cdrom::state.interrupt_request = 3;
+  bus::irq(2);
+}
+
+static void command_test() {
+  switch (get_arg()) {
+    case 0x20:
+      set_resp(0x99);
+      set_resp(0x02);
+      set_resp(0x01);
+      set_resp(0xc3);
+
+      cdrom::state.interrupt_request = 3;
+      bus::irq(2);
+      break;
+  }
+}
+
+static void command_get_id_no_disk() {
+  set_resp(0x08);
+  set_resp(0x40);
+
+  set_resp(0x00);
+  set_resp(0x00);
+
+  set_resp(0x00);
+  set_resp(0x00);
+  set_resp(0x00);
+  set_resp(0x00);
+
+  cdrom::state.interrupt_request = 5;
+  bus::irq(2);
+}
+
+static void command_get_id() {
+  set_resp(0x02);
+
+  cdrom::state.interrupt_request = 3;
+  bus::irq(2);
+
+  second_response = &command_get_id_no_disk;
+}
+
+void cdrom::run() {
+  if (second_response) {
+    second_response();
+    second_response = nullptr;
+  }
+
+  if (state.has_command) {
+    state.has_command = false;
+
+    switch (state.command) {
+      case 0x01:
+        return command_get_stat();
+
+      case 0x19:
+        return command_test();
+
+      case 0x1a:
+        return command_get_id();
+
+      default:
+        printf("cd-rom command: $%02x\n", state.command);
+        break;
+    }
   }
 }

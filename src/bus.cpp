@@ -22,13 +22,7 @@ void bus::initialize(const std::string &bios_file_name, const std::string &game_
   utility::read_all_bytes(bios_file_name.c_str(), bios);
 }
 
-void bus::irq_ack(int interrupt) {
-  cpu::state.i_stat &= ~(1 << interrupt);
-}
-
-void bus::irq_req(int interrupt) {
-  printf("bus::irq_req(%d)\n", interrupt);
-
+void bus::irq(int interrupt) {
   cpu::state.i_stat |= (1 << interrupt);
 }
 
@@ -45,7 +39,8 @@ uint32_t bus::read_byte(uint32_t address) {
     return utility::read_byte(dmem, address);
   }
 
-  if (address == 0x1f000084) {
+  if (address == 0x1f000084 ||
+      address == 0x1f801040) {
     return 0;
   }
 
@@ -53,8 +48,8 @@ uint32_t bus::read_byte(uint32_t address) {
     return cdrom::mmio_read(BYTE, address);
   }
 
-  printf("unknown byte read: $%08x\n", address);
-  throw std::runtime_error("unknown read");
+  printf("bus::read_byte(0x%08x)\n", address);
+  throw std::exception();
 }
 
 uint32_t bus::read_half(uint32_t address) {
@@ -78,12 +73,13 @@ uint32_t bus::read_half(uint32_t address) {
     return spu::mmio_read(HALF, address);
   }
 
-  if (address == 0x1f801120) {
+  if (address == 0x1f801120 ||
+      address == 0x1f801044) {
     return 0;
   }
 
-  printf("unknown half read: $%08x\n", address);
-  throw std::runtime_error("unknown read");
+  printf("bus::read_half(0x%08x)\n", address);
+  throw std::exception();
 }
 
 uint32_t bus::read_word(uint32_t address) {
@@ -111,7 +107,7 @@ uint32_t bus::read_word(uint32_t address) {
     if (utility::between<0x1f801100, 0x1f80110f>(address) ||
         utility::between<0x1f801110, 0x1f80111f>(address) ||
         utility::between<0x1f801120, 0x1f80112f>(address)) {
-      return timer::mmio_read(WORD, address);
+      return timer::bus_read(WORD, address);
     }
 
     if (utility::between<0x1f801800, 0x1f801803>(address)) {
@@ -140,8 +136,8 @@ uint32_t bus::read_word(uint32_t address) {
     return 0;
   }
 
-  printf("unknown word read: $%08x\n", address);
-  throw std::runtime_error("unknown read");
+  printf("bus::read_word(0x%08x)\n", address);
+  throw std::exception();
 }
 
 void bus::write_byte(uint32_t address, uint32_t data) {
@@ -167,7 +163,7 @@ void bus::write_byte(uint32_t address, uint32_t data) {
   }
 
   printf("unknown byte write: $%08x <- $%08x\n", address, data);
-  throw std::runtime_error("unknown write");
+  throw std::exception();
 }
 
 void bus::write_half(uint32_t address, uint32_t data) {
@@ -208,7 +204,7 @@ void bus::write_half(uint32_t address, uint32_t data) {
   }
 
   printf("unknown half write: $%08x <- $%08x\n", address, data);
-  throw std::runtime_error("unknown write");
+  throw std::exception();
 }
 
 void bus::write_word(uint32_t address, uint32_t data) {
@@ -237,7 +233,7 @@ void bus::write_word(uint32_t address, uint32_t data) {
     if (utility::between<0x1f801100, 0x1f80110f>(address) ||
         utility::between<0x1f801110, 0x1f80111f>(address) ||
         utility::between<0x1f801120, 0x1f80112f>(address)) {
-      return timer::mmio_write(WORD, address, data);
+      return timer::bus_write(WORD, address, data);
     }
 
     if (utility::between<0x1f801800, 0x1f801803>(address)) {
@@ -274,12 +270,12 @@ void bus::write_word(uint32_t address, uint32_t data) {
     return;
   }
 
-  if (utility::between<0x1f000000, 0x1f7fffff>(address) || // expansion region 1 mmio_write
-      utility::between<0x1f802000, 0x1f802fff>(address) || // expansion region 2 mmio_write
-      utility::between<0x1fa00000, 0x1fbfffff>(address)) { // expansion region 3 mmio_write
+  if (utility::between<0x1f000000, 0x1f7fffff>(address) || // expansion region 1 bus_write
+      utility::between<0x1f802000, 0x1f802fff>(address) || // expansion region 2 bus_write
+      utility::between<0x1fa00000, 0x1fbfffff>(address)) { // expansion region 3 bus_write
     return;
   }
 
   printf("unknown word write: $%08x <- $%08x\n", address, data);
-  throw std::runtime_error("unknown write");
+  throw std::exception();
 }

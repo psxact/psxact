@@ -1,4 +1,5 @@
 #include "bus.hpp"
+#include "cdrom/cdrom_core.hpp"
 #include "cpu/cpu_core.hpp"
 #include "gpu/gpu_core.hpp"
 #include "renderer.hpp"
@@ -19,7 +20,12 @@ int main(int argc, char *argv[]) {
   renderer::initialize();
 
   while (renderer::render()) {
-    cpu::run(33868800 / 60);
+    for (int i = 0; i < 10; i++) {
+      cpu::run(33868800 / 60 / 10);
+      cdrom::run();
+    }
+
+    bus::irq(0);
   }
 
   renderer::destroy();

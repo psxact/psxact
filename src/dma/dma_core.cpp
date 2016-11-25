@@ -4,11 +4,28 @@
 
 static dma::state_t state;
 
-static inline uint32_t get_channel_index(uint32_t address) {
+static void update_irq_active_flag() {
+  auto forced = ((state.dicr >> 15) & 1) != 0;
+  auto master = ((state.dicr >> 23) & 1) != 0;
+  auto signal = ((state.dicr >> 16) & (state.dicr >> 24) & 0x7f) != 0;
+  auto active = forced || (master && signal);
+
+  if (active) {
+    if (!(state.dicr & 0x80000000)) {
+      bus::irq(3);
+    }
+
+    state.dicr |= 0x80000000;
+  } else {
+    state.dicr &= ~0x80000000;
+  }
+}
+
+static uint32_t get_channel_index(uint32_t address) {
   return (address >> 4) & 7;
 }
 
-static inline uint32_t get_register_index(uint32_t address) {
+static uint32_t get_register_index(uint32_t address) {
   return (address >> 2) & 3;
 }
 
@@ -43,6 +60,7 @@ void dma::mmio_write(int size, uint32_t address, uint32_t data) {
         state.dicr &=  (       0xff000000);
         state.dicr |=  (data & 0x00ff803f);
         state.dicr &= ~(data & 0x7f000000);
+        update_irq_active_flag();
         break;
 
       case 2: break;
@@ -168,18 +186,5 @@ void dma::irq_channel(int n) {
     state.dicr |= flag;
   }
 
-  auto forced = ((state.dicr >> 15) & 1) != 0;
-  auto master = ((state.dicr >> 23) & 1) != 0;
-  auto signal = ((state.dicr >> 16) & (state.dicr >> 24) & 0x7f) != 0;
-  auto active = forced || (master && signal);
-
-  if (active) {
-    if (!(state.dicr & 0x80000000)) {
-      bus::irq_req(3);
-    }
-
-    state.dicr |= 0x80000000;
-  } else {
-    state.dicr &= ~0x80000000;
-  }
+  update_irq_active_flag();
 }
