@@ -126,6 +126,7 @@ namespace gpu {
       int clut_y;
       int base_u;
       int base_v;
+      int depth;
     };
 
     void draw_poly3(const polygon_t<3> &p);

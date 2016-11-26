@@ -1,15 +1,16 @@
+#include <cassert>
 #include "gpu_core.hpp"
 #include "../memory/vram.hpp"
 
 static int command_size[256] = {
     1, 1, 3, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $00
     1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $10
-    1, 1, 1, 1,  1, 1, 1, 1,  5, 1, 1, 1,  9, 1, 1, 1, // $20
+    1, 1, 1, 1,  1, 1, 1, 1,  5, 1, 1, 1,  9, 9, 1, 1, // $20
     6, 1, 1, 1,  1, 1, 1, 1,  8, 1, 1, 1,  1, 1, 1, 1, // $30
 
     1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $40
     1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $50
-    1, 1, 1, 1,  1, 1, 1, 1,  2, 1, 1, 1,  1, 1, 1, 1, // $60
+    1, 1, 1, 1,  1, 4, 1, 1,  2, 1, 1, 1,  1, 1, 1, 1, // $60
     1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $70
 
     1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $80
@@ -25,8 +26,8 @@ static int command_size[256] = {
 
 static gpu::point_t gp0_to_point(uint32_t point) {
   gpu::point_t result;
-  result.x = int(point & 0xffff);
-  result.y = int(point >> 16);
+  result.x = utility::sclip<11>(point);
+  result.y = utility::sclip<11>(point >> 16);
 
   return result;
 }
@@ -118,7 +119,8 @@ void gpu::gp0(uint32_t data) {
         break;
       }
 
-      case 0x2c: { // textured quad, opaque
+      case 0x2c:
+      case 0x2d: { // textured quad, opaque
         auto color  = state.fifo.buffer[0];
         auto point1 = state.fifo.buffer[1];
         auto coord1 = state.fifo.buffer[2];
@@ -139,6 +141,7 @@ void gpu::gp0(uint32_t data) {
         p.clut_y = ((coord1 >> 22) & 0x1ff) * 1;
         p.base_u = ((coord2 >> 16) & 0x00f) * 64;
         p.base_v = ((coord2 >> 20) & 0x001) * 256;
+        p.depth  = ((coord2 >> 23) & 0x003);
 
         gpu::texture::draw_poly4(p);
         break;
@@ -176,6 +179,46 @@ void gpu::gp0(uint32_t data) {
         auto v3 = gp0_to_gouraud_pixel(point4, color4);
 
         gpu::gouraud::draw_poly4({v0, v1, v2, v3});
+        break;
+      }
+
+      case 0x65: {
+        //auto color  = gp0_to_color(state.fifo.buffer[0]);
+        auto point1 = gp0_to_point(state.fifo.buffer[1]);
+        auto coord  = state.fifo.buffer[2];
+        auto point2 = gp0_to_point(state.fifo.buffer[3]);
+
+        assert((state.status & 0x180) == 0);
+
+        auto base_u = ((state.status >> 0) & 0xf) * 64;
+        auto base_v = ((state.status >> 4) & 0x1) * 256;
+
+        auto clut_x = ((coord >> 16) & 0x03f) * 16;
+        auto clut_y = ((coord >> 22) & 0x1ff);
+
+        for (int y = 0; y < point2.y; y++) {
+          for (int x = 0; x < point2.x; x++) {
+            auto texel = vram::read(base_u + (x / 4),
+                                    base_v + y);
+
+            int index = 0;
+
+            switch (x & 3) {
+              case 0: index = (texel >>  0) & 0xf; break;
+              case 1: index = (texel >>  4) & 0xf; break;
+              case 2: index = (texel >>  8) & 0xf; break;
+              case 3: index = (texel >> 12) & 0xf; break;
+            }
+
+            auto color = vram::read(clut_x + index,
+                                    clut_y);
+
+            vram::write(point1.x + x,
+                        point1.y + y,
+                        color);
+          }
+        }
+
         break;
       }
 

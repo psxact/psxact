@@ -16,6 +16,9 @@ static int dither_lut[4][4] = {
 };
 
 void gpu::draw_point(int x, int y, int r, int g, int b) {
+  if (x < state.drawing_area_x1 || x > state.drawing_area_x2) return;
+  if (y < state.drawing_area_y1 || y > state.drawing_area_y2) return;
+
   auto dither = dither_lut[y & 3][x & 3];
 
   r = clip<0, 255>(r + dither);

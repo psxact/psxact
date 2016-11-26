@@ -43,7 +43,7 @@ namespace cpu {
 
   void disassemble();
 
-  void run(int count);
+  void tick();
 
   void enter_exception(uint32_t code);
 

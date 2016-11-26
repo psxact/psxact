@@ -24,7 +24,6 @@ void bus::initialize(const std::string &bios_file_name, const std::string &game_
 }
 
 void bus::irq(int interrupt) {
-  printf("bus::irq(%d)\n", interrupt);
   cpu::state.i_stat |= (1 << interrupt);
 }
 

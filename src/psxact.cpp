@@ -3,13 +3,12 @@
 #include "cpu/cpu_core.hpp"
 #include "gpu/gpu_core.hpp"
 #include "renderer.hpp"
+#include "timer/timer_core.hpp"
 
 int main(int argc, char *argv[]) {
   if (argc != 3) {
     return -1;
   }
-
-  freopen("C:/Users/Adam.Becker/stdout.log", "w", stdout);
 
   std::string bios_file_name(argv[1]);
   std::string game_file_name(argv[2]);
@@ -21,7 +20,11 @@ int main(int argc, char *argv[]) {
 
   while (renderer::render()) {
     for (int i = 0; i < 10; i++) {
-      cpu::run(33868800 / 60 / 10);
+      for (int i = 0; i < 33868800 / 60 / 10; i++) {
+        cpu::tick();
+        timer::tick_timer_2();
+      }
+
       cdrom::run();
     }
 

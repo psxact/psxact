@@ -32,40 +32,32 @@ void cpu::initialize() {
   state.regs.next_pc = state.regs.pc + 4;
 }
 
-void cpu::run(int count) {
-  bool dis = false;
+void cpu::tick() {
+  cpu::read_code();
 
-  for (int i = 0; i < count; i++) {
-    cpu::read_code();
+  state.is_branch_delay_slot = state.is_branch;
+  state.is_branch = false;
 
-    if (dis) {
-      disassemble();
-    }
+  state.is_load_delay_slot = state.is_load;
+  state.is_load = false;
 
-    state.is_branch_delay_slot = state.is_branch;
-    state.is_branch = false;
+  if (state.i_stat & state.i_mask) {
+    state.cop0.regs[13] |= (1 << 10);
+  } else {
+    state.cop0.regs[13] &= ~(1 << 10);
+  }
 
-    state.is_load_delay_slot = state.is_load;
-    state.is_load = false;
+  auto iec = (state.cop0.regs[12] & 1) != 0;
+  auto irq = (state.cop0.regs[12] & state.cop0.regs[13] & 0xff00) != 0;
 
-    if (state.i_stat & state.i_mask) {
-      state.cop0.regs[13] |= (1 << 10);
-    } else {
-      state.cop0.regs[13] &= ~(1 << 10);
-    }
-
-    auto iec = (state.cop0.regs[12] & 1) != 0;
-    auto irq = (state.cop0.regs[12] & state.cop0.regs[13] & 0xff00) != 0;
-
-    if (iec && irq) {
-      enter_exception(0x0);
-    } else {
-      auto code = (cpu::state.code >> 26) & 63;
-      if (code)
-        op_table[code]();
-      else
-        op_table_special[(cpu::state.code >> 0) & 63]();
-    }
+  if (iec && irq) {
+    enter_exception(0x0);
+  } else {
+    auto code = (cpu::state.code >> 26) & 63;
+    if (code)
+      op_table[code]();
+    else
+      op_table_special[(cpu::state.code >> 0) & 63]();
   }
 }
 

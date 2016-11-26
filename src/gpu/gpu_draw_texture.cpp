@@ -1,10 +1,10 @@
 #include "gpu_core.hpp"
 #include "../memory/vram.hpp"
 
-void fill_texture(const gpu::texture::polygon_t<3> &p,
-                  const int &w0,
-                  const int &w1,
-                  const int &w2, int x, int y) {
+void fill_texture_4bpp(const gpu::texture::polygon_t<3> &p,
+                       const int &w0,
+                       const int &w1,
+                       const int &w2, int x, int y) {
   int area = w0 + w1 + w2;
 
   int u = ((p.v[0].u * w0) + (p.v[1].u * w1) + (p.v[2].u * w2)) / area;
@@ -26,6 +26,21 @@ void fill_texture(const gpu::texture::polygon_t<3> &p,
   }
 
   vram::write(x, y, color);
+}
+
+void fill_texture_15bpp(const gpu::texture::polygon_t<3> &p,
+                        const int &w0,
+                        const int &w1,
+                        const int &w2, int x, int y) {
+  int area = w0 + w1 + w2;
+
+  int u = ((p.v[0].u * w0) + (p.v[1].u * w1) + (p.v[2].u * w2)) / area;
+  int v = ((p.v[0].v * w0) + (p.v[1].v * w1) + (p.v[2].v * w2)) / area;
+
+  auto color = vram::read(p.base_u + u, p.base_v + v);
+  if (color) {
+    vram::write(x, y, color);
+  }
 }
 
 static int min3(int a, int b, int c) {
@@ -80,7 +95,11 @@ static void fill_poly3_texture(const gpu::texture::polygon_t<3> &t) {
           (w2 > 0 || (w2 == 0 && is_top_left_01));
 
       if (draw) {
-        fill_texture(t, w0, w1, w2, p.x, p.y);
+        switch (t.depth) {
+          case 0: fill_texture_4bpp (t, w0, w1, w2, p.x, p.y); break;
+          case 2: fill_texture_15bpp(t, w0, w1, w2, p.x, p.y); break;
+          case 3: fill_texture_15bpp(t, w0, w1, w2, p.x, p.y); break;
+        }
       }
 
       w0 += x12;
@@ -108,9 +127,9 @@ void gpu::texture::draw_poly3(const gpu::texture::polygon_t<3> &p) {
   auto &v2 = p.v[2];
 
   if (double_area(v0.point, v1.point, v2.point) < 0) {
-    fill_poly3_texture({v0, v1, v2, p.clut_x, p.clut_y, p.base_u, p.base_v});
+    fill_poly3_texture({v0, v1, v2, p.clut_x, p.clut_y, p.base_u, p.base_v, p.depth});
   } else {
-    fill_poly3_texture({v0, v2, v1, p.clut_x, p.clut_y, p.base_u, p.base_v});
+    fill_poly3_texture({v0, v2, v1, p.clut_x, p.clut_y, p.base_u, p.base_v, p.depth});
   }
 }
 
@@ -120,6 +139,6 @@ void gpu::texture::draw_poly4(const gpu::texture::polygon_t<4> &p) {
   auto &v2 = p.v[2];
   auto &v3 = p.v[3];
 
-  gpu::texture::draw_poly3({v0, v1, v2, p.clut_x, p.clut_y, p.base_u, p.base_v});
-  gpu::texture::draw_poly3({v1, v2, v3, p.clut_x, p.clut_y, p.base_u, p.base_v});
+  gpu::texture::draw_poly3({v0, v1, v2, p.clut_x, p.clut_y, p.base_u, p.base_v, p.depth});
+  gpu::texture::draw_poly3({v1, v2, v3, p.clut_x, p.clut_y, p.base_u, p.base_v, p.depth});
 }

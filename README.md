@@ -7,9 +7,9 @@ This emulator is designed to work "out of the box", no plug-in hell required!
 
 ## Current Status
 
-Currently, the emulator hangs after drawing the Sony&trade; logo while trying
-to communicate with the CD-ROM drive. Textured primitives are partially
-implemented.
+Currently, the emulator can get through the BIOS, but hasn't booted any
+commercial games yet. A software rasterizer is used to attempt pixel accurate
+graphical output, the results are quite nice!
 
 ![Current status](images/current.png)
 
@@ -27,6 +27,9 @@ $ psxact <bios file here> <game file here>
 ## Building
 
 This project uses CMake for builds, and requires SDL2.
+
+I personally use the `FindSDL2.cmake` script available
+[here](https://github.com/tcbrindle/sdl2-cmake-scripts).
 
 ## Contributing
 

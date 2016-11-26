@@ -40,8 +40,6 @@ static void set_data(uint8_t data) {
 uint32_t cdrom::bus_read(int width, uint32_t address) {
   assert(width == BYTE);
 
-  printf("cdrom::bus_read(%d, 0x%08x)\n", width, address);
-
   switch (address - 0x1f801800) {
     case 0: { // status register
       uint32_t result = state.index;
@@ -68,8 +66,6 @@ uint32_t cdrom::bus_read(int width, uint32_t address) {
 
 void cdrom::bus_write(int width, uint32_t address, uint32_t data) {
   assert(width == BYTE);
-
-  printf("cdrom::bus_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
 
   switch (address - 0x1f801800) {
     case 0:
