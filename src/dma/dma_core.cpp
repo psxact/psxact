@@ -96,8 +96,8 @@ static void run_channel_2_data_read() {
   bs = bs ? bs : 0x10000;
   ba = ba ? ba : 0x10000;
 
-  for (int a = 0; a < ba; a++) {
-    for (int s = 0; s < bs; s++) {
+  for (unsigned a = 0; a < ba; a++) {
+    for (unsigned s = 0; s < bs; s++) {
       bus::write(WORD, address, gpu::data());
       address += 4;
     }
@@ -116,8 +116,8 @@ static void run_channel_2_data_write() {
   bs = bs ? bs : 0x10000;
   ba = ba ? ba : 0x10000;
 
-  for (int a = 0; a < ba; a++) {
-    for (int s = 0; s < bs; s++) {
+  for (unsigned a = 0; a < ba; a++) {
+    for (unsigned s = 0; s < bs; s++) {
       gpu::gp0(bus::read(WORD, address));
       address += 4;
     }
@@ -137,7 +137,7 @@ static void run_channel_2_list() {
 
     auto count = value >> 24;
 
-    for (auto index = 0; index < count; index++) {
+    for (unsigned index = 0; index < count; index++) {
       gpu::gp0(bus::read(WORD, address));
       address += 4;
     }
@@ -156,7 +156,7 @@ static void run_channel_6() {
 
   counter = counter ? counter : 0x10000;
 
-  for (int i = 1; i < counter; i++) {
+  for (unsigned i = 1; i < counter; i++) {
     bus::write(WORD, address, address - 4);
     address -= 4;
   }

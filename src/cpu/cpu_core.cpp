@@ -5,25 +5,25 @@
 cpu::state_t cpu::state;
 
 cpu::opcode cpu::op_table[64] = {
-  nullptr, op_bxx,   op_j,    op_jal,   op_beq,  op_bne, op_blez, op_bgtz,
-  op_addi, op_addiu, op_slti, op_sltiu, op_andi, op_ori, op_xori, op_lui,
-  op_cop0, op_cop1,  op_cop2, op_cop3,  op_und,  op_und, op_und,  op_und,
-  op_und,  op_und,   op_und,  op_und,   op_und,  op_und, op_und,  op_und,
-  op_lb,   op_lh,    op_lwl,  op_lw,    op_lbu,  op_lhu, op_lwr,  op_und,
-  op_sb,   op_sh,    op_swl,  op_sw,    op_und,  op_und, op_swr,  op_und,
-  op_lwc0, op_lwc1,  op_lwc2, op_lwc3,  op_und,  op_und, op_und,  op_und,
-  op_swc0, op_swc1,  op_swc2, op_swc3,  op_und,  op_und, op_und,  op_und
+  nullptr,      cpu::op_bxx,   cpu::op_j,    cpu::op_jal,   cpu::op_beq,  cpu::op_bne, cpu::op_blez, cpu::op_bgtz,
+  cpu::op_addi, cpu::op_addiu, cpu::op_slti, cpu::op_sltiu, cpu::op_andi, cpu::op_ori, cpu::op_xori, cpu::op_lui,
+  cpu::op_cop0, cpu::op_cop1,  cpu::op_cop2, cpu::op_cop3,  cpu::op_und,  cpu::op_und, cpu::op_und,  cpu::op_und,
+  cpu::op_und,  cpu::op_und,   cpu::op_und,  cpu::op_und,   cpu::op_und,  cpu::op_und, cpu::op_und,  cpu::op_und,
+  cpu::op_lb,   cpu::op_lh,    cpu::op_lwl,  cpu::op_lw,    cpu::op_lbu,  cpu::op_lhu, cpu::op_lwr,  cpu::op_und,
+  cpu::op_sb,   cpu::op_sh,    cpu::op_swl,  cpu::op_sw,    cpu::op_und,  cpu::op_und, cpu::op_swr,  cpu::op_und,
+  cpu::op_lwc0, cpu::op_lwc1,  cpu::op_lwc2, cpu::op_lwc3,  cpu::op_und,  cpu::op_und, cpu::op_und,  cpu::op_und,
+  cpu::op_swc0, cpu::op_swc1,  cpu::op_swc2, cpu::op_swc3,  cpu::op_und,  cpu::op_und, cpu::op_und,  cpu::op_und
 };
 
 cpu::opcode cpu::op_table_special[64] = {
-  op_sll,  op_und,   op_srl,  op_sra,  op_sllv,    op_und,   op_srlv, op_srav,
-  op_jr,   op_jalr,  op_und,  op_und,  op_syscall, op_break, op_und,  op_und,
-  op_mfhi, op_mthi,  op_mflo, op_mtlo, op_und,     op_und,   op_und,  op_und,
-  op_mult, op_multu, op_div,  op_divu, op_und,     op_und,   op_und,  op_und,
-  op_add,  op_addu,  op_sub,  op_subu, op_and,     op_or,    op_xor,  op_nor,
-  op_und,  op_und,   op_slt,  op_sltu, op_und,     op_und,   op_und,  op_und,
-  op_und,  op_und,   op_und,  op_und,  op_und,     op_und,   op_und,  op_und,
-  op_und,  op_und,   op_und,  op_und,  op_und,     op_und,   op_und,  op_und
+  cpu::op_sll,  cpu::op_und,   cpu::op_srl,  cpu::op_sra,  cpu::op_sllv,    cpu::op_und,   cpu::op_srlv, cpu::op_srav,
+  cpu::op_jr,   cpu::op_jalr,  cpu::op_und,  cpu::op_und,  cpu::op_syscall, cpu::op_break, cpu::op_und,  cpu::op_und,
+  cpu::op_mfhi, cpu::op_mthi,  cpu::op_mflo, cpu::op_mtlo, cpu::op_und,     cpu::op_und,   cpu::op_und,  cpu::op_und,
+  cpu::op_mult, cpu::op_multu, cpu::op_div,  cpu::op_divu, cpu::op_und,     cpu::op_und,   cpu::op_und,  cpu::op_und,
+  cpu::op_add,  cpu::op_addu,  cpu::op_sub,  cpu::op_subu, cpu::op_and,     cpu::op_or,    cpu::op_xor,  cpu::op_nor,
+  cpu::op_und,  cpu::op_und,   cpu::op_slt,  cpu::op_sltu, cpu::op_und,     cpu::op_und,   cpu::op_und,  cpu::op_und,
+  cpu::op_und,  cpu::op_und,   cpu::op_und,  cpu::op_und,  cpu::op_und,     cpu::op_und,   cpu::op_und,  cpu::op_und,
+  cpu::op_und,  cpu::op_und,   cpu::op_und,  cpu::op_und,  cpu::op_und,     cpu::op_und,   cpu::op_und,  cpu::op_und
 };
 
 void cpu::initialize() {
@@ -154,6 +154,9 @@ uint32_t cpu::bus_read(int width, uint32_t address) {
 
     case 0x1f801074:
       return state.i_mask;
+
+    default:
+      return 0;
   }
 }
 
