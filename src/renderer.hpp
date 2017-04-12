@@ -1,7 +1,8 @@
 #ifndef PSXACT_RENDERER_HPP
 #define PSXACT_RENDERER_HPP
 
-#include <SDL2/SDL.h>
+#define SDL_MAIN_HANDLED
+#include <SDL.h>
 
 namespace renderer {
   void destroy();

@@ -9,15 +9,15 @@ int clip(int value) {
 };
 
 static int dither_lut[4][4] = {
-    { -4,  0, -3,  1 },
-    {  2, -2,  3, -1 },
-    { -3,  1, -4,  0 },
-    {  3, -1,  2, -2 }
+  { -4,  0, -3,  1 },
+  {  2, -2,  3, -1 },
+  { -3,  1, -4,  0 },
+  {  3, -1,  2, -2 }
 };
 
 void gpu::draw_point(int x, int y, int r, int g, int b) {
-  if (x < state.drawing_area_x1 || x > state.drawing_area_x2) return;
-  if (y < state.drawing_area_y1 || y > state.drawing_area_y2) return;
+  if (x < int(state.drawing_area_x1) || x > int(state.drawing_area_x2)) return;
+  if (y < int(state.drawing_area_y1) || y > int(state.drawing_area_y2)) return;
 
   auto dither = dither_lut[y & 3][x & 3];
 

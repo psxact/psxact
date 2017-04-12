@@ -29,8 +29,14 @@ uint32_t gpu::bus_read(int width, uint32_t address) {
   assert(width == WORD);
 
   switch (address) {
-    case 0x1f801810: return data();
-    case 0x1f801814: return stat();
+    case 0x1f801810:
+      return data();
+
+    case 0x1f801814:
+      return stat();
+
+    default:
+      return 0;
   }
 }
 
