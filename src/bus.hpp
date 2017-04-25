@@ -4,13 +4,13 @@
 #include <stdint.h>
 #include <string>
 
-enum bus_width_t {
-  BYTE,
-  HALF,
-  WORD
-};
-
 namespace bus {
+  enum bus_width_t {
+    BYTE,
+    HALF,
+    WORD
+  };
+
   void initialize(const std::string &bios_file_name, const std::string &game_file_name);
 
   void irq(int interrupt);
