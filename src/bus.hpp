@@ -6,9 +6,9 @@
 
 namespace bus {
   enum bus_width_t {
-    BYTE,
-    HALF,
-    WORD
+    BUS_WIDTH_BYTE,
+    BUS_WIDTH_HALF,
+    BUS_WIDTH_WORD
   };
 
   void initialize(const std::string &bios_file_name, const std::string &game_file_name);

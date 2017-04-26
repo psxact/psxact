@@ -98,7 +98,7 @@ static void run_channel_2_data_read() {
 
   for (unsigned a = 0; a < ba; a++) {
     for (unsigned s = 0; s < bs; s++) {
-      bus::write(WORD, address, gpu::data());
+      bus::write(bus::BUS_WIDTH_WORD, address, gpu::data());
       address += 4;
     }
   }
@@ -118,7 +118,7 @@ static void run_channel_2_data_write() {
 
   for (unsigned a = 0; a < ba; a++) {
     for (unsigned s = 0; s < bs; s++) {
-      gpu::gp0(bus::read(WORD, address));
+      gpu::gp0(bus::read(bus::BUS_WIDTH_WORD, address));
       address += 4;
     }
   }
@@ -132,13 +132,13 @@ static void run_channel_2_list() {
   auto address = state.channels[2].address;
 
   while (address != 0xffffff) {
-    auto value = bus::read(WORD, address);
+    auto value = bus::read(bus::BUS_WIDTH_WORD, address);
     address += 4;
 
     auto count = value >> 24;
 
     for (unsigned index = 0; index < count; index++) {
-      gpu::gp0(bus::read(WORD, address));
+      gpu::gp0(bus::read(bus::BUS_WIDTH_WORD, address));
       address += 4;
     }
 
@@ -157,11 +157,11 @@ static void run_channel_6() {
   counter = counter ? counter : 0x10000;
 
   for (unsigned i = 1; i < counter; i++) {
-    bus::write(WORD, address, address - 4);
+    bus::write(bus::BUS_WIDTH_WORD, address, address - 4);
     address -= 4;
   }
 
-  bus::write(WORD, address, 0x00ffffff);
+  bus::write(bus::BUS_WIDTH_WORD, address, 0x00ffffff);
 
   state.channels[6].control &= ~0x11000000;
 

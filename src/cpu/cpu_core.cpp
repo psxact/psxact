@@ -122,7 +122,7 @@ void cpu::read_code() {
 
   // todo: read i-cache
 
-  state.code = bus::read(WORD, map_address(state.regs.this_pc));
+  state.code = bus::read(bus::BUS_WIDTH_WORD, map_address(state.regs.this_pc));
 }
 
 uint32_t cpu::read_data(int width, uint32_t address) {
