@@ -26,7 +26,7 @@ uint32_t gpu::stat() {
 }
 
 uint32_t gpu::bus_read(int width, uint32_t address) {
-  assert(width == WORD);
+  assert(width == bus::BUS_WIDTH_WORD);
 
   switch (address) {
     case 0x1f801810:
@@ -41,7 +41,7 @@ uint32_t gpu::bus_read(int width, uint32_t address) {
 }
 
 void gpu::bus_write(int width, uint32_t address, uint32_t data) {
-  assert(width == WORD);
+  assert(width == bus::BUS_WIDTH_WORD);
 
   switch (address) {
     case 0x1f801810:
