@@ -38,7 +38,7 @@ static void set_data(uint8_t data) {
 }
 
 uint32_t cdrom::bus_read(int width, uint32_t address) {
-  assert(width == BYTE);
+  assert(width == bus::BUS_WIDTH_BYTE);
 
   switch (address - 0x1f801800) {
     case 0: { // status register
@@ -65,7 +65,7 @@ uint32_t cdrom::bus_read(int width, uint32_t address) {
 }
 
 void cdrom::bus_write(int width, uint32_t address, uint32_t data) {
-  assert(width == BYTE);
+  assert(width == bus::BUS_WIDTH_BYTE);
 
   switch (address - 0x1f801800) {
     case 0:
