@@ -1,0 +1,21 @@
+language: cpp
+
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      env:
+        - BUILD_TYPE="Unix Makefiles"
+        - TARGET_OS=Linux
+      sudo: require
+    - os: osx
+      osx_image: xcode8.3
+      env:
+        - BUILD_TYPE=Xcode
+        - TARGET_OS=OSX
+
+before_install:
+  - bash .travis.sh travis_before_install
+  
+script:
+  - bash .travis.sh travis_script
