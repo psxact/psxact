@@ -1,7 +1,14 @@
 cmake_minimum_required(VERSION 3.0)
 project(psxact)
 
+set(CMAKE_MODULE_PATH
+	${CMAKE_CURRENT_SOURCE_DIR}/modules
+	${CMAKE_MODULE_PATH}
+)
+
+set(SDL2_PATH "" CACHE INTERNAL "Fill in path to the SDL2 (Win32)")
 find_package(SDL2 REQUIRED)
+include_directories(${SDL2_INCLUDE_DIR})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
