@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 project(psxact)
 
 set(CMAKE_MODULE_PATH
-	${CMAKE_CURRENT_SOURCE_DIR}/modules
-	${CMAKE_MODULE_PATH}
+    ${CMAKE_CURRENT_SOURCE_DIR}/modules
+    ${CMAKE_MODULE_PATH}
 )
 
 set(SDL2_PATH "" CACHE INTERNAL "Fill in path to the SDL2 (Win32)")
