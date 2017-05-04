@@ -4,36 +4,36 @@
 
 cdrom::state_t cdrom::state;
 
-static uint8_t get_arg() {
+static uint8_t read_arg_byte() {
   auto parameter = cdrom::state.args_fifo.front();
   cdrom::state.args_fifo.pop_front();
 
   return parameter;
 }
 
-static void set_arg(uint8_t data) {
+static void write_arg_byte(uint8_t data) {
   cdrom::state.args_fifo.push_back(data);
 }
 
-static uint8_t get_resp() {
+static uint8_t read_resp_byte() {
   auto response = cdrom::state.resp_fifo.front();
   cdrom::state.resp_fifo.pop_front();
 
   return response;
 }
 
-static void set_resp(uint8_t data) {
+static void write_resp_byte(uint8_t data) {
   cdrom::state.resp_fifo.push_back(data);
 }
 
-static uint8_t get_data() {
+static uint8_t read_data_byte() {
   auto data = cdrom::state.data_fifo.front();
   cdrom::state.data_fifo.pop_front();
 
   return data;
 }
 
-static void set_data(uint8_t data) {
+static void write_data_byte(uint8_t data) {
   cdrom::state.data_fifo.push_back(data);
 }
 
@@ -52,8 +52,8 @@ uint32_t cdrom::bus_read(int width, uint32_t address) {
       return result;
     }
 
-    case 1: return get_resp();
-    case 2: return get_data();
+    case 1: return read_resp_byte();
+    case 2: return read_data_byte();
     case 3:
       switch (state.index & 1) {
         default: return state.interrupt_enable; // interrupt enable register
@@ -88,7 +88,7 @@ void cdrom::bus_write(int width, uint32_t address, uint32_t data) {
     case 2:
       switch (state.index) {
         case 0: // parameter fifo
-          set_arg(uint8_t(data));
+          write_arg_byte(uint8_t(data));
           break;
 
         case 1: // interrupt enable register
@@ -118,19 +118,19 @@ void cdrom::bus_write(int width, uint32_t address, uint32_t data) {
 static void (*second_response)() = nullptr;
 
 static void command_get_stat() {
-  set_resp(0x02);
+  write_resp_byte(0x02);
 
   cdrom::state.interrupt_request = 3;
   bus::irq(2);
 }
 
 static void command_test() {
-  switch (get_arg()) {
+  switch (read_arg_byte()) {
     case 0x20:
-      set_resp(0x99);
-      set_resp(0x02);
-      set_resp(0x01);
-      set_resp(0xc3);
+      write_resp_byte(0x99);
+      write_resp_byte(0x02);
+      write_resp_byte(0x01);
+      write_resp_byte(0xc3);
 
       cdrom::state.interrupt_request = 3;
       bus::irq(2);
@@ -139,23 +139,23 @@ static void command_test() {
 }
 
 static void command_get_id_no_disk() {
-  set_resp(0x08);
-  set_resp(0x40);
+  write_resp_byte(0x08);
+  write_resp_byte(0x40);
 
-  set_resp(0x00);
-  set_resp(0x00);
+  write_resp_byte(0x00);
+  write_resp_byte(0x00);
 
-  set_resp(0x00);
-  set_resp(0x00);
-  set_resp(0x00);
-  set_resp(0x00);
+  write_resp_byte(0x00);
+  write_resp_byte(0x00);
+  write_resp_byte(0x00);
+  write_resp_byte(0x00);
 
   cdrom::state.interrupt_request = 5;
   bus::irq(2);
 }
 
 static void command_get_id() {
-  set_resp(0x02);
+  write_resp_byte(0x02);
 
   cdrom::state.interrupt_request = 3;
   bus::irq(2);
