@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 
 travis_before_install() {
