@@ -6,7 +6,6 @@ travis_before_install() {
   if [ "$TARGET_OS" = "Linux" ]; then
     sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test;
     sudo apt-get update -qq;
-    sudo apt-get install -qq ;
     sudo apt-get install -qq libsdl2-dev gcc-5 g++-5 cmake;
   elif [ "$TARGET_OS" = "OSX" ]; then
     brew update
