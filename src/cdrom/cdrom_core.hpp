@@ -2,7 +2,7 @@
 #define PSXACT_CDROM_CORE_HPP
 
 #include <cstdint>
-#include <deque>
+#include "../fifo.hpp"
 
 namespace cdrom {
   struct state_t {
@@ -12,9 +12,9 @@ namespace cdrom {
     uint32_t command;
     bool has_command;
 
-    std::deque<uint8_t> args_fifo;
-    std::deque<uint8_t> resp_fifo;
-    std::deque<uint8_t> data_fifo;
+    fifo_t<uint8_t, 16> args_fifo;
+    fifo_t<uint8_t, 16> resp_fifo;
+    fifo_t<uint8_t, 16> data_fifo; // actually bigger, not sure the exact size
   };
 
   extern state_t state;

@@ -7,10 +7,11 @@ private:
   enum {
     MASK = (1 << bits) - 1,
     MASK_LSB = (1 << (bits - 1)) - 1,
-    MASK_MSB = (1 << (bits - 1))
+    MASK_MSB = (1 << (bits - 1)),
+    SIZE = (1 << bits)
   };
 
-  T buffer[size];
+  T buffer[SIZE];
   unsigned rd_ptr;
   unsigned wr_ptr;
 
