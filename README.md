@@ -42,3 +42,7 @@ PS1 emulator available.
 
 However, do try and follow the syntax used by the project when contributing, I
 **will** rewrite any code to make it match the project style before accepting.
+
+## Communication
+
+Join us on our efnet channel, `#psxact`!
