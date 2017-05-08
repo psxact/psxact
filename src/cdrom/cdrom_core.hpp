@@ -1,5 +1,5 @@
-#ifndef PSXACT_CDROM_CORE_HPP
-#define PSXACT_CDROM_CORE_HPP
+#ifndef __PSXACT_CDROM_CORE_HPP__
+#define __PSXACT_CDROM_CORE_HPP__
 
 #include <cstdint>
 #include "../fifo.hpp"
@@ -26,4 +26,4 @@ namespace cdrom {
   void run();
 }
 
-#endif //PSXACT_CDROM_CORE_HPP
+#endif // __PSXACT_CDROM_CORE_HPP__

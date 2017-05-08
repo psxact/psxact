@@ -14,7 +14,8 @@ template<bool forwarded = false>
 static inline uint32_t get_register(uint32_t index) {
   if (!forwarded && cpu::state.is_load_delay_slot && cpu::state.load_index == index) {
     return cpu::state.load_value;
-  } else {
+  }
+  else {
     return cpu::state.regs.gp[index];
   }
 }
@@ -62,7 +63,8 @@ void cpu::op_add() {
 
   if (overflow(x, y, z)) {
     enter_exception(0xc);
-  } else {
+  }
+  else {
     set_rd(z);
   }
 }
@@ -74,7 +76,8 @@ void cpu::op_addi() {
 
   if (overflow(x, y, z)) {
     enter_exception(0xc);
-  } else {
+  }
+  else {
     set_rt(z);
   }
 }
@@ -133,8 +136,8 @@ void cpu::op_bxx() {
   // bltz rs,$nnnn
   // bltzal rs,$nnnn
   bool condition = (state.code & (1 << 16))
-                   ? int32_t(rs()) >= 0
-                   : int32_t(rs()) <  0;
+    ? int32_t(rs()) >= 0
+    : int32_t(rs()) <  0;
 
   if ((state.code & 0x1e0000) == 0x100000) {
     state.regs.gp[31] = state.regs.next_pc;
@@ -148,17 +151,17 @@ void cpu::op_bxx() {
 
 void cpu::op_cop0() {
   switch ((cpu::state.code >> 21) & 31) {
+  default: op_und(); return;
+
+  case 0x00: set_rt(state.cop0.regs[decoder::rd()]); return; // mfc0 rt,rd
+  case 0x04: state.cop0.regs[decoder::rd()] = rt(); return; // mtc0 rt,rd
+
+  case 0x10:
+    switch (cpu::state.code & 63) {
     default: op_und(); return;
 
-    case 0x00: set_rt(state.cop0.regs[decoder::rd()]); return; // mfc0 rt,rd
-    case 0x04: state.cop0.regs[decoder::rd()] = rt(); return; // mtc0 rt,rd
-
-    case 0x10:
-      switch (cpu::state.code & 63) {
-        default: op_und(); return;
-
-        case 0x10: leave_exception(); return; // rfe
-      }
+    case 0x10: leave_exception(); return; // rfe
+    }
   }
 }
 
@@ -169,16 +172,17 @@ void cpu::op_cop1() {
 void cpu::op_cop2() {
   if (state.code & (1 << 25)) {
     printf("cop2 $%08x\n", state.code);
-  } else {
+  }
+  else {
     switch (decoder::rs()) {
-      case 0: /*printf("mfc2 r%02d, r%02d\n", decoder::rt(), decoder::rd());*/ break;
-      case 2: /*printf("cfc2 r%02d, r%02d\n", decoder::rt(), decoder::rd());*/ break;
-      case 4: /*printf("mtc2 r%02d, r%02d\n", decoder::rt(), decoder::rd());*/ break;
-      case 6: /*printf("ctc2 r%02d, r%02d\n", decoder::rt(), decoder::rd());*/ break;
+    case 0: /*printf("mfc2 r%02d, r%02d\n", decoder::rt(), decoder::rd());*/ break;
+    case 2: /*printf("cfc2 r%02d, r%02d\n", decoder::rt(), decoder::rd());*/ break;
+    case 4: /*printf("mtc2 r%02d, r%02d\n", decoder::rt(), decoder::rd());*/ break;
+    case 6: /*printf("ctc2 r%02d, r%02d\n", decoder::rt(), decoder::rd());*/ break;
 
-      default:
-        printf("unimplemented cop2\n");
-        throw "unimplemented cop2\n";
+    default:
+      printf("unimplemented cop2\n");
+      throw "unimplemented cop2\n";
     }
   }
 }
@@ -194,13 +198,16 @@ void cpu::op_div() {
   if (dividend == 0x80000000 && divisor == 0xffffffff) {
     state.regs.lo = 0x80000000;
     state.regs.hi = 0;
-  } else if (dividend >= 0 && divisor == 0) {
+  }
+  else if (dividend >= 0 && divisor == 0) {
     state.regs.lo = uint32_t(0xffffffff);
     state.regs.hi = uint32_t(dividend);
-  } else if (dividend <= 0 && divisor == 0) {
+  }
+  else if (dividend <= 0 && divisor == 0) {
     state.regs.lo = uint32_t(0x00000001);
     state.regs.hi = uint32_t(dividend);
-  } else {
+  }
+  else {
     state.regs.lo = uint32_t(dividend / divisor);
     state.regs.hi = uint32_t(dividend % divisor);
   }
@@ -213,7 +220,8 @@ void cpu::op_divu() {
   if (divisor) {
     state.regs.lo = dividend / divisor;
     state.regs.hi = dividend % divisor;
-  } else {
+  }
+  else {
     state.regs.lo = 0xffffffff;
     state.regs.hi = dividend;
   }
@@ -263,7 +271,8 @@ void cpu::op_lh() {
   auto address = rs() + decoder::iconst();
   if (address & 1) {
     enter_exception(0x4);
-  } else {
+  }
+  else {
     auto data = read_data(bus::BUS_WIDTH_HALF, address);
     data = utility::sclip<16>(data);
 
@@ -275,7 +284,8 @@ void cpu::op_lhu() {
   auto address = rs() + decoder::iconst();
   if (address & 1) {
     enter_exception(0x4);
-  } else {
+  }
+  else {
     auto data = read_data(bus::BUS_WIDTH_HALF, address);
 
     set_rt<1>(data);
@@ -290,7 +300,8 @@ void cpu::op_lw() {
   auto address = rs() + decoder::iconst();
   if (address & 3) {
     enter_exception(0x4);
-  } else {
+  }
+  else {
     auto data = read_data(bus::BUS_WIDTH_WORD, address);
 
     set_rt<1>(data);
@@ -318,10 +329,10 @@ void cpu::op_lwl() {
   auto data = read_data(bus::BUS_WIDTH_WORD, address & ~3);
 
   switch (address & 3) {
-    default: data = (data << 24) | (rt<1>() & 0x00ffffff); break;
-    case  1: data = (data << 16) | (rt<1>() & 0x0000ffff); break;
-    case  2: data = (data <<  8) | (rt<1>() & 0x000000ff); break;
-    case  3: data = (data <<  0) | (rt<1>() & 0x00000000); break;
+  default: data = (data << 24) | (rt<1>() & 0x00ffffff); break;
+  case  1: data = (data << 16) | (rt<1>() & 0x0000ffff); break;
+  case  2: data = (data <<  8) | (rt<1>() & 0x000000ff); break;
+  case  3: data = (data <<  0) | (rt<1>() & 0x00000000); break;
   }
 
   set_rt<1>(data);
@@ -332,10 +343,10 @@ void cpu::op_lwr() {
   auto data = read_data(bus::BUS_WIDTH_WORD, address & ~3);
 
   switch (address & 3) {
-    default: data = (data >>  0) | (rt<1>() & 0x00000000); break;
-    case  1: data = (data >>  8) | (rt<1>() & 0xff000000); break;
-    case  2: data = (data >> 16) | (rt<1>() & 0xffff0000); break;
-    case  3: data = (data >> 24) | (rt<1>() & 0xffffff00); break;
+  default: data = (data >>  0) | (rt<1>() & 0x00000000); break;
+  case  1: data = (data >>  8) | (rt<1>() & 0xff000000); break;
+  case  2: data = (data >> 16) | (rt<1>() & 0xffff0000); break;
+  case  3: data = (data >> 24) | (rt<1>() & 0xffffff00); break;
   }
 
   set_rt<1>(data);
@@ -398,7 +409,8 @@ void cpu::op_sh() {
   auto address = rs() + decoder::iconst();
   if (address & 1) {
     enter_exception(0x5);
-  } else {
+  }
+  else {
     auto data = rt();
 
     write_data(bus::BUS_WIDTH_HALF, address, data);
@@ -452,7 +464,8 @@ void cpu::op_sub() {
 
   if (overflow(x, ~y, z)) {
     enter_exception(0xc);
-  } else {
+  }
+  else {
     set_rd(z);
   }
 }
@@ -465,7 +478,8 @@ void cpu::op_sw() {
   auto address = rs() + decoder::iconst();
   if (address & 3) {
     enter_exception(0x5);
-  } else {
+  }
+  else {
     auto data = rt();
 
     write_data(bus::BUS_WIDTH_WORD, address, data);
@@ -493,10 +507,10 @@ void cpu::op_swl() {
   auto data = read_data(bus::BUS_WIDTH_WORD, address & ~3);
 
   switch (address & 3) {
-    default: data = (data & 0xffffff00) | (rt() >> 24); break;
-    case  1: data = (data & 0xffff0000) | (rt() >> 16); break;
-    case  2: data = (data & 0xff000000) | (rt() >>  8); break;
-    case  3: data = (data & 0x00000000) | (rt() >>  0); break;
+  default: data = (data & 0xffffff00) | (rt() >> 24); break;
+  case  1: data = (data & 0xffff0000) | (rt() >> 16); break;
+  case  2: data = (data & 0xff000000) | (rt() >>  8); break;
+  case  3: data = (data & 0x00000000) | (rt() >>  0); break;
   }
 
   write_data(bus::BUS_WIDTH_WORD, address & ~3, data);
@@ -507,10 +521,10 @@ void cpu::op_swr() {
   auto data = read_data(bus::BUS_WIDTH_WORD, address & ~3);
 
   switch (address & 3) {
-    default: data = (data & 0x00000000) | (rt() <<  0); break;
-    case  1: data = (data & 0x000000ff) | (rt() <<  8); break;
-    case  2: data = (data & 0x0000ffff) | (rt() << 16); break;
-    case  3: data = (data & 0x00ffffff) | (rt() << 24); break;
+  default: data = (data & 0x00000000) | (rt() <<  0); break;
+  case  1: data = (data & 0x000000ff) | (rt() <<  8); break;
+  case  2: data = (data & 0x0000ffff) | (rt() << 16); break;
+  case  3: data = (data & 0x00ffffff) | (rt() << 24); break;
   }
 
   write_data(bus::BUS_WIDTH_WORD, address & ~3, data);

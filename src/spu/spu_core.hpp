@@ -1,5 +1,5 @@
-#ifndef __SPU_CORE_HPP__
-#define __SPU_CORE_HPP__
+#ifndef __PSXACT_SPU_CORE_HPP__
+#define __PSXACT_SPU_CORE_HPP__
 
 #include <stdint.h>
 
@@ -9,4 +9,4 @@ namespace spu {
   void bus_write(int width, uint32_t address, uint32_t data);
 }
 
-#endif
+#endif // __PSXACT_SPU_CORE_HPP__

@@ -5,8 +5,23 @@
 #include "renderer.hpp"
 #include "timer/timer_core.hpp"
 
+void run_for_one_frame() {
+  for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 33868800 / 60 / 10; i++) {
+      cpu::tick();
+      timer::tick_timer_2();
+    }
+
+    cdrom::run();
+  }
+
+  bus::irq(0);
+}
+
 int main(int argc, char *argv[]) {
   if (argc != 3) {
+    printf("Usage:\n");
+    printf("$ psxact <bios-file-name> <game-file-name>\n");
     return -1;
   }
 
@@ -19,16 +34,7 @@ int main(int argc, char *argv[]) {
   renderer::initialize();
 
   while (renderer::render()) {
-    for (int i = 0; i < 10; i++) {
-      for (int i = 0; i < 33868800 / 60 / 10; i++) {
-        cpu::tick();
-        timer::tick_timer_2();
-      }
-
-      cdrom::run();
-    }
-
-    bus::irq(0);
+    run_for_one_frame();
   }
 
   renderer::destroy();

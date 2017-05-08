@@ -26,9 +26,9 @@ void gpu::draw_point(int x, int y, int r, int g, int b) {
   b = clip<0, 255>(b + dither);
 
   auto color =
-      (((r >> 3) & 0x1f) <<  0) |
-      (((g >> 3) & 0x1f) <<  5) |
-      (((b >> 3) & 0x1f) << 10);
+    (((r >> 3) & 0x1f) << 0) |
+    (((g >> 3) & 0x1f) << 5) |
+    (((b >> 3) & 0x1f) << 10);
 
   vram::write(x, y, uint16_t(color));
 }

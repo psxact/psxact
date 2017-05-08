@@ -43,7 +43,8 @@ void cpu::tick() {
 
   if (state.i_stat & state.i_mask) {
     state.cop0.regs[13] |= (1 << 10);
-  } else {
+  }
+  else {
     state.cop0.regs[13] &= ~(1 << 10);
   }
 
@@ -52,7 +53,8 @@ void cpu::tick() {
 
   if (iec && irq) {
     enter_exception(0x0);
-  } else {
+  }
+  else {
     auto code = (cpu::state.code >> 26) & 63;
     if (code)
       op_table[code]();
@@ -73,7 +75,8 @@ void cpu::enter_exception(uint32_t code) {
   if (state.is_branch_delay_slot) {
     epc = state.regs.this_pc - 4;
     cause |= 0x80000000;
-  } else {
+  }
+  else {
     epc = state.regs.this_pc;
     cause &= ~0x80000000;
   }
@@ -83,8 +86,9 @@ void cpu::enter_exception(uint32_t code) {
   state.cop0.regs[14] = epc;
 
   state.regs.pc = (status & (1 << 22))
-                  ? 0xbfc00180
-                  : 0x80000080;
+    ? 0xbfc00180
+    : 0x80000080
+    ;
 
   state.regs.next_pc = state.regs.pc + 4;
 }
@@ -149,14 +153,14 @@ uint32_t cpu::bus_read(int width, uint32_t address) {
   printf("cpu::bus_read(%d, 0x%08x)\n", width, address);
 
   switch (address) {
-    case 0x1f801070:
-      return state.i_stat;
+  case 0x1f801070:
+    return state.i_stat;
 
-    case 0x1f801074:
-      return state.i_mask;
+  case 0x1f801074:
+    return state.i_mask;
 
-    default:
-      return 0;
+  default:
+    return 0;
   }
 }
 
@@ -164,12 +168,12 @@ void cpu::bus_write(int width, uint32_t address, uint32_t data) {
   printf("cpu::bus_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
 
   switch (address) {
-    case 0x1f801070:
-      state.i_stat = state.i_stat & data;
-      break;
+  case 0x1f801070:
+    state.i_stat = state.i_stat & data;
+    break;
 
-    case 0x1f801074:
-      state.i_mask = data & 0x7ff;
-      break;
+  case 0x1f801074:
+    state.i_mask = data & 0x7ff;
+    break;
   }
 }

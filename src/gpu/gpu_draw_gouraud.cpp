@@ -1,8 +1,9 @@
 #include "gpu_core.hpp"
 
-void fill_gouraud(const gpu::gouraud::pixel_t &v0, const int &w0,
-                  const gpu::gouraud::pixel_t &v1, const int &w1,
-                  const gpu::gouraud::pixel_t &v2, const int &w2, int x, int y) {
+void fill_gouraud(
+  const gpu::gouraud::pixel_t &v0, const int &w0,
+  const gpu::gouraud::pixel_t &v1, const int &w1,
+  const gpu::gouraud::pixel_t &v2, const int &w2, int x, int y) {
   int area = w0 + w1 + w2;
 
   int r = ((v0.color.r * w0) + (v1.color.r * w1) + (v2.color.r * w2)) / area;
@@ -64,9 +65,9 @@ static void fill_poly3_gouraud(const gpu::gouraud::pixel_t &v0, const gpu::goura
 
     for (p.x = min_x; p.x <= max_x; p.x++) {
       bool draw =
-          (w0 > 0 || (w0 == 0 && is_top_left_12)) &&
-          (w1 > 0 || (w1 == 0 && is_top_left_20)) &&
-          (w2 > 0 || (w2 == 0 && is_top_left_01));
+        (w0 > 0 || (w0 == 0 && is_top_left_12)) &&
+        (w1 > 0 || (w1 == 0 && is_top_left_20)) &&
+        (w2 > 0 || (w2 == 0 && is_top_left_01));
 
       if (draw) {
         fill_gouraud(v0, w0, v1, w1, v2, w2, p.x, p.y);
@@ -94,7 +95,8 @@ void gpu::gouraud::draw_poly3(const polygon_t<3> &p) {
 
   if (double_area(p0.point, p1.point, p2.point) < 0) {
     fill_poly3_gouraud(p0, p1, p2);
-  } else {
+  }
+  else {
     fill_poly3_gouraud(p0, p2, p1);
   }
 }

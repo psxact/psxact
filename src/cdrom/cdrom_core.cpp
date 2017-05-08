@@ -35,8 +35,8 @@ uint32_t cdrom::bus_read(int width, uint32_t address) {
   case 0: // status register
     return
       state.index |
-      ( state.args_fifo.is_empty() << 3) |
-      (!state.args_fifo.is_full () << 4) |
+      (state.args_fifo.is_empty() << 3) |
+      (!state.args_fifo.is_full() << 4) |
       (!state.resp_fifo.is_empty() << 5) |
       (!state.data_fifo.is_empty() << 6);
 
@@ -103,7 +103,7 @@ void cdrom::bus_write(int width, uint32_t address, uint32_t data) {
   }
 }
 
-static void (*second_response)() = nullptr;
+static void(*second_response)() = nullptr;
 
 static void command_get_stat() {
   write_resp_byte(0x02);
@@ -114,15 +114,15 @@ static void command_get_stat() {
 
 static void command_test() {
   switch (read_args_byte()) {
-    case 0x20:
-      write_resp_byte(0x99);
-      write_resp_byte(0x02);
-      write_resp_byte(0x01);
-      write_resp_byte(0xc3);
+  case 0x20:
+    write_resp_byte(0x99);
+    write_resp_byte(0x02);
+    write_resp_byte(0x01);
+    write_resp_byte(0xc3);
 
-      cdrom::state.interrupt_request = 3;
-      bus::irq(2);
-      break;
+    cdrom::state.interrupt_request = 3;
+    bus::irq(2);
+    break;
   }
 }
 
@@ -161,18 +161,18 @@ void cdrom::run() {
     state.has_command = false;
 
     switch (state.command) {
-      case 0x01:
-        return command_get_stat();
+    case 0x01:
+      return command_get_stat();
 
-      case 0x19:
-        return command_test();
+    case 0x19:
+      return command_test();
 
-      case 0x1a:
-        return command_get_id();
+    case 0x1a:
+      return command_get_id();
 
-      default:
-        printf("cd-rom command: $%02x\n", state.command);
-        break;
+    default:
+      printf("cd-rom command: $%02x\n", state.command);
+      break;
     }
   }
 }

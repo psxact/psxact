@@ -1,5 +1,5 @@
-#ifndef PSXACT_UTILITY_HPP
-#define PSXACT_UTILITY_HPP
+#ifndef __PSXACT_UTILITY_HPP__
+#define __PSXACT_UTILITY_HPP__
 
 #include <stdio.h>
 #include <stdint.h>
@@ -87,4 +87,4 @@ namespace utility {
   }
 }
 
-#endif //PSXACT_UTILITY_HPP
+#endif // __PSXACT_UTILITY_HPP__

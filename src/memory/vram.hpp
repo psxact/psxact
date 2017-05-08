@@ -1,5 +1,5 @@
-#ifndef PSXACT_VRAM_HPP
-#define PSXACT_VRAM_HPP
+#ifndef __PSXACT_VRAM_HPP__
+#define __PSXACT_VRAM_HPP__
 
 #include <cstdint>
 
@@ -11,4 +11,4 @@ namespace vram {
   void write(int x, int y, uint16_t data);
 }
 
-#endif //PSXACT_VRAM_HPP
+#endif // __PSXACT_VRAM_HPP__

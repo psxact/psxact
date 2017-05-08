@@ -1,5 +1,5 @@
-#ifndef PSXACT_CPU_CORE_HPP
-#define PSXACT_CPU_CORE_HPP
+#ifndef __PSXACT_CPU_CORE_HPP__
+#define __PSXACT_CPU_CORE_HPP__
 
 #include <cstdint>
 
@@ -144,4 +144,4 @@ namespace cpu {
   }
 }
 
-#endif //PSXACT_CPU_CORE_HPP
+#endif // __PSXACT_CPU_CORE_HPP__

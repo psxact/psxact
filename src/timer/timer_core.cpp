@@ -7,9 +7,9 @@ uint32_t timer::bus_read(int width, uint32_t address) {
   int n = (address >> 4) & 3;
 
   switch ((address & 0xf) / 4) {
-    case 0: return timers[n].counter;
-    case 1: return timers[n].control;
-    case 2: return timers[n].compare;
+  case 0: return timers[n].counter;
+  case 1: return timers[n].control;
+  case 2: return timers[n].compare;
   }
 
   return 0;
@@ -19,19 +19,25 @@ void timer::bus_write(int width, uint32_t address, uint32_t data) {
   int n = (address >> 4) & 3;
 
   switch ((address & 0xf) / 4) {
-    case 0:
-      timers[n].counter = uint16_t(data);
-      break;
+  case 0:
+    timers[n].counter = uint16_t(data);
+    break;
 
-    case 1:
-      timers[n].control = uint16_t(data | 0x400);
-      timers[n].counter = 0;
-      break;
+  case 1:
+    timers[n].control = uint16_t(data | 0x400);
+    timers[n].counter = 0;
+    break;
 
-    case 2:
-      timers[n].compare = uint16_t(data);
-      break;
+  case 2:
+    timers[n].compare = uint16_t(data);
+    break;
   }
+}
+
+void timer::tick_timer_0() {
+}
+
+void timer::tick_timer_1() {
 }
 
 void timer::tick_timer_2() {

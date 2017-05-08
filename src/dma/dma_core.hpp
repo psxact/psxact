@@ -1,5 +1,5 @@
-#ifndef PSXACT_DMA_CORE_HPP
-#define PSXACT_DMA_CORE_HPP
+#ifndef __PSXACT_DMA_CORE_HPP__
+#define __PSXACT_DMA_CORE_HPP__
 
 #include <cstdint>
 
@@ -26,4 +26,4 @@ namespace dma {
   void run_channel(int n);
 }
 
-#endif //PSXACT_DMA_CORE_HPP
+#endif // __PSXACT_DMA_CORE_HPP__

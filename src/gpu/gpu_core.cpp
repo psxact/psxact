@@ -29,14 +29,14 @@ uint32_t gpu::bus_read(int width, uint32_t address) {
   assert(width == bus::BUS_WIDTH_WORD);
 
   switch (address) {
-    case 0x1f801810:
-      return data();
+  case 0x1f801810:
+    return data();
 
-    case 0x1f801814:
-      return stat();
+  case 0x1f801814:
+    return stat();
 
-    default:
-      return 0;
+  default:
+    return 0;
   }
 }
 
@@ -44,11 +44,11 @@ void gpu::bus_write(int width, uint32_t address, uint32_t data) {
   assert(width == bus::BUS_WIDTH_WORD);
 
   switch (address) {
-    case 0x1f801810:
-      return gp0(data);
+  case 0x1f801810:
+    return gp0(data);
 
-    case 0x1f801814:
-      return gp1(data);
+  case 0x1f801814:
+    return gp1(data);
   }
 }
 
@@ -58,8 +58,9 @@ uint16_t gpu::vram_transfer() {
     return 0;
   }
 
-  auto data = vram::read(transfer.reg.x + transfer.run.x,
-                         transfer.reg.y + transfer.run.y);
+  auto data = vram::read(
+    transfer.reg.x + transfer.run.x,
+    transfer.reg.y + transfer.run.y);
 
   transfer.run.x++;
 
@@ -82,8 +83,9 @@ void gpu::vram_transfer(uint16_t data) {
     return;
   }
 
-  vram::write(transfer.reg.x + transfer.run.x,
-              transfer.reg.y + transfer.run.y, uint16_t(data));
+  vram::write(
+    transfer.reg.x + transfer.run.x,
+    transfer.reg.y + transfer.run.y, uint16_t(data));
 
   transfer.run.x++;
 

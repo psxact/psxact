@@ -30,25 +30,25 @@ void bus::irq(int interrupt) {
 uint32_t bus::read(int width, uint32_t address) {
   if (utility::between<0x00000000, 0x007fffff>(address)) {
     switch (width) {
-      case BUS_WIDTH_BYTE: return utility::read_byte(wram, address);
-      case BUS_WIDTH_HALF: return utility::read_half(wram, address);
-      case BUS_WIDTH_WORD: return utility::read_word(wram, address);
+    case BUS_WIDTH_BYTE: return utility::read_byte(wram, address);
+    case BUS_WIDTH_HALF: return utility::read_half(wram, address);
+    case BUS_WIDTH_WORD: return utility::read_word(wram, address);
     }
   }
 
   if (utility::between<0x1fc00000, 0x1fc7ffff>(address)) {
     switch (width) {
-      case BUS_WIDTH_BYTE: return utility::read_byte(bios, address);
-      case BUS_WIDTH_HALF: return utility::read_half(bios, address);
-      case BUS_WIDTH_WORD: return utility::read_word(bios, address);
+    case BUS_WIDTH_BYTE: return utility::read_byte(bios, address);
+    case BUS_WIDTH_HALF: return utility::read_half(bios, address);
+    case BUS_WIDTH_WORD: return utility::read_word(bios, address);
     }
   }
 
   if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
     switch (width) {
-      case BUS_WIDTH_BYTE: return utility::read_byte(dmem, address);
-      case BUS_WIDTH_HALF: return utility::read_half(dmem, address);
-      case BUS_WIDTH_WORD: return utility::read_word(dmem, address);
+    case BUS_WIDTH_BYTE: return utility::read_byte(dmem, address);
+    case BUS_WIDTH_HALF: return utility::read_half(dmem, address);
+    case BUS_WIDTH_WORD: return utility::read_word(dmem, address);
     }
   }
 
@@ -99,9 +99,9 @@ uint32_t bus::read(int width, uint32_t address) {
 void bus::write(int width, uint32_t address, uint32_t data) {
   if (utility::between<0x00000000, 0x007fffff>(address)) {
     switch (width) {
-      case BUS_WIDTH_BYTE: return utility::write_byte(wram, address, data);
-      case BUS_WIDTH_HALF: return utility::write_half(wram, address, data);
-      case BUS_WIDTH_WORD: return utility::write_word(wram, address, data);
+    case BUS_WIDTH_BYTE: return utility::write_byte(wram, address, data);
+    case BUS_WIDTH_HALF: return utility::write_half(wram, address, data);
+    case BUS_WIDTH_WORD: return utility::write_word(wram, address, data);
     }
   }
 
@@ -112,9 +112,9 @@ void bus::write(int width, uint32_t address, uint32_t data) {
 
   if (utility::between<0x1f800000, 0x1f8003ff>(address)) {
     switch (width) {
-      case BUS_WIDTH_BYTE: return utility::write_byte(dmem, address, data);
-      case BUS_WIDTH_HALF: return utility::write_half(dmem, address, data);
-      case BUS_WIDTH_WORD: return utility::write_word(dmem, address, data);
+    case BUS_WIDTH_BYTE: return utility::write_byte(dmem, address, data);
+    case BUS_WIDTH_HALF: return utility::write_half(dmem, address, data);
+    case BUS_WIDTH_WORD: return utility::write_word(dmem, address, data);
     }
   }
 
@@ -155,17 +155,17 @@ void bus::write(int width, uint32_t address, uint32_t data) {
   }
 
   switch (address) {
-    case 0x1f801000: assert(data == 0x1f000000); return;
-    case 0x1f801004: assert(data == 0x1f802000); return;
-    case 0x1f801008: assert(data == 0x0013243f); return;
-    case 0x1f80100c: assert(data == 0x00003022); return;
-    case 0x1f801010: assert(data == 0x0013243f); return;
-    case 0x1f801014: assert(data == 0x200931e1); return;
-    case 0x1f801018: assert(data == 0x00020843); return;
-    case 0x1f80101c: assert(data == 0x00070777); return;
-    case 0x1f801020: assert(data == 0x00031125); return;
+  case 0x1f801000: assert(data == 0x1f000000); return;
+  case 0x1f801004: assert(data == 0x1f802000); return;
+  case 0x1f801008: assert(data == 0x0013243f); return;
+  case 0x1f80100c: assert(data == 0x00003022); return;
+  case 0x1f801010: assert(data == 0x0013243f); return;
+  case 0x1f801014: assert(data == 0x200931e1); return;
+  case 0x1f801018: assert(data == 0x00020843); return;
+  case 0x1f80101c: assert(data == 0x00070777); return;
+  case 0x1f801020: assert(data == 0x00031125); return;
 
-    case 0x1f801060: assert(data == 0x00000b88); return;
+  case 0x1f801060: assert(data == 0x00000b88); return;
   }
 
   if (address == 0xfffe0130) {

@@ -2,9 +2,9 @@
 #include "../memory/vram.hpp"
 
 void fill_texture_4bpp(const gpu::texture::polygon_t<3> &p,
-                       const int &w0,
-                       const int &w1,
-                       const int &w2, int x, int y) {
+  const int &w0,
+  const int &w1,
+  const int &w2, int x, int y) {
   int area = w0 + w1 + w2;
 
   int u = ((p.v[0].u * w0) + (p.v[1].u * w1) + (p.v[2].u * w2)) / area;
@@ -14,10 +14,10 @@ void fill_texture_4bpp(const gpu::texture::polygon_t<3> &p,
   int index = 0;
 
   switch (u & 3) {
-    case 0: index = (texel >>  0) & 0xf; break;
-    case 1: index = (texel >>  4) & 0xf; break;
-    case 2: index = (texel >>  8) & 0xf; break;
-    case 3: index = (texel >> 12) & 0xf; break;
+  case 0: index = (texel >>  0) & 0xf; break;
+  case 1: index = (texel >>  4) & 0xf; break;
+  case 2: index = (texel >>  8) & 0xf; break;
+  case 3: index = (texel >> 12) & 0xf; break;
   }
 
   auto color = vram::read(p.clut_x + index, p.clut_y);
@@ -29,9 +29,9 @@ void fill_texture_4bpp(const gpu::texture::polygon_t<3> &p,
 }
 
 void fill_texture_15bpp(const gpu::texture::polygon_t<3> &p,
-                        const int &w0,
-                        const int &w1,
-                        const int &w2, int x, int y) {
+  const int &w0,
+  const int &w1,
+  const int &w2, int x, int y) {
   int area = w0 + w1 + w2;
 
   int u = ((p.v[0].u * w0) + (p.v[1].u * w1) + (p.v[2].u * w2)) / area;
@@ -90,15 +90,15 @@ static void fill_poly3_texture(const gpu::texture::polygon_t<3> &t) {
 
     for (p.x = min_x; p.x <= max_x; p.x++) {
       bool draw =
-          (w0 > 0 || (w0 == 0 && is_top_left_12)) &&
-          (w1 > 0 || (w1 == 0 && is_top_left_20)) &&
-          (w2 > 0 || (w2 == 0 && is_top_left_01));
+        (w0 > 0 || (w0 == 0 && is_top_left_12)) &&
+        (w1 > 0 || (w1 == 0 && is_top_left_20)) &&
+        (w2 > 0 || (w2 == 0 && is_top_left_01));
 
       if (draw) {
         switch (t.depth) {
-          case 0: fill_texture_4bpp (t, w0, w1, w2, p.x, p.y); break;
-          case 2: fill_texture_15bpp(t, w0, w1, w2, p.x, p.y); break;
-          case 3: fill_texture_15bpp(t, w0, w1, w2, p.x, p.y); break;
+        case 0: fill_texture_4bpp (t, w0, w1, w2, p.x, p.y); break;
+        case 2: fill_texture_15bpp(t, w0, w1, w2, p.x, p.y); break;
+        case 3: fill_texture_15bpp(t, w0, w1, w2, p.x, p.y); break;
         }
       }
 
@@ -127,9 +127,10 @@ void gpu::texture::draw_poly3(const gpu::texture::polygon_t<3> &p) {
   auto &v2 = p.v[2];
 
   if (double_area(v0.point, v1.point, v2.point) < 0) {
-    fill_poly3_texture({v0, v1, v2, p.clut_x, p.clut_y, p.base_u, p.base_v, p.depth});
-  } else {
-    fill_poly3_texture({v0, v2, v1, p.clut_x, p.clut_y, p.base_u, p.base_v, p.depth});
+    fill_poly3_texture({ v0, v1, v2, p.clut_x, p.clut_y, p.base_u, p.base_v, p.depth });
+  }
+  else {
+    fill_poly3_texture({ v0, v2, v1, p.clut_x, p.clut_y, p.base_u, p.base_v, p.depth });
   }
 }
 
@@ -139,6 +140,6 @@ void gpu::texture::draw_poly4(const gpu::texture::polygon_t<4> &p) {
   auto &v2 = p.v[2];
   auto &v3 = p.v[3];
 
-  gpu::texture::draw_poly3({v0, v1, v2, p.clut_x, p.clut_y, p.base_u, p.base_v, p.depth});
-  gpu::texture::draw_poly3({v1, v2, v3, p.clut_x, p.clut_y, p.base_u, p.base_v, p.depth});
+  gpu::texture::draw_poly3({ v0, v1, v2, p.clut_x, p.clut_y, p.base_u, p.base_v, p.depth });
+  gpu::texture::draw_poly3({ v1, v2, v3, p.clut_x, p.clut_y, p.base_u, p.base_v, p.depth });
 }

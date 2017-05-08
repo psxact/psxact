@@ -1,5 +1,5 @@
-#ifndef PSXACT_GPU_CORE_HPP
-#define PSXACT_GPU_CORE_HPP
+#ifndef __PSXACT_GPU_CORE_HPP__
+#define __PSXACT_GPU_CORE_HPP__
 
 #include <cstdint>
 #include <queue>
@@ -135,4 +135,4 @@ namespace gpu {
   }
 }
 
-#endif //PSXACT_GPU_CORE_HPP
+#endif // __PSXACT_GPU_CORE_HPP__

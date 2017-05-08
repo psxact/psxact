@@ -1,5 +1,5 @@
-#ifndef __PSXACT_FIFO_H__
-#define __PSXACT_FIFO_H__
+#ifndef __PSXACT_FIFO_HPP__
+#define __PSXACT_FIFO_HPP__
 
 template<typename T, int bits>
 class fifo_t {
@@ -57,4 +57,4 @@ public:
   }
 };
 
-#endif // __PSXACT_FIFO_H__
+#endif // __PSXACT_FIFO_HPP__

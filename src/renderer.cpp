@@ -1,6 +1,9 @@
 #include "renderer.hpp"
 #include "memory/vram.hpp"
 
+const unsigned width = 1024;
+const unsigned height = 512;
+
 SDL_Window *window;
 SDL_Surface *surface;
 SDL_Event event;
@@ -12,9 +15,14 @@ void renderer::destroy() {
 void renderer::initialize() {
   SDL_Init(SDL_INIT_VIDEO);
 
-  window = SDL_CreateWindow("psxact",
-                            SDL_WINDOWPOS_CENTERED,
-                            SDL_WINDOWPOS_CENTERED, 1024, 512, 0);
+  window = SDL_CreateWindow(
+    "psxact",
+    SDL_WINDOWPOS_CENTERED,
+    SDL_WINDOWPOS_CENTERED,
+    width,
+    height,
+    0
+  );
 
   surface = SDL_GetWindowSurface(window);
 }
@@ -34,7 +42,7 @@ bool renderer::render() {
   auto colors = vram::get_pointer();
 
   for (uint32_t i = 0; i < 1024 * 512; i++) {
-    *pixels++ = color_16_to_24( colors[i] );
+    *pixels++ = color_16_to_24(colors[i]);
   }
 
   SDL_UnlockSurface(surface);

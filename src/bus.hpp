@@ -1,5 +1,5 @@
-#ifndef PSXACT_BUS_HPP
-#define PSXACT_BUS_HPP
+#ifndef __PSXACT_BUS_HPP__
+#define __PSXACT_BUS_HPP__
 
 #include <stdint.h>
 #include <string>
@@ -20,4 +20,4 @@ namespace bus {
   void write(int width, uint32_t address, uint32_t data);
 }
 
-#endif //PSXACT_BUS_HPP
+#endif // __PSXACT_BUS_HPP__

@@ -16,7 +16,8 @@ static void update_irq_active_flag() {
     }
 
     state.dicr |= 0x80000000;
-  } else {
+  }
+  else {
     state.dicr &= ~0x80000000;
   }
 }
@@ -33,17 +34,17 @@ uint32_t dma::bus_read(int width, uint32_t address) {
   auto channel = get_channel_index(address);
   if (channel == 7) {
     switch (get_register_index(address)) {
-      case 0: return state.dpcr;
-      case 1: return state.dicr;
-      case 2: return 0x7ffac68b;
-      case 3: return 0x00fffff7;
+    case 0: return state.dpcr;
+    case 1: return state.dicr;
+    case 2: return 0x7ffac68b;
+    case 3: return 0x00fffff7;
     }
   }
   else {
     switch (get_register_index(address)) {
-      case 0: return state.channels[channel].address;
-      case 1: return state.channels[channel].counter;
-      case 2: return state.channels[channel].control;
+    case 0: return state.channels[channel].address;
+    case 1: return state.channels[channel].counter;
+    case 2: return state.channels[channel].control;
     }
   }
 
@@ -54,24 +55,24 @@ void dma::bus_write(int width, uint32_t address, uint32_t data) {
   auto channel = get_channel_index(address);
   if (channel == 7) {
     switch (get_register_index(address)) {
-      case 0: state.dpcr = data; break;
+    case 0: state.dpcr = data; break;
 
-      case 1:
-        state.dicr &=  (       0xff000000);
-        state.dicr |=  (data & 0x00ff803f);
-        state.dicr &= ~(data & 0x7f000000);
-        update_irq_active_flag();
-        break;
+    case 1:
+      state.dicr &= (0xff000000);
+      state.dicr |= (data & 0x00ff803f);
+      state.dicr &= ~(data & 0x7f000000);
+      update_irq_active_flag();
+      break;
 
-      case 2: break;
-      case 3: break;
+    case 2: break;
+    case 3: break;
     }
   }
   else {
     switch (get_register_index(address)) {
-      case 0: state.channels[channel].address = data & 0x00ffffff; break;
-      case 1: state.channels[channel].counter = data & 0xffffffff; break;
-      case 2: state.channels[channel].control = data & 0x71770703; break;
+    case 0: state.channels[channel].address = data & 0x00ffffff; break;
+    case 1: state.channels[channel].counter = data & 0xffffffff; break;
+    case 2: state.channels[channel].control = data & 0x71770703; break;
     }
   }
 
