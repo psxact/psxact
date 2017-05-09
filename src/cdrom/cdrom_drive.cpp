@@ -1,5 +1,5 @@
 #include <cassert>
-#include "cdrom_core.hpp"
+#include "cdrom_drive.hpp"
 #include "../bus.hpp"
 
 cdrom::state_t cdrom::state;
@@ -28,7 +28,7 @@ static void write_data_byte(uint8_t data) {
   cdrom::state.data_fifo.write(data);
 }
 
-uint32_t cdrom::bus_read(int width, uint32_t address) {
+uint32_t cdrom::io_read(int width, uint32_t address) {
   assert(width == bus::BUS_WIDTH_BYTE);
 
   switch (address - 0x1f801800) {
@@ -52,7 +52,7 @@ uint32_t cdrom::bus_read(int width, uint32_t address) {
   return 0;
 }
 
-void cdrom::bus_write(int width, uint32_t address, uint32_t data) {
+void cdrom::io_write(int width, uint32_t address, uint32_t data) {
   assert(width == bus::BUS_WIDTH_BYTE);
 
   switch (address - 0x1f801800) {

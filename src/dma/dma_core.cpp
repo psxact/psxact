@@ -30,7 +30,7 @@ static uint32_t get_register_index(uint32_t address) {
   return (address >> 2) & 3;
 }
 
-uint32_t dma::bus_read(int width, uint32_t address) {
+uint32_t dma::io_read(int width, uint32_t address) {
   auto channel = get_channel_index(address);
   if (channel == 7) {
     switch (get_register_index(address)) {
@@ -51,7 +51,7 @@ uint32_t dma::bus_read(int width, uint32_t address) {
   return 0;
 }
 
-void dma::bus_write(int width, uint32_t address, uint32_t data) {
+void dma::io_write(int width, uint32_t address, uint32_t data) {
   auto channel = get_channel_index(address);
   if (channel == 7) {
     switch (get_register_index(address)) {

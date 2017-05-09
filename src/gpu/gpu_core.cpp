@@ -25,7 +25,7 @@ uint32_t gpu::stat() {
   return (gpu::state.status & ~0x00080000) | 0x1c002000;
 }
 
-uint32_t gpu::bus_read(int width, uint32_t address) {
+uint32_t gpu::io_read(int width, uint32_t address) {
   assert(width == bus::BUS_WIDTH_WORD);
 
   switch (address) {
@@ -40,7 +40,7 @@ uint32_t gpu::bus_read(int width, uint32_t address) {
   }
 }
 
-void gpu::bus_write(int width, uint32_t address, uint32_t data) {
+void gpu::io_write(int width, uint32_t address, uint32_t data) {
   assert(width == bus::BUS_WIDTH_WORD);
 
   switch (address) {

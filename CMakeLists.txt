@@ -14,8 +14,8 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SOURCE_FILES
-    src/cdrom/cdrom_core.cpp
-    src/cdrom/cdrom_core.hpp
+    src/cdrom/cdrom_drive.cpp
+    src/cdrom/cdrom_drive.hpp
     src/cpu/cpu_code.cpp
     src/cpu/cpu_core.cpp
     src/cpu/cpu_core.hpp

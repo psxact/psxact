@@ -1,5 +1,5 @@
 #include "bus.hpp"
-#include "cdrom/cdrom_core.hpp"
+#include "cdrom/cdrom_drive.hpp"
 #include "cpu/cpu_core.hpp"
 #include "gpu/gpu_core.hpp"
 #include "renderer.hpp"

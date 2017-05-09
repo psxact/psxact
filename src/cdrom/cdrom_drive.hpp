@@ -1,5 +1,5 @@
-#ifndef __PSXACT_CDROM_CORE_HPP__
-#define __PSXACT_CDROM_CORE_HPP__
+#ifndef __PSXACT_CDROM_DRIVE_HPP__
+#define __PSXACT_CDROM_DRIVE_HPP__
 
 #include <cstdint>
 #include "../fifo.hpp"
@@ -19,11 +19,11 @@ namespace cdrom {
 
   extern state_t state;
 
-  uint32_t bus_read(int width, uint32_t address);
+  uint32_t io_read(int width, uint32_t address);
 
-  void bus_write(int width, uint32_t address, uint32_t data);
+  void io_write(int width, uint32_t address, uint32_t data);
 
   void run();
 }
 
-#endif // __PSXACT_CDROM_CORE_HPP__
+#endif // __PSXACT_CDROM_DRIVE_HPP__

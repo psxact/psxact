@@ -15,9 +15,9 @@ namespace dma {
     } channels[7];
   };
 
-  uint32_t bus_read(int width, uint32_t address);
+  uint32_t io_read(int width, uint32_t address);
 
-  void bus_write(int width, uint32_t address, uint32_t data);
+  void io_write(int width, uint32_t address, uint32_t data);
 
   void main();
 

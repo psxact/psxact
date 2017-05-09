@@ -3,7 +3,7 @@
 
 static timer::state_t timers[3];
 
-uint32_t timer::bus_read(int width, uint32_t address) {
+uint32_t timer::io_read(int width, uint32_t address) {
   int n = (address >> 4) & 3;
 
   switch ((address & 0xf) / 4) {
@@ -15,7 +15,7 @@ uint32_t timer::bus_read(int width, uint32_t address) {
   return 0;
 }
 
-void timer::bus_write(int width, uint32_t address, uint32_t data) {
+void timer::io_write(int width, uint32_t address, uint32_t data) {
   int n = (address >> 4) & 3;
 
   switch ((address & 0xf) / 4) {

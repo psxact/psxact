@@ -149,7 +149,7 @@ void cpu::write_data(int width, uint32_t address, uint32_t data) {
   return bus::write(width, map_address(address), data);
 }
 
-uint32_t cpu::bus_read(int width, uint32_t address) {
+uint32_t cpu::io_read(int width, uint32_t address) {
   printf("cpu::bus_read(%d, 0x%08x)\n", width, address);
 
   switch (address) {
@@ -164,7 +164,7 @@ uint32_t cpu::bus_read(int width, uint32_t address) {
   }
 }
 
-void cpu::bus_write(int width, uint32_t address, uint32_t data) {
+void cpu::io_write(int width, uint32_t address, uint32_t data) {
   printf("cpu::bus_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
 
   switch (address) {

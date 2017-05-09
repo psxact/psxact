@@ -2,7 +2,7 @@
 
 static input::state_t state;
 
-uint32_t input::bus_read(int width, uint32_t address) {
+uint32_t input::io_read(int width, uint32_t address) {
   switch (address) {
   case 0x1f801040:
     state.status &= ~(1 << 1);
@@ -15,7 +15,7 @@ uint32_t input::bus_read(int width, uint32_t address) {
   return 0;
 }
 
-void input::bus_write(int width, uint32_t address, uint32_t data) {
+void input::io_write(int width, uint32_t address, uint32_t data) {
   switch (address) {
   case 0x1f801040:
     state.status |= (1 << 1);

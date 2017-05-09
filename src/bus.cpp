@@ -2,7 +2,7 @@
 #include <cstring>
 #include <exception>
 #include "bus.hpp"
-#include "cdrom/cdrom_core.hpp"
+#include "cdrom/cdrom_drive.hpp"
 #include "cpu/cpu_core.hpp"
 #include "dma/dma_core.hpp"
 #include "gpu/gpu_core.hpp"
@@ -53,33 +53,33 @@ uint32_t bus::read(int width, uint32_t address) {
   }
 
   if (utility::between<0x1f801040, 0x1f80104f>(address)) {
-    return input::bus_read(width, address);
+    return input::io_read(width, address);
   }
 
   if (utility::between<0x1f801070, 0x1f801077>(address)) {
-    return cpu::bus_read(width, address);
+    return cpu::io_read(width, address);
   }
 
   if (utility::between<0x1f801080, 0x1f8010ff>(address)) {
-    return dma::bus_read(width, address);
+    return dma::io_read(width, address);
   }
 
   if (utility::between<0x1f801100, 0x1f80110f>(address) ||
       utility::between<0x1f801110, 0x1f80111f>(address) ||
       utility::between<0x1f801120, 0x1f80112f>(address)) {
-    return timer::bus_read(width, address);
+    return timer::io_read(width, address);
   }
 
   if (utility::between<0x1f801800, 0x1f801803>(address)) {
-    return cdrom::bus_read(width, address);
+    return cdrom::io_read(width, address);
   }
 
   if (utility::between<0x1f801810, 0x1f801817>(address)) {
-    return gpu::bus_read(width, address);
+    return gpu::io_read(width, address);
   }
 
   if (utility::between<0x1f801c00, 0x1f801fff>(address)) {
-    return spu::bus_read(width, address);
+    return spu::io_read(width, address);
   }
 
   if (utility::between<0x1f000000, 0x1f7fffff>(address) || // expansion region 1
@@ -119,33 +119,33 @@ void bus::write(int width, uint32_t address, uint32_t data) {
   }
 
   if (utility::between<0x1f801040, 0x1f80104f>(address)) {
-    return input::bus_write(width, address, data);
+    return input::io_write(width, address, data);
   }
 
   if (utility::between<0x1f801070, 0x1f801077>(address)) {
-    return cpu::bus_write(width, address, data);
+    return cpu::io_write(width, address, data);
   }
 
   if (utility::between<0x1f801080, 0x1f8010ff>(address)) {
-    return dma::bus_write(width, address, data);
+    return dma::io_write(width, address, data);
   }
 
   if (utility::between<0x1f801100, 0x1f80110f>(address) ||
       utility::between<0x1f801110, 0x1f80111f>(address) ||
       utility::between<0x1f801120, 0x1f80112f>(address)) {
-    return timer::bus_write(width, address, data);
+    return timer::io_write(width, address, data);
   }
 
   if (utility::between<0x1f801800, 0x1f801803>(address)) {
-    return cdrom::bus_write(width, address, data);
+    return cdrom::io_write(width, address, data);
   }
 
   if (utility::between<0x1f801810, 0x1f801817>(address)) {
-    return gpu::bus_write(width, address, data);
+    return gpu::io_write(width, address, data);
   }
 
   if (utility::between<0x1f801c00, 0x1f801fff>(address)) {
-    return spu::bus_write(width, address, data);
+    return spu::io_write(width, address, data);
   }
 
   if (utility::between<0x1f000000, 0x1f7fffff>(address) || // expansion region 1 bus_write
