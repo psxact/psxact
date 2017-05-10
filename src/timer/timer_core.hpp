@@ -1,25 +1,18 @@
 #ifndef __PSXACT_TIMER_CORE_HPP__
 #define __PSXACT_TIMER_CORE_HPP__
 
-#include <cstdint>
+#include "../state.hpp"
 
 namespace timer {
-  struct state_t {
-    uint16_t counter;
-    uint16_t control;
-    uint16_t compare;
-    int divider;
-  };
+  uint32_t io_read(timer_state_t *state, int width, uint32_t address);
 
-  uint32_t io_read(int width, uint32_t address);
+  void io_write(timer_state_t *state, int width, uint32_t address, uint32_t data);
 
-  void io_write(int width, uint32_t address, uint32_t data);
+  void tick_timer_0(timer_state_t *state);
 
-  void tick_timer_0();
+  void tick_timer_1(timer_state_t *state);
 
-  void tick_timer_1();
-
-  void tick_timer_2();
+  void tick_timer_2(timer_state_t *state);
 }
 
 #endif // __PSXACT_TIMER_CORE_HPP__

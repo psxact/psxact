@@ -1,18 +1,35 @@
 #include "bus.hpp"
 #include "cdrom/cdrom_drive.hpp"
 #include "cpu/cpu_core.hpp"
+#include "dma/dma_core.hpp"
 #include "gpu/gpu_core.hpp"
+#include "input/input.hpp"
 #include "renderer.hpp"
+#include "spu/spu_core.hpp"
 #include "timer/timer_core.hpp"
 
-void run_for_one_frame() {
+system_state_t *init(const char *bfn, const char *gfn) {
+  std::string bios_file_name(bfn);
+  std::string game_file_name(gfn);
+
+  auto system = new system_state_t();
+
+  cpu::initialize(&system->cpu_state);
+  bus::initialize(bios_file_name, game_file_name);
+
+  bus::set_state(system);
+
+  return system;
+}
+
+void run_for_one_frame(system_state_t *system) {
   for (int i = 0; i < 10; i++) {
     for (int i = 0; i < 33868800 / 60 / 10; i++) {
-      cpu::tick();
-      timer::tick_timer_2();
+      cpu::tick(&system->cpu_state);
+      timer::tick_timer_2(&system->timer_state);
     }
 
-    cdrom::run();
+    cdrom::run(&system->cdrom_state);
   }
 
   bus::irq(0);
@@ -25,16 +42,12 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  std::string bios_file_name(argv[1]);
-  std::string game_file_name(argv[2]);
-
-  cpu::initialize();
-  bus::initialize(bios_file_name, game_file_name);
+  auto system = init(argv[1], argv[2]);
 
   renderer::initialize();
 
   while (renderer::render()) {
-    run_for_one_frame();
+    run_for_one_frame(system);
   }
 
   renderer::destroy();

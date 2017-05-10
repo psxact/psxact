@@ -121,7 +121,7 @@ static inline int double_area(const gpu::point_t &v0, const gpu::point_t &v1, co
   return e0 + e1 + e2;
 }
 
-void gpu::texture::draw_poly3(const gpu::texture::polygon_t<3> &p) {
+void gpu::texture::draw_poly3(gpu_state_t *state, const gpu::texture::polygon_t<3> &p) {
   auto &v0 = p.v[0];
   auto &v1 = p.v[1];
   auto &v2 = p.v[2];
@@ -134,12 +134,12 @@ void gpu::texture::draw_poly3(const gpu::texture::polygon_t<3> &p) {
   }
 }
 
-void gpu::texture::draw_poly4(const gpu::texture::polygon_t<4> &p) {
+void gpu::texture::draw_poly4(gpu_state_t *state, const gpu::texture::polygon_t<4> &p) {
   auto &v0 = p.v[0];
   auto &v1 = p.v[1];
   auto &v2 = p.v[2];
   auto &v3 = p.v[3];
 
-  gpu::texture::draw_poly3({ v0, v1, v2, p.clut_x, p.clut_y, p.base_u, p.base_v, p.depth });
-  gpu::texture::draw_poly3({ v1, v2, v3, p.clut_x, p.clut_y, p.base_u, p.base_v, p.depth });
+  gpu::texture::draw_poly3(state, { v0, v1, v2, p.clut_x, p.clut_y, p.base_u, p.base_v, p.depth });
+  gpu::texture::draw_poly3(state, { v1, v2, v3, p.clut_x, p.clut_y, p.base_u, p.base_v, p.depth });
 }

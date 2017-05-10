@@ -3,84 +3,25 @@
 
 #include <cstdint>
 #include <queue>
+#include "../state.hpp"
 #include "../utility.hpp"
 
 namespace gpu {
-  struct state_t {
-    uint32_t status = 0x14802000;
-    uint32_t texture_window_mask_x;
-    uint32_t texture_window_mask_y;
-    uint32_t texture_window_offset_x;
-    uint32_t texture_window_offset_y;
-    uint32_t drawing_area_x1;
-    uint32_t drawing_area_y1;
-    uint32_t drawing_area_x2;
-    uint32_t drawing_area_y2;
-    uint32_t x_offset;
-    uint32_t y_offset;
-    uint32_t display_area_x;
-    uint32_t display_area_y;
-    uint32_t display_area_x1;
-    uint32_t display_area_y1;
-    uint32_t display_area_x2;
-    uint32_t display_area_y2;
-    bool textured_rectangle_x_flip;
-    bool textured_rectangle_y_flip;
+  uint32_t io_read(gpu_state_t *state, int width, uint32_t address);
 
-    struct {
-      uint32_t buffer[16];
-      int wr;
-      int rd;
-    } fifo;
+  void io_write(gpu_state_t *state, int width, uint32_t address, uint32_t data);
 
-    struct {
-      struct {
-        int x;
-        int y;
-        int w;
-        int h;
-      } reg;
+  uint32_t data(gpu_state_t *state);
 
-      struct {
-        bool active;
-        int x;
-        int y;
-      } run;
-    } cpu_to_gpu_transfer;
+  uint32_t stat(gpu_state_t *state);
 
-    struct {
-      struct {
-        int x;
-        int y;
-        int w;
-        int h;
-      } reg;
+  void gp0(gpu_state_t *state, uint32_t data);
 
-      struct {
-        bool active;
-        int x;
-        int y;
-      } run;
-    } gpu_to_cpu_transfer;
-  };
+  void gp1(gpu_state_t *state, uint32_t data);
 
-  extern state_t state;
+  void vram_transfer(gpu_state_t *state, uint16_t data);
 
-  uint32_t io_read(int width, uint32_t address);
-
-  void io_write(int width, uint32_t address, uint32_t data);
-
-  uint32_t data();
-
-  uint32_t stat();
-
-  void gp0(uint32_t data);
-
-  void gp1(uint32_t data);
-
-  void vram_transfer(uint16_t data);
-
-  uint16_t vram_transfer();
+  uint16_t vram_transfer(gpu_state_t *state);
 
   struct color_t {
     int r;
@@ -93,7 +34,7 @@ namespace gpu {
     int y;
   };
 
-  void draw_point(int x, int y, int r, int g, int b);
+  void draw_point(gpu_state_t *state, int x, int y, int r, int g, int b);
 
   namespace gouraud {
     struct pixel_t {
@@ -106,9 +47,9 @@ namespace gpu {
       pixel_t v[size];
     };
 
-    void draw_poly3(const gpu::gouraud::polygon_t<3> &p);
+    void draw_poly3(gpu_state_t *state, const gpu::gouraud::polygon_t<3> &p);
 
-    void draw_poly4(const gpu::gouraud::polygon_t<4> &p);
+    void draw_poly4(gpu_state_t *state, const gpu::gouraud::polygon_t<4> &p);
   }
 
   namespace texture {
@@ -129,9 +70,9 @@ namespace gpu {
       int depth;
     };
 
-    void draw_poly3(const polygon_t<3> &p);
+    void draw_poly3(gpu_state_t *state, const polygon_t<3> &p);
 
-    void draw_poly4(const polygon_t<4> &p);
+    void draw_poly4(gpu_state_t *state, const polygon_t<4> &p);
   }
 }
 

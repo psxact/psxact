@@ -3,27 +3,14 @@
 
 #include <cstdint>
 #include "../fifo.hpp"
+#include "../state.hpp"
 
 namespace cdrom {
-  struct state_t {
-    uint32_t interrupt_enable;
-    uint32_t interrupt_request;
-    uint32_t index;
-    uint32_t command;
-    bool has_command;
+  uint32_t io_read(cdrom_state_t *state, int width, uint32_t address);
 
-    fifo_t<uint8_t, 16> args_fifo;
-    fifo_t<uint8_t, 16> resp_fifo;
-    fifo_t<uint8_t, 16> data_fifo; // actually bigger, not sure the exact size
-  };
+  void io_write(cdrom_state_t *state, int width, uint32_t address, uint32_t data);
 
-  extern state_t state;
-
-  uint32_t io_read(int width, uint32_t address);
-
-  void io_write(int width, uint32_t address, uint32_t data);
-
-  void run();
+  void run(cdrom_state_t *state);
 }
 
 #endif // __PSXACT_CDROM_DRIVE_HPP__

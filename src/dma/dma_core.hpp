@@ -2,28 +2,18 @@
 #define __PSXACT_DMA_CORE_HPP__
 
 #include <cstdint>
+#include "../state.hpp"
 
 namespace dma {
-  struct state_t {
-    uint32_t dpcr = 0x07654321;
-    uint32_t dicr = 0x00000000;
+  uint32_t io_read(dma_state_t *state, int width, uint32_t address);
 
-    struct {
-      uint32_t address;
-      uint32_t counter;
-      uint32_t control;
-    } channels[7];
-  };
+  void io_write(dma_state_t *state, int width, uint32_t address, uint32_t data);
 
-  uint32_t io_read(int width, uint32_t address);
+  void main(dma_state_t *state);
 
-  void io_write(int width, uint32_t address, uint32_t data);
+  void irq_channel(dma_state_t *state, int n);
 
-  void main();
-
-  void irq_channel(int n);
-
-  void run_channel(int n);
+  void run_channel(dma_state_t *state, int n);
 }
 
 #endif // __PSXACT_DMA_CORE_HPP__
