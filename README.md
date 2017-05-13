@@ -1,4 +1,4 @@
-# PSXACT
+![Logo](images/logo.png)
 
 [![Build Status](https://travis-ci.org/adam-becker/psxact.svg?branch=develop)](https://travis-ci.org/adam-becker/psxact)
 [![Build status](https://ci.appveyor.com/api/projects/status/drk4b45g4pyij3ij/branch/develop?svg=true)](https://ci.appveyor.com/project/adam-becker/psxact/branch/develop)
@@ -30,9 +30,6 @@ $ psxact <bios file here> <game file here>
 ## Building
 
 This project uses CMake for builds, and requires SDL2.
-
-I personally use the `FindSDL2.cmake` script available
-[here](https://github.com/tcbrindle/sdl2-cmake-scripts).
 
 ## Contributing
 
