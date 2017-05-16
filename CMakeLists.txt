@@ -10,6 +10,7 @@ set(SDL2_PATH "" CACHE INTERNAL "Fill in path to the SDL2 (Win32)")
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIR})
 
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

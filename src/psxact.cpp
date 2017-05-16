@@ -1,11 +1,8 @@
 #include "bus.hpp"
 #include "cdrom/cdrom_drive.hpp"
 #include "cpu/cpu_core.hpp"
-#include "dma/dma_core.hpp"
 #include "gpu/gpu_core.hpp"
-#include "input/input.hpp"
 #include "renderer.hpp"
-#include "spu/spu_core.hpp"
 #include "timer/timer_core.hpp"
 
 system_state_t *init(const char *bfn, const char *gfn) {
@@ -15,16 +12,14 @@ system_state_t *init(const char *bfn, const char *gfn) {
   auto system = new system_state_t();
 
   cpu::initialize(&system->cpu_state);
-  bus::initialize(bios_file_name, game_file_name);
-
-  bus::set_state(system);
+  bus::initialize(system, bios_file_name, game_file_name);
 
   return system;
 }
 
 void run_for_one_frame(system_state_t *system) {
   for (int i = 0; i < 10; i++) {
-    for (int i = 0; i < 33868800 / 60 / 10; i++) {
+    for (int j = 0; j < 33868800 / 60 / 10; j++) {
       cpu::tick(&system->cpu_state);
       timer::tick_timer_2(&system->timer_state);
     }

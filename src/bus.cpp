@@ -19,7 +19,11 @@ static input_state_t *input_state;
 static spu_state_t *spu_state;
 static timer_state_t *timer_state;
 
-void bus::set_state(system_state_t *state) {
+static utility::memory_t<19> bios;
+static utility::memory_t<21> wram;
+static utility::memory_t<10> dmem;
+
+void bus::initialize(system_state_t *state, const std::string &bios_file_name, const std::string &game_file_name) {
   cdrom_state = &state->cdrom_state;
   cpu_state = &state->cpu_state;
   dma_state = &state->dma_state;
@@ -27,13 +31,7 @@ void bus::set_state(system_state_t *state) {
   input_state = &state->input_state;
   spu_state = &state->spu_state;
   timer_state = &state->timer_state;
-}
 
-utility::memory_t<19> bios;
-utility::memory_t<21> wram;
-utility::memory_t<10> dmem;
-
-void bus::initialize(const std::string &bios_file_name, const std::string &game_file_name) {
   memset(bios.b, 0, size_t(bios.size));
   memset(wram.b, 0, size_t(wram.size));
   memset(dmem.b, 0, size_t(dmem.size));
@@ -42,7 +40,8 @@ void bus::initialize(const std::string &bios_file_name, const std::string &game_
 }
 
 void bus::irq(int interrupt) {
-  cpu_state->i_stat |= (1 << interrupt);
+  auto flag = 1 << interrupt;
+  cpu::set_istat(cpu_state, cpu_state->i_stat | flag);
 }
 
 uint32_t bus::read(int width, uint32_t address) {

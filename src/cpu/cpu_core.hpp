@@ -26,6 +26,10 @@ namespace cpu {
 
   void write_data(cpu_state_t *state, int width, uint32_t address, uint32_t data);
 
+  void set_imask(cpu_state_t *state, uint32_t value);
+
+  void set_istat(cpu_state_t *state, uint32_t value);
+
   uint32_t io_read(cpu_state_t *state, int width, uint32_t address);
 
   void io_write(cpu_state_t *state, int width, uint32_t address, uint32_t data);

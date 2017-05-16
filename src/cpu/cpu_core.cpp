@@ -39,13 +39,6 @@ void cpu::tick(cpu_state_t *state) {
   state->is_load_delay_slot = state->is_load;
   state->is_load = false;
 
-  if (state->i_stat & state->i_mask) {
-    state->cop0.regs[13] |= (1 << 10);
-  }
-  else {
-    state->cop0.regs[13] &= ~(1 << 10);
-  }
-
   auto iec = (state->cop0.regs[12] & 1) != 0;
   auto irq = (state->cop0.regs[12] & state->cop0.regs[13] & 0xff00) != 0;
 
@@ -147,6 +140,26 @@ void cpu::write_data(cpu_state_t *state, int width, uint32_t address, uint32_t d
   return bus::write(width, map_address(address), data);
 }
 
+static void update_irq(cpu_state_t *state, uint32_t stat, uint32_t mask) {
+  state->i_stat = stat;
+  state->i_mask = mask;
+
+  if (state->i_stat & state->i_mask) {
+    state->cop0.regs[13] |= (1 << 10);
+  }
+  else {
+    state->cop0.regs[13] &= ~(1 << 10);
+  }
+}
+
+void cpu::set_imask(cpu_state_t *state, uint32_t value) {
+  update_irq(state, state->i_stat, value);
+}
+
+void cpu::set_istat(cpu_state_t *state, uint32_t value) {
+  update_irq(state, value, state->i_mask);
+}
+
 uint32_t cpu::io_read(cpu_state_t *state, int width, uint32_t address) {
   printf("cpu::bus_read(%d, 0x%08x)\n", width, address);
 
@@ -167,11 +180,11 @@ void cpu::io_write(cpu_state_t *state, int width, uint32_t address, uint32_t dat
 
   switch (address) {
   case 0x1f801070:
-    state->i_stat = data & state->i_stat;
+    set_istat(state, data & state->i_stat);
     break;
 
   case 0x1f801074:
-    state->i_mask = data & 0x7ff;
+    set_imask(state, data & 0x7ff);
     break;
   }
 }
