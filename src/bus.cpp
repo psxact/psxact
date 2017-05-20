@@ -23,7 +23,7 @@ static utility::memory_t<19> bios;
 static utility::memory_t<21> wram;
 static utility::memory_t<10> dmem;
 
-void bus::initialize(system_state_t *state, const std::string &bios_file_name, const std::string &game_file_name) {
+void bus::initialize(system_state_t *state, const std::string &bios_file_name) {
   cdrom_state = &state->cdrom_state;
   cpu_state = &state->cpu_state;
   dma_state = &state->dma_state;
@@ -165,9 +165,9 @@ void bus::write(int width, uint32_t address, uint32_t data) {
     return spu::io_write(spu_state, width, address, data);
   }
 
-  if (utility::between<0x1f000000, 0x1f7fffff>(address) || // expansion region 1 bus_write
-      utility::between<0x1f802000, 0x1f802fff>(address) || // expansion region 2 bus_write
-      utility::between<0x1fa00000, 0x1fbfffff>(address)) { // expansion region 3 bus_write
+  if (utility::between<0x1f000000, 0x1f7fffff>(address) || // expansion region 1
+      utility::between<0x1f802000, 0x1f802fff>(address) || // expansion region 2
+      utility::between<0x1fa00000, 0x1fbfffff>(address)) { // expansion region 3
     return;
   }
 
@@ -178,9 +178,9 @@ void bus::write(int width, uint32_t address, uint32_t data) {
   case 0x1f80100c: assert(data == 0x00003022); return;
   case 0x1f801010: assert(data == 0x0013243f); return;
   case 0x1f801014: assert(data == 0x200931e1); return;
-  case 0x1f801018: assert(data == 0x00020843); return;
+  case 0x1f801018: assert(data == 0x00020843 || data == 0x00020943); return;
   case 0x1f80101c: assert(data == 0x00070777); return;
-  case 0x1f801020: assert(data == 0x00031125); return;
+  case 0x1f801020: assert(data == 0x00031125 || data == 0x0000132c || data == 0x00001325); return;
 
   case 0x1f801060: assert(data == 0x00000b88); return;
   }

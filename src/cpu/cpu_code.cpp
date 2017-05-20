@@ -170,21 +170,7 @@ void cpu::op_cop1(cpu_state_t *state) {
 }
 
 void cpu::op_cop2(cpu_state_t *state) {
-  if (state->code & (1 << 25)) {
-    printf("cop2 $%08x\n", state->code);
-  }
-  else {
-    switch (decoder::rs(state)) {
-    case 0: /*printf("mfc2 r%02d, r%02d\n", decoder::rt(), decoder::rd());*/ break;
-    case 2: /*printf("cfc2 r%02d, r%02d\n", decoder::rt(), decoder::rd());*/ break;
-    case 4: /*printf("mtc2 r%02d, r%02d\n", decoder::rt(), decoder::rd());*/ break;
-    case 6: /*printf("ctc2 r%02d, r%02d\n", decoder::rt(), decoder::rd());*/ break;
-
-    default:
-      printf("unimplemented cop2\n");
-      throw "unimplemented cop2\n";
-    }
-  }
+  printf("cop2 $%08x\n", state->code);
 }
 
 void cpu::op_cop3(cpu_state_t *state) {
@@ -317,7 +303,7 @@ void cpu::op_lwc1(cpu_state_t *state) {
 }
 
 void cpu::op_lwc2(cpu_state_t *state) {
-  throw "unimplemented lwc2\n";
+  //throw "unimplemented lwc2\n";
 }
 
 void cpu::op_lwc3(cpu_state_t *state) {
@@ -495,7 +481,7 @@ void cpu::op_swc1(cpu_state_t *state) {
 }
 
 void cpu::op_swc2(cpu_state_t *state) {
-  throw "unimplemented swc2\n";
+  //throw "unimplemented swc2\n";
 }
 
 void cpu::op_swc3(cpu_state_t *state) {

@@ -5,9 +5,9 @@ template<typename T, int bits>
 class fifo_t {
 private:
   enum {
-    MASK = (1 << bits) - 1,
-    MASK_LSB = (1 << (bits - 1)) - 1,
-    MASK_MSB = (1 << (bits - 1)),
+    MASK = (1 << (bits + 1)) - 1,
+    MASK_LSB = (1 << bits) - 1,
+    MASK_MSB = (1 << bits),
     SIZE = (1 << bits)
   };
 
@@ -15,45 +15,38 @@ private:
   unsigned rd_ptr;
   unsigned wr_ptr;
 
-  unsigned get_rd_lsb() const {
-    return rd_ptr & MASK_LSB;
-  }
-
-  unsigned get_wr_lsb() const {
-    return wr_ptr & MASK_LSB;
-  }
-
-  unsigned get_rd_msb() const {
-    return rd_ptr & MASK_MSB;
-  }
-
-  unsigned get_wr_msb() const {
-    return wr_ptr & MASK_MSB;
-  }
-
 public:
+  void clear() {
+    rd_ptr = 0;
+    wr_ptr = 0;
+  }
+
   const T &read() {
-    T &value = buffer[rd_ptr];
+    T &value = buffer[rd_ptr & MASK_LSB];
     rd_ptr = (rd_ptr + 1) & MASK;
 
     return value;
   }
 
   void write(const T &value) {
-    buffer[wr_ptr] = value;
+    buffer[wr_ptr & MASK_LSB] = value;
     wr_ptr = (wr_ptr + 1) & MASK;
   }
 
   bool is_empty() const {
-    return
-      (get_rd_lsb() == get_wr_lsb()) &&
-      (get_rd_msb() == get_wr_msb());
+    return rd_ptr == wr_ptr;
   }
 
   bool is_full() const {
-    return
-      (get_rd_lsb() == get_wr_lsb()) &&
-      (get_rd_msb() != get_wr_msb());
+    return rd_ptr == (wr_ptr ^ MASK_MSB);
+  }
+
+  bool has_data() const {
+    return !is_empty();
+  }
+
+  bool has_room() const {
+    return !is_full();
   }
 };
 

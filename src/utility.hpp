@@ -85,6 +85,14 @@ namespace utility {
   constexpr unsigned mib() {
     return 1024 * kib<value>();
   }
+
+  inline uint8_t dec_to_bcd(uint8_t value) {
+    return uint8_t(((value / 10) * 16) + (value % 10));
+  }
+
+  inline uint8_t bcd_to_dec(uint8_t value) {
+    return uint8_t(((value / 16) * 10) + (value % 16));
+  }
 }
 
 #endif // __PSXACT_UTILITY_HPP__

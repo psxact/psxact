@@ -161,8 +161,6 @@ void cpu::set_istat(cpu_state_t *state, uint32_t value) {
 }
 
 uint32_t cpu::io_read(cpu_state_t *state, int width, uint32_t address) {
-  printf("cpu::bus_read(%d, 0x%08x)\n", width, address);
-
   switch (address) {
   case 0x1f801070:
     return state->i_stat;
@@ -171,13 +169,12 @@ uint32_t cpu::io_read(cpu_state_t *state, int width, uint32_t address) {
     return state->i_mask;
 
   default:
+    printf("cpu::bus_read(%d, 0x%08x)\n", width, address);
     return 0;
   }
 }
 
 void cpu::io_write(cpu_state_t *state, int width, uint32_t address, uint32_t data) {
-  printf("cpu::bus_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
-
   switch (address) {
   case 0x1f801070:
     set_istat(state, data & state->i_stat);
@@ -185,6 +182,10 @@ void cpu::io_write(cpu_state_t *state, int width, uint32_t address, uint32_t dat
 
   case 0x1f801074:
     set_imask(state, data & 0x7ff);
+    break;
+
+  default:
+    printf("cpu::bus_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
     break;
   }
 }

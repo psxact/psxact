@@ -5,26 +5,28 @@
 #include "renderer.hpp"
 #include "timer/timer_core.hpp"
 
-system_state_t *init(const char *bfn, const char *gfn) {
+system_state_t *initialize(const char *bfn, const char *gfn) {
   std::string bios_file_name(bfn);
   std::string game_file_name(gfn);
 
   auto system = new system_state_t();
 
+  cdrom::initialize(&system->cdrom_state, game_file_name);
   cpu::initialize(&system->cpu_state);
-  bus::initialize(system, bios_file_name, game_file_name);
+  bus::initialize(system, bios_file_name);
 
   return system;
 }
 
 void run_for_one_frame(system_state_t *system) {
-  for (int i = 0; i < 10; i++) {
-    for (int j = 0; j < 33868800 / 60 / 10; j++) {
-      cpu::tick(&system->cpu_state);
-      timer::tick_timer_2(&system->timer_state);
-    }
+  const int CPU_FREQ = 33868800;
+  const int CYCLES_PER_FRAME = CPU_FREQ / 60;
 
-    cdrom::run(&system->cdrom_state);
+  for (int i = 0; i < CYCLES_PER_FRAME; i++) {
+    cpu::tick(&system->cpu_state);
+    timer::tick_timer_2(&system->timer_state);
+
+    cdrom::tick(&system->cdrom_state);
   }
 
   bus::irq(0);
@@ -37,7 +39,7 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  auto system = init(argv[1], argv[2]);
+  auto system = initialize(argv[1], argv[2]);
 
   renderer::initialize();
 

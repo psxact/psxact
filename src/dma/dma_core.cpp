@@ -1,6 +1,7 @@
 #include "dma_core.hpp"
 #include "../bus.hpp"
 #include "../gpu/gpu_core.hpp"
+#include "../state.hpp"
 
 static void update_irq_active_flag(dma_state_t *state) {
   auto forced = ((state->dicr >> 15) & 1) != 0;
@@ -152,6 +153,24 @@ static void run_channel_2_list(dma_state_t *state) {
   dma::irq_channel(state, 2);
 }
 
+static void run_channel_3(dma_state_t *state) {
+  auto address = state->channels[3].address;
+  auto counter = state->channels[3].counter & 0xffff;
+
+  counter = counter ? counter : 0x10000;
+
+  for (unsigned i = 0; i < counter; i++) {
+    auto data = bus::read(bus::BUS_WIDTH_WORD, 0x1f801800);
+    bus::write(bus::BUS_WIDTH_WORD, address, data);
+
+    address += 4;
+  }
+
+  state->channels[3].control &= ~0x01000000;
+
+  dma::irq_channel(state, 3);
+}
+
 static void run_channel_6(dma_state_t *state) {
   auto address = state->channels[6].address;
   auto counter = state->channels[6].counter & 0xffff;
@@ -165,7 +184,7 @@ static void run_channel_6(dma_state_t *state) {
 
   bus::write(bus::BUS_WIDTH_WORD, address, 0x00ffffff);
 
-  state->channels[6].control &= ~0x11000000;
+  state->channels[6].control &= ~0x01000000;
 
   dma::irq_channel(state, 6);
 }
@@ -176,6 +195,12 @@ void dma::run_channel(dma_state_t *state, int n) {
     case 0x01000200: return run_channel_2_data_read(state);
     case 0x01000201: return run_channel_2_data_write(state);
     case 0x01000401: return run_channel_2_list(state);
+    }
+  }
+
+  if (n == 3) {
+    switch (state->channels[3].control) {
+    case 0x11000000: return run_channel_3(state);
     }
   }
 

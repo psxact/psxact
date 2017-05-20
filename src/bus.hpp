@@ -12,7 +12,7 @@ namespace bus {
     BUS_WIDTH_WORD
   };
 
-  void initialize(system_state_t *state, const std::string &bios_file_name, const std::string &game_file_name);
+  void initialize(system_state_t *state, const std::string &bios_file_name);
 
   void irq(int interrupt);
 

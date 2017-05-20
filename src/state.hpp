@@ -2,18 +2,55 @@
 #define __PSXACT_STATE_HPP__
 
 #include <stdint.h>
+#include <string>
 #include "fifo.hpp"
 
-struct cdrom_state_t {
-  uint32_t interrupt_enable;
-  uint32_t interrupt_request;
-  uint32_t index;
-  uint32_t command;
-  bool has_command;
+struct cdrom_sector_timecode_t {
+  uint8_t minute;
+  uint8_t second;
+  uint8_t sector;
+};
 
-  fifo_t<uint8_t, 16> args_fifo;
-  fifo_t<uint8_t, 16> resp_fifo;
-  fifo_t<uint8_t, 16> data_fifo; // actually bigger, not sure the exact size
+struct cdrom_state_t {
+  int index;
+  int interrupt_enable;
+  int interrupt_request;
+
+  cdrom_sector_timecode_t seek_timecode;
+  cdrom_sector_timecode_t read_timecode;
+
+  fifo_t<uint8_t, 4> parameter;
+  fifo_t<uint8_t, 4> response;
+  fifo_t<uint8_t, 12> data;
+
+  uint8_t command;
+  bool command_is_new;
+  bool busy;
+
+  std::string game_file_name;
+
+  typedef void (*stage_t)(cdrom_state_t *state);
+
+  struct {
+    stage_t stage;
+    int timer;
+
+    int interrupt_request;
+
+    fifo_t<uint8_t, 4> parameter;
+    fifo_t<uint8_t, 4> response;
+    uint8_t command;
+  } control;
+
+  struct {
+    stage_t stage;
+    int timer;
+  } drive;
+
+  struct {
+    bool double_speed;
+    bool read_whole_sector;
+  } mode;
 };
 
 struct cpu_state_t {
