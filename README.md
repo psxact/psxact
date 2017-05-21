@@ -42,4 +42,4 @@ However, do try and follow the syntax used by the project when contributing, I
 
 ## Communication
 
-Join us on our efnet channel, `#psxact`!
+Join us on our `freenode` channel, `#psxact`!
