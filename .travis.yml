@@ -1,5 +1,13 @@
 language: cpp
 
+notifications:
+  irc:
+    channels:
+      "irc.servercentral.net#psxact"
+    on_success: change
+    on_failure: always
+    skip_join: true
+
 matrix:
   include:
     - os: linux
