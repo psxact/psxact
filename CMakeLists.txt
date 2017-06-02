@@ -18,6 +18,7 @@ set(SOURCE_FILES
     src/cdrom/cdrom_drive.cpp
     src/cdrom/cdrom_drive.hpp
     src/cpu/cpu_code.cpp
+    src/cpu/cpu_cop2.cpp
     src/cpu/cpu_core.cpp
     src/cpu/cpu_core.hpp
     src/cpu/decoder.cpp

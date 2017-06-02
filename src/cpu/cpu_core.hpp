@@ -109,6 +109,14 @@ namespace cpu {
   // undefined instruction
   void op_und(cpu_state_t *state);
 
+  namespace cop2 {
+    void op_cop(cpu_state_t *state);
+    void op_cfc(cpu_state_t *state);
+    void op_ctc(cpu_state_t *state);
+    void op_mfc(cpu_state_t *state);
+    void op_mtc(cpu_state_t *state);
+  }
+
   namespace decoder {
     uint32_t iconst(cpu_state_t *state);
     uint32_t uconst(cpu_state_t *state);

@@ -170,6 +170,17 @@ void cpu::op_cop1(cpu_state_t *state) {
 }
 
 void cpu::op_cop2(cpu_state_t *state) {
+  if (state->code & (1 << 25)) {
+    return cop2::op_cop(state);
+  }
+
+  switch (cpu::decoder::rs(state)) {
+  case 0x00: return cop2::op_mfc(state);
+  case 0x02: return cop2::op_cfc(state);
+  case 0x04: return cop2::op_mtc(state);
+  case 0x06: return cop2::op_ctc(state);
+  }
+
   printf("cop2 $%08x\n", state->code);
 }
 

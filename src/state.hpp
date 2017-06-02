@@ -59,6 +59,11 @@ struct cpu_state_t {
   } cop0;
 
   struct {
+    uint32_t ccr[32];
+    uint32_t gpr[32];
+  } cop2;
+
+  struct {
     uint32_t gp[32];
     uint32_t lo;
     uint32_t hi;
