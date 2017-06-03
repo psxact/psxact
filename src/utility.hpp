@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#define likely(n) __builtin_expect(!!(n), 1)
+#define unlikely(n) __builtin_expect(!!(n), 0)
+
 namespace utility {
   template<int bits>
   struct memory_t {
