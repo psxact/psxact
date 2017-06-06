@@ -1,6 +1,7 @@
 #include "cpu_core.hpp"
 #include "../bus.hpp"
 #include "../utility.hpp"
+#include "cpu_cop2.hpp"
 
 // --========--
 //   Decoding
@@ -171,14 +172,17 @@ void cpu::op_cop1(cpu_state_t *state) {
 
 void cpu::op_cop2(cpu_state_t *state) {
   if (state->code & (1 << 25)) {
-    return cop2::op_cop(state);
+    return cop2::run(&state->cop2, state->code & 0x1ffffff);
   }
 
+  auto rd = cpu::decoder::rd(state);
+  auto rt = cpu::decoder::rt(state);
+
   switch (cpu::decoder::rs(state)) {
-  case 0x00: return cop2::op_mfc(state);
-  case 0x02: return cop2::op_cfc(state);
-  case 0x04: return cop2::op_mtc(state);
-  case 0x06: return cop2::op_ctc(state);
+  case 0x00: return set_rt(state, cop2::read_gpr(&state->cop2, rd));
+  case 0x02: return set_rt(state, cop2::read_ccr(&state->cop2, rd));
+  case 0x04: return cop2::write_gpr(&state->cop2, rd, get_register(state, rt));
+  case 0x06: return cop2::write_ccr(&state->cop2, rd, get_register(state, rt));
   }
 
   printf("cop2 $%08x\n", state->code);
@@ -314,7 +318,15 @@ void cpu::op_lwc1(cpu_state_t *state) {
 }
 
 void cpu::op_lwc2(cpu_state_t *state) {
-  //throw "unimplemented lwc2\n";
+  auto address = get_rs(state) + decoder::iconst(state);
+  if (address & 3) {
+    enter_exception(state, 0x4);
+  }
+  else {
+    auto data = read_data(state, bus::BUS_WIDTH_WORD, address);
+
+    cop2::write_gpr(&state->cop2, decoder::rt(state), data);
+  }
 }
 
 void cpu::op_lwc3(cpu_state_t *state) {
@@ -492,7 +504,15 @@ void cpu::op_swc1(cpu_state_t *state) {
 }
 
 void cpu::op_swc2(cpu_state_t *state) {
-  //throw "unimplemented swc2\n";
+  auto address = get_rs(state) + decoder::iconst(state);
+  if (address & 3) {
+    enter_exception(state, 0x5);
+  }
+  else {
+    auto data = cop2::read_gpr(&state->cop2, decoder::rt(state));
+
+    write_data(state, bus::BUS_WIDTH_WORD, address, data);
+  }
 }
 
 void cpu::op_swc3(cpu_state_t *state) {

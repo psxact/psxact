@@ -12,7 +12,6 @@ void cdrom::initialize(cdrom_state_t *state, const std::string &game_file_name) 
 }
 
 static uint8_t io_read_port_0(cdrom_state_t *state) {
-  printf("cdrom::io_read_port_0(%d)\n", state->index);
   return uint8_t(
     (state->index) |
   //(state->xa_adpcm.has_data() << 2) |
@@ -25,12 +24,10 @@ static uint8_t io_read_port_0(cdrom_state_t *state) {
 }
 
 static uint8_t io_read_port_1(cdrom_state_t *state) {
-  printf("cdrom::io_read_port_1(%d)\n", state->index);
   return state->response.read();
 }
 
 static uint8_t io_read_port_2(cdrom_state_t *state) {
-  printf("cdrom::io_read_port_2(%d)\n", state->index);
   return state->data.read();
 }
 
@@ -119,7 +116,7 @@ static void io_write_port_2_3(cdrom_state_t *state, uint8_t data) {
 }
 
 static void io_write_port_3_0(cdrom_state_t *state, uint8_t data) {
-  printf("cdrom::io_write_port_3_0(0x%02x)\n", data);
+  // printf("cdrom::io_write_port_3_0(0x%02x)\n", data);
 }
 
 static void io_write_port_3_1(cdrom_state_t *state, uint8_t data) {
@@ -132,11 +129,11 @@ static void io_write_port_3_1(cdrom_state_t *state, uint8_t data) {
 }
 
 static void io_write_port_3_2(cdrom_state_t *state, uint8_t data) {
-  printf("cdrom::io_write_port_3_2(0x%02x)\n", data);
+  // printf("cdrom::io_write_port_3_2(0x%02x)\n", data);
 }
 
 static void io_write_port_3_3(cdrom_state_t *state, uint8_t data) {
-  printf("cdrom::io_write_port_3_3(0x%02x)\n", data);
+  // printf("cdrom::io_write_port_3_3(0x%02x)\n", data);
 }
 
 void cdrom::io_write(cdrom_state_t *state, int width, uint32_t address, uint32_t data) {
@@ -374,8 +371,6 @@ void cdrom::control::transferring_command(cdrom_state_t *state) {
 void cdrom::control::executing_command(cdrom_state_t *state) {
 #define get_param() state->control.parameter.read()
 
-  printf("cdrom::control::executing_command(0x%02x)\n", state->control.command);
-
   switch (state->control.command) {
   case 0x01:
     cdrom::command::get_status(state);
@@ -429,6 +424,7 @@ void cdrom::control::executing_command(cdrom_state_t *state) {
     break;
 
   default:
+    printf("cdrom::control::executing_command(0x%02x)\n", state->control.command);
     return;
   }
 

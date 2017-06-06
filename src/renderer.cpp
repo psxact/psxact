@@ -48,5 +48,7 @@ bool renderer::render() {
   SDL_UnlockSurface(surface);
   SDL_UpdateWindowSurface(window);
 
+  SDL_Delay(10);
+
   return !SDL_PollEvent(&event) || event.type != SDL_QUIT;
 }

@@ -5,7 +5,7 @@
 static int command_size[256] = {
   1, 1, 3, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $00
   1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $10
-  1, 1, 1, 1,  1, 1, 1, 1,  5, 1, 1, 1,  9, 9, 1, 1, // $20
+  4, 1, 1, 1,  1, 1, 1, 1,  5, 1, 1, 1,  9, 9, 1, 1, // $20
   6, 1, 1, 1,  1, 1, 1, 1,  8, 1, 1, 1,  1, 1, 1, 1, // $30
 
   1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $40
@@ -102,6 +102,20 @@ void gpu::gp0(gpu_state_t *state, uint32_t data) {
         }
       }
 
+      break;
+    }
+
+    case 0x20: { // monochrome triangle, opaque
+      auto color = state->fifo.buffer[0];
+      auto point1 = state->fifo.buffer[1];
+      auto point2 = state->fifo.buffer[2];
+      auto point3 = state->fifo.buffer[3];
+
+      auto v0 = gp0_to_gouraud_pixel(point1, color);
+      auto v1 = gp0_to_gouraud_pixel(point2, color);
+      auto v2 = gp0_to_gouraud_pixel(point3, color);
+
+      gpu::gouraud::draw_poly3(state, { v0, v1, v2 });
       break;
     }
 
