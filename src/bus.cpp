@@ -186,6 +186,26 @@ void bus::write(int width, uint32_t address, uint32_t data) {
   }
 
   if (address == 0xfffe0130) {
+    // bus::write(2, 0xfffe0130, 0x00000804)
+    // bus::write(2, 0xfffe0130, 0x00000800)
+    // bus::write(2, 0xfffe0130, 0x0001e988)
+
+    //     17 :: nostr  - No Streaming
+    //     16 :: ldsch  - Enable Load Scheduling
+    //     15 :: bgnt   - Enable Bus Grant
+    //     14 :: nopad  - No Wait State
+    //     13 :: rdpri  - Enable Read Priority
+    //     12 :: intp   - Interrupt Polarity
+    //     11 :: is1    - Enable I-Cache Set 1
+    //     10 :: is0    - Enable I-Cache Set 0
+    //  9,  8 :: iblksz - I-Cache Refill Size
+    //      7 :: ds     - Enable D-Cache
+    //  5,  4 :: dblksz - D-Cache Refill Size
+    //      3 :: ram    - Scratchpad RAM
+    //      2 :: tag    - Tag Test Mode
+    //      1 :: inv    - Invalidate Mode
+    //      0 :: lock   - Lock Mode
+
     return;
   }
 

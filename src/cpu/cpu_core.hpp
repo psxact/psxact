@@ -16,10 +16,6 @@ namespace cpu {
 
   void tick(cpu_state_t *state);
 
-  void enter_exception(cpu_state_t *state, uint32_t code);
-
-  void leave_exception(cpu_state_t *state);
-
   void read_code(cpu_state_t *state);
 
   uint32_t read_data(cpu_state_t *state, int width, uint32_t address);

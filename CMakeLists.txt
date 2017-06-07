@@ -18,7 +18,10 @@ set(SOURCE_FILES
     src/cdrom/cdrom_drive.cpp
     src/cdrom/cdrom_drive.hpp
     src/cpu/cpu_code.cpp
+    src/cpu/cpu_cop0.cpp
+    src/cpu/cpu_cop0.hpp
     src/cpu/cpu_cop2.cpp
+    src/cpu/cpu_cop2.hpp
     src/cpu/cpu_core.cpp
     src/cpu/cpu_core.hpp
     src/cpu/decoder.cpp
@@ -45,7 +48,7 @@ set(SOURCE_FILES
     src/psxact.cpp
     src/renderer.cpp
     src/renderer.hpp
-    src/utility.hpp src/cpu/cpu_cop2.hpp)
+    src/utility.hpp)
 
 add_executable(psxact ${SOURCE_FILES})
 

@@ -11,7 +11,7 @@ uint32_t gpu::data(gpu_state_t *state) {
     return (upper << 16) | lower;
   }
 
-  return 0;
+  return state->data_latch;
 }
 
 uint32_t gpu::stat(gpu_state_t *state) {

@@ -49,6 +49,18 @@ void gpu::gp1(gpu_state_t *state, uint32_t data) {
     state->status |= (data <<  7) & 0x4000;
     break;
 
+  case 0x10:
+    switch (data & 0x00ffffff) {
+    case 0x07:
+      state->data_latch = 2;
+      break;
+
+    default:
+      printf("unhandled gp1 command: 0x%08x\n", data);
+      break;
+    }
+    break;
+
   default:
     printf("unhandled gp1 command: 0x%08x\n", data);
     break;

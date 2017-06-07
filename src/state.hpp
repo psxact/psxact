@@ -91,11 +91,12 @@ struct cop2_state_t {
   uint32_t reg_23;
 };
 
-struct cpu_state_t {
-  struct {
-    uint32_t regs[16];
-  } cop0;
+struct cop0_state_t {
+  uint32_t regs[16];
+};
 
+struct cpu_state_t {
+  cop0_state_t cop0;
   cop2_state_t cop2;
 
   struct {
@@ -133,6 +134,7 @@ struct dma_state_t {
 };
 
 struct gpu_state_t {
+  uint32_t data_latch = 0;
   uint32_t status = 0x14802000;
   uint32_t texture_window_mask_x;
   uint32_t texture_window_mask_y;

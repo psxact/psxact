@@ -1,6 +1,7 @@
 #include "cpu_core.hpp"
 #include "../bus.hpp"
 #include "../utility.hpp"
+#include "cpu_cop0.hpp"
 #include "cpu_cop2.hpp"
 
 // --========--
@@ -63,7 +64,7 @@ void cpu::op_add(cpu_state_t *state) {
   auto z = x + y;
 
   if (overflow(x, y, z)) {
-    enter_exception(state, 0xc);
+    cop0::enter_exception(state, 0xc);
   }
   else {
     set_rd(state, z);
@@ -76,7 +77,7 @@ void cpu::op_addi(cpu_state_t *state) {
   auto z = x + y;
 
   if (overflow(x, y, z)) {
-    enter_exception(state, 0xc);
+    cop0::enter_exception(state, 0xc);
   }
   else {
     set_rt(state, z);
@@ -128,7 +129,7 @@ void cpu::op_bne(cpu_state_t *state) {
 }
 
 void cpu::op_break(cpu_state_t *state) {
-  enter_exception(state, 0x09);
+  cop0::enter_exception(state, 0x09);
 }
 
 void cpu::op_bxx(cpu_state_t *state) {
@@ -151,23 +152,25 @@ void cpu::op_bxx(cpu_state_t *state) {
 }
 
 void cpu::op_cop0(cpu_state_t *state) {
-  switch ((state->code >> 21) & 31) {
-  default: op_und(state); return;
-
-  case 0x00: set_rt(state, state->cop0.regs[decoder::rd(state)]); return; // mfc0 rt,rd
-  case 0x04: state->cop0.regs[decoder::rd(state)] = get_rt(state); return; // mtc0 rt,rd
-
-  case 0x10:
-    switch (state->code & 63) {
-    default: op_und(state); return;
-
-    case 0x10: leave_exception(state); return; // rfe
-    }
+  if (state->code & (1 << 25)) {
+    return cop0::run(state, state->code & 0x1ffffff);
   }
+
+  auto rd = cpu::decoder::rd(state);
+  auto rt = cpu::decoder::rt(state);
+
+  switch (cpu::decoder::rs(state)) {
+  case 0x00: return set_rt(state, cop0::read_gpr(state, rd));
+  case 0x02: return set_rt(state, cop0::read_gpr(state, rd));
+  case 0x04: return cop0::write_gpr(state, rd, get_register(state, rt));
+  case 0x06: return cop0::write_ccr(state, rd, get_register(state, rt));
+  }
+
+  printf("cop0 $%08x\n", state->code);
 }
 
 void cpu::op_cop1(cpu_state_t *state) {
-  enter_exception(state, 0xb);
+  cop0::enter_exception(state, 0xb);
 }
 
 void cpu::op_cop2(cpu_state_t *state) {
@@ -189,7 +192,7 @@ void cpu::op_cop2(cpu_state_t *state) {
 }
 
 void cpu::op_cop3(cpu_state_t *state) {
-  enter_exception(state, 0xb);
+  cop0::enter_exception(state, 0xb);
 }
 
 void cpu::op_div(cpu_state_t *state) {
@@ -271,7 +274,7 @@ void cpu::op_lbu(cpu_state_t *state) {
 void cpu::op_lh(cpu_state_t *state) {
   auto address = get_rs(state) + decoder::iconst(state);
   if (address & 1) {
-    enter_exception(state, 0x4);
+    cop0::enter_exception(state, 0x4);
   }
   else {
     auto data = read_data(state, bus::BUS_WIDTH_HALF, address);
@@ -284,7 +287,7 @@ void cpu::op_lh(cpu_state_t *state) {
 void cpu::op_lhu(cpu_state_t *state) {
   auto address = get_rs(state) + decoder::iconst(state);
   if (address & 1) {
-    enter_exception(state, 0x4);
+    cop0::enter_exception(state, 0x4);
   }
   else {
     auto data = read_data(state, bus::BUS_WIDTH_HALF, address);
@@ -300,7 +303,7 @@ void cpu::op_lui(cpu_state_t *state) {
 void cpu::op_lw(cpu_state_t *state) {
   auto address = get_rs(state) + decoder::iconst(state);
   if (address & 3) {
-    enter_exception(state, 0x4);
+    cop0::enter_exception(state, 0x4);
   }
   else {
     auto data = read_data(state, bus::BUS_WIDTH_WORD, address);
@@ -320,7 +323,7 @@ void cpu::op_lwc1(cpu_state_t *state) {
 void cpu::op_lwc2(cpu_state_t *state) {
   auto address = get_rs(state) + decoder::iconst(state);
   if (address & 3) {
-    enter_exception(state, 0x4);
+    cop0::enter_exception(state, 0x4);
   }
   else {
     auto data = read_data(state, bus::BUS_WIDTH_WORD, address);
@@ -417,7 +420,7 @@ void cpu::op_sb(cpu_state_t *state) {
 void cpu::op_sh(cpu_state_t *state) {
   auto address = get_rs(state) + decoder::iconst(state);
   if (address & 1) {
-    enter_exception(state, 0x5);
+    cop0::enter_exception(state, 0x5);
   }
   else {
     auto data = get_rt(state);
@@ -472,7 +475,7 @@ void cpu::op_sub(cpu_state_t *state) {
   auto z = x - y;
 
   if (overflow(x, ~y, z)) {
-    enter_exception(state, 0xc);
+    cop0::enter_exception(state, 0xc);
   }
   else {
     set_rd(state, z);
@@ -486,7 +489,7 @@ void cpu::op_subu(cpu_state_t *state) {
 void cpu::op_sw(cpu_state_t *state) {
   auto address = get_rs(state) + decoder::iconst(state);
   if (address & 3) {
-    enter_exception(state, 0x5);
+    cop0::enter_exception(state, 0x5);
   }
   else {
     auto data = get_rt(state);
@@ -506,7 +509,7 @@ void cpu::op_swc1(cpu_state_t *state) {
 void cpu::op_swc2(cpu_state_t *state) {
   auto address = get_rs(state) + decoder::iconst(state);
   if (address & 3) {
-    enter_exception(state, 0x5);
+    cop0::enter_exception(state, 0x5);
   }
   else {
     auto data = cop2::read_gpr(&state->cop2, decoder::rt(state));
@@ -548,7 +551,7 @@ void cpu::op_swr(cpu_state_t *state) {
 }
 
 void cpu::op_syscall(cpu_state_t *state) {
-  enter_exception(state, 0x08);
+  cop0::enter_exception(state, 0x08);
 }
 
 void cpu::op_xor(cpu_state_t *state) {
@@ -560,5 +563,5 @@ void cpu::op_xori(cpu_state_t *state) {
 }
 
 void cpu::op_und(cpu_state_t *state) {
-  cpu::enter_exception(state, 0xa);
+  cop0::enter_exception(state, 0xa);
 }

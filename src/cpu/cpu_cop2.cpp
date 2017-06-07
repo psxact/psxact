@@ -65,89 +65,89 @@ namespace CommandConfig {
   }
 }
 
-void command(cop2_state_t &self, uint32_t command);
+void command(cop2_state_t *self, uint32_t command);
 
-uint32_t control(cop2_state_t &self, uint32_t reg);
+uint32_t control(cop2_state_t *self, uint32_t reg);
 
-void set_control(cop2_state_t &self, uint32_t reg, uint32_t val);
+void set_control(cop2_state_t *self, uint32_t reg, uint32_t val);
 
-uint32_t data(cop2_state_t &self, uint32_t reg);
+uint32_t data(cop2_state_t *self, uint32_t reg);
 
-void set_data(cop2_state_t &self, uint32_t reg, uint32_t val);
+void set_data(cop2_state_t *self, uint32_t reg, uint32_t val);
 
-void cmd_rtps(cop2_state_t &self, command_config_t config);
+void cmd_rtps(cop2_state_t *self, command_config_t config);
 
-void cmd_nclip(cop2_state_t &self);
+void cmd_nclip(cop2_state_t *self);
 
-void cmd_op(cop2_state_t &self, command_config_t config);
+void cmd_op(cop2_state_t *self, command_config_t config);
 
-void cmd_dpcs(cop2_state_t &self, command_config_t config);
+void cmd_dpcs(cop2_state_t *self, command_config_t config);
 
-void cmd_dcpl(cop2_state_t &self, command_config_t config);
+void cmd_dcpl(cop2_state_t *self, command_config_t config);
 
-void cmd_dpct(cop2_state_t &self, command_config_t config);
+void cmd_dpct(cop2_state_t *self, command_config_t config);
 
-void do_dpc(cop2_state_t &self, command_config_t config);
+void do_dpc(cop2_state_t *self, command_config_t config);
 
-void cmd_intpl(cop2_state_t &self, command_config_t config);
+void cmd_intpl(cop2_state_t *self, command_config_t config);
 
-void cmd_mvmva(cop2_state_t &self, command_config_t config);
+void cmd_mvmva(cop2_state_t *self, command_config_t config);
 
-void cmd_ncds(cop2_state_t &self, command_config_t config);
+void cmd_ncds(cop2_state_t *self, command_config_t config);
 
-void cmd_ncdt(cop2_state_t &self, command_config_t config);
+void cmd_ncdt(cop2_state_t *self, command_config_t config);
 
-void cmd_nccs(cop2_state_t &self, command_config_t config);
+void cmd_nccs(cop2_state_t *self, command_config_t config);
 
-void cmd_cc(cop2_state_t &self, command_config_t config);
+void cmd_cc(cop2_state_t *self, command_config_t config);
 
-void cmd_ncs(cop2_state_t &self, command_config_t config);
+void cmd_ncs(cop2_state_t *self, command_config_t config);
 
-void cmd_nct(cop2_state_t &self, command_config_t config);
+void cmd_nct(cop2_state_t *self, command_config_t config);
 
-void cmd_sqr(cop2_state_t &self, command_config_t config);
+void cmd_sqr(cop2_state_t *self, command_config_t config);
 
-void cmd_avsz3(cop2_state_t &self);
+void cmd_avsz3(cop2_state_t *self);
 
-void cmd_avsz4(cop2_state_t &self);
+void cmd_avsz4(cop2_state_t *self);
 
-void cmd_rtpt(cop2_state_t &self, command_config_t config);
+void cmd_rtpt(cop2_state_t *self, command_config_t config);
 
-void cmd_gpf(cop2_state_t &self, command_config_t config);
+void cmd_gpf(cop2_state_t *self, command_config_t config);
 
-void cmd_gpl(cop2_state_t &self, command_config_t config);
+void cmd_gpl(cop2_state_t *self, command_config_t config);
 
-void cmd_ncct(cop2_state_t &self, command_config_t config);
+void cmd_ncct(cop2_state_t *self, command_config_t config);
 
-void do_ncc(cop2_state_t &self, command_config_t config, uint8_t vector_index);
+void do_ncc(cop2_state_t *self, command_config_t config, uint8_t vector_index);
 
-void do_nc(cop2_state_t &self, command_config_t config, uint8_t vector_index);
+void do_nc(cop2_state_t *self, command_config_t config, uint8_t vector_index);
 
-void do_ncd(cop2_state_t &self, command_config_t config, uint8_t vector_index);
+void do_ncd(cop2_state_t *self, command_config_t config, uint8_t vector_index);
 
-void multiply_matrix_by_vector(cop2_state_t &self, command_config_t config, matrix_type_t matrix, uint8_t vector_index, control_vector_type_t control_vector);
+void multiply_matrix_by_vector(cop2_state_t *self, command_config_t config, matrix_type_t matrix, uint8_t vector_index, control_vector_type_t control_vector);
 
-void mac_to_ir(cop2_state_t &self, command_config_t config);
+void mac_to_ir(cop2_state_t *self, command_config_t config);
 
-uint8_t mac_to_color(cop2_state_t &gte, int32_t mac, uint8_t which);
+uint8_t mac_to_color(cop2_state_t *self, int32_t mac, uint8_t which);
 
-void mac_to_rgb_fifo(cop2_state_t &self);
+void mac_to_rgb_fifo(cop2_state_t *self);
 
-uint32_t do_rtp(cop2_state_t &self, command_config_t config, unsigned vector_index);
+uint32_t do_rtp(cop2_state_t *self, command_config_t config, unsigned vector_index);
 
-void depth_queuing(cop2_state_t &self, uint32_t projection_factor);
+void depth_queuing(cop2_state_t *self, uint32_t projection_factor);
 
-void set_flag(cop2_state_t &self, uint8_t bit);
+void set_flag(cop2_state_t *self, uint8_t bit);
 
-int64_t i64_to_i44(cop2_state_t &self, uint8_t flag, int64_t val);
+int64_t i64_to_i44(cop2_state_t *self, uint8_t flag, int64_t val);
 
-int16_t i32_to_i16_saturate(cop2_state_t &self, command_config_t config, uint8_t flag, int32_t val);
+int16_t i32_to_i16_saturate(cop2_state_t *self, command_config_t config, uint8_t flag, int32_t val);
 
-int16_t i32_to_i11_saturate(cop2_state_t &self, uint8_t flag, int32_t val);
+int16_t i32_to_i11_saturate(cop2_state_t *self, uint8_t flag, int32_t val);
 
-void check_mac_overflow(cop2_state_t &self, int64_t val);
+void check_mac_overflow(cop2_state_t *self, int64_t val);
 
-uint16_t i64_to_otz(cop2_state_t &self, int64_t average);
+uint16_t i64_to_otz(cop2_state_t *self, int64_t average);
 
 
 
@@ -204,7 +204,7 @@ namespace divider {
 
     m = 1 << 15;
 
-    while (!(value & m)) {
+    while (!(value & m) && n < 16) {
       m = m >> 1;
       n = n + 1;
     }
@@ -232,12 +232,12 @@ namespace divider {
 
 
 
-void command(cop2_state_t &self, uint32_t command) {
+void command(cop2_state_t *self, uint32_t command) {
   auto opcode = command & 0x3f;
   auto config = CommandConfig::from_command(command);
 
   // Clear flags prior to command execution
-  self.flags = 0;
+  self->flags = 0;
 
   switch (opcode) {
   case 0x01: return cmd_rtps(self, config);
@@ -267,14 +267,14 @@ void command(cop2_state_t &self, uint32_t command) {
   }
 
   // Update the flags MSB: OR together bits [30:23] + [18:13]
-  auto msb = (self.flags & 0x7f87e000) != 0;
-  self.flags |= (msb << 31);
+  auto msb = (self->flags & 0x7f87e000) != 0;
+  self->flags |= (msb << 31);
 }
 
-uint32_t control(cop2_state_t &self, uint32_t reg) {
+uint32_t control(cop2_state_t *self, uint32_t reg) {
   switch (reg) {
     case 0: {
-      auto &matrix = self.matrices[matrix_type_t::Rotation];
+      auto &matrix = self->matrices[matrix_type_t::Rotation];
 
       auto v0 = uint32_t(uint16_t(matrix[0][0]));
       auto v1 = uint32_t(uint16_t(matrix[0][1]));
@@ -282,7 +282,7 @@ uint32_t control(cop2_state_t &self, uint32_t reg) {
       return v0 | (v1 << 16);
     }
     case 1: {
-      auto &matrix = self.matrices[matrix_type_t::Rotation];
+      auto &matrix = self->matrices[matrix_type_t::Rotation];
 
       auto v0 = uint32_t(uint16_t(matrix[0][2]));
       auto v1 = uint32_t(uint16_t(matrix[1][0]));
@@ -290,7 +290,7 @@ uint32_t control(cop2_state_t &self, uint32_t reg) {
       return v0 | (v1 << 16);
     }
     case 2: {
-      auto &matrix = self.matrices[matrix_type_t::Rotation];
+      auto &matrix = self->matrices[matrix_type_t::Rotation];
 
       auto v0 = uint32_t(uint16_t(matrix[1][1]));
       auto v1 = uint32_t(uint16_t(matrix[1][2]));
@@ -298,7 +298,7 @@ uint32_t control(cop2_state_t &self, uint32_t reg) {
       return v0 | (v1 << 16);
     }
     case 3: {
-      auto &matrix = self.matrices[matrix_type_t::Rotation];
+      auto &matrix = self->matrices[matrix_type_t::Rotation];
 
       auto v0 = uint32_t(uint16_t(matrix[2][0]));
       auto v1 = uint32_t(uint16_t(matrix[2][1]));
@@ -306,19 +306,19 @@ uint32_t control(cop2_state_t &self, uint32_t reg) {
       return v0 | (v1 << 16);
     }
     case 4: {
-      auto &matrix = self.matrices[matrix_type_t::Rotation];
+      auto &matrix = self->matrices[matrix_type_t::Rotation];
 
       return uint32_t(matrix[2][2]);
     }
     case 5:
     case 6:
     case 7: {
-      auto &vector = self.control_vectors[control_vector_type_t::Translation];
+      auto &vector = self->control_vectors[control_vector_type_t::Translation];
 
       return uint32_t(vector[reg - 5]);
     }
     case 8: {
-      auto &matrix = self.matrices[matrix_type_t::Light];
+      auto &matrix = self->matrices[matrix_type_t::Light];
 
       auto v0 = uint32_t(uint16_t(matrix[0][0]));
       auto v1 = uint32_t(uint16_t(matrix[0][1]));
@@ -326,7 +326,7 @@ uint32_t control(cop2_state_t &self, uint32_t reg) {
       return v0 | (v1 << 16);
     }
     case 9: {
-      auto &matrix = self.matrices[matrix_type_t::Light];
+      auto &matrix = self->matrices[matrix_type_t::Light];
 
       auto v0 = uint32_t(uint16_t(matrix[0][2]));
       auto v1 = uint32_t(uint16_t(matrix[1][0]));
@@ -334,7 +334,7 @@ uint32_t control(cop2_state_t &self, uint32_t reg) {
       return v0 | (v1 << 16);
     }
     case 10: {
-      auto &matrix = self.matrices[matrix_type_t::Light];
+      auto &matrix = self->matrices[matrix_type_t::Light];
 
       auto v0 = uint32_t(uint16_t(matrix[1][1]));
       auto v1 = uint32_t(uint16_t(matrix[1][2]));
@@ -342,7 +342,7 @@ uint32_t control(cop2_state_t &self, uint32_t reg) {
       return v0 | (v1 << 16);
     }
     case 11: {
-      auto &matrix = self.matrices[matrix_type_t::Light];
+      auto &matrix = self->matrices[matrix_type_t::Light];
 
       auto v0 = uint32_t(uint16_t(matrix[2][0]));
       auto v1 = uint32_t(uint16_t(matrix[2][1]));
@@ -350,19 +350,19 @@ uint32_t control(cop2_state_t &self, uint32_t reg) {
       return v0 | (v1 << 16);
     }
     case 12: {
-      auto &matrix = self.matrices[matrix_type_t::Light];
+      auto &matrix = self->matrices[matrix_type_t::Light];
 
       return uint32_t(matrix[2][2]);
     }
     case 13:
     case 14:
     case 15: {
-      auto &vector = self.control_vectors[control_vector_type_t ::BackgroundColor];
+      auto &vector = self->control_vectors[control_vector_type_t ::BackgroundColor];
 
       return uint32_t(vector[reg - 13]);
     }
     case 16: {
-      auto &matrix = self.matrices[matrix_type_t::Color];
+      auto &matrix = self->matrices[matrix_type_t::Color];
 
       auto v0 = uint32_t(uint16_t(matrix[0][0]));
       auto v1 = uint32_t(uint16_t(matrix[0][1]));
@@ -370,7 +370,7 @@ uint32_t control(cop2_state_t &self, uint32_t reg) {
       return v0 | (v1 << 16);
     }
     case 17: {
-      auto &matrix = self.matrices[matrix_type_t::Color];
+      auto &matrix = self->matrices[matrix_type_t::Color];
 
       auto v0 = uint32_t(uint16_t(matrix[0][2]));
       auto v1 = uint32_t(uint16_t(matrix[1][0]));
@@ -378,7 +378,7 @@ uint32_t control(cop2_state_t &self, uint32_t reg) {
       return v0 | (v1 << 16);
     }
     case 18: {
-      auto &matrix = self.matrices[matrix_type_t::Color];
+      auto &matrix = self->matrices[matrix_type_t::Color];
 
       auto v0 = uint32_t(uint16_t(matrix[1][1]));
       auto v1 = uint32_t(uint16_t(matrix[1][2]));
@@ -386,7 +386,7 @@ uint32_t control(cop2_state_t &self, uint32_t reg) {
       return v0 | (v1 << 16);
     }
     case 19: {
-      auto &matrix = self.matrices[matrix_type_t::Color];
+      auto &matrix = self->matrices[matrix_type_t::Color];
 
       auto v0 = uint32_t(uint16_t(matrix[2][0]));
       auto v1 = uint32_t(uint16_t(matrix[2][1]));
@@ -394,39 +394,39 @@ uint32_t control(cop2_state_t &self, uint32_t reg) {
       return v0 | (v1 << 16);
     }
     case 20: {
-      auto &matrix = self.matrices[matrix_type_t::Color];
+      auto &matrix = self->matrices[matrix_type_t::Color];
 
       return uint32_t(matrix[2][2]);
     }
   case 21:
   case 22:
   case 23: {
-      auto &vector = self.control_vectors[control_vector_type_t::FarColor];
+      auto &vector = self->control_vectors[control_vector_type_t::FarColor];
 
       return uint32_t(vector[reg - 21]);
     }
-  case 24: return uint32_t(self.ofx);
-  case 25: return uint32_t(self.ofy);
+  case 24: return uint32_t(self->ofx);
+  case 25: return uint32_t(self->ofy);
     // H reads back as a signed value even though unsigned)
-  case 26: return uint32_t(int16_t(self.h));
-  case 27: return uint32_t(self.dqa);
-  case 28: return uint32_t(self.dqb);
-  case 29: return uint32_t(self.zsf3);
-  case 30: return uint32_t(self.zsf4);
-  case 31: return self.flags;
+  case 26: return uint32_t(int16_t(self->h));
+  case 27: return uint32_t(self->dqa);
+  case 28: return uint32_t(self->dqb);
+  case 29: return uint32_t(self->zsf3);
+  case 30: return uint32_t(self->zsf4);
+  case 31: return self->flags;
   default:
-    printf("Unhandled GTE control register %d", reg);
+    printf("Unhandled GTE control register %d\n", reg);
     break;
 }
 }
 
-void set_control(cop2_state_t &self, uint32_t reg, uint32_t val) {
+void set_control(cop2_state_t *self, uint32_t reg, uint32_t val) {
   switch (reg) {
   case 0: {
     auto v0 = int16_t(val);
     auto v1 = int16_t(val >> 16);
 
-    auto &matrix = self.matrices[matrix_type_t::Rotation];
+    auto &matrix = self->matrices[matrix_type_t::Rotation];
 
     matrix[0][0] = v0;
     matrix[0][1] = v1;
@@ -436,7 +436,7 @@ void set_control(cop2_state_t &self, uint32_t reg, uint32_t val) {
     auto v0 = int16_t(val);
     auto v1 = int16_t(val >> 16);
 
-    auto &matrix = self.matrices[matrix_type_t::Rotation];
+    auto &matrix = self->matrices[matrix_type_t::Rotation];
 
     matrix[0][2] = v0;
     matrix[1][0] = v1;
@@ -446,7 +446,7 @@ void set_control(cop2_state_t &self, uint32_t reg, uint32_t val) {
     auto v0 = int16_t(val);
     auto v1 = int16_t(val >> 16);
 
-    auto &matrix = self.matrices[matrix_type_t::Rotation];
+    auto &matrix = self->matrices[matrix_type_t::Rotation];
 
     matrix[1][1] = v0;
     matrix[1][2] = v1;
@@ -456,20 +456,20 @@ void set_control(cop2_state_t &self, uint32_t reg, uint32_t val) {
     auto v0 = int16_t(val);
     auto v1 = int16_t(val >> 16);
 
-    auto &matrix = self.matrices[matrix_type_t::Rotation];
+    auto &matrix = self->matrices[matrix_type_t::Rotation];
 
     matrix[2][0] = v0;
     matrix[2][1] = v1;
     break;
   }
   case 4: {
-    auto &matrix = self.matrices[matrix_type_t::Rotation];
+    auto &matrix = self->matrices[matrix_type_t::Rotation];
 
     matrix[2][2] = int16_t(val);
     break;
   }
   case 5: case 6: case 7: {
-    auto &vector = self.control_vectors[control_vector_type_t::Translation];
+    auto &vector = self->control_vectors[control_vector_type_t::Translation];
 
     vector[reg - 5] = int32_t(val);
     break;
@@ -478,7 +478,7 @@ void set_control(cop2_state_t &self, uint32_t reg, uint32_t val) {
     auto v0 = int16_t(val);
     auto v1 = int16_t(val >> 16);
 
-    auto &matrix = self.matrices[matrix_type_t::Light];
+    auto &matrix = self->matrices[matrix_type_t::Light];
 
     matrix[0][0] = v0;
     matrix[0][1] = v1;
@@ -488,7 +488,7 @@ void set_control(cop2_state_t &self, uint32_t reg, uint32_t val) {
     auto v0 = int16_t(val);
     auto v1 = int16_t(val >> 16);
 
-    auto &matrix = self.matrices[matrix_type_t::Light];
+    auto &matrix = self->matrices[matrix_type_t::Light];
 
     matrix[0][2] = v0;
     matrix[1][0] = v1;
@@ -498,7 +498,7 @@ void set_control(cop2_state_t &self, uint32_t reg, uint32_t val) {
     auto v0 = int16_t(val);
     auto v1 = int16_t(val >> 16);
 
-    auto &matrix = self.matrices[matrix_type_t::Light];
+    auto &matrix = self->matrices[matrix_type_t::Light];
 
     matrix[1][1] = v0;
     matrix[1][2] = v1;
@@ -508,20 +508,20 @@ void set_control(cop2_state_t &self, uint32_t reg, uint32_t val) {
     auto v0 = int16_t(val);
     auto v1 = int16_t(val >> 16);
 
-    auto &matrix = self.matrices[matrix_type_t::Light];
+    auto &matrix = self->matrices[matrix_type_t::Light];
 
     matrix[2][0] = v0;
     matrix[2][1] = v1;
     break;
   }
   case 12: {
-    auto &matrix = self.matrices[matrix_type_t::Light];
+    auto &matrix = self->matrices[matrix_type_t::Light];
 
     matrix[2][2] = int16_t(val);
     break;
   }
   case 13: case 14: case 15: {
-    auto &vector = self.control_vectors[control_vector_type_t::BackgroundColor];
+    auto &vector = self->control_vectors[control_vector_type_t::BackgroundColor];
 
     vector[reg - 13] = int32_t(val);
     break;
@@ -530,7 +530,7 @@ void set_control(cop2_state_t &self, uint32_t reg, uint32_t val) {
     auto v0 = int16_t(val);
     auto v1 = int16_t(val >> 16);
 
-    auto &matrix = self.matrices[matrix_type_t::Color];
+    auto &matrix = self->matrices[matrix_type_t::Color];
 
     matrix[0][0] = v0;
     matrix[0][1] = v1;
@@ -540,7 +540,7 @@ void set_control(cop2_state_t &self, uint32_t reg, uint32_t val) {
     auto v0 = int16_t(val);
     auto v1 = int16_t(val >> 16);
 
-    auto &matrix = self.matrices[matrix_type_t::Color];
+    auto &matrix = self->matrices[matrix_type_t::Color];
 
     matrix[0][2] = v0;
     matrix[1][0] = v1;
@@ -550,7 +550,7 @@ void set_control(cop2_state_t &self, uint32_t reg, uint32_t val) {
     auto v0 = int16_t(val);
     auto v1 = int16_t(val >> 16);
 
-    auto &matrix = self.matrices[matrix_type_t::Color];
+    auto &matrix = self->matrices[matrix_type_t::Color];
 
     matrix[1][1] = v0;
     matrix[1][2] = v1;
@@ -560,37 +560,37 @@ void set_control(cop2_state_t &self, uint32_t reg, uint32_t val) {
     auto v0 = int16_t(val);
     auto v1 = int16_t(val >> 16);
 
-    auto &matrix = self.matrices[matrix_type_t::Color];
+    auto &matrix = self->matrices[matrix_type_t::Color];
 
     matrix[2][0] = v0;
     matrix[2][1] = v1;
     break;
   }
   case 20: {
-    auto &matrix = self.matrices[matrix_type_t::Color];
+    auto &matrix = self->matrices[matrix_type_t::Color];
 
     matrix[2][2] = int16_t(val);
     break;
   }
   case 21: case 22: case 23: {
-    auto &vector = self.control_vectors[control_vector_type_t::FarColor];
+    auto &vector = self->control_vectors[control_vector_type_t::FarColor];
 
     vector[reg - 21] = int32_t(val);
     break;
   }
-  case 24: self.ofx = int32_t(val); break;
-  case 25: self.ofy = int32_t(val); break;
-  case 26: self.h = uint16_t(val); break;
-  case 27: self.dqa = int16_t(val); break;
-  case 28: self.dqb = int32_t(val); break;
-  case 29: self.zsf3 = int16_t(val); break;
-  case 30: self.zsf4 = int16_t(val); break;
+  case 24: self->ofx = int32_t(val); break;
+  case 25: self->ofy = int32_t(val); break;
+  case 26: self->h = uint16_t(val); break;
+  case 27: self->dqa = int16_t(val); break;
+  case 28: self->dqb = int32_t(val); break;
+  case 29: self->zsf3 = int16_t(val); break;
+  case 30: self->zsf4 = int16_t(val); break;
   case 31: {
-    self.flags = val & 0x7ffff00;
+    self->flags = val & 0x7ffff00;
 
     auto msb = (val & 0x7f87e000) != 0;
 
-    self.flags |= uint32_t(msb) << 31;
+    self->flags |= uint32_t(msb) << 31;
     break;
   }
   default:
@@ -599,7 +599,7 @@ void set_control(cop2_state_t &self, uint32_t reg, uint32_t val) {
   }
 }
 
-uint32_t data(cop2_state_t &self, uint32_t reg) {
+uint32_t data(cop2_state_t *self, uint32_t reg) {
   auto rgbx_to_u32 = []( cop2_state_t::color_t rgbx ) -> uint32_t {
     auto r = uint32_t(rgbx.r);
     auto g = uint32_t(rgbx.g);
@@ -618,75 +618,71 @@ uint32_t data(cop2_state_t &self, uint32_t reg) {
 
   switch (reg) {
   case 0: {
-    auto v0 = uint32_t(uint16_t(self.v[0][0]));
-    auto v1 = uint32_t(uint16_t(self.v[0][1]));
+    auto v0 = uint32_t(uint16_t(self->v[0][0]));
+    auto v1 = uint32_t(uint16_t(self->v[0][1]));
 
     return v0 | (v1 << 16);
   }
-  case 1: return uint32_t(self.v[0][2]);
+  case 1: return uint32_t(self->v[0][2]);
   case 2: {
-    auto v0 = uint32_t(uint16_t(self.v[1][0]));
-    auto v1 = uint32_t(uint16_t(self.v[1][1]));
+    auto v0 = uint32_t(uint16_t(self->v[1][0]));
+    auto v1 = uint32_t(uint16_t(self->v[1][1]));
 
     return v0 | (v1 << 16);
   }
-  case 3: return uint32_t(self.v[1][2]);
+  case 3: return uint32_t(self->v[1][2]);
   case 4: {
-    auto v0 = uint32_t(uint16_t(self.v[2][0]));
-    auto v1 = uint32_t(uint16_t(self.v[2][1]));
+    auto v0 = uint32_t(uint16_t(self->v[2][0]));
+    auto v1 = uint32_t(uint16_t(self->v[2][1]));
 
     return v0 | (v1 << 16);
   }
-  case 5: uint32_t(self.v[2][2]);
-  case 6: uint32_t(rgbx_to_u32(self.rgb));
-  case 7: uint32_t(self.otz);
-  case 8: uint32_t(self.ir[0]);
-  case 9: uint32_t(self.ir[1]);
-  case 10: return uint32_t(self.ir[2]);
-  case 11: return uint32_t(self.ir[3]);
-  case 12: return uint32_t(xy_to_u32(self.xy_fifo[0]));
-  case 13: return uint32_t(xy_to_u32(self.xy_fifo[1]));
-  case 14: return uint32_t(xy_to_u32(self.xy_fifo[2]));
-  case 15: return uint32_t(xy_to_u32(self.xy_fifo[3]));
-  case 16: return uint32_t(self.z_fifo[0]);
-  case 17: return uint32_t(self.z_fifo[1]);
-  case 18: return uint32_t(self.z_fifo[2]);
-  case 19: return uint32_t(self.z_fifo[3]);
-  case 20: return uint32_t(rgbx_to_u32(self.rgb_fifo[0]));
-  case 21: return uint32_t(rgbx_to_u32(self.rgb_fifo[1]));
-  case 22: return uint32_t(rgbx_to_u32(self.rgb_fifo[2]));
-  case 23: return uint32_t(self.reg_23);
-  case 24: return uint32_t(self.mac[0]);
-  case 25: return uint32_t(self.mac[1]);
-  case 26: return uint32_t(self.mac[2]);
-  case 27: return uint32_t(self.mac[3]);
+  case 5: return uint32_t(self->v[2][2]);
+  case 6: return uint32_t(rgbx_to_u32(self->rgb));
+  case 7: return uint32_t(self->otz);
+  case 8: return uint32_t(self->ir[0]);
+  case 9: return uint32_t(self->ir[1]);
+  case 10: return uint32_t(self->ir[2]);
+  case 11: return uint32_t(self->ir[3]);
+  case 12: return uint32_t(xy_to_u32(self->xy_fifo[0]));
+  case 13: return uint32_t(xy_to_u32(self->xy_fifo[1]));
+  case 14: return uint32_t(xy_to_u32(self->xy_fifo[2]));
+  case 15: return uint32_t(xy_to_u32(self->xy_fifo[3]));
+  case 16: return uint32_t(self->z_fifo[0]);
+  case 17: return uint32_t(self->z_fifo[1]);
+  case 18: return uint32_t(self->z_fifo[2]);
+  case 19: return uint32_t(self->z_fifo[3]);
+  case 20: return uint32_t(rgbx_to_u32(self->rgb_fifo[0]));
+  case 21: return uint32_t(rgbx_to_u32(self->rgb_fifo[1]));
+  case 22: return uint32_t(rgbx_to_u32(self->rgb_fifo[2]));
+  case 23: return uint32_t(self->reg_23);
+  case 24: return uint32_t(self->mac[0]);
+  case 25: return uint32_t(self->mac[1]);
+  case 26: return uint32_t(self->mac[2]);
+  case 27: return uint32_t(self->mac[3]);
   case 28:
   case 29: {
       auto saturate = [](int16_t v) -> uint32_t {
-        if (v < 0) {
-          return 0;
-        } else if (v > 0x1f) {
-          return 0x1f;
-        } else {
-          return uint32_t(v);
-        }
+        if (v < 0x00) { return 0x00; }
+        if (v > 0x1f) { return 0x1f; }
+        return uint32_t(v);
       };
 
-      auto a = saturate(self.ir[1] >> 7);
-      auto b = saturate(self.ir[2] >> 7);
-      auto c = saturate(self.ir[3] >> 7);
+      auto a = saturate(self->ir[1] >> 7);
+      auto b = saturate(self->ir[2] >> 7);
+      auto c = saturate(self->ir[3] >> 7);
 
       return a | (b << 5) | (c << 10);
     }
-  case 30: return uint32_t(self.lzcs);
-  case 31: return uint32_t(self.lzcr);
+  case 30: return uint32_t(self->lzcs);
+  case 31: return uint32_t(self->lzcr);
   default:
     printf("Unhandled GTE data register %d\n", reg);
     break;
   }
 }
 
-void set_data(cop2_state_t &self, uint32_t reg, uint32_t val) {
+void set_data(cop2_state_t *self, uint32_t reg, uint32_t val) {
 
   auto val_to_rgbx = [val]() -> cop2_state_t::color_t {
     auto r = uint8_t(val);
@@ -709,83 +705,83 @@ void set_data(cop2_state_t &self, uint32_t reg, uint32_t val) {
     auto v0 = int16_t(val);
     auto v1 = int16_t(val >> 16);
 
-    self.v[0][0] = v0;
-    self.v[0][1] = v1;
+    self->v[0][0] = v0;
+    self->v[0][1] = v1;
     break;
   }
-  case 1: self.v[0][2] = int16_t(val); break;
+  case 1: self->v[0][2] = int16_t(val); break;
   case 2: {
     auto v0 = int16_t(val);
     auto v1 = int16_t(val >> 16);
 
-    self.v[1][0] = v0;
-    self.v[1][1] = v1;
+    self->v[1][0] = v0;
+    self->v[1][1] = v1;
     break;
   }
-  case 3: self.v[1][2] = int16_t(val); break;
+  case 3: self->v[1][2] = int16_t(val); break;
   case 4: {
     auto v0 = int16_t(val);
     auto v1 = int16_t(val >> 16);
 
-    self.v[2][0] = v0;
-    self.v[2][1] = v1;
+    self->v[2][0] = v0;
+    self->v[2][1] = v1;
     break;
   }
-  case 5: self.v[2][2] = int16_t(val); break;
-  case 6: self.rgb = val_to_rgbx(); break;
-  case 7: self.otz = uint16_t(val); break;
-  case 8: self.ir[0] = int16_t(val); break;
-  case 9: self.ir[1] = int16_t(val); break;
-  case 10: self.ir[2] = int16_t(val); break;
-  case 11: self.ir[3] = int16_t(val); break;
-  case 12: self.xy_fifo[0] = val_to_xy(); break;
-  case 13: self.xy_fifo[1] = val_to_xy(); break;
+  case 5: self->v[2][2] = int16_t(val); break;
+  case 6: self->rgb = val_to_rgbx(); break;
+  case 7: self->otz = uint16_t(val); break;
+  case 8: self->ir[0] = int16_t(val); break;
+  case 9: self->ir[1] = int16_t(val); break;
+  case 10: self->ir[2] = int16_t(val); break;
+  case 11: self->ir[3] = int16_t(val); break;
+  case 12: self->xy_fifo[0] = val_to_xy(); break;
+  case 13: self->xy_fifo[1] = val_to_xy(); break;
   case 14: {
     auto xy = val_to_xy();
-    self.xy_fifo[2] = xy;
-    self.xy_fifo[3] = xy;
+    self->xy_fifo[2] = xy;
+    self->xy_fifo[3] = xy;
     break;
   }
   case 15: {
-    self.xy_fifo[3] = val_to_xy();
-    self.xy_fifo[0] = self.xy_fifo[1];
-    self.xy_fifo[1] = self.xy_fifo[2];
-    self.xy_fifo[2] = self.xy_fifo[3];
+    self->xy_fifo[3] = val_to_xy();
+    self->xy_fifo[0] = self->xy_fifo[1];
+    self->xy_fifo[1] = self->xy_fifo[2];
+    self->xy_fifo[2] = self->xy_fifo[3];
     break;
   }
-  case 16: self.z_fifo[0] = uint16_t(val); break;
-  case 17: self.z_fifo[1] = uint16_t(val); break;
-  case 18: self.z_fifo[2] = uint16_t(val); break;
-  case 19: self.z_fifo[3] = uint16_t(val); break;
-  case 20: self.rgb_fifo[0] = val_to_rgbx(); break;
-  case 21: self.rgb_fifo[1] = val_to_rgbx(); break;
-  case 22: self.rgb_fifo[2] = val_to_rgbx(); break;
-  case 23: self.reg_23 = val; break;
-  case 24: self.mac[0] = int32_t(val); break;
-  case 25: self.mac[1] = int32_t(val); break;
-  case 26: self.mac[2] = int32_t(val); break;
-  case 27: self.mac[3] = int32_t(val); break;
+  case 16: self->z_fifo[0] = uint16_t(val); break;
+  case 17: self->z_fifo[1] = uint16_t(val); break;
+  case 18: self->z_fifo[2] = uint16_t(val); break;
+  case 19: self->z_fifo[3] = uint16_t(val); break;
+  case 20: self->rgb_fifo[0] = val_to_rgbx(); break;
+  case 21: self->rgb_fifo[1] = val_to_rgbx(); break;
+  case 22: self->rgb_fifo[2] = val_to_rgbx(); break;
+  case 23: self->reg_23 = val; break;
+  case 24: self->mac[0] = int32_t(val); break;
+  case 25: self->mac[1] = int32_t(val); break;
+  case 26: self->mac[2] = int32_t(val); break;
+  case 27: self->mac[3] = int32_t(val); break;
   case 28: {
     auto to_ir = [](uint32_t v) -> int16_t {
       return int16_t((v & 0x1f) << 7);
     };
 
-    self.ir[0] = to_ir(val);
-    self.ir[1] = to_ir(val >> 5);
-    self.ir[2] = to_ir(val >> 10);
+    self->ir[0] = to_ir(val);
+    self->ir[1] = to_ir(val >> 5);
+    self->ir[2] = to_ir(val >> 10);
   }
   case 29: break;
   case 30: {
-    self.lzcs = val;
+    self->lzcs = val;
 
     // If val is negative we count the leading ones,
     // otherwise we count the leading zeroes.
     auto tmp = ((val >> 31) & 1) ? ~val : val;
 
-    self.lzcr = uint8_t(divider::leading_zeros(tmp));
+    self->lzcr = uint8_t(divider::leading_zeros(tmp));
   }
   case 31:
-    printf("Write to read-only GTE data register 31");
+    // printf("Write to read-only GTE data register 31\n");
     break;
 
   default:
@@ -794,20 +790,20 @@ void set_data(cop2_state_t &self, uint32_t reg, uint32_t val) {
   }
 }
 
-void cmd_rtps(cop2_state_t &self, command_config_t config) {
+void cmd_rtps(cop2_state_t *self, command_config_t config) {
   // Transform vector 0
   auto projection_factor = do_rtp(self, config, 0);
 
   depth_queuing(self, projection_factor);
 }
 
-void cmd_nclip(cop2_state_t &self) {
-  auto x0 = int32_t(self.xy_fifo[0].x);
-  auto y0 = int32_t(self.xy_fifo[0].y);
-  auto x1 = int32_t(self.xy_fifo[1].x);
-  auto y1 = int32_t(self.xy_fifo[1].y);
-  auto x2 = int32_t(self.xy_fifo[2].x);
-  auto y2 = int32_t(self.xy_fifo[2].y);
+void cmd_nclip(cop2_state_t *self) {
+  auto x0 = int32_t(self->xy_fifo[0].x);
+  auto y0 = int32_t(self->xy_fifo[0].y);
+  auto x1 = int32_t(self->xy_fifo[1].x);
+  auto y1 = int32_t(self->xy_fifo[1].y);
+  auto x2 = int32_t(self->xy_fifo[2].x);
+  auto y2 = int32_t(self->xy_fifo[2].y);
 
   // Convert to 32bits
 
@@ -820,67 +816,67 @@ void cmd_nclip(cop2_state_t &self) {
 
   check_mac_overflow(self, sum);
 
-  self.mac[0] = int32_t(sum);
+  self->mac[0] = int32_t(sum);
 }
 
-void cmd_op(cop2_state_t &self, command_config_t config) {
+void cmd_op(cop2_state_t *self, command_config_t config) {
   auto rm = matrix_type_t::Rotation;
 
-  auto ir1 = int32_t(self.ir[1]);
-  auto ir2 = int32_t(self.ir[2]);
-  auto ir3 = int32_t(self.ir[3]);
+  auto ir1 = int32_t(self->ir[1]);
+  auto ir2 = int32_t(self->ir[2]);
+  auto ir3 = int32_t(self->ir[3]);
 
-  auto r0 = int32_t(self.matrices[rm][0][0]);
-  auto r1 = int32_t(self.matrices[rm][1][1]);
-  auto r2 = int32_t(self.matrices[rm][2][2]);
+  auto r0 = int32_t(self->matrices[rm][0][0]);
+  auto r1 = int32_t(self->matrices[rm][1][1]);
+  auto r2 = int32_t(self->matrices[rm][2][2]);
 
   auto shift = config.shift;
 
-  self.mac[1] = (r1 * ir3 - r2 * ir2) >> shift;
-  self.mac[2] = (r2 * ir1 - r0 * ir3) >> shift;
-  self.mac[3] = (r0 * ir2 - r1 * ir1) >> shift;
+  self->mac[1] = (r1 * ir3 - r2 * ir2) >> shift;
+  self->mac[2] = (r2 * ir1 - r0 * ir3) >> shift;
+  self->mac[3] = (r0 * ir2 - r1 * ir1) >> shift;
 
   mac_to_ir(self, config);
 }
 
-void cmd_dpcs(cop2_state_t &self, command_config_t config) {
-  auto r = self.rgb.r;
-  auto g = self.rgb.g;
-  auto b = self.rgb.b;
+void cmd_dpcs(cop2_state_t *self, command_config_t config) {
+  auto r = self->rgb.r;
+  auto g = self->rgb.g;
+  auto b = self->rgb.b;
 
   uint8_t col[3] = {r, g, b};
 
   for (auto i = 0; i < 3; i++) {
-    auto fc = int64_t(self.control_vectors[control_vector_type_t::FarColor][i]) << 12;
+    auto fc = int64_t(self->control_vectors[control_vector_type_t::FarColor][i]) << 12;
     auto col1 = int64_t(col[i]) << (4 + 12);
 
     auto sub = fc - col1;
 
     auto tmp = int32_t(i64_to_i44(self, i, sub) >> config.shift);
 
-    auto ir0 = int64_t(self.ir[0]);
+    auto ir0 = int64_t(self->ir[0]);
 
     auto sat = int64_t(i32_to_i16_saturate(self, CommandConfig::from_command(0), i, tmp));
 
     auto res = i64_to_i44(self, i, col1 + ir0 * sat);
 
-    self.mac[i + 1] = int32_t(res >> config.shift);
+    self->mac[i + 1] = int32_t(res >> config.shift);
   }
 
   mac_to_ir(self, config);
   mac_to_rgb_fifo(self);
 }
 
-void cmd_dcpl(cop2_state_t &self, command_config_t config) {
-  auto r = self.rgb.r;
-  auto g = self.rgb.g;
-  auto b = self.rgb.b;
+void cmd_dcpl(cop2_state_t *self, command_config_t config) {
+  auto r = self->rgb.r;
+  auto g = self->rgb.g;
+  auto b = self->rgb.b;
 
   uint8_t col[3] = {r, g, b};
 
   for (int i = 0; i < 3; i++) {
-    auto fc = int64_t(self.control_vectors[control_vector_type_t::FarColor][i]) << 12;
-    auto ir = int32_t(self.ir[i + 1]);
+    auto fc = int64_t(self->control_vectors[control_vector_type_t::FarColor][i]) << 12;
+    auto ir = int32_t(self->ir[i + 1]);
     auto col1 = int32_t(col[i]) << 4;
 
     auto shading = int64_t(col1 * ir);
@@ -888,18 +884,18 @@ void cmd_dcpl(cop2_state_t &self, command_config_t config) {
     auto tmp = fc - shading;
     auto tmp1 = int32_t(i64_to_i44(self, i, tmp) >> config.shift);
 
-    auto ir0 = int64_t(self.ir[0]);
+    auto ir0 = int64_t(self->ir[0]);
     auto res = int64_t(i32_to_i16_saturate(self, CommandConfig::from_command(0), i, tmp1));
     auto res1 = i64_to_i44(self, i, shading + ir0 * res);
 
-    self.mac[i + 1] = int32_t(res1 >> config.shift);
+    self->mac[i + 1] = int32_t(res1 >> config.shift);
   }
 
   mac_to_ir(self, config);
   mac_to_rgb_fifo(self);
 }
 
-void cmd_dpct(cop2_state_t &self, command_config_t config) {
+void cmd_dpct(cop2_state_t *self, command_config_t config) {
   // Each call uses the oldest entry in the RGB FIFO and pushes
   // the result at the top so the three calls will process and
   // replace the entire contents of the FIFO
@@ -908,125 +904,125 @@ void cmd_dpct(cop2_state_t &self, command_config_t config) {
   do_dpc(self, config);
 }
 
-void do_dpc(cop2_state_t &self, command_config_t config) {
-  auto r = self.rgb_fifo[0].r;
-  auto g = self.rgb_fifo[0].g;
-  auto b = self.rgb_fifo[0].b;
+void do_dpc(cop2_state_t *self, command_config_t config) {
+  auto r = self->rgb_fifo[0].r;
+  auto g = self->rgb_fifo[0].g;
+  auto b = self->rgb_fifo[0].b;
 
   uint8_t col[3] = {r, g, b};
 
   for (int i = 0; i < 3; i++) {
-    auto fc = int64_t(self.control_vectors[control_vector_type_t::FarColor][i]) << 12;
+    auto fc = int64_t(self->control_vectors[control_vector_type_t::FarColor][i]) << 12;
     auto col1 = int64_t(col[i]) << (4 + 12);
 
     auto sub = fc - col1;
 
     auto tmp = int32_t(i64_to_i44(self, i, sub) >> config.shift);
 
-    auto ir0 = int64_t(self.ir[0]);
+    auto ir0 = int64_t(self->ir[0]);
 
     auto sat = int64_t(i32_to_i16_saturate(self, CommandConfig::from_command(0), i, tmp));
 
     auto res = i64_to_i44(self, i, col1 + ir0 * sat);
 
-    self.mac[i + 1] = int32_t(res >> config.shift);
+    self->mac[i + 1] = int32_t(res >> config.shift);
   }
 
   mac_to_ir(self, config);
   mac_to_rgb_fifo(self);
 }
 
-void cmd_intpl(cop2_state_t &self, command_config_t config) {
+void cmd_intpl(cop2_state_t *self, command_config_t config) {
   // XXX this is very similar to the loop in DPCS above, we
   // could probably factor that.
   for (int i = 0; i < 3; i++) {
-    auto fc = int64_t(self.control_vectors[control_vector_type_t::FarColor][i]) << 12;
-    auto ir = int64_t(self.ir[i + 1]) << 12;
+    auto fc = int64_t(self->control_vectors[control_vector_type_t::FarColor][i]) << 12;
+    auto ir = int64_t(self->ir[i + 1]) << 12;
 
     auto sub = fc - ir;
 
     auto tmp = int32_t(i64_to_i44(self, i, sub) >> config.shift);
 
-    auto ir0 = int64_t(self.ir[0]);
+    auto ir0 = int64_t(self->ir[0]);
 
     auto sat = int64_t(i32_to_i16_saturate(self, CommandConfig::from_command(0), i, tmp));
 
     auto res = i64_to_i44(self, i, ir + ir0 * sat);
 
-    self.mac[i + 1] = int32_t(res >> config.shift);
+    self->mac[i + 1] = int32_t(res >> config.shift);
   }
 
   mac_to_ir(self, config);
   mac_to_rgb_fifo(self);
 }
 
-void cmd_mvmva(cop2_state_t &self, command_config_t config) {
+void cmd_mvmva(cop2_state_t *self, command_config_t config) {
   // The fourth vector holds IR values
-  self.v[3][0] = self.ir[1];
-  self.v[3][1] = self.ir[2];
-  self.v[3][2] = self.ir[3];
+  self->v[3][0] = self->ir[1];
+  self->v[3][1] = self->ir[2];
+  self->v[3][2] = self->ir[3];
 
   multiply_matrix_by_vector(self, config, config.matrix, config.vector_mul, config.vector_add);
 }
 
-void cmd_ncds(cop2_state_t &self, command_config_t config) {
+void cmd_ncds(cop2_state_t *self, command_config_t config) {
   do_ncd(self, config, 0);
 }
 
-void cmd_ncdt(cop2_state_t &self, command_config_t config) {
+void cmd_ncdt(cop2_state_t *self, command_config_t config) {
   do_ncd(self, config, 0);
   do_ncd(self, config, 1);
   do_ncd(self, config, 2);
 }
 
-void cmd_nccs(cop2_state_t &self, command_config_t config) {
+void cmd_nccs(cop2_state_t *self, command_config_t config) {
   do_ncc(self, config, 0);
 }
 
-void cmd_cc(cop2_state_t &self, command_config_t config) {
-  self.v[3][0] = self.ir[1];
-  self.v[3][1] = self.ir[2];
-  self.v[3][2] = self.ir[3];
+void cmd_cc(cop2_state_t *self, command_config_t config) {
+  self->v[3][0] = self->ir[1];
+  self->v[3][1] = self->ir[2];
+  self->v[3][2] = self->ir[3];
 
   multiply_matrix_by_vector(self, config, matrix_type_t::Color, 3, control_vector_type_t::BackgroundColor);
 
-  uint8_t col[3] = {self.rgb.r, self.rgb.g, self.rgb.b};
+  uint8_t col[3] = {self->rgb.r, self->rgb.g, self->rgb.b};
 
   for (int i = 0; i < 3; i++) {
-    auto ir = int32_t(self.ir[i + 1]);
+    auto ir = int32_t(self->ir[i + 1]);
     auto col1 = int32_t(col[i]) << 4;
 
-    self.mac[i + 1] = (ir * col1) >> config.shift;
+    self->mac[i + 1] = (ir * col1) >> config.shift;
   }
 
   mac_to_ir(self, config);
   mac_to_rgb_fifo(self);
 }
 
-void cmd_ncs(cop2_state_t &self, command_config_t config) {
+void cmd_ncs(cop2_state_t *self, command_config_t config) {
   do_nc(self, config, 0);
 }
 
-void cmd_nct(cop2_state_t &self, command_config_t config) {
+void cmd_nct(cop2_state_t *self, command_config_t config) {
   do_nc(self, config, 0);
   do_nc(self, config, 1);
   do_nc(self, config, 2);
 }
 
-void cmd_sqr(cop2_state_t &self, command_config_t config) {
+void cmd_sqr(cop2_state_t *self, command_config_t config) {
   for (int i = 1; i < 4; i++) {
-    auto ir = int32_t(self.ir[i]);
+    auto ir = int32_t(self->ir[i]);
 
-    self.mac[i] = (ir * ir) >> config.shift;
+    self->mac[i] = (ir * ir) >> config.shift;
   }
 
   mac_to_ir(self, config);
 }
 
-void cmd_avsz3(cop2_state_t &self) {
-  auto z1 = uint32_t(self.z_fifo[1]);
-  auto z2 = uint32_t(self.z_fifo[2]);
-  auto z3 = uint32_t(self.z_fifo[3]);
+void cmd_avsz3(cop2_state_t *self) {
+  auto z1 = uint32_t(self->z_fifo[1]);
+  auto z2 = uint32_t(self->z_fifo[2]);
+  auto z3 = uint32_t(self->z_fifo[3]);
 
   auto sum = z1 + z2 + z3;
 
@@ -1034,21 +1030,21 @@ void cmd_avsz3(cop2_state_t &self) {
   // ordering table size. So for instance for a table of 1024
   // entries it should be set at 341 to use the full table
   // granularity.
-  auto zsf3 = int64_t(self.zsf3);
+  auto zsf3 = int64_t(self->zsf3);
 
   auto average = zsf3 * int64_t(sum);
 
   check_mac_overflow(self, average);
 
-  self.mac[0] = int32_t(average);
-  self.otz = i64_to_otz(self, average);
+  self->mac[0] = int32_t(average);
+  self->otz = i64_to_otz(self, average);
 }
 
-void cmd_avsz4(cop2_state_t &self) {
-  auto z0 = uint32_t(self.z_fifo[0]);
-  auto z1 = uint32_t(self.z_fifo[1]);
-  auto z2 = uint32_t(self.z_fifo[2]);
-  auto z3 = uint32_t(self.z_fifo[3]);
+void cmd_avsz4(cop2_state_t *self) {
+  auto z0 = uint32_t(self->z_fifo[0]);
+  auto z1 = uint32_t(self->z_fifo[1]);
+  auto z2 = uint32_t(self->z_fifo[2]);
+  auto z3 = uint32_t(self->z_fifo[3]);
 
   auto sum = z0 + z1 + z2 + z3;
 
@@ -1056,17 +1052,17 @@ void cmd_avsz4(cop2_state_t &self) {
   // ordering table size. So for instance for a table of 1024
   // entries it should be set at 256 to use the full table
   // granularity.
-  auto zsf4 = int64_t(self.zsf4);
+  auto zsf4 = int64_t(self->zsf4);
 
   auto average = zsf4 * int64_t(sum);
 
   check_mac_overflow(self, average);
 
-  self.mac[0] = int32_t(average);
-  self.otz = i64_to_otz(self, average);
+  self->mac[0] = int32_t(average);
+  self->otz = i64_to_otz(self, average);
 }
 
-void cmd_rtpt(cop2_state_t &self, command_config_t config) {
+void cmd_rtpt(cop2_state_t *self, command_config_t config) {
 
   // Transform the three vectors at once
   do_rtp(self, config, 0);
@@ -1077,84 +1073,84 @@ void cmd_rtpt(cop2_state_t &self, command_config_t config) {
   depth_queuing(self, projection_factor);
 }
 
-void cmd_gpf(cop2_state_t &self, command_config_t config) {
-  auto ir0 = int32_t(self.ir[0]);
+void cmd_gpf(cop2_state_t *self, command_config_t config) {
+  auto ir0 = int32_t(self->ir[0]);
 
   for (int i = 1; i < 4; i++) {
-    auto ir = int32_t(self.ir[i]);
+    auto ir = int32_t(self->ir[i]);
 
-    self.mac[i] = (ir * ir0) >> config.shift;
+    self->mac[i] = (ir * ir0) >> config.shift;
   }
 
   mac_to_ir(self, config);
   mac_to_rgb_fifo(self);
 }
 
-void cmd_gpl(cop2_state_t &self, command_config_t config) {
-  auto ir0 = int32_t(self.ir[0]);
+void cmd_gpl(cop2_state_t *self, command_config_t config) {
+  auto ir0 = int32_t(self->ir[0]);
 
   auto shift = config.shift;
 
   for (int i = 1; i < 4; i++) {
-    auto ir = int32_t(self.ir[i]);
+    auto ir = int32_t(self->ir[i]);
 
     auto ir_prod = int64_t(ir * ir0);
 
-    auto mac = int64_t(self.mac[i]) << shift;
+    auto mac = int64_t(self->mac[i]) << shift;
 
     auto sum = i64_to_i44(self, (i - 1), mac + ir_prod);
 
-    self.mac[i] = int32_t(sum >> shift);
+    self->mac[i] = int32_t(sum >> shift);
   }
 
   mac_to_ir(self, config);
   mac_to_rgb_fifo(self);
 }
 
-void cmd_ncct(cop2_state_t &self, command_config_t config) {
+void cmd_ncct(cop2_state_t *self, command_config_t config) {
   // Transform the three vectors at once
   do_ncc(self, config, 0);
   do_ncc(self, config, 1);
   do_ncc(self, config, 2);
 }
 
-void do_ncc(cop2_state_t &self, command_config_t config, uint8_t vector_index) {
+void do_ncc(cop2_state_t *self, command_config_t config, uint8_t vector_index) {
   multiply_matrix_by_vector(self, config, matrix_type_t::Light, vector_index, control_vector_type_t::Zero);
 
   // Use the 4th vector to store the intermediate values
-  self.v[3][0] = self.ir[1];
-  self.v[3][1] = self.ir[2];
-  self.v[3][2] = self.ir[3];
+  self->v[3][0] = self->ir[1];
+  self->v[3][1] = self->ir[2];
+  self->v[3][2] = self->ir[3];
 
   multiply_matrix_by_vector(self, config, matrix_type_t::Color, 3, control_vector_type_t::BackgroundColor);
 
 
-  uint8_t col[3] = {self.rgb.r, self.rgb.g, self.rgb.b};
+  uint8_t col[3] = {self->rgb.r, self->rgb.g, self->rgb.b};
 
   for (int i = 0; i < 3; i++) {
     auto col1 = int32_t(col[i]) << 4;
-    auto ir = int32_t(self.ir[i + 1]);
+    auto ir = int32_t(self->ir[i + 1]);
 
-    self.mac[i + 1] = (col1 * ir) >> config.shift;
+    self->mac[i + 1] = (col1 * ir) >> config.shift;
   }
 
   mac_to_ir(self, config);
   mac_to_rgb_fifo(self);
 }
 
-void do_nc(cop2_state_t &self, command_config_t config, uint8_t vector_index) {
+void do_nc(cop2_state_t *self, command_config_t config, uint8_t vector_index) {
   multiply_matrix_by_vector(self, config, matrix_type_t::Light, vector_index, control_vector_type_t::Zero);
 
-  self.v[3][0] = self.ir[1];
-  self.v[3][1] = self.ir[2];
-  self.v[3][2] = self.ir[3];
+  self->v[3][0] = self->ir[1];
+  self->v[3][1] = self->ir[2];
+  self->v[3][2] = self->ir[3];
 
   multiply_matrix_by_vector(self, config, matrix_type_t::Color, 3, control_vector_type_t::BackgroundColor);
 
   mac_to_rgb_fifo(self);
 }
 
-void do_ncd(cop2_state_t &self, command_config_t config, uint8_t vector_index) {
+void do_ncd(cop2_state_t *self, command_config_t config, uint8_t vector_index) {
 
   multiply_matrix_by_vector(self, config, matrix_type_t::Light, vector_index, control_vector_type_t::Zero);
 
@@ -1162,16 +1158,16 @@ void do_ncd(cop2_state_t &self, command_config_t config, uint8_t vector_index) {
   // values. This vector does not exist in the real hardware (at
   // least not in the registers), it's just a hack to make the
   // code simpler.
-  self.v[3][0] = self.ir[1];
-  self.v[3][1] = self.ir[2];
-  self.v[3][2] = self.ir[3];
+  self->v[3][0] = self->ir[1];
+  self->v[3][1] = self->ir[2];
+  self->v[3][2] = self->ir[3];
 
   multiply_matrix_by_vector(self, config, matrix_type_t::Color, 3, control_vector_type_t::BackgroundColor);
 
   cmd_dcpl(self, config);
 }
 
-void multiply_matrix_by_vector(cop2_state_t &self, command_config_t config, matrix_type_t matrix, uint8_t vector_index, control_vector_type_t control_vector) {
+void multiply_matrix_by_vector(cop2_state_t *self, command_config_t config, matrix_type_t matrix, uint8_t vector_index, control_vector_type_t control_vector) {
 
   auto vector_index1 = unsigned(vector_index);
 
@@ -1195,12 +1191,12 @@ void multiply_matrix_by_vector(cop2_state_t &self, command_config_t config, matr
   // Iterate over the matrix rows
   for (int r = 0; r < 3; r++) {
     // First the control_vector is added to the result
-    auto res = int64_t(self.control_vectors[crv][r]) << 12;
+    auto res = int64_t(self->control_vectors[crv][r]) << 12;
 
     // Iterate over the matrix columns
     for (int c = 0; c < 3; c++) {
-      auto v = int32_t(self.v[vector_index1][c]);
-      auto m = int32_t(self.matrices[mat][r][c]);
+      auto v = int32_t(self->v[vector_index1][c]);
+      auto m = int32_t(self->matrices[mat][r][c]);
 
       auto product = v * m;
 
@@ -1210,50 +1206,50 @@ void multiply_matrix_by_vector(cop2_state_t &self, command_config_t config, matr
     }
 
     // Store the result in the accumulator
-    self.mac[r + 1] = int32_t(res >> config.shift);
+    self->mac[r + 1] = int32_t(res >> config.shift);
   }
 
   mac_to_ir(self, config);
 }
 
-void mac_to_ir(cop2_state_t &self, command_config_t config) {
-  self.ir[1] = i32_to_i16_saturate(self, config, 0, self.mac[1]);
-  self.ir[2] = i32_to_i16_saturate(self, config, 1, self.mac[2]);
-  self.ir[3] = i32_to_i16_saturate(self, config, 2, self.mac[3]);
+void mac_to_ir(cop2_state_t *self, command_config_t config) {
+  self->ir[1] = i32_to_i16_saturate(self, config, 0, self->mac[1]);
+  self->ir[2] = i32_to_i16_saturate(self, config, 1, self->mac[2]);
+  self->ir[3] = i32_to_i16_saturate(self, config, 2, self->mac[3]);
 }
 
-uint8_t mac_to_color(cop2_state_t &gte, int32_t mac, uint8_t which) {
+uint8_t mac_to_color(cop2_state_t *self, int32_t mac, uint8_t which) {
   auto c = mac >> 4;
 
   if (c < 0) {
-    set_flag(gte, 21 - which);
+    set_flag(self, 21 - which);
     return 0;
   } else if (c > 0xff) {
-    set_flag(gte, 21 - which);
+    set_flag(self, 21 - which);
     return 0xff;
   } else {
     return uint8_t(c);
   }
 }
 
-void mac_to_rgb_fifo(cop2_state_t &self) {
-  auto mac1 = self.mac[1];
-  auto mac2 = self.mac[2];
-  auto mac3 = self.mac[3];
+void mac_to_rgb_fifo(cop2_state_t *self) {
+  auto mac1 = self->mac[1];
+  auto mac2 = self->mac[2];
+  auto mac3 = self->mac[3];
 
   auto r = mac_to_color(self, mac1, 0);
   auto g = mac_to_color(self, mac2, 1);
   auto b = mac_to_color(self, mac3, 2);
 
-  self.rgb_fifo[0] = self.rgb_fifo[1];
-  self.rgb_fifo[1] = self.rgb_fifo[2];
-  self.rgb_fifo[2].r = r;
-  self.rgb_fifo[2].g = g;
-  self.rgb_fifo[2].b = b;
-  self.rgb_fifo[2].c = self.rgb.c;
+  self->rgb_fifo[0] = self->rgb_fifo[1];
+  self->rgb_fifo[1] = self->rgb_fifo[2];
+  self->rgb_fifo[2].r = r;
+  self->rgb_fifo[2].g = g;
+  self->rgb_fifo[2].b = b;
+  self->rgb_fifo[2].c = self->rgb.c;
 }
 
-uint32_t do_rtp(cop2_state_t &self, command_config_t config, unsigned vector_index) {
+uint32_t do_rtp(cop2_state_t *self, command_config_t config, unsigned vector_index) {
   // The computed Z coordinate with unconditional 12bit shift
   // applied
   auto z_shifted = 0;
@@ -1267,12 +1263,12 @@ uint32_t do_rtp(cop2_state_t &self, command_config_t config, unsigned vector_ind
   for (int r = 0; r < 3; r++) {
     // Start with the translation. Convert translation vector
     // component from i32 to i64 with 12 fractional bits
-    auto res = int64_t(self.control_vectors[tr][r]) << 12;
+    auto res = int64_t(self->control_vectors[tr][r]) << 12;
 
     // Iterate over the rotation matrix columns
     for (int c = 0; c < 3; c++) {
-      auto v = int32_t(self.v[vector_index][c]);
-      auto m = int32_t(self.matrices[rm][r][c]);
+      auto v = int32_t(self->v[vector_index][c]);
+      auto m = int32_t(self->matrices[rm][r][c]);
 
       auto rot = v * m;
 
@@ -1282,7 +1278,7 @@ uint32_t do_rtp(cop2_state_t &self, command_config_t config, unsigned vector_ind
     }
 
     // Store the result in the accumulator
-    self.mac[r + 1] = int32_t(res >> config.shift);
+    self->mac[r + 1] = int32_t(res >> config.shift);
 
     // The last result will be Z, we can overwrite it each
     // time and the last one will be the good one.
@@ -1294,9 +1290,9 @@ uint32_t do_rtp(cop2_state_t &self, command_config_t config, unsigned vector_ind
   // them in case of an overflow.
 
   // 16bit clamped x coordinate
-  self.ir[1] = i32_to_i16_saturate(self, config, 0, self.mac[1]);
+  self->ir[1] = i32_to_i16_saturate(self, config, 0, self->mac[1]);
   // 16bit clamped y coordinate
-  self.ir[2] = i32_to_i16_saturate(self, config, 1, self.mac[2]);
+  self->ir[2] = i32_to_i16_saturate(self, config, 1, self->mac[2]);
   // 16bit clamped z coordinate
   //
   // Weird behaviour of the clamping/overflow checking, taken
@@ -1313,14 +1309,14 @@ uint32_t do_rtp(cop2_state_t &self, command_config_t config, unsigned vector_ind
 
   // Then clamp the value normally
   auto min2 = config.clamp_negative ? 0 : -32768;
-  auto val = self.mac[3];
+  auto val = self->mac[3];
 
   if (val < min2) {
-    self.ir[3] = int16_t(min2);
+    self->ir[3] = int16_t(min2);
   } else if (val > 32767) {
-    self.ir[3] = 32767;
+    self->ir[3] = 32767;
   } else {
-    self.ir[3] = int16_t(val);
+    self->ir[3] = int16_t(val);
   }
 
   // Step 3: convert the shifted Z value to a 16bit unsigned
@@ -1338,10 +1334,10 @@ uint32_t do_rtp(cop2_state_t &self, command_config_t config, unsigned vector_ind
   }
 
   // Push `z_saturated` onto the Z_FIFO
-  self.z_fifo[0] = self.z_fifo[1];
-  self.z_fifo[1] = self.z_fifo[2];
-  self.z_fifo[2] = self.z_fifo[3];
-  self.z_fifo[3] = z_saturated;
+  self->z_fifo[0] = self->z_fifo[1];
+  self->z_fifo[1] = self->z_fifo[2];
+  self->z_fifo[2] = self->z_fifo[3];
+  self->z_fifo[3] = z_saturated;
 
   // Step 3: perspective projection against the screen plane
 
@@ -1350,10 +1346,10 @@ uint32_t do_rtp(cop2_state_t &self, command_config_t config, unsigned vector_ind
 
   // Projection factor: 1.16 unsigned
   int projection_factor;
-  if (z_saturated > (self.h / 2)) {
+  if (z_saturated > (self->h / 2)) {
     // GTE-specific division algorithm for dist /
     // z. Returns a saturated 17bit value.
-    projection_factor = divider::divide(self.h, z_saturated);
+    projection_factor = divider::divide(self->h, z_saturated);
   } else {
     // If the Z coordinate is smaller than or equal to
     // half the projection plane distance we clip it
@@ -1364,10 +1360,10 @@ uint32_t do_rtp(cop2_state_t &self, command_config_t config, unsigned vector_ind
 
   // Work in 64bits to detect overflows
   auto factor = int64_t(projection_factor);
-  auto x = int64_t(self.ir[1]);
-  auto y = int64_t(self.ir[2]);
-  auto ofx = int64_t(self.ofx);
-  auto ofy = int64_t(self.ofy);
+  auto x = int64_t(self->ir[1]);
+  auto y = int64_t(self->ir[2]);
+  auto ofx = int64_t(self->ofx);
+  auto ofy = int64_t(self->ofy);
 
   // Project X and Y onto the plane
   auto screen_x = x * factor + ofx;
@@ -1380,47 +1376,47 @@ uint32_t do_rtp(cop2_state_t &self, command_config_t config, unsigned vector_ind
   auto screen_y1 = int32_t(screen_y >> 16);
 
   // Push onto the XY FIFO
-  self.xy_fifo[3].x = i32_to_i11_saturate(self, 0, screen_x1);
-  self.xy_fifo[3].y = i32_to_i11_saturate(self, 1, screen_y1);
-  self.xy_fifo[0] = self.xy_fifo[1];
-  self.xy_fifo[1] = self.xy_fifo[2];
-  self.xy_fifo[2] = self.xy_fifo[3];
+  self->xy_fifo[3].x = i32_to_i11_saturate(self, 0, screen_x1);
+  self->xy_fifo[3].y = i32_to_i11_saturate(self, 1, screen_y1);
+  self->xy_fifo[0] = self->xy_fifo[1];
+  self->xy_fifo[1] = self->xy_fifo[2];
+  self->xy_fifo[2] = self->xy_fifo[3];
 
   // return projection factor
   return projection_factor;
 }
 
-void depth_queuing(cop2_state_t &self, uint32_t projection_factor) {
+void depth_queuing(cop2_state_t *self, uint32_t projection_factor) {
   // Work in 64bits to detect overflows
   auto factor = int64_t(projection_factor);
-  auto dqa = int64_t(self.dqa);
-  auto dqb = int64_t(self.dqb);
+  auto dqa = int64_t(self->dqa);
+  auto dqb = int64_t(self->dqb);
 
   auto depth = dqb + dqa * factor;
 
   check_mac_overflow(self, depth);
 
-  self.mac[0] = int32_t(depth);
+  self->mac[0] = int32_t(depth);
 
   // Compute 16bit IR value
   auto depth1 = depth >> 12;
 
   if (depth1 < 0) {
     set_flag(self, 12);
-    self.ir[0] = 0;
+    self->ir[0] = 0;
   } else if (depth1 > 4096) {
     set_flag(self, 12);
-    self.ir[0] = 4096;
+    self->ir[0] = 4096;
   } else {
-    self.ir[0] = int16_t(depth1);
+    self->ir[0] = int16_t(depth1);
   }
 }
 
-void set_flag(cop2_state_t &self, uint8_t bit) {
-  self.flags |= 1 << bit;
+void set_flag(cop2_state_t *self, uint8_t bit) {
+  self->flags |= 1 << bit;
 }
 
-int64_t i64_to_i44(cop2_state_t &self, uint8_t flag, int64_t val) {
+int64_t i64_to_i44(cop2_state_t *self, uint8_t flag, int64_t val) {
   if (val > 0x7ffffffffffLL) {
     set_flag(self, 30 - flag);
   } else if (val < -0x80000000000LL) {
@@ -1430,7 +1426,7 @@ int64_t i64_to_i44(cop2_state_t &self, uint8_t flag, int64_t val) {
   return (val << (64 - 44)) >> (64 - 44);
 }
 
-int16_t i32_to_i16_saturate(cop2_state_t &self, command_config_t config, uint8_t flag, int32_t val) {
+int16_t i32_to_i16_saturate(cop2_state_t *self, command_config_t config, uint8_t flag, int32_t val) {
   int16_t min = config.clamp_negative ? 0 : (-32768);
   int16_t max = 32767;
 
@@ -1449,7 +1445,7 @@ int16_t i32_to_i16_saturate(cop2_state_t &self, command_config_t config, uint8_t
   }
 }
 
-int16_t i32_to_i11_saturate(cop2_state_t &self, uint8_t flag, int32_t val) {
+int16_t i32_to_i11_saturate(cop2_state_t *self, uint8_t flag, int32_t val) {
   if (val < -0x400) {
     set_flag(self, 14 - flag);
     return (-0x400);
@@ -1461,7 +1457,7 @@ int16_t i32_to_i11_saturate(cop2_state_t &self, uint8_t flag, int32_t val) {
   }
 }
 
-void check_mac_overflow(cop2_state_t &self, int64_t val) {
+void check_mac_overflow(cop2_state_t *self, int64_t val) {
   if (val < -0x80000000) {
     set_flag(self, 15);
   } else if (val > 0x7fffffff) {
@@ -1469,7 +1465,7 @@ void check_mac_overflow(cop2_state_t &self, int64_t val) {
   }
 }
 
-uint16_t i64_to_otz(cop2_state_t &self, int64_t average) {
+uint16_t i64_to_otz(cop2_state_t *self, int64_t average) {
   auto value = average >> 12;
 
   if (value < 0) {
@@ -1486,21 +1482,21 @@ uint16_t i64_to_otz(cop2_state_t &self, int64_t average) {
 //
 
 void cop2::run(cop2_state_t *state, uint32_t n) {
-  command(*state, n);
+  command(state, n);
 }
 
 uint32_t cop2::read_ccr(cop2_state_t *state, uint32_t n) {
-  return control(*state, n);
+  return control(state, n);
 }
 
 void cop2::write_ccr(cop2_state_t *state, uint32_t n, uint32_t value) {
-  set_control(*state, n, value);
+  set_control(state, n, value);
 }
 
 uint32_t cop2::read_gpr(cop2_state_t *state, uint32_t n) {
-  return data(*state, n);
+  return data(state, n);
 }
 
 void cop2::write_gpr(cop2_state_t *state, uint32_t n, uint32_t value) {
-  set_data(*state, n, value);
+  set_data(state, n, value);
 }

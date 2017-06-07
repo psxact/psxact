@@ -11,10 +11,6 @@ namespace cop2 {
 
   uint32_t read_gpr(cop2_state_t *state, uint32_t n);
   void write_gpr(cop2_state_t *state, uint32_t n, uint32_t value);
-
-  namespace gte {
-
-  }
 }
 
 #endif //__PSXACT_CPU_COP2_HPP__

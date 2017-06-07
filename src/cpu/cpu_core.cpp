@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include "cpu_core.hpp"
 #include "../bus.hpp"
+#include "cpu_cop0.hpp"
 
 cpu::opcode cpu::op_table[64] = {
   nullptr,      cpu::op_bxx,   cpu::op_j,    cpu::op_jal,   cpu::op_beq,  cpu::op_bne, cpu::op_blez, cpu::op_bgtz,
@@ -43,7 +44,7 @@ void cpu::tick(cpu_state_t *state) {
   auto irq = (state->cop0.regs[12] & state->cop0.regs[13] & 0xff00) != 0;
 
   if (iec && irq) {
-    enter_exception(state, 0x0);
+    cop0::enter_exception(state, 0x0);
   }
   else {
     auto code = (state->code >> 26) & 63;
@@ -52,43 +53,6 @@ void cpu::tick(cpu_state_t *state) {
     else
       op_table_special[state->code & 63](state);
   }
-}
-
-void cpu::enter_exception(cpu_state_t *state, uint32_t code) {
-  uint32_t status = state->cop0.regs[12];
-  status = (status & ~0x3f) | ((status << 2) & 0x3f);
-
-  uint32_t cause = state->cop0.regs[13];
-  cause = (cause & ~0x7f) | ((code << 2) & 0x7f);
-
-  uint32_t epc;
-
-  if (state->is_branch_delay_slot) {
-    epc = state->regs.this_pc - 4;
-    cause |= 0x80000000;
-  }
-  else {
-    epc = state->regs.this_pc;
-    cause &= ~0x80000000;
-  }
-
-  state->cop0.regs[12] = status;
-  state->cop0.regs[13] = cause;
-  state->cop0.regs[14] = epc;
-
-  state->regs.pc = (status & (1 << 22))
-    ? 0xbfc00180
-    : 0x80000080
-    ;
-
-  state->regs.next_pc = state->regs.pc + 4;
-}
-
-void cpu::leave_exception(cpu_state_t *state) {
-  uint32_t sr = state->cop0.regs[12];
-  sr = (sr & ~0xf) | ((sr >> 2) & 0xf);
-
-  state->cop0.regs[12] = sr;
 }
 
 static uint32_t segments[8] = {
@@ -108,7 +72,7 @@ static inline uint32_t map_address(uint32_t address) {
 
 void cpu::read_code(cpu_state_t *state) {
   if (state->regs.pc & 3) {
-    enter_exception(state, 0x4);
+    cop0::enter_exception(state, 0x4);
   }
 
   state->regs.this_pc = state->regs.pc;
