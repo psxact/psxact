@@ -22,6 +22,7 @@ struct cdrom_state_t {
   fifo_t<uint8_t, 4> parameter;
   fifo_t<uint8_t, 4> response;
   fifo_t<uint8_t, 12> data;
+  uint8_t data_buffer[4096];
 
   uint8_t command;
   bool command_is_new;

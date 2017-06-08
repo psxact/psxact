@@ -116,7 +116,19 @@ static void io_write_port_2_3(cdrom_state_t *state, uint8_t data) {
 }
 
 static void io_write_port_3_0(cdrom_state_t *state, uint8_t data) {
-  // printf("cdrom::io_write_port_3_0(0x%02x)\n", data);
+  if (data & 0x80) {
+    int skip = state->mode.read_whole_sector ? 12 : 24;
+    int size = state->mode.read_whole_sector ? 0x924 : 0x800;
+
+    state->data.clear();
+
+    for (int i = 0; i < size; i++) {
+      state->data.write(state->data_buffer[i + skip]);
+    }
+  }
+  else {
+    state->data.clear();
+  }
 }
 
 static void io_write_port_3_1(cdrom_state_t *state, uint8_t data) {
@@ -220,21 +232,10 @@ void cdrom::read_sector(cdrom_state_t *state) {
   auto target = bytes_per_sector * (cursor - lead_in_duration);
   auto lpFile = fopen(state->game_file_name.c_str(), "rb+");
 
-  state->data.clear();
+  fseek(lpFile, target, SEEK_SET);
 
-  if (state->mode.read_whole_sector) {
-    fseek(lpFile, target + 12, SEEK_SET);
-
-    for (int i = 0; i < 0x924; i++) {
-      state->data.write(uint8_t(getc(lpFile)));
-    }
-  }
-  else {
-    fseek(lpFile, target + 24, SEEK_SET);
-
-    for (int i = 0; i < 0x800; i++) {
-      state->data.write(uint8_t(getc(lpFile)));
-    }
+  for (int i = 0; i < bytes_per_sector; i++) {
+    state->data_buffer[i] = uint8_t(getc(lpFile));
   }
 
   fclose(lpFile);
@@ -326,6 +327,11 @@ void cdrom::command::test(cdrom_state_t *state, uint8_t function) {
   }
 }
 
+void cdrom::command::unmute(cdrom_state_t *state) {
+  state->control.response.write(cdrom::get_status_byte(state));
+  state->control.interrupt_request = 3;
+}
+
 // -===-
 //  CPU
 // -===-
@@ -395,6 +401,10 @@ void cdrom::control::executing_command(cdrom_state_t *state) {
 
   case 0x0a:
     cdrom::command::init(state);
+    break;
+
+  case 0x0c:
+    cdrom::command::unmute(state);
     break;
 
   case 0x0e: {

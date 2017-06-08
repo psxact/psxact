@@ -29,6 +29,7 @@ namespace cdrom {
     void set_mode(cdrom_state_t *state, uint8_t mode);
     void set_seek_target(cdrom_state_t *state, uint8_t minute, uint8_t second, uint8_t sector);
     void test(cdrom_state_t *state, uint8_t function);
+    void unmute(cdrom_state_t *state);
   }
 
   namespace control {
