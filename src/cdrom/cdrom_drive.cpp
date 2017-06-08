@@ -233,11 +233,7 @@ void cdrom::read_sector(cdrom_state_t *state) {
   auto lpFile = fopen(state->game_file_name.c_str(), "rb+");
 
   fseek(lpFile, target, SEEK_SET);
-
-  for (int i = 0; i < bytes_per_sector; i++) {
-    state->data_buffer[i] = uint8_t(getc(lpFile));
-  }
-
+  fread(state->data_buffer, sizeof(uint8_t), 0x930, lpFile);
   fclose(lpFile);
 }
 
