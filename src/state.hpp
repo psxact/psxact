@@ -18,6 +18,7 @@ struct cdrom_state_t {
 
   cdrom_sector_timecode_t seek_timecode;
   cdrom_sector_timecode_t read_timecode;
+  bool seek_unprocessed;
 
   fifo_t<uint8_t, 4> parameter;
   fifo_t<uint8_t, 4> response;

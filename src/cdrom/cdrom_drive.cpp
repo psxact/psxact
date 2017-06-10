@@ -223,6 +223,11 @@ void cdrom::read_sector(cdrom_state_t *state) {
   constexpr int bytes_per_sector = 2352;
   constexpr int lead_in_duration = 2 * sectors_per_second;
 
+  printf("cdrom::read_sector(\"%02d:%02d:%02d\")\n",
+         state->read_timecode.minute,
+         state->read_timecode.second,
+         state->read_timecode.sector);
+
   auto &tc = state->read_timecode;
   auto cursor =
       (tc.minute * sectors_per_minute) +
@@ -240,6 +245,15 @@ void cdrom::read_sector(cdrom_state_t *state) {
 // -========-
 //  Commands
 // -========-
+
+static void do_seek(cdrom_state_t *state) {
+  if (state->seek_unprocessed) {
+    state->seek_unprocessed = 0;
+    state->read_timecode.minute = state->seek_timecode.minute;
+    state->read_timecode.second = state->seek_timecode.second;
+    state->read_timecode.sector = state->seek_timecode.sector;
+  }
+}
 
 void cdrom::command::get_id(cdrom_state_t *state) {
   state->control.response.write(cdrom::get_status_byte(state));
@@ -271,6 +285,8 @@ void cdrom::command::read_n(cdrom_state_t *state) {
   state->control.response.write(cdrom::get_status_byte(state));
   state->control.interrupt_request = 3;
 
+  do_seek(state);
+
   int cycles = get_cycles_per_sector(state);
 
   cdrom::drive::transition(state, &cdrom::drive::reading, cycles);
@@ -287,9 +303,7 @@ void cdrom::command::seek_data_mode(cdrom_state_t *state) {
   state->control.response.write(cdrom::get_status_byte(state));
   state->control.interrupt_request = 3;
 
-  state->read_timecode.minute = state->seek_timecode.minute;
-  state->read_timecode.second = state->seek_timecode.second;
-  state->read_timecode.sector = state->seek_timecode.sector;
+  do_seek(state);
 
   cdrom::drive::transition(state, &cdrom::drive::int2, 40000);
 }
@@ -309,6 +323,7 @@ void cdrom::command::set_seek_target(cdrom_state_t *state, uint8_t minute, uint8
   state->seek_timecode.minute = minute;
   state->seek_timecode.second = second;
   state->seek_timecode.sector = sector;
+  state->seek_unprocessed = 1;
 }
 
 void cdrom::command::test(cdrom_state_t *state, uint8_t function) {
@@ -530,7 +545,7 @@ void cdrom::drive::reading(cdrom_state_t *state) {
     state->read_timecode.second++;
 
     if (state->read_timecode.second == 60) {
-      state->read_timecode.sector = 0;
+      state->read_timecode.second = 0;
       state->read_timecode.minute++;
     }
   }
