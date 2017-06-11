@@ -200,9 +200,8 @@ namespace divider {
   }
 
   int leading_zeros(uint16_t value) {
-    int n, m;
-
-    m = 1 << 15;
+    int m = 1 << 15;
+    int n = 0;
 
     while (!(value & m) && n < 16) {
       m = m >> 1;
@@ -416,8 +415,8 @@ uint32_t control(cop2_state_t *self, uint32_t reg) {
   case 31: return self->flags;
   default:
     printf("Unhandled GTE control register %d\n", reg);
-    break;
-}
+    return 0;
+  }
 }
 
 void set_control(cop2_state_t *self, uint32_t reg, uint32_t val) {
@@ -678,7 +677,7 @@ uint32_t data(cop2_state_t *self, uint32_t reg) {
   case 31: return uint32_t(self->lzcr);
   default:
     printf("Unhandled GTE data register %d\n", reg);
-    break;
+    return 0;
   }
 }
 

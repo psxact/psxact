@@ -180,7 +180,7 @@ void bus::write(int width, uint32_t address, uint32_t data) {
   case 0x1f801014: assert(data == 0x200931e1); return;
   case 0x1f801018: assert(data == 0x00020843 || data == 0x00020943); return;
   case 0x1f80101c: assert(data == 0x00070777); return;
-  case 0x1f801020: assert(data == 0x00031125 || data == 0x0000132c || data == 0x00001325); return;
+  case 0x1f801020: assert(data == 0x00031125 || data == 0x0000132c || data == 0x00001323 || data == 0x00001325); return;
 
   case 0x1f801060: assert(data == 0x00000b88); return;
   }

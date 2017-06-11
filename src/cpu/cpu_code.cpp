@@ -196,10 +196,10 @@ void cpu::op_cop3(cpu_state_t *state) {
 }
 
 void cpu::op_div(cpu_state_t *state) {
-  auto dividend = int32_t(get_rs(state));
-  auto divisor = int32_t(get_rt(state));
+  int32_t dividend = int32_t(get_rs(state));
+  int32_t divisor = int32_t(get_rt(state));
 
-  if (dividend == 0x80000000 && divisor == 0xffffffff) {
+  if (dividend == int32_t(0x80000000) && divisor == int32_t(0xffffffff)) {
     state->regs.lo = 0x80000000;
     state->regs.hi = 0;
   }
