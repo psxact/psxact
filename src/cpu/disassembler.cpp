@@ -2,99 +2,120 @@
 #include "cpu_core.hpp"
 
 
-#define iconst cpu::decoder::iconst(state)
-#define uconst cpu::decoder::uconst(state)
-#define rd cpu::decoder::rd(state)
-#define rs cpu::decoder::rs(state)
-#define rt cpu::decoder::rt(state)
-#define sa cpu::decoder::sa(state)
+#define get_iconst() cpu::decoder::iconst(state)
+#define get_uconst() cpu::decoder::uconst(state)
+#define get_rd() register_names[cpu::decoder::rd(state)]
+#define get_rs() register_names[cpu::decoder::rs(state)]
+#define get_rt() register_names[cpu::decoder::rt(state)]
+#define get_sa() cpu::decoder::sa(state)
 
 
-void disassemble_special(cpu_state_t *state) {
+static const char *register_names[32] = {
+  "r0",
+  "at",
+  "v0", "v1",
+  "a0", "a1", "a2", "a3",
+  "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7",
+  "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7",
+  "t8", "t9",
+  "k0", "k1",
+  "gp",
+  "sp",
+  "fp",
+  "ra"
+};
+
+
+void disassemble_special(cpu_state_t *state, FILE *file) {
   switch (state->code & 0x3f) {
-  case 0x00: printf("sll    r%02d, r%02d, #%d\n", rd, rt, sa); break;
+  case 0x00: fprintf(file, "sll       %s, %s, #%d\n", get_rd(), get_rt(), get_sa()); break;
 
-  case 0x02: printf("srl    r%02d, r%02d, #%d\n", rd, rt, sa); break;
-  case 0x03: printf("sra    r%02d, r%02d, #%d\n", rd, rt, sa); break;
-  case 0x04: printf("sllv   r%02d, r%02d, r%02d\n", rd, rt, rs); break;
+  case 0x02: fprintf(file, "srl       %s, %s, #%d\n", get_rd(), get_rt(), get_sa()); break;
+  case 0x03: fprintf(file, "sra       %s, %s, #%d\n", get_rd(), get_rt(), get_sa()); break;
+  case 0x04: fprintf(file, "sllv      %s, %s, %s\n", get_rd(), get_rt(), get_rs()); break;
 
-  case 0x06: printf("srlv   r%02d, r%02d, r%02d\n", rd, rt, rs); break;
-  case 0x07: printf("srav   r%02d, r%02d, r%02d\n", rd, rt, rs); break;
-  case 0x08: printf("jr     r%02d\n", rs); break;
-  case 0x09: printf("jalr   r%02d, r%02d\n", rd, rs); break;
+  case 0x06: fprintf(file, "srlv      %s, %s, %s\n", get_rd(), get_rt(), get_rs()); break;
+  case 0x07: fprintf(file, "srav      %s, %s, %s\n", get_rd(), get_rt(), get_rs()); break;
+  case 0x08: fprintf(file, "jr        %s\n", get_rs()); break;
+  case 0x09: fprintf(file, "jalr      %s, %s\n", get_rd(), get_rs()); break;
 
-  case 0x0c: printf("syscall\n"); break;
-  case 0x0d: printf("break\n"); break;
+  case 0x0c: fprintf(file, "syscall   \n"); break;
+  case 0x0d: fprintf(file, "break     \n"); break;
 
-  case 0x10: printf("mfhi   r%02d\n", rs); break;
-  case 0x11: printf("mthi   r%02d\n", rs); break;
-  case 0x12: printf("mflo   r%02d\n", rs); break;
-  case 0x13: printf("mtlo   r%02d\n", rs); break;
+  case 0x10: fprintf(file, "mfhi      %s\n", get_rs()); break;
+  case 0x11: fprintf(file, "mthi      %s\n", get_rs()); break;
+  case 0x12: fprintf(file, "mflo      %s\n", get_rs()); break;
+  case 0x13: fprintf(file, "mtlo      %s\n", get_rs()); break;
 
-  case 0x18: printf("mult   r%02d, r%02d\n", rs, rt); break;
-  case 0x19: printf("multu  r%02d, r%02d\n", rs, rt); break;
-  case 0x1a: printf("div    r%02d, r%02d\n", rs, rt); break;
-  case 0x1b: printf("divu   r%02d, r%02d\n", rs, rt); break;
+  case 0x18: fprintf(file, "mult      %s, %s\n", get_rs(), get_rt()); break;
+  case 0x19: fprintf(file, "multu     %s, %s\n", get_rs(), get_rt()); break;
+  case 0x1a: fprintf(file, "div       %s, %s\n", get_rs(), get_rt()); break;
+  case 0x1b: fprintf(file, "divu      %s, %s\n", get_rs(), get_rt()); break;
 
-  case 0x20: printf("add    r%02d, r%02d, r%02d\n", rd, rs, rt); break;
-  case 0x21: printf("addu   r%02d, r%02d, r%02d\n", rd, rs, rt); break;
-  case 0x22: printf("sub    r%02d, r%02d, r%02d\n", rd, rs, rt); break;
-  case 0x23: printf("subu   r%02d, r%02d, r%02d\n", rd, rs, rt); break;
-  case 0x24: printf("and    r%02d, r%02d, r%02d\n", rd, rs, rt); break;
-  case 0x25: printf("or     r%02d, r%02d, r%02d\n", rd, rs, rt); break;
-  case 0x26: printf("xor    r%02d, r%02d, r%02d\n", rd, rs, rt); break;
-  case 0x27: printf("nor    r%02d, r%02d, r%02d\n", rd, rs, rt); break;
+  case 0x20: fprintf(file, "add       %s, %s, %s\n", get_rd(), get_rs(), get_rt()); break;
+  case 0x21: fprintf(file, "addu      %s, %s, %s\n", get_rd(), get_rs(), get_rt()); break;
+  case 0x22: fprintf(file, "sub       %s, %s, %s\n", get_rd(), get_rs(), get_rt()); break;
+  case 0x23: fprintf(file, "subu      %s, %s, %s\n", get_rd(), get_rs(), get_rt()); break;
+  case 0x24: fprintf(file, "and       %s, %s, %s\n", get_rd(), get_rs(), get_rt()); break;
+  case 0x25: fprintf(file, "or        %s, %s, %s\n", get_rd(), get_rs(), get_rt()); break;
+  case 0x26: fprintf(file, "xor       %s, %s, %s\n", get_rd(), get_rs(), get_rt()); break;
+  case 0x27: fprintf(file, "nor       %s, %s, %s\n", get_rd(), get_rs(), get_rt()); break;
 
-  case 0x2a: printf("slt    r%02d, r%02d, r%02d\n", rd, rs, rt); break;
-  case 0x2b: printf("sltu   r%02d, r%02d, r%02d\n", rd, rs, rt); break;
+  case 0x2a: fprintf(file, "slt       %s, %s, %s\n", get_rd(), get_rs(), get_rt()); break;
+  case 0x2b: fprintf(file, "sltu      %s, %s, %s\n", get_rd(), get_rs(), get_rt()); break;
 
   default:
-    printf("unknown (0x%08x)\n", state->code);
+    fprintf(file, "unknown (0x%08x)\n", state->code);
     break;
   }
 }
 
-void disassemble_reg_imm(cpu_state_t *state) {
+void disassemble_reg_imm(cpu_state_t *state, FILE *file) {
   auto pc = state->regs.this_pc;
 
-  switch (rt) {
-  case 0x00: printf("bltz   r%02d, #0x%08x\n", rs, pc + 4 + (iconst << 2)); break;
-  case 0x01: printf("bgez   r%02d, #0x%08x\n", rs, pc + 4 + (iconst << 2)); break;
+  switch (cpu::decoder::rt(state)) {
+  case 0x00: fprintf(file, "bltz      %s, 0x%08x\n", get_rs(), pc + 4 + (get_iconst() << 2)); break;
+  case 0x01: fprintf(file, "bgez      %s, 0x%08x\n", get_rs(), pc + 4 + (get_iconst() << 2)); break;
 
-  case 0x10: printf("bltzal r%02d, #0x%08x\n", rs, pc + 4 + (iconst << 2)); break;
-  case 0x11: printf("bgezal r%02d, #0x%08x\n", rs, pc + 4 + (iconst << 2)); break;
+  case 0x10: fprintf(file, "bltzal    %s, 0x%08x\n", get_rs(), pc + 4 + (get_iconst() << 2)); break;
+  case 0x11: fprintf(file, "bgezal    %s, 0x%08x\n", get_rs(), pc + 4 + (get_iconst() << 2)); break;
 
   default:
-    printf("unknown (0x%08x)\n", state->code);
+    fprintf(file, "unknown (0x%08x)\n", state->code);
     break;
   }
 }
 
-void cpu::disassemble(cpu_state_t *state) {
+void cpu::disassemble(cpu_state_t *state, FILE *file) {
   auto pc = state->regs.this_pc;
 
-  printf("0x%08x | ", pc);
+  fprintf(file, "%08X: ", pc);
+
+  if (state->code == 0) {
+    fprintf(file, "nop       \n");
+    return;
+  }
 
   switch ((state->code >> 26) & 0x3f) {
-  case 0x00: return disassemble_special(state);
-  case 0x01: return disassemble_reg_imm(state);
+  case 0x00: disassemble_special(state, file); break;
+  case 0x01: disassemble_reg_imm(state, file); break;
 
-  case 0x02: printf("j      0x%08x\n", (pc & ~0x0fffffff) | ((state->code << 2) & 0x0fffffff)); break;
-  case 0x03: printf("jal    0x%08x\n", (pc & ~0x0fffffff) | ((state->code << 2) & 0x0fffffff)); break;
+  case 0x02: fprintf(file, "j         0x%08x\n", (pc & ~0x0fffffff) | ((state->code << 2) & 0x0fffffff)); break;
+  case 0x03: fprintf(file, "jal       0x%08x\n", (pc & ~0x0fffffff) | ((state->code << 2) & 0x0fffffff)); break;
 
-  case 0x04: printf("beq    r%02d, r%02d, #0x%08x\n", rs, rt, pc + 4 + (iconst << 2)); break;
-  case 0x05: printf("bne    r%02d, r%02d, #0x%08x\n", rs, rt, pc + 4 + (iconst << 2)); break;
-  case 0x06: printf("blez   r%02d, #0x%08x\n", rs, pc + 4 + (iconst << 2)); break;
-  case 0x07: printf("bgtz   r%02d, #0x%08x\n", rs, pc + 4 + (iconst << 2)); break;
+  case 0x04: fprintf(file, "beq       %s, %s, 0x%08x\n", get_rs(), get_rt(), pc + 4 + (get_iconst() << 2)); break;
+  case 0x05: fprintf(file, "bne       %s, %s, 0x%08x\n", get_rs(), get_rt(), pc + 4 + (get_iconst() << 2)); break;
+  case 0x06: fprintf(file, "blez      %s, 0x%08x\n", get_rs(), pc + 4 + (get_iconst() << 2)); break;
+  case 0x07: fprintf(file, "bgtz      %s, 0x%08x\n", get_rs(), pc + 4 + (get_iconst() << 2)); break;
 
-  case 0x08: printf("addi   r%02d, r%02d, #0x%08x\n", rt, rs, iconst); break;
-  case 0x09: printf("addiu  r%02d, r%02d, #0x%08x\n", rt, rs, iconst); break;
-  case 0x0a: printf("slti   r%02d, r%02d, #0x%08x\n", rt, rs, iconst); break;
-  case 0x0b: printf("sltiu  r%02d, r%02d, #0x%08x\n", rt, rs, iconst); break;
-  case 0x0c: printf("andi   r%02d, r%02d, #0x%04x\n", rt, rs, uconst); break;
-  case 0x0d: printf("ori    r%02d, r%02d, #0x%04x\n", rt, rs, uconst); break;
-  case 0x0e: printf("xori   r%02d, r%02d, #0x%04x\n", rt, rs, uconst); break;
-  case 0x0f: printf("lui    r%02d, #0x%04x\n", rt, uconst); break;
+  case 0x08: fprintf(file, "addi      %s, %s, 0x%04x\n", get_rt(), get_rs(), get_iconst()); break;
+  case 0x09: fprintf(file, "addiu     %s, %s, 0x%04x\n", get_rt(), get_rs(), get_iconst()); break;
+  case 0x0a: fprintf(file, "slti      %s, %s, 0x%04x\n", get_rt(), get_rs(), get_iconst()); break;
+  case 0x0b: fprintf(file, "sltiu     %s, %s, 0x%04x\n", get_rt(), get_rs(), get_iconst()); break;
+  case 0x0c: fprintf(file, "andi      %s, %s, 0x%04x\n", get_rt(), get_rs(), get_uconst()); break;
+  case 0x0d: fprintf(file, "ori       %s, %s, 0x%04x\n", get_rt(), get_rs(), get_uconst()); break;
+  case 0x0e: fprintf(file, "xori      %s, %s, 0x%04x\n", get_rt(), get_rs(), get_uconst()); break;
+  case 0x0f: fprintf(file, "lui       %s, 0x%04x\n", get_rt(), get_uconst()); break;
 
   case 0x10:
   case 0x11:
@@ -102,45 +123,45 @@ void cpu::disassemble(cpu_state_t *state) {
   case 0x13: {
     auto co = (state->code >> 26) & 3;
 
-    switch (rs) {
-    case 0x00: printf("mfc%d   r%02d, r%02d\n", co, rt, rd); break;
-    case 0x04: printf("mtc%d   r%02d, r%02d\n", co, rt, rd); break;
+    switch (cpu::decoder::rs(state)) {
+    case 0x00: fprintf(file, "mfc%d      %s, %s\n", co, get_rt(), get_rd()); break;
+    case 0x04: fprintf(file, "mtc%d      %s, %s\n", co, get_rt(), get_rd()); break;
 
     case 0x10:
       switch (state->code & 0x3f) {
-      case 0x10: printf("rfe\n"); break;
+      case 0x10: fprintf(file, "rfe\n"); break;
 
       default:
-        printf("unknown (0x%08x)\n", state->code);
+        fprintf(file, "unknown (0x%08x)\n", state->code);
         break;
       }
       break;
 
     default:
-      printf("unknown (0x%08x)\n", state->code);
+      fprintf(file, "unknown (0x%08x)\n", state->code);
       break;
     }
 
     break;
   }
 
-  case 0x20: printf("lb     r%02d, #%08x(r%02d)\n", rt, iconst, rs); break;
-  case 0x21: printf("lh     r%02d, #%08x(r%02d)\n", rt, iconst, rs); break;
-  case 0x22: printf("lwl    r%02d, #%08x(r%02d)\n", rt, iconst, rs); break;
-  case 0x23: printf("lw     r%02d, #%08x(r%02d)\n", rt, iconst, rs); break;
-  case 0x24: printf("lbu    r%02d, #%08x(r%02d)\n", rt, iconst, rs); break;
-  case 0x25: printf("lhu    r%02d, #%08x(r%02d)\n", rt, iconst, rs); break;
-  case 0x26: printf("lwr    r%02d, #%08x(r%02d)\n", rt, iconst, rs); break;
+  case 0x20: fprintf(file, "lb        %s, 0x%04x(%s)\n", get_rt(), get_iconst(), get_rs()); break;
+  case 0x21: fprintf(file, "lh        %s, 0x%04x(%s)\n", get_rt(), get_iconst(), get_rs()); break;
+  case 0x22: fprintf(file, "lwl       %s, 0x%04x(%s)\n", get_rt(), get_iconst(), get_rs()); break;
+  case 0x23: fprintf(file, "lw        %s, 0x%04x(%s)\n", get_rt(), get_iconst(), get_rs()); break;
+  case 0x24: fprintf(file, "lbu       %s, 0x%04x(%s)\n", get_rt(), get_iconst(), get_rs()); break;
+  case 0x25: fprintf(file, "lhu       %s, 0x%04x(%s)\n", get_rt(), get_iconst(), get_rs()); break;
+  case 0x26: fprintf(file, "lwr       %s, 0x%04x(%s)\n", get_rt(), get_iconst(), get_rs()); break;
 
-  case 0x28: printf("sb     r%02d, #%08x(r%02d)\n", rt, iconst, rs); break;
-  case 0x29: printf("sh     r%02d, #%08x(r%02d)\n", rt, iconst, rs); break;
-  case 0x2a: printf("swl    r%02d, #%08x(r%02d)\n", rt, iconst, rs); break;
-  case 0x2b: printf("sw     r%02d, #%08x(r%02d)\n", rt, iconst, rs); break;
+  case 0x28: fprintf(file, "sb        %s, 0x%04x(%s)\n", get_rt(), get_iconst(), get_rs()); break;
+  case 0x29: fprintf(file, "sh        %s, 0x%04x(%s)\n", get_rt(), get_iconst(), get_rs()); break;
+  case 0x2a: fprintf(file, "swl       %s, 0x%04x(%s)\n", get_rt(), get_iconst(), get_rs()); break;
+  case 0x2b: fprintf(file, "sw        %s, 0x%04x(%s)\n", get_rt(), get_iconst(), get_rs()); break;
 
-  case 0x2e: printf("swr    r%02d, #%08x(r%02d)\n", rt, iconst, rs); break;
+  case 0x2e: fprintf(file, "swr       %s, 0x%04x(%s)\n", get_rt(), get_iconst(), get_rs()); break;
 
   default:
-    printf("unknown (0x%08x)\n", state->code);
+    fprintf(file, "unknown (0x%08x)\n", state->code);
     break;
   }
 }

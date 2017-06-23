@@ -12,7 +12,7 @@ namespace cpu {
 
   void initialize(cpu_state_t *state);
 
-  void disassemble(cpu_state_t *state);
+  void disassemble(cpu_state_t *state, FILE *file);
 
   void tick(cpu_state_t *state);
 
