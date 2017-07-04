@@ -50,6 +50,25 @@ static uint8_t io_read_port_3(cdrom_state_t *state) {
   }
 }
 
+static uint32_t io_read_internal(cdrom_state_t *state, uint32_t port) {
+  switch (port) {
+  case 0:
+    return io_read_port_0(state);
+
+  case 1:
+    return io_read_port_1(state);
+
+  case 2:
+    return io_read_port_2(state);
+
+  case 3:
+    return io_read_port_3(state);
+
+  default:
+    return 0;
+  }
+}
+
 uint32_t cdrom::io_read(cdrom_state_t *state, int width, uint32_t address) {
   if (width == bus::BUS_WIDTH_WORD && address == 0x1f801800) {
     auto b0 = state->data.read();
@@ -63,29 +82,7 @@ uint32_t cdrom::io_read(cdrom_state_t *state, int width, uint32_t address) {
   assert(width == bus::BUS_WIDTH_BYTE);
 
   uint32_t port = get_port(address);
-  uint32_t data;
-
-  switch (address - 0x1f801800) {
-  case 0:
-    data = io_read_port_0(state);
-    break;
-
-  case 1:
-    data = io_read_port_1(state);
-    break;
-
-  case 2:
-    data = io_read_port_2(state);
-    break;
-
-  case 3:
-    data = io_read_port_3(state);
-    break;
-
-  default:
-    data = 0;
-    break;
-  }
+  uint32_t data = io_read_internal(state, port);
 
   if (utility::log_cdrom) {
     printf("cdrom::io_read_port_%d_%d() returned 0x%02x\n", port, state->index, data);
