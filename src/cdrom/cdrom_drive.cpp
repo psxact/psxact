@@ -7,7 +7,7 @@
 void cdrom::initialize(cdrom_state_t *state, const std::string &game_file_name) {
   state->game_file_name = game_file_name;
 
-  cdrom::control::transition(state, &cdrom::control::idling, 1000);
+  cdrom::logic::transition(state, &cdrom::logic::idling, 1000);
   cdrom::drive::transition(state, &cdrom::drive::idling, 1000);
 }
 
@@ -203,10 +203,10 @@ void cdrom::tick(cdrom_state_t *state) {
     state->drive.stage(state);
   }
 
-  state->control.timer--;
+  state->logic.timer--;
 
-  if (state->control.timer == 0) {
-    state->control.stage(state);
+  if (state->logic.timer == 0) {
+    state->logic.stage(state);
   }
 
   if (state->interrupt_request) {
@@ -271,34 +271,34 @@ static void do_seek(cdrom_state_t *state) {
 }
 
 void cdrom::command::get_id(cdrom_state_t *state) {
-  state->control.response.write(cdrom::get_status_byte(state));
-  state->control.interrupt_request = 3;
+  state->logic.response.write(cdrom::get_status_byte(state));
+  state->logic.interrupt_request = 3;
 
   cdrom::drive::transition(state, &cdrom::drive::getting_id, 40000);
 }
 
 void cdrom::command::get_status(cdrom_state_t *state) {
-  state->control.response.write(cdrom::get_status_byte(state));
-  state->control.interrupt_request = 3;
+  state->logic.response.write(cdrom::get_status_byte(state));
+  state->logic.interrupt_request = 3;
 }
 
 void cdrom::command::init(cdrom_state_t *state) {
-  state->control.response.write(cdrom::get_status_byte(state));
-  state->control.interrupt_request = 3;
+  state->logic.response.write(cdrom::get_status_byte(state));
+  state->logic.interrupt_request = 3;
 
   cdrom::drive::transition(state, &cdrom::drive::int2, 1000);
 }
 
 void cdrom::command::pause(cdrom_state_t *state) {
-  state->control.response.write(cdrom::get_status_byte(state));
-  state->control.interrupt_request = 3;
+  state->logic.response.write(cdrom::get_status_byte(state));
+  state->logic.interrupt_request = 3;
 
   cdrom::drive::transition(state, &cdrom::drive::int2, 1000);
 }
 
 void cdrom::command::read_n(cdrom_state_t *state) {
-  state->control.response.write(cdrom::get_status_byte(state));
-  state->control.interrupt_request = 3;
+  state->logic.response.write(cdrom::get_status_byte(state));
+  state->logic.interrupt_request = 3;
 
   do_seek(state);
 
@@ -308,15 +308,15 @@ void cdrom::command::read_n(cdrom_state_t *state) {
 }
 
 void cdrom::command::read_table_of_contents(cdrom_state_t *state) {
-  state->control.response.write(cdrom::get_status_byte(state));
-  state->control.interrupt_request = 3;
+  state->logic.response.write(cdrom::get_status_byte(state));
+  state->logic.interrupt_request = 3;
 
   cdrom::drive::transition(state, &cdrom::drive::int2, 40000);
 }
 
 void cdrom::command::seek_data_mode(cdrom_state_t *state) {
-  state->control.response.write(cdrom::get_status_byte(state));
-  state->control.interrupt_request = 3;
+  state->logic.response.write(cdrom::get_status_byte(state));
+  state->logic.interrupt_request = 3;
 
   do_seek(state);
 
@@ -324,16 +324,16 @@ void cdrom::command::seek_data_mode(cdrom_state_t *state) {
 }
 
 void cdrom::command::set_mode(cdrom_state_t *state, uint8_t mode) {
-  state->control.response.write(cdrom::get_status_byte(state));
-  state->control.interrupt_request = 3;
+  state->logic.response.write(cdrom::get_status_byte(state));
+  state->logic.interrupt_request = 3;
 
   state->mode.double_speed = (mode & 0x80) != 0;
   state->mode.read_whole_sector = (mode & 0x20) != 0;
 }
 
 void cdrom::command::set_seek_target(cdrom_state_t *state, uint8_t minute, uint8_t second, uint8_t sector) {
-  state->control.response.write(cdrom::get_status_byte(state));
-  state->control.interrupt_request = 3;
+  state->logic.response.write(cdrom::get_status_byte(state));
+  state->logic.interrupt_request = 3;
 
   state->seek_timecode.minute = minute;
   state->seek_timecode.second = second;
@@ -348,70 +348,70 @@ void cdrom::command::test(cdrom_state_t *state, uint8_t function) {
 
   switch (function) {
   case 0x20:
-    state->control.response.write(0x98);
-    state->control.response.write(0x06);
-    state->control.response.write(0x10);
-    state->control.response.write(0xc3);
-    state->control.interrupt_request = 3;
+    state->logic.response.write(0x98);
+    state->logic.response.write(0x06);
+    state->logic.response.write(0x10);
+    state->logic.response.write(0xc3);
+    state->logic.interrupt_request = 3;
     break;
   }
 }
 
 void cdrom::command::unmute(cdrom_state_t *state) {
-  state->control.response.write(cdrom::get_status_byte(state));
-  state->control.interrupt_request = 3;
+  state->logic.response.write(cdrom::get_status_byte(state));
+  state->logic.interrupt_request = 3;
 }
 
-// -===-
-//  CPU
-// -===-
+// -=====-
+//  Logic
+// -=====-
 
-void cdrom::control::transition(cdrom_state_t *state, cdrom_state_t::stage_t stage, int timer) {
-  state->control.stage = stage;
-  state->control.timer = timer;
+void cdrom::logic::transition(cdrom_state_t *state, cdrom_state_t::stage_t stage, int timer) {
+  state->logic.stage = stage;
+  state->logic.timer = timer;
 }
 
-void cdrom::control::idling(cdrom_state_t *state) {
+void cdrom::logic::idling(cdrom_state_t *state) {
   if (state->command_is_new) {
     state->command_is_new = 0;
 
     if (state->parameter.is_empty()) {
-      transition(state, cdrom::control::transferring_command, 1000);
+      transition(state, cdrom::logic::transferring_command, 1000);
     }
     else {
-      transition(state, cdrom::control::transferring_parameters, 1000);
+      transition(state, cdrom::logic::transferring_parameters, 1000);
     }
   }
   else {
-    transition(state, cdrom::control::idling, 1000);
+    transition(state, cdrom::logic::idling, 1000);
   }
 }
 
-void cdrom::control::transferring_parameters(cdrom_state_t *state) {
-  state->control.parameter.write(state->parameter.read());
+void cdrom::logic::transferring_parameters(cdrom_state_t *state) {
+  state->logic.parameter.write(state->parameter.read());
 
   if (state->parameter.is_empty()) {
-    transition(state, cdrom::control::transferring_command, 1000);
+    transition(state, cdrom::logic::transferring_command, 1000);
   }
   else {
-    transition(state, cdrom::control::transferring_parameters, 1000);
+    transition(state, cdrom::logic::transferring_parameters, 1000);
   }
 }
 
-void cdrom::control::transferring_command(cdrom_state_t *state) {
-  state->control.command = state->command;
+void cdrom::logic::transferring_command(cdrom_state_t *state) {
+  state->logic.command = state->command;
 
-  transition(state, cdrom::control::executing_command, 1000);
+  transition(state, cdrom::logic::executing_command, 1000);
 }
 
-void cdrom::control::executing_command(cdrom_state_t *state) {
-#define get_param() state->control.parameter.read()
+void cdrom::logic::executing_command(cdrom_state_t *state) {
+#define get_param() state->logic.parameter.read()
 
   if (utility::log_cdrom) {
-    printf("cdrom::control::executing_command(0x%02x)\n", state->control.command);
+    printf("cdrom::control::executing_command(0x%02x)\n", state->logic.command);
   }
 
-  switch (state->control.command) {
+  switch (state->logic.command) {
   case 0x01:
     cdrom::command::get_status(state);
     break;
@@ -471,36 +471,36 @@ void cdrom::control::executing_command(cdrom_state_t *state) {
     return;
   }
 
-  transition(state, &cdrom::control::clearing_response, 1000);
+  transition(state, &cdrom::logic::clearing_response, 1000);
 
 #undef get_param
 }
 
-void cdrom::control::clearing_response(cdrom_state_t *state) {
+void cdrom::logic::clearing_response(cdrom_state_t *state) {
   state->response.clear();
 
-  transition(state, &cdrom::control::transferring_response, 1000);
+  transition(state, &cdrom::logic::transferring_response, 1000);
 }
 
-void cdrom::control::transferring_response(cdrom_state_t *state) {
-  state->response.write(state->control.response.read());
+void cdrom::logic::transferring_response(cdrom_state_t *state) {
+  state->response.write(state->logic.response.read());
 
-  if (state->control.response.is_empty()) {
-    transition(state, &cdrom::control::deliver_interrupt, 1000);
+  if (state->logic.response.is_empty()) {
+    transition(state, &cdrom::logic::deliver_interrupt, 1000);
   }
   else {
-    transition(state, &cdrom::control::transferring_response, 1000);
+    transition(state, &cdrom::logic::transferring_response, 1000);
   }
 }
 
-void cdrom::control::deliver_interrupt(cdrom_state_t *state) {
+void cdrom::logic::deliver_interrupt(cdrom_state_t *state) {
   if (state->interrupt_request == 0) {
-    state->interrupt_request = state->control.interrupt_request;
+    state->interrupt_request = state->logic.interrupt_request;
 
-    transition(state, &cdrom::control::idling, 1);
+    transition(state, &cdrom::logic::idling, 1);
   }
   else {
-    transition(state, &cdrom::control::deliver_interrupt, 1);
+    transition(state, &cdrom::logic::deliver_interrupt, 1);
   }
 }
 
@@ -521,20 +521,20 @@ void cdrom::drive::getting_id(cdrom_state_t *state) {
   if (state->interrupt_request == 0) {
     // INT2(02h,00h, 20h,00h, 53h,43h,45h,4xh)
 
-    state->control.response.write(0x02);
-    state->control.response.write(0x00);
+    state->logic.response.write(0x02);
+    state->logic.response.write(0x00);
 
-    state->control.response.write(0x20);
-    state->control.response.write(0x00);
+    state->logic.response.write(0x20);
+    state->logic.response.write(0x00);
 
-    state->control.response.write('S');
-    state->control.response.write('C');
-    state->control.response.write('E');
-    state->control.response.write('A');
-    state->control.interrupt_request = 2;
+    state->logic.response.write('S');
+    state->logic.response.write('C');
+    state->logic.response.write('E');
+    state->logic.response.write('A');
+    state->logic.interrupt_request = 2;
 
-    cdrom::control::transition(state, cdrom::control::clearing_response, 1000);
     cdrom::drive::transition(state, cdrom::drive::idling, 1000);
+    cdrom::logic::transition(state, cdrom::logic::clearing_response, 1000);
   }
   else {
     cdrom::drive::transition(state, cdrom::drive::getting_id, 1000);
@@ -543,11 +543,11 @@ void cdrom::drive::getting_id(cdrom_state_t *state) {
 
 void cdrom::drive::int2(cdrom_state_t *state) {
   if (state->interrupt_request == 0) {
-    state->control.response.write(cdrom::get_status_byte(state));
-    state->control.interrupt_request = 2;
+    state->logic.response.write(cdrom::get_status_byte(state));
+    state->logic.interrupt_request = 2;
 
-    cdrom::control::transition(state, cdrom::control::clearing_response, 1000);
     cdrom::drive::transition(state, cdrom::drive::idling, 1000);
+    cdrom::logic::transition(state, cdrom::logic::clearing_response, 1000);
   }
   else {
     cdrom::drive::transition(state, cdrom::drive::int2, 1000);
@@ -555,8 +555,8 @@ void cdrom::drive::int2(cdrom_state_t *state) {
 }
 
 void cdrom::drive::reading(cdrom_state_t *state) {
-  state->control.response.write(cdrom::get_status_byte(state));
-  state->control.interrupt_request = 1;
+  state->logic.response.write(cdrom::get_status_byte(state));
+  state->logic.interrupt_request = 1;
 
   cdrom::read_sector(state);
 
@@ -577,5 +577,5 @@ void cdrom::drive::reading(cdrom_state_t *state) {
   int cycles = get_cycles_per_sector(state);
 
   cdrom::drive::transition(state, &cdrom::drive::reading, cycles);
-  cdrom::control::transition(state, &cdrom::control::clearing_response, 1000);
+  cdrom::logic::transition(state, &cdrom::logic::clearing_response, 1000);
 }

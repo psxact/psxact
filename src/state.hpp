@@ -42,7 +42,7 @@ struct cdrom_state_t {
     fifo_t<uint8_t, 4> parameter;
     fifo_t<uint8_t, 4> response;
     uint8_t command;
-  } control;
+  } logic;
 
   struct {
     stage_t stage;

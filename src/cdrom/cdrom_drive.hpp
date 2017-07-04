@@ -32,7 +32,7 @@ namespace cdrom {
     void unmute(cdrom_state_t *state);
   }
 
-  namespace control {
+  namespace logic {
     void transition(cdrom_state_t *state, cdrom_state_t::stage_t stage, int timer);
 
     void idling(cdrom_state_t *state);
