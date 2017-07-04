@@ -11,9 +11,9 @@ namespace utility {
   constexpr bool log_cdrom = 0;
   constexpr bool log_cpu   = 0;
   constexpr bool log_dma   = 0;
-  constexpr bool log_gpu   = 0;
+  constexpr bool log_gpu   = 1;
   constexpr bool log_input = 0;
-  constexpr bool log_spu   = 1;
+  constexpr bool log_spu   = 0;
   constexpr bool log_timer = 0;
 
   template<int bits>

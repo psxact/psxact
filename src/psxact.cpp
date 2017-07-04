@@ -19,14 +19,19 @@ system_state_t *initialize(const char *bfn, const char *gfn) {
 }
 
 void run_for_one_frame(system_state_t *system) {
+  const int ITERATIONS = 2;
+
   const int CPU_FREQ = 33868800;
-  const int CYCLES_PER_FRAME = CPU_FREQ / 60;
+  const int CYCLES_PER_FRAME = CPU_FREQ / 60 / ITERATIONS;
 
   for (int i = 0; i < CYCLES_PER_FRAME; i++) {
     cpu::tick(&system->cpu_state);
-    timer::tick_timer_2(&system->timer_state);
 
-    cdrom::tick(&system->cdrom_state);
+    for (int j = 0; j < ITERATIONS; j++) {
+      timer::tick_timer_1(&system->timer_state);
+      timer::tick_timer_2(&system->timer_state);
+      cdrom::tick(&system->cdrom_state);
+    }
   }
 
   bus::irq(0);

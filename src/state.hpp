@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string>
 #include "fifo.hpp"
+#include "utility.hpp"
 
 struct cdrom_sector_timecode_t {
   uint8_t minute;
@@ -199,6 +200,15 @@ struct input_state_t {
 };
 
 struct spu_state_t {
+  uint16_t control;
+
+  uint16_t registers[24][8];
+
+  utility::memory_t<19> sound_ram;
+
+  uint32_t sound_ram_address;
+  uint16_t sound_ram_address_latch;
+  uint16_t sound_ram_transfer_control;
 };
 
 struct timer_state_t {

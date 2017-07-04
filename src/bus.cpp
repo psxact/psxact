@@ -105,6 +105,20 @@ uint32_t bus::read(int width, uint32_t address) {
     return 0;
   }
 
+  switch (address) {
+//case 0x1f801000: return 0x1f000000;
+//case 0x1f801004: return 0x1f802000;
+//case 0x1f801008: return 0x0013243f;
+//case 0x1f80100c: return 0x00003022;
+//case 0x1f801010: return 0x0013243f;
+  case 0x1f801014: return 0x200931e1;
+//case 0x1f801018: return;
+//case 0x1f80101c: return 0x00070777;
+//case 0x1f801020: return;
+
+//case 0x1f801060: return 0x00000b88;
+  }
+
   if (address == 0xfffe0130) {
     return 0;
   }

@@ -46,6 +46,14 @@ void timer::tick_timer_0(timer_state_t *state) {
 }
 
 void timer::tick_timer_1(timer_state_t *state) {
+  auto &timer = state->timers[1];
+
+  timer.divider += 11;
+
+  if (timer.divider >= 3413 * 7) {
+    timer.divider -= 3413 * 7;
+    timer.counter += 1;
+  }
 }
 
 void timer::tick_timer_2(timer_state_t *state) {
