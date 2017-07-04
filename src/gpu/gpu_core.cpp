@@ -26,6 +26,10 @@ uint32_t gpu::stat(gpu_state_t *state) {
 uint32_t gpu::io_read(gpu_state_t *state, int width, uint32_t address) {
   assert(width == bus::BUS_WIDTH_WORD);
 
+  if (utility::log_gpu) {
+    printf("gpu::io_read(%d, 0x%08x)\n", width, address);
+  }
+
   switch (address) {
   case 0x1f801810:
     return data(state);
@@ -40,6 +44,10 @@ uint32_t gpu::io_read(gpu_state_t *state, int width, uint32_t address) {
 
 void gpu::io_write(gpu_state_t *state, int width, uint32_t address, uint32_t data) {
   assert(width == bus::BUS_WIDTH_WORD);
+
+  if (utility::log_gpu) {
+    printf("gpu::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
+  }
 
   switch (address) {
   case 0x1f801810:

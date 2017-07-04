@@ -8,6 +8,14 @@
 #define unlikely(n) __builtin_expect(!!(n), 0)
 
 namespace utility {
+  constexpr bool log_cdrom = 0;
+  constexpr bool log_cpu   = 0;
+  constexpr bool log_dma   = 0;
+  constexpr bool log_gpu   = 0;
+  constexpr bool log_input = 0;
+  constexpr bool log_spu   = 1;
+  constexpr bool log_timer = 0;
+
   template<int bits>
   struct memory_t {
     static constexpr int mask = (1 << bits) - 1;

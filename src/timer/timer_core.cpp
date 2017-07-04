@@ -1,7 +1,13 @@
 #include "timer_core.hpp"
 #include "../bus.hpp"
+#include "../utility.hpp"
+#include "../state.hpp"
 
 uint32_t timer::io_read(timer_state_t *state, int width, uint32_t address) {
+  if (utility::log_timer) {
+    printf("timer::io_read(%d, 0x%08x)\n", width, address);
+  }
+
   int n = (address >> 4) & 3;
 
   switch ((address & 0xf) / 4) {
@@ -14,6 +20,10 @@ uint32_t timer::io_read(timer_state_t *state, int width, uint32_t address) {
 }
 
 void timer::io_write(timer_state_t *state, int width, uint32_t address, uint32_t data) {
+  if (utility::log_timer) {
+    printf("timer::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
+  }
+
   int n = (address >> 4) & 3;
 
   switch ((address & 0xf) / 4) {

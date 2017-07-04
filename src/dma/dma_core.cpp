@@ -30,6 +30,10 @@ static uint32_t get_register_index(uint32_t address) {
 }
 
 uint32_t dma::io_read(dma_state_t *state, int width, uint32_t address) {
+  if (utility::log_dma) {
+    printf("dma::io_read(%d, 0x%08x)\n", width, address);
+  }
+
   auto channel = get_channel_index(address);
   if (channel == 7) {
     switch (get_register_index(address)) {
@@ -51,6 +55,10 @@ uint32_t dma::io_read(dma_state_t *state, int width, uint32_t address) {
 }
 
 void dma::io_write(dma_state_t *state, int width, uint32_t address, uint32_t data) {
+  if (utility::log_dma) {
+    printf("dma::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
+  }
+
   auto channel = get_channel_index(address);
   if (channel == 7) {
     switch (get_register_index(address)) {

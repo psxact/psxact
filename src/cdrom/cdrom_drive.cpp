@@ -11,6 +11,10 @@ void cdrom::initialize(cdrom_state_t *state, const std::string &game_file_name) 
   cdrom::drive::transition(state, &cdrom::drive::idling, 1000);
 }
 
+static uint32_t get_port(uint32_t address) {
+  return address - 0x1f801800;
+}
+
 static uint8_t io_read_port_0(cdrom_state_t *state) {
   return uint8_t(
     (state->index) |
@@ -42,7 +46,6 @@ static uint8_t io_read_port_3(cdrom_state_t *state) {
     return uint8_t(0xe0 | state->interrupt_request);
 
   default:
-    printf("cdrom::io_read_port_3(%d)\n", state->index);
     return 0;
   }
 }
@@ -59,25 +62,39 @@ uint32_t cdrom::io_read(cdrom_state_t *state, int width, uint32_t address) {
 
   assert(width == bus::BUS_WIDTH_BYTE);
 
+  uint32_t port = get_port(address);
+  uint32_t data;
+
   switch (address - 0x1f801800) {
   case 0:
-    return io_read_port_0(state);
+    data = io_read_port_0(state);
+    break;
 
   case 1:
-    return io_read_port_1(state);
+    data = io_read_port_1(state);
+    break;
 
   case 2:
-    return io_read_port_2(state);
+    data = io_read_port_2(state);
+    break;
 
   case 3:
-    return io_read_port_3(state);
+    data = io_read_port_3(state);
+    break;
 
   default:
-    return 0;
+    data = 0;
+    break;
   }
+
+  if (utility::log_cdrom) {
+    printf("cdrom::io_read_port_%d_%d() returned 0x%02x\n", port, state->index, data);
+  }
+
+  return data;
 }
 
-static void io_write_port_0(cdrom_state_t *state, uint8_t data) {
+static void io_write_port_0_n(cdrom_state_t *state, uint8_t data) {
   state->index = data & 3;
 }
 
@@ -87,15 +104,12 @@ static void io_write_port_1_0(cdrom_state_t *state, uint8_t data) {
 }
 
 static void io_write_port_1_1(cdrom_state_t *state, uint8_t data) {
-  printf("cdrom::io_write_port_1_1(0x%02x)\n", data);
 }
 
 static void io_write_port_1_2(cdrom_state_t *state, uint8_t data) {
-  printf("cdrom::io_write_port_1_2(0x%02x)\n", data);
 }
 
 static void io_write_port_1_3(cdrom_state_t *state, uint8_t data) {
-  printf("cdrom::io_write_port_1_3(0x%02x)\n", data);
 }
 
 static void io_write_port_2_0(cdrom_state_t *state, uint8_t data) {
@@ -108,11 +122,9 @@ static void io_write_port_2_1(cdrom_state_t *state, uint8_t data) {
 }
 
 static void io_write_port_2_2(cdrom_state_t *state, uint8_t data) {
-  printf("cdrom::io_write_port_2_2(0x%02x)\n", data);
 }
 
 static void io_write_port_2_3(cdrom_state_t *state, uint8_t data) {
-  printf("cdrom::io_write_port_2_3(0x%02x)\n", data);
 }
 
 static void io_write_port_3_0(cdrom_state_t *state, uint8_t data) {
@@ -141,21 +153,25 @@ static void io_write_port_3_1(cdrom_state_t *state, uint8_t data) {
 }
 
 static void io_write_port_3_2(cdrom_state_t *state, uint8_t data) {
-  // printf("cdrom::io_write_port_3_2(0x%02x)\n", data);
 }
 
 static void io_write_port_3_3(cdrom_state_t *state, uint8_t data) {
-  // printf("cdrom::io_write_port_3_3(0x%02x)\n", data);
 }
 
 void cdrom::io_write(cdrom_state_t *state, int width, uint32_t address, uint32_t data) {
   assert(width == bus::BUS_WIDTH_BYTE);
 
+  uint32_t port = get_port(address);
+
+  if (utility::log_cdrom) {
+    printf("cdrom::io_write_port_%d_%d(0x%02x)\n", port, state->index, data);
+  }
+
   uint8_t clipped = uint8_t(data);
 
-  switch (address - 0x1f801800) {
+  switch (port) {
   case 0:
-    return io_write_port_0(state, clipped);
+    return io_write_port_0_n(state, clipped);
 
   case 1:
     switch (state->index) {
@@ -223,10 +239,12 @@ void cdrom::read_sector(cdrom_state_t *state) {
   constexpr int bytes_per_sector = 2352;
   constexpr int lead_in_duration = 2 * sectors_per_second;
 
-  printf("cdrom::read_sector(\"%02d:%02d:%02d\")\n",
-         state->read_timecode.minute,
-         state->read_timecode.second,
-         state->read_timecode.sector);
+  if (utility::log_cdrom) {
+    printf("cdrom::read_sector(\"%02d:%02d:%02d\")\n",
+           state->read_timecode.minute,
+           state->read_timecode.second,
+           state->read_timecode.sector);
+  }
 
   auto &tc = state->read_timecode;
   auto cursor =
@@ -327,6 +345,10 @@ void cdrom::command::set_seek_target(cdrom_state_t *state, uint8_t minute, uint8
 }
 
 void cdrom::command::test(cdrom_state_t *state, uint8_t function) {
+  if (utility::log_cdrom) {
+    printf("cdrom::command::test(0x%02x)\n", function);
+  }
+
   switch (function) {
   case 0x20:
     state->control.response.write(0x98);
@@ -388,6 +410,10 @@ void cdrom::control::transferring_command(cdrom_state_t *state) {
 void cdrom::control::executing_command(cdrom_state_t *state) {
 #define get_param() state->control.parameter.read()
 
+  if (utility::log_cdrom) {
+    printf("cdrom::control::executing_command(0x%02x)\n", state->control.command);
+  }
+
   switch (state->control.command) {
   case 0x01:
     cdrom::command::get_status(state);
@@ -445,7 +471,6 @@ void cdrom::control::executing_command(cdrom_state_t *state) {
     break;
 
   default:
-    printf("cdrom::control::executing_command(0x%02x)\n", state->control.command);
     return;
   }
 
