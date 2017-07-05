@@ -10,9 +10,9 @@ This emulator is designed to work "out of the box", no plug-in hell required!
 
 ## Current Status
 
-Currently, the emulator can get through the BIOS, but hasn't booted any
-commercial games yet. A software rasterizer is used to attempt pixel accurate
-graphical output, the results are quite nice!
+Currently, the emulator is capable of booting a small amount of commercial
+games. A software rasterizer is used to attempt pixel accurate graphical output,
+the results are quite nice!
 
 ![Current status](images/current.png)
 
