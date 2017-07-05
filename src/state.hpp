@@ -201,6 +201,7 @@ struct input_state_t {
 
 struct spu_state_t {
   uint16_t control;
+  uint16_t status;
 
   uint16_t registers[24][8];
 

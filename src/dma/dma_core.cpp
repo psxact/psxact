@@ -179,6 +179,12 @@ static void run_channel_3(dma_state_t *state) {
   dma::irq_channel(state, 3);
 }
 
+static void run_channel_4_write(dma_state_t *state) {
+  state->channels[4].control &= ~0x01000000;
+
+  dma::irq_channel(state, 4);
+}
+
 static void run_channel_6(dma_state_t *state) {
   auto address = state->channels[6].address;
   auto counter = state->channels[6].counter & 0xffff;
@@ -209,6 +215,12 @@ void dma::run_channel(dma_state_t *state, int n) {
   if (n == 3) {
     switch (state->channels[3].control) {
     case 0x11000000: return run_channel_3(state);
+    }
+  }
+
+  if (n == 4) {
+    switch (state->channels[4].control) {
+    case 0x01000201: return run_channel_4_write(state);
     }
   }
 

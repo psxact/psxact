@@ -71,6 +71,18 @@ static inline uint32_t map_address(uint32_t address) {
   return address & segments[address >> 29];
 }
 
+static void log_bios_calls(const cpu_state_t *state) {
+  if (state->regs.this_pc == 0x00a0) {
+    printf("bios::a(0x%02x)\n", state->regs.gp[9]);
+  }
+  else if (state->regs.this_pc == 0x00b0) {
+    printf("bios::b(0x%02x)\n", state->regs.gp[9]);
+  }
+  else if (state->regs.this_pc == 0x00c0) {
+    printf("bios::c(0x%02x)\n", state->regs.gp[9]);
+  }
+}
+
 void cpu::read_code(cpu_state_t *state) {
   if (state->regs.pc & 3) {
     cop0::enter_exception(state, 0x4);
@@ -79,6 +91,10 @@ void cpu::read_code(cpu_state_t *state) {
   state->regs.this_pc = state->regs.pc;
   state->regs.pc = state->regs.next_pc;
   state->regs.next_pc += 4;
+
+  if (utility::log_cpu) {
+    log_bios_calls(state);
+  }
 
   // todo: read i-cache
 
