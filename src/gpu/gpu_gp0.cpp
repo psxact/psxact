@@ -10,8 +10,8 @@ static int command_size[256] = {
 
   1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $40
   1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $50
-  1, 1, 1, 1,  1, 4, 1, 1,  2, 1, 1, 1,  1, 1, 1, 1, // $60
-  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  3, 1, 1, 1, // $70
+  1, 1, 1, 1,  4, 4, 4, 4,  2, 1, 1, 1,  3, 3, 3, 3, // $60
+  1, 1, 1, 1,  3, 3, 3, 3,  1, 1, 1, 1,  3, 3, 3, 3, // $70
 
   1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $80
   1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $90
@@ -204,59 +204,45 @@ void gpu::gp0(gpu_state_t *state, uint32_t data) {
       break;
     }
 
-    case 0x65: {
-      //auto color  = gp0_to_color(state.fifo.buffer[0]);
-      auto point1 = gp0_to_point(state->fifo.buffer[1]);
-      auto coord = state->fifo.buffer[2];
-      auto point2 = gp0_to_point(state->fifo.buffer[3]);
+    case 0x64:
+    case 0x65:
+    case 0x66:
+    case 0x67:
+      return gpu::draw_rect(state);
 
-      assert((state->status & 0x180) == 0);
+    case 0x6c:
+    case 0x6d:
+    case 0x6e:
+    case 0x6f:
+      return gpu::draw_rect(state);
 
-      auto base_u = ((state->status >> 0) & 0xf) * 64;
-      auto base_v = ((state->status >> 4) & 0x1) * 256;
+    case 0x74:
+    case 0x75:
+    case 0x76:
+    case 0x77:
+      return gpu::draw_rect(state);
 
-      auto clut_x = ((coord >> 16) & 0x03f) * 16;
-      auto clut_y = ((coord >> 22) & 0x1ff);
+    case 0x7c:
+    case 0x7d:
+    case 0x7e:
+    case 0x7f:
+      return gpu::draw_rect(state);
 
-      for (int y = 0; y < point2.y; y++) {
-        for (int x = 0; x < point2.x; x++) {
-          auto texel = vram::read(base_u + (x / 4),
-            base_v + y);
+    case 0x60:
+    case 0x62:
+      return gpu::draw_rect(state);
 
-          int index = 0;
+    case 0x68:
+    case 0x6a:
+      return gpu::draw_rect(state);
 
-          switch (x & 3) {
-          case 0: index = (texel >> 0) & 0xf; break;
-          case 1: index = (texel >> 4) & 0xf; break;
-          case 2: index = (texel >> 8) & 0xf; break;
-          case 3: index = (texel >> 12) & 0xf; break;
-          }
+    case 0x70:
+    case 0x72:
+      return gpu::draw_rect(state);
 
-          auto color = vram::read(clut_x + index,
-            clut_y);
-
-          vram::write(point1.x + x,
-            point1.y + y,
-            color);
-        }
-      }
-
-      break;
-    }
-
-    case 0x68: {
-      auto color = gp0_to_color(state->fifo.buffer[0]);
-      auto point = gp0_to_point(state->fifo.buffer[1]);
-
-      gpu::draw_point(
-        state,
-        point.x,
-        point.y,
-        color.r,
-        color.g,
-        color.b);
-      break;
-    }
+    case 0x78:
+    case 0x7a:
+      return gpu::draw_rect(state);
 
     case 0xa0: {
       auto &transfer = state->cpu_to_gpu_transfer;

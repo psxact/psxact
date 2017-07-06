@@ -35,6 +35,7 @@ set(SOURCE_FILES
     src/gpu/gpu_draw.cpp
     src/gpu/gpu_draw_gouraud.cpp
     src/gpu/gpu_draw_texture.cpp
+    src/gpu/gpu_rect.cpp
     src/input/input.cpp
     src/input/input.hpp
     src/memory/vram.cpp

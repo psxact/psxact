@@ -36,6 +36,8 @@ namespace gpu {
 
   void draw_point(gpu_state_t *state, int x, int y, int r, int g, int b);
 
+  void draw_rect(gpu_state_t *state);
+
   namespace gouraud {
     struct pixel_t {
       point_t point;
