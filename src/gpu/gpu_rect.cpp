@@ -112,8 +112,8 @@ static gpu::color_t get_color(gpu_state_t *state, int x, int y) {
 }
 
 void gpu::draw_rect(gpu_state_t *state) {
-  uint32_t xofs = state->x_offset + uint16_t(state->fifo.buffer[1]);
-  uint32_t yofs = state->y_offset + uint16_t(state->fifo.buffer[1] >> 16);
+  uint32_t xofs = state->x_offset + int16_t(state->fifo.buffer[1]);
+  uint32_t yofs = state->y_offset + int16_t(state->fifo.buffer[1] >> 16);
 
   uint32_t w = get_x_length(state);
   uint32_t h = get_y_length(state);
