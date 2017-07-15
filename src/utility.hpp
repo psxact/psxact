@@ -66,6 +66,19 @@ namespace utility {
     memory.w[(address & memory.mask) / 4] = data;
   }
 
+  template<int32_t min, int32_t max>
+  inline int32_t sclamp(int32_t value) {
+    if (value < min) {
+      return min;
+    }
+
+    if (value > max) {
+      return max;
+    }
+
+    return value;
+  }
+
   template<int bits>
   inline uint32_t sclip(uint32_t value) {
     enum { mask = (1 << bits) - 1 };
@@ -103,6 +116,20 @@ namespace utility {
 
   inline uint8_t bcd_to_dec(uint8_t value) {
     return uint8_t(((value / 16) * 10) + (value % 16));
+  }
+
+  template<int bits>
+  inline int clz(uint32_t value) {
+    constexpr int mask = 1 << (bits - 1);
+
+    uint32_t count = 0;
+
+    while (!(value & mask) && count < bits) {
+      value = value << 1;
+      count = count + 1;
+    }
+
+    return count;
   }
 }
 

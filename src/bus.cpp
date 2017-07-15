@@ -10,6 +10,7 @@
 #include "spu/spu_core.hpp"
 #include "timer/timer_core.hpp"
 #include "utility.hpp"
+#include "state.hpp"
 
 static cdrom_state_t *cdrom_state;
 static cpu_state_t *cpu_state;
@@ -37,6 +38,8 @@ void bus::initialize(system_state_t *state, const std::string &bios_file_name) {
   memset(dmem.b, 0, size_t(dmem.size));
 
   utility::read_all_bytes(bios_file_name.c_str(), bios);
+
+  // utility::write_word(bios, 0x6990, 0);
 }
 
 void bus::irq(int interrupt) {
@@ -127,6 +130,46 @@ uint32_t bus::read(int width, uint32_t address) {
   throw std::exception();
 }
 
+static void load_executable() {
+#define get_word(file)  \
+  (                     \
+  (getc(file) <<  0) |  \
+  (getc(file) <<  8) |  \
+  (getc(file) << 16) |  \
+  (getc(file) << 24)    \
+  )
+
+  FILE *game = fopen(cdrom_state->game_file_name.c_str(), "rb+");
+
+  fseek(game, 0x010, SEEK_SET);
+
+  uint32_t pc = get_word(game);
+  uint32_t gp = get_word(game);
+
+  uint32_t offset = get_word(game);
+  uint32_t length = get_word(game);
+
+  fseek(game, 0x030, SEEK_SET);
+
+  uint32_t sp = get_word(game) + get_word(game);
+
+  cpu_state->regs.pc = pc;
+  cpu_state->regs.next_pc = pc + 4;
+  cpu_state->regs.gp[28] = gp;
+  cpu_state->regs.gp[29] = sp;
+  cpu_state->regs.gp[30] = sp;
+
+  fseek(game, 0x800, SEEK_SET);
+
+  for (uint32_t i = 0; i < length; i += 4) {
+    utility::write_word(wram, offset + i, get_word(game));
+  }
+
+  fclose(game);
+
+#undef get_word
+}
+
 void bus::write(int width, uint32_t address, uint32_t data) {
   if (utility::between<0x00000000, 0x007fffff>(address)) {
     switch (width) {
@@ -168,6 +211,7 @@ void bus::write(int width, uint32_t address, uint32_t data) {
   }
 
   if (utility::between<0x1f801800, 0x1f801803>(address)) {
+    // return load_executable();
     return cdrom::io_write(cdrom_state, width, address, data);
   }
 

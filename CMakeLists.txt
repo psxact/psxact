@@ -20,6 +20,8 @@ set(SOURCE_FILES
     src/cpu/cpu_code.cpp
     src/cpu/cpu_cop0.cpp
     src/cpu/cpu_cop0.hpp
+    src/cpu/cpu_cop2_flag.cpp
+    src/cpu/cpu_cop2_io.cpp
     src/cpu/cpu_cop2.cpp
     src/cpu/cpu_cop2.hpp
     src/cpu/cpu_core.cpp

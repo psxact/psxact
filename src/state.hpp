@@ -6,6 +6,17 @@
 #include "fifo.hpp"
 #include "utility.hpp"
 
+union color_t {
+  struct {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+    uint8_t c;
+  };
+
+  uint32_t value;
+};
+
 struct cdrom_sector_timecode_t {
   uint8_t minute;
   uint8_t second;
@@ -56,46 +67,38 @@ struct cdrom_state_t {
   } mode;
 };
 
-
-struct cop2_state_t {
-  int32_t ofx;
-  int32_t ofy;
-  uint16_t h;
-  int16_t dqa;
-  int32_t dqb;
-  int16_t zsf3;
-  int16_t zsf4;
-  int16_t matrices[3][3][3];
-  int32_t control_vectors[4][3];
-  uint32_t flags;
-
-  struct color_t {
-    uint8_t c;
-    uint8_t b;
-    uint8_t g;
-    uint8_t r;
-  };
-
-  struct point_t {
-    int16_t x;
-    int16_t y;
-  };
-
-  int16_t v[4][3];
-  int32_t mac[4];
-  uint16_t otz;
-  color_t rgb;
-  int16_t ir[4];
-  point_t xy_fifo[4];
-  uint16_t z_fifo[4];
-  color_t rgb_fifo[3];
-  uint32_t lzcs;
-  uint8_t lzcr;
-  uint32_t reg_23;
-};
-
 struct cop0_state_t {
   uint32_t regs[16];
+};
+
+struct cop2_state_t {
+  struct {
+    int32_t matrix[4][3][3];
+    int32_t vector[4][3];
+    int32_t ofx;
+    int32_t ofy;
+    int32_t h;
+    int32_t dqa;
+    int32_t dqb;
+    int32_t zsf3;
+    int32_t zsf4;
+    uint32_t flag;
+  } ccr;
+
+  struct {
+    int32_t vector[4][3];
+    color_t rgbc;
+    int32_t otz;
+    int32_t ir0; //[4];
+    int32_t sx[3];
+    int32_t sy[3];
+    int32_t sz[4];
+    color_t rgb[3];
+    int32_t res;
+    int32_t mac[4];
+    int32_t lzcs;
+    int32_t lzcr;
+  } gpr;
 };
 
 struct cpu_state_t {

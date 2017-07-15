@@ -125,7 +125,9 @@ void cpu::disassemble(cpu_state_t *state, FILE *file) {
 
     switch (cpu::decoder::rs(state)) {
     case 0x00: fprintf(file, "mfc%d      %s, %s\n", co, get_rt(), get_rd()); break;
+    case 0x02: fprintf(file, "cfc%d      %s, %s\n", co, get_rt(), get_rd()); break;
     case 0x04: fprintf(file, "mtc%d      %s, %s\n", co, get_rt(), get_rd()); break;
+    case 0x06: fprintf(file, "ctc%d      %s, %s\n", co, get_rt(), get_rd()); break;
 
     case 0x10:
       switch (state->code & 0x3f) {

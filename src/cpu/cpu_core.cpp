@@ -4,6 +4,8 @@
 #include "cpu_cop0.hpp"
 #include "../utility.hpp"
 
+bool log_cpu_instr = 0;
+
 cpu::opcode cpu::op_table[64] = {
   nullptr,      cpu::op_bxx,   cpu::op_j,    cpu::op_jal,   cpu::op_beq,  cpu::op_bne, cpu::op_blez, cpu::op_bgtz,
   cpu::op_addi, cpu::op_addiu, cpu::op_slti, cpu::op_sltiu, cpu::op_andi, cpu::op_ori, cpu::op_xori, cpu::op_lui,
@@ -48,6 +50,10 @@ void cpu::tick(cpu_state_t *state) {
     cop0::enter_exception(state, 0x0);
   }
   else {
+    if (log_cpu_instr) {
+      cpu::disassemble(state, stdout);
+    }
+
     auto code = (state->code >> 26) & 63;
     if (code)
       op_table[code](state);
@@ -92,9 +98,13 @@ void cpu::read_code(cpu_state_t *state) {
   state->regs.pc = state->regs.next_pc;
   state->regs.next_pc += 4;
 
-  if (utility::log_cpu) {
-    log_bios_calls(state);
+  if (state->regs.this_pc == 0x00b0 && state->regs.gp[9] == 0x3d) {
+    printf("%c", state->regs.gp[4]);
   }
+
+//  if (utility::log_cpu) {
+//    log_bios_calls(state);
+//  }
 
   // todo: read i-cache
 
