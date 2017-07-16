@@ -1,5 +1,5 @@
+#include <algorithm>
 #include "cpu_cop2.hpp"
-#include "../state.hpp"
 
 static const uint8_t unr_table[0x101] = {
   0xff, 0xfd, 0xfb, 0xf9, 0xf7, 0xf5, 0xf3, 0xf1, 0xef, 0xee, 0xec, 0xea, 0xe8, 0xe6, 0xe4, 0xe3,
@@ -257,7 +257,7 @@ static inline int64_t transform_pt(cop2_state_t *state, uint32_t code, int mx, i
   auto &ccr = state->ccr;
   auto &gpr = state->gpr;
 
-  int32_t z = transform(state, code, mx, cv, v) >> 12;
+  int32_t z = int32_t(transform(state, code, mx, cv, v) >> 12);
 
   gpr.vector[3][0] = cop2::flags::b(state, 0, code, gpr.mac[1]);
   gpr.vector[3][1] = cop2::flags::b(state, 1, code, gpr.mac[2]);
