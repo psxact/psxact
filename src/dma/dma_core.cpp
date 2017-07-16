@@ -96,6 +96,18 @@ void dma::main(dma_state_t *state) {
   if (state->dpcr & 0x00000008) { run_channel(state, 0); }
 }
 
+static void run_channel_0(dma_state_t *state) {
+  state->channels[0].control &= ~0x01000000;
+
+  dma::irq_channel(state, 0);
+}
+
+static void run_channel_1(dma_state_t *state) {
+  state->channels[1].control &= ~0x01000000;
+
+  dma::irq_channel(state, 1);
+}
+
 static void run_channel_2_data_read(dma_state_t *state) {
   auto address = state->channels[2].address;
   auto bs = (state->channels[2].counter >>  0) & 0xffff;
@@ -204,6 +216,18 @@ static void run_channel_6(dma_state_t *state) {
 }
 
 void dma::run_channel(dma_state_t *state, int n) {
+  if (n == 0) {
+    switch (state->channels[0].control) {
+    case 0x01000201: return run_channel_0(state);
+    }
+  }
+
+  if (n == 1) {
+    switch (state->channels[1].control) {
+    case 0x01000200: return run_channel_1(state);
+    }
+  }
+
   if (n == 2) {
     switch (state->channels[2].control) {
     case 0x01000200: return run_channel_2_data_read(state);

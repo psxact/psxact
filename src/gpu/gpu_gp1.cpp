@@ -50,7 +50,19 @@ void gpu::gp1(gpu_state_t *state, uint32_t data) {
     break;
 
   case 0x10:
-    switch (data & 0x00ffffff) {
+    switch (data & 0xf) {
+    case 0x03:
+      state->data_latch = (state->drawing_area_x1 & 0x3ff) | ((state->drawing_area_y1 & 0x3ff) << 10);
+      break;
+
+    case 0x04:
+      state->data_latch = (state->drawing_area_x2 & 0x3ff) | ((state->drawing_area_y2 & 0x3ff) << 10);
+      break;
+
+    case 0x05:
+      state->data_latch = (state->x_offset & 0x7ff) | ((state->y_offset & 0x7ff) << 11);
+      break;
+
     case 0x07:
       state->data_latch = 2;
       break;
