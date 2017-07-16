@@ -40,6 +40,8 @@ set(SOURCE_FILES
     src/gpu/gpu_rect.cpp
     src/input/input.cpp
     src/input/input.hpp
+    src/mdec/mdec_core.cpp
+    src/mdec/mdec_core.hpp
     src/memory/vram.cpp
     src/memory/vram.hpp
     src/spu/spu_core.cpp

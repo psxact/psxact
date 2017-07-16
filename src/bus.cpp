@@ -7,6 +7,7 @@
 #include "dma/dma_core.hpp"
 #include "gpu/gpu_core.hpp"
 #include "input/input.hpp"
+#include "mdec/mdec_core.hpp"
 #include "spu/spu_core.hpp"
 #include "timer/timer_core.hpp"
 #include "utility.hpp"
@@ -17,6 +18,7 @@ static cpu_state_t *cpu_state;
 static dma_state_t *dma_state;
 static gpu_state_t *gpu_state;
 static input_state_t *input_state;
+static mdec_state_t *mdec_state;
 static spu_state_t *spu_state;
 static timer_state_t *timer_state;
 
@@ -30,6 +32,7 @@ void bus::initialize(system_state_t *state, const std::string &bios_file_name) {
   dma_state = &state->dma_state;
   gpu_state = &state->gpu_state;
   input_state = &state->input_state;
+  mdec_state = &state->mdec_state;
   spu_state = &state->spu_state;
   timer_state = &state->timer_state;
 
@@ -96,6 +99,10 @@ uint32_t bus::read(int width, uint32_t address) {
 
   if (utility::between<0x1f801810, 0x1f801817>(address)) {
     return gpu::io_read(gpu_state, width, address);
+  }
+
+  if (utility::between<0x1f801820, 0x1f801827>(address)) {
+    return mdec::io_read(mdec_state, width, address);
   }
 
   if (utility::between<0x1f801c00, 0x1f801fff>(address)) {
@@ -217,6 +224,10 @@ void bus::write(int width, uint32_t address, uint32_t data) {
 
   if (utility::between<0x1f801810, 0x1f801817>(address)) {
     return gpu::io_write(gpu_state, width, address, data);
+  }
+
+  if (utility::between<0x1f801820, 0x1f801827>(address)) {
+    return mdec::io_write(mdec_state, width, address, data);
   }
 
   if (utility::between<0x1f801c00, 0x1f801fff>(address)) {

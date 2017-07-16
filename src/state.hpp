@@ -202,6 +202,9 @@ struct input_state_t {
   uint32_t status;
 };
 
+struct mdec_state_t {
+};
+
 struct spu_state_t {
   uint16_t control;
   uint16_t status;
@@ -230,6 +233,7 @@ struct system_state_t {
   dma_state_t dma_state;
   gpu_state_t gpu_state;
   input_state_t input_state;
+  mdec_state_t mdec_state;
   spu_state_t spu_state;
   timer_state_t timer_state;
 };
