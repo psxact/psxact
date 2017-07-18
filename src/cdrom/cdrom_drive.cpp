@@ -1,11 +1,11 @@
 #include <cassert>
 #include "cdrom_drive.hpp"
 #include "../bus.hpp"
-#include "../state.hpp"
 #include "../utility.hpp"
 
 void cdrom::initialize(cdrom_state_t *state, const std::string &game_file_name) {
   state->game_file_name = game_file_name;
+  state->game_file = fopen(game_file_name.c_str(), "rb+");
 
   cdrom::logic::transition(state, &cdrom::logic::idling, 1000);
   cdrom::drive::transition(state, &cdrom::drive::idling, 1000);
@@ -250,11 +250,9 @@ void cdrom::read_sector(cdrom_state_t *state) {
       (tc.sector);
 
   auto target = bytes_per_sector * (cursor - lead_in_duration);
-  auto lpFile = fopen(state->game_file_name.c_str(), "rb+");
 
-  fseek(lpFile, target, SEEK_SET);
-  fread(state->data_buffer, sizeof(uint8_t), 0x930, lpFile);
-  fclose(lpFile);
+  fseek(state->game_file, target, SEEK_SET);
+  fread(state->data_buffer, sizeof(uint8_t), 0x930, state->game_file);
 }
 
 // -========-

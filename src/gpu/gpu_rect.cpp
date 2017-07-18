@@ -1,5 +1,4 @@
 #include "gpu_core.hpp"
-#include "../state.hpp"
 #include "../memory/vram.hpp"
 
 // Rect Commands
@@ -7,7 +6,7 @@
 // 24    | Texture Mode      (0=Blended, 1=Raw)       (Textured only)
 // 25    | Semi Transparency (0=Off, 1=On)
 
-static uint32_t get_x_length(gpu_state_t *state) {
+static int32_t get_x_length(gpu_state_t *state) {
   switch ((state->fifo.buffer[0] >> 27) & 3) {
   case 0:
     return
@@ -15,13 +14,21 @@ static uint32_t get_x_length(gpu_state_t *state) {
         ? uint16_t(state->fifo.buffer[3])
         : uint16_t(state->fifo.buffer[2]);
 
-  case 1: return 1;
-  case 2: return 8;
-  case 3: return 16;
+  case 1:
+    return 1;
+
+  case 2:
+    return 8;
+
+  case 3:
+    return 16;
+
+  default:
+    return 0;
   }
 }
 
-static uint32_t get_y_length(gpu_state_t *state) {
+static int32_t get_y_length(gpu_state_t *state) {
   switch ((state->fifo.buffer[0] >> 27) & 3) {
   case 0:
     return
@@ -29,9 +36,17 @@ static uint32_t get_y_length(gpu_state_t *state) {
         ? uint16_t(state->fifo.buffer[3] >> 16)
         : uint16_t(state->fifo.buffer[2] >> 16);
 
-  case 1: return 1;
-  case 2: return 8;
-  case 3: return 16;
+  case 1:
+    return 1;
+
+  case 2:
+    return 8;
+
+  case 3:
+    return 16;
+
+  default:
+    return 0;
   }
 }
 
@@ -93,6 +108,9 @@ static gpu::color_t get_texture_color(gpu_state_t *state, int x, int y) {
   case 2:
   case 3: // 15BPP
     return {};
+
+  default:
+    return {};
   }
 }
 
@@ -111,23 +129,22 @@ static gpu::color_t get_color(gpu_state_t *state, int x, int y) {
   }
 }
 
-void gpu::draw_rect(gpu_state_t *state) {
+void gpu::draw_rectangle(gpu_state_t *state) {
   uint32_t xofs = state->x_offset + int16_t(state->fifo.buffer[1]);
   uint32_t yofs = state->y_offset + int16_t(state->fifo.buffer[1] >> 16);
 
-  uint32_t w = get_x_length(state);
-  uint32_t h = get_y_length(state);
+  int32_t w = get_x_length(state);
+  int32_t h = get_y_length(state);
 
   for (int y = 0; y < h; y++) {
     for (int x = 0; x < w; x++) {
-      auto color = get_color(state, x, y);
+      color_t color = get_color(state, x, y);
+      point_t point;
 
-      gpu::draw_point(state,
-                      xofs + x,
-                      yofs + y,
-                      color.r,
-                      color.g,
-                      color.b);
+      point.x = xofs + x;
+      point.y = yofs + y;
+
+      gpu::draw_point(state, point, color);
     }
   }
 }

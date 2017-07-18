@@ -42,6 +42,7 @@ struct cdrom_state_t {
   bool busy;
 
   std::string game_file_name;
+  FILE *game_file;
 
   typedef void (*stage_t)(cdrom_state_t *state);
 

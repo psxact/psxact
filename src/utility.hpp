@@ -80,6 +80,18 @@ namespace utility {
   }
 
   template<int bits>
+  inline int32_t uclamp(int32_t value) {
+    enum {
+      min = 0,
+      max = (1 << bits) - 1
+    };
+
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
+  }
+
+  template<int bits>
   inline uint32_t sclip(uint32_t value) {
     enum { mask = (1 << bits) - 1 };
     enum { sign = 1 << (bits - 1) };

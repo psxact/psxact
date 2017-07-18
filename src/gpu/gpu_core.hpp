@@ -24,58 +24,33 @@ namespace gpu {
   uint16_t vram_transfer(gpu_state_t *state);
 
   struct color_t {
-    int r;
-    int g;
-    int b;
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
   };
 
   struct point_t {
-    int x;
-    int y;
+    int32_t x;
+    int32_t y;
   };
 
-  void draw_point(gpu_state_t *state, int x, int y, int r, int g, int b);
+  struct tev_t {
+    // from 'palette'
+    int palette_page_x;
+    int palette_page_y;
 
-  void draw_rect(gpu_state_t *state);
+    // from 'texpage'
+    int texture_colors;
+    int texture_page_x;
+    int texture_page_y;
+    int color_mix_mode;
+  };
 
-  namespace gouraud {
-    struct pixel_t {
-      point_t point;
-      color_t color;
-    };
+  void draw_point(gpu_state_t *state, point_t point, color_t color);
 
-    template<int size>
-    struct polygon_t {
-      pixel_t v[size];
-    };
-
-    void draw_poly3(gpu_state_t *state, const gpu::gouraud::polygon_t<3> &p);
-
-    void draw_poly4(gpu_state_t *state, const gpu::gouraud::polygon_t<4> &p);
-  }
-
-  namespace texture {
-    struct pixel_t {
-      point_t point;
-      color_t color;
-      int u;
-      int v;
-    };
-
-    template<int size>
-    struct polygon_t {
-      pixel_t v[size];
-      int clut_x;
-      int clut_y;
-      int base_u;
-      int base_v;
-      int depth;
-    };
-
-    void draw_poly3(gpu_state_t *state, const polygon_t<3> &p);
-
-    void draw_poly4(gpu_state_t *state, const polygon_t<4> &p);
-  }
+  void draw_line(gpu_state_t *state);
+  void draw_polygon(gpu_state_t *state);
+  void draw_rectangle(gpu_state_t *state);
 }
 
 #endif // __PSXACT_GPU_CORE_HPP__

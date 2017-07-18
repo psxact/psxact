@@ -27,7 +27,7 @@ void renderer::initialize() {
   surface = SDL_GetWindowSurface(window);
 }
 
-uint32_t color_16_to_24(uint32_t color) {
+uint32_t color_16_to_24(uint16_t color) {
   auto r = ((color << 3) & 0xf8);
   auto g = ((color >> 2) & 0xf8);
   auto b = ((color >> 7) & 0xf8);
@@ -41,7 +41,7 @@ bool renderer::render() {
   auto pixels = (uint32_t *)surface->pixels;
   auto colors = vram::get_pointer();
 
-  for (uint32_t i = 0; i < 1024 * 512; i++) {
+  for (int i = 0; i < 1024 * 512; i++) {
     *pixels++ = color_16_to_24(colors[i]);
   }
 
@@ -50,5 +50,5 @@ bool renderer::render() {
 
   SDL_Delay(10);
 
-  return !SDL_PollEvent(&event) || event.type != SDL_QUIT;
+  return !(SDL_PollEvent(&event) && event.type == SDL_QUIT);
 }

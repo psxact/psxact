@@ -1,6 +1,5 @@
 #include <cstdint>
 #include "cpu_cop2.hpp"
-#include "../state.hpp"
 
 static uint32_t read_matrix_vector_group(cop2_state_t *state, uint32_t n) {
   auto &matrix = state->ccr.matrix[n >> 3];
@@ -15,6 +14,9 @@ static uint32_t read_matrix_vector_group(cop2_state_t *state, uint32_t n) {
   case 5: return uint32_t(vector[0]);
   case 6: return uint32_t(vector[1]);
   case 7: return uint32_t(vector[2]);
+
+  default:
+    return 0;
   }
 }
 
@@ -49,6 +51,9 @@ uint32_t cop2::read_ccr(cop2_state_t *state, uint32_t n) {
 
   case 0x1f:
     return ccr.flag;
+
+  default:
+    return 0;
   }
 }
 
@@ -238,6 +243,9 @@ uint32_t cop2::read_gpr(cop2_state_t *state, uint32_t n) {
 
   case 0x1f:
     return uint32_t(gpr.lzcr);
+
+  default:
+    return 0;
   }
 }
 

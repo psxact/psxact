@@ -35,8 +35,7 @@ set(SOURCE_FILES
     src/gpu/gpu_core.cpp
     src/gpu/gpu_core.hpp
     src/gpu/gpu_draw.cpp
-    src/gpu/gpu_draw_gouraud.cpp
-    src/gpu/gpu_draw_texture.cpp
+    src/gpu/gpu_poly.cpp
     src/gpu/gpu_rect.cpp
     src/input/input.cpp
     src/input/input.hpp
@@ -53,7 +52,7 @@ set(SOURCE_FILES
     src/psxact.cpp
     src/renderer.cpp
     src/renderer.hpp
-    src/utility.hpp)
+    src/utility.hpp src/gpu/gpu_line.cpp)
 
 add_executable(psxact ${SOURCE_FILES})
 
