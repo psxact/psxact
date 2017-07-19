@@ -1,6 +1,7 @@
 #include <cassert>
 #include "gpu_core.hpp"
 #include "../memory/vram.hpp"
+#include "../state.hpp"
 
 static int command_size[256] = {
   1, 1, 3, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $00
@@ -51,6 +52,30 @@ void gpu::gp0(gpu_state_t *state, uint32_t data) {
     switch (command) {
     case 0x00: break; // nop
     case 0x01: break; // clear texture cache
+
+    case 0x02: {
+      uint16_t color =
+        ((state->fifo.buffer[0] >> 3) & 0x001f) |
+        ((state->fifo.buffer[0] >> 6) & 0x03e0) |
+        ((state->fifo.buffer[0] >> 9) & 0x7c00);
+
+      gpu::point_t point;
+      point.x = (state->fifo.buffer[1] + 0x0) & 0x3f0;
+      point.y = (state->fifo.buffer[1] >> 16) & 0x1ff;
+
+      gpu::point_t count;
+      count.x = (state->fifo.buffer[2] + 0xf) & 0x7f0;
+      count.y = (state->fifo.buffer[2] >> 16) & 0x1ff;
+
+      for (int y = 0; y < count.y; y++) {
+        for (int x = 0; x < count.x; x++) {
+          vram::write(point.x + x,
+                      point.y + y,
+                      color);
+        }
+      }
+      break;
+    }
 
     case 0xa0: {
       auto &transfer = state->cpu_to_gpu_transfer;
