@@ -120,13 +120,13 @@ void gpu::gp0(gpu_state_t *state, uint32_t data) {
       break;
 
     case 0xe3:
-      state->drawing_area_x1 = utility::uclip<10>(state->fifo.buffer[0] >> 0);
-      state->drawing_area_y1 = utility::uclip<10>(state->fifo.buffer[0] >> 10);
+      state->drawing_area_x1 = (state->fifo.buffer[0] >>  0) & 0x3ff;
+      state->drawing_area_y1 = (state->fifo.buffer[0] >> 10) & 0x3ff;
       break;
 
     case 0xe4:
-      state->drawing_area_x2 = utility::uclip<10>(state->fifo.buffer[0] >> 0);
-      state->drawing_area_y2 = utility::uclip<10>(state->fifo.buffer[0] >> 10);
+      state->drawing_area_x2 = (state->fifo.buffer[0] >>  0) & 0x3ff;
+      state->drawing_area_y2 = (state->fifo.buffer[0] >> 10) & 0x3ff;
       break;
 
     case 0xe5:

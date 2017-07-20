@@ -147,12 +147,12 @@ struct gpu_state_t {
   uint32_t texture_window_mask_y;
   uint32_t texture_window_offset_x;
   uint32_t texture_window_offset_y;
-  uint32_t drawing_area_x1;
-  uint32_t drawing_area_y1;
-  uint32_t drawing_area_x2;
-  uint32_t drawing_area_y2;
-  uint32_t x_offset;
-  uint32_t y_offset;
+  int32_t drawing_area_x1;
+  int32_t drawing_area_y1;
+  int32_t drawing_area_x2;
+  int32_t drawing_area_y2;
+  int32_t x_offset;
+  int32_t y_offset;
   uint32_t display_area_x;
   uint32_t display_area_y;
   uint32_t display_area_x1;

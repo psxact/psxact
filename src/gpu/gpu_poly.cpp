@@ -104,12 +104,18 @@ static gpu::tev_t get_tev(gpu_state_t *state, uint32_t command) {
 
   //  11    Texture Disable (0=Normal, 1=Disable if GP1(09h).Bit0=1)   ;GPUSTAT.15
 
-  result.color_mix_mode = (texpage >> 5) & 3;
   result.palette_page_x = (palette << 4) & 0x3f0;
   result.palette_page_y = (palette >> 6) & 0x1ff;
   result.texture_colors = (texpage >> 7) & 3;
   result.texture_page_x = (texpage << 6) & 0x3c0;
   result.texture_page_y = (texpage << 4) & 0x100;
+
+  if (command & (1 << 26)) {
+    result.color_mix_mode = (texpage >> 5) & 3;
+  }
+  else {
+    result.color_mix_mode = (state->status >> 5) & 3;
+  }
 
   return result;
 }
@@ -146,6 +152,15 @@ static gpu::point_t point_lerp(const gpu::point_t *t, int w0, int w1, int w2) {
   return point;
 }
 
+static gpu::color_t color_from_uint16(uint16_t value) {
+  gpu::color_t color;
+  color.r = (value << 3) & 0xf8;
+  color.g = (value >> 2) & 0xf8;
+  color.b = (value >> 7) & 0xf8;
+
+  return color;
+}
+
 static gpu::color_t get_color__4bpp(gpu::tev_t &tev, gpu::point_t &coord) {
   uint16_t texel = vram::read(tev.texture_page_x + coord.x / 4,
                               tev.texture_page_y + coord.y);
@@ -155,12 +170,7 @@ static gpu::color_t get_color__4bpp(gpu::tev_t &tev, gpu::point_t &coord) {
   uint16_t pixel = vram::read(tev.palette_page_x + texel,
                               tev.palette_page_y);
 
-  gpu::color_t color;
-  color.r = (pixel << 3) & 0xf8;
-  color.g = (pixel >> 2) & 0xf8;
-  color.b = (pixel >> 7) & 0xf8;
-
-  return color;
+  return color_from_uint16(pixel);
 }
 
 static gpu::color_t get_color__8bpp(gpu::tev_t &tev, gpu::point_t &coord) {
@@ -172,24 +182,14 @@ static gpu::color_t get_color__8bpp(gpu::tev_t &tev, gpu::point_t &coord) {
   uint16_t pixel = vram::read(tev.palette_page_x + texel,
                               tev.palette_page_y);
 
-  gpu::color_t color;
-  color.r = (pixel << 3) & 0xf8;
-  color.g = (pixel >> 2) & 0xf8;
-  color.b = (pixel >> 7) & 0xf8;
-
-  return color;
+  return color_from_uint16(pixel);
 }
 
 static gpu::color_t get_color_15bpp(gpu::tev_t &tev, gpu::point_t &coord) {
   uint16_t pixel = vram::read(tev.texture_page_x + coord.x,
                               tev.texture_page_y + coord.y);
 
-  gpu::color_t color;
-  color.r = (pixel << 3) & 0xf8;
-  color.g = (pixel >> 2) & 0xf8;
-  color.b = (pixel >> 7) & 0xf8;
-
-  return color;
+  return color_from_uint16(pixel);
 }
 
 static gpu::color_t get_texture_color(triangle_t &triangle, int w0, int w1, int w2) {
@@ -203,6 +203,30 @@ static gpu::color_t get_texture_color(triangle_t &triangle, int w0, int w1, int 
   }
 }
 
+static bool get_color(uint32_t command, triangle_t &triangle, int w0, int w1, int w2, gpu::color_t &color) {
+  bool shaded  = (command & (1 << 26)) == 0;
+  bool blended = (command & (1 << 24)) != 0;
+
+  if (shaded) {
+    color = color_lerp(triangle.colors, w0, w1, w2);
+    return true;
+  }
+
+  if (blended) {
+    color = get_texture_color(triangle, w0, w1, w2);
+  }
+  else {
+    gpu::color_t color1 = get_texture_color(triangle, w0, w1, w2);
+    gpu::color_t color2 = color_lerp(triangle.colors, w0, w1, w2);
+
+    color.r = std::min(255, (color1.r * color2.r) / 128);
+    color.g = std::min(255, (color1.g * color2.g) / 128);
+    color.b = std::min(255, (color1.b * color2.b) / 128);
+  }
+
+  return (color.r | color.g | color.b) > 0;
+}
+
 static void draw_triangle(gpu_state_t *state, uint32_t command, triangle_t &triangle) {
   const gpu::point_t *v = triangle.points;
 
@@ -213,6 +237,11 @@ static void draw_triangle(gpu_state_t *state, uint32_t command, triangle_t &tria
   gpu::point_t max;
   max.x = std::max(v[0].x, std::max(v[1].x, v[2].x));
   max.y = std::max(v[0].y, std::max(v[1].y, v[2].y));
+
+  min.x = std::max(min.x, state->drawing_area_x1);
+  min.y = std::max(min.y, state->drawing_area_y1);
+  max.x = std::min(max.x, state->drawing_area_x2);
+  max.y = std::min(max.y, state->drawing_area_y2);
 
   int dx[3];
   dx[0] = v[2].y - v[1].y;
@@ -231,7 +260,7 @@ static void draw_triangle(gpu_state_t *state, uint32_t command, triangle_t &tria
 
   gpu::point_t point;
 
-  for (point.y = min.y; point.y < max.y; point.y++) {
+  for (point.y = min.y; point.y <= max.y; point.y++) {
     int w0 = row[0];
     row[0] += dy[0];
 
@@ -241,43 +270,45 @@ static void draw_triangle(gpu_state_t *state, uint32_t command, triangle_t &tria
     int w2 = row[2];
     row[2] += dy[2];
 
-    for (point.x = min.x; point.x < max.x; point.x++) {
+    for (point.x = min.x; point.x <= max.x; point.x++) {
       if ((w0 | w1 | w2) > 0) {
-
-        //  25    Semi Transparency (0=Off, 1=On)            (All Render Types)
-
         gpu::color_t color;
 
-        if (command & (1 << 26)) {
-          if (command & (1 << 24)) {
-            color = get_texture_color(triangle, w0, w1, w2);
+        if (get_color(command, triangle, w0, w1, w2, color)) {
+          if (command & (1 << 25)) {
+            gpu::color_t bg = color_from_uint16(vram::read(point.x, point.y));
 
-            if (color.r == 0 && color.g == 0 && color.b == 0) {
-              goto continue_;
+            switch (triangle.tev.color_mix_mode) {
+            case 0:
+              color.r = (bg.r + color.r) / 2;
+              color.g = (bg.g + color.g) / 2;
+              color.b = (bg.b + color.b) / 2;
+              break;
+
+            case 1:
+              color.r = std::min(255, bg.r + color.r);
+              color.g = std::min(255, bg.g + color.g);
+              color.b = std::min(255, bg.b + color.b);
+              break;
+
+            case 2:
+              color.r = std::max(0, bg.r - color.r);
+              color.g = std::max(0, bg.g - color.g);
+              color.b = std::max(0, bg.b - color.b);
+              break;
+
+            case 3:
+              color.r = std::min(255, bg.r + color.r / 4);
+              color.g = std::min(255, bg.g + color.g / 4);
+              color.b = std::min(255, bg.b + color.b / 4);
+              break;
             }
           }
-          else {
-            gpu::color_t color1 = get_texture_color(triangle, w0, w1, w2);
 
-            if (color1.r == 0 && color1.g == 0 && color1.b == 0) {
-              goto continue_;
-            }
-
-            gpu::color_t color2 = color_lerp(triangle.colors, w0, w1, w2);
-
-            color.r = std::min(255, (color1.r * color2.r) / 128);
-            color.g = std::min(255, (color1.g * color2.g) / 128);
-            color.b = std::min(255, (color1.b * color2.b) / 128);
-          }
+          gpu::draw_point(state, point, color);
         }
-        else {
-          color = color_lerp(triangle.colors, w0, w1, w2);
-        }
-
-        gpu::draw_point(state, point, color);
       }
 
-    continue_:
       w0 += dx[0];
       w1 += dx[1];
       w2 += dx[2];
