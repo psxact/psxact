@@ -115,10 +115,6 @@ static inline int get_cv(uint32_t code) {
   return (code >> 13) & 3;
 }
 
-static inline int get_lm(uint32_t code) {
-  return (code & (1 << 10)) ? 0 : (-32768);
-}
-
 static inline void mac_to_ir(cop2_state_t *state, uint32_t code) {
   auto &gpr = state->gpr;
 
@@ -191,7 +187,7 @@ static inline int64_t transform(cop2_state_t *state, uint32_t code, int mx, int 
   auto &ccr = state->ccr;
   auto &gpr = state->gpr;
 
-  int64_t mac;
+  int64_t mac = 0;
 
   auto &matrix = ccr.matrix[mx];
   auto &offset = ccr.vector[cv];
@@ -254,7 +250,6 @@ static inline int64_t transform(cop2_state_t *state, uint32_t code, int mx, int 
 }
 
 static inline int64_t transform_pt(cop2_state_t *state, uint32_t code, int mx, int cv, int v) {
-  auto &ccr = state->ccr;
   auto &gpr = state->gpr;
 
   int32_t z = int32_t(transform(state, code, mx, cv, v) >> 12);

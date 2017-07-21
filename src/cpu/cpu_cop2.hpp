@@ -74,8 +74,6 @@ namespace cop2 {
 
     int32_t d(cop2_state_t *state, int32_t value);
 
-    //int32_t d_chained(cop2_state_t *state, int32_t value);
-
     int32_t e(cop2_state_t *state);
 
     int64_t f(cop2_state_t *state, int64_t value);

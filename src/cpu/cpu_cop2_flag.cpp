@@ -2,10 +2,6 @@
 #include "cpu_cop2.hpp"
 #include "../limits.hpp"
 
-static inline bool get_flag(cop2_state_t *state, int flag) {
-  return (state->ccr.flag & (1 << flag)) != 0;
-}
-
 static inline void set_flag(cop2_state_t *state, int flag) {
   state->ccr.flag |= 1 << flag;
 }

@@ -21,7 +21,7 @@ static uint32_t read_matrix_vector_group(cop2_state_t *state, uint32_t n) {
 }
 
 uint32_t cop2::read_ccr(cop2_state_t *state, uint32_t n) {
-  if (n >= 0x00 && n <= 0x17) {
+  if (n <= 0x17) {
     return read_matrix_vector_group(state, n);
   }
 
@@ -101,7 +101,7 @@ static void write_matrix_vector_group(cop2_state_t *state, uint32_t n, uint32_t 
 }
 
 void cop2::write_ccr(cop2_state_t *state, uint32_t n, uint32_t value) {
-  if (n >= 0x00 && n <= 0x17) {
+  if (n <= 0x17) {
     return write_matrix_vector_group(state, n, value);
   }
 
