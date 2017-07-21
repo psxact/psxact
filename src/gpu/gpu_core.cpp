@@ -105,3 +105,63 @@ void gpu::vram_transfer(gpu_state_t *state, uint16_t data) {
     }
   }
 }
+
+// common functionality
+
+gpu::color_t gpu::color_from_uint16(uint16_t value) {
+  color_t color;
+  color.r = (value << 3) & 0xf8;
+  color.g = (value >> 2) & 0xf8;
+  color.b = (value >> 7) & 0xf8;
+
+  return color;
+}
+
+gpu::color_t gpu::get_texture_color__4bpp(gpu::tev_t &tev, gpu::point_t &coord) {
+  uint16_t texel = vram::read(tev.texture_page_x + coord.x / 4,
+                              tev.texture_page_y + coord.y);
+
+  texel = (texel >> ((coord.x & 3) * 4)) & 15;
+
+  uint16_t pixel = vram::read(tev.palette_page_x + texel,
+                              tev.palette_page_y);
+
+  return color_from_uint16(pixel);
+}
+
+gpu::color_t gpu::get_texture_color__8bpp(gpu::tev_t &tev, gpu::point_t &coord) {
+  uint16_t texel = vram::read(tev.texture_page_x + coord.x / 2,
+                              tev.texture_page_y + coord.y);
+
+  texel = (texel >> ((coord.x & 1) * 8)) & 255;
+
+  uint16_t pixel = vram::read(tev.palette_page_x + texel,
+                              tev.palette_page_y);
+
+  return color_from_uint16(pixel);
+}
+
+gpu::color_t gpu::get_texture_color_15bpp(gpu::tev_t &tev, gpu::point_t &coord) {
+  uint16_t pixel = vram::read(tev.texture_page_x + coord.x,
+                              tev.texture_page_y + coord.y);
+
+  return color_from_uint16(pixel);
+}
+
+gpu::color_t gpu::get_texture_color(gpu::tev_t &tev, gpu::point_t &coord) {
+  switch (tev.texture_colors) {
+  default:
+
+  case 0:
+    return gpu::get_texture_color__4bpp(tev, coord);
+
+  case 1:
+    return gpu::get_texture_color__8bpp(tev, coord);
+
+  case 2:
+    return gpu::get_texture_color_15bpp(tev, coord);
+
+  case 3:
+    return gpu::get_texture_color_15bpp(tev, coord);
+  }
+}

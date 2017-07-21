@@ -51,6 +51,18 @@ namespace gpu {
   void draw_line(gpu_state_t *state);
   void draw_polygon(gpu_state_t *state);
   void draw_rectangle(gpu_state_t *state);
+
+  // common functionality
+
+  color_t color_from_uint16(uint16_t value);
+
+  color_t get_texture_color__4bpp(gpu::tev_t &tev, gpu::point_t &coord);
+
+  color_t get_texture_color__8bpp(gpu::tev_t &tev, gpu::point_t &coord);
+
+  color_t get_texture_color_15bpp(gpu::tev_t &tev, gpu::point_t &coord);
+
+  color_t get_texture_color(gpu::tev_t &tev, gpu::point_t &coord);
 }
 
 #endif // __PSXACT_GPU_CORE_HPP__

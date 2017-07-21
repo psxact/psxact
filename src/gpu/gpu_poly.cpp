@@ -9,31 +9,35 @@ struct triangle_t {
   gpu::tev_t tev;
 };
 
-static int get_color_factor(uint32_t command) {
-  static const int lut[4] = { 0, 0, 2, 3 };
+static const int point_factor_lut[4] = {
+  1, 2, 2, 3
+};
 
+static const int color_factor_lut[4] = {
+  0, 0, 2, 3
+};
+
+static const int coord_factor_lut[4] = {
+  0, 2, 0, 3
+};
+
+static int get_factor(const int (&lut)[4], uint32_t command) {
   int bit1 = (command >> 28) & 1;
   int bit0 = (command >> 26) & 1;
 
   return lut[(bit1 << 1) | bit0];
+}
+
+static int get_color_factor(uint32_t command) {
+  return get_factor(color_factor_lut, command);
 }
 
 static int get_point_factor(uint32_t command) {
-  static const int lut[4] = { 1, 2, 2, 3 };
-
-  int bit1 = (command >> 28) & 1;
-  int bit0 = (command >> 26) & 1;
-
-  return lut[(bit1 << 1) | bit0];
+  return get_factor(point_factor_lut, command);
 }
 
 static int get_coord_factor(uint32_t command) {
-  static const int lut[4] = { 0, 2, 0, 3 };
-
-  int bit1 = (command >> 28) & 1;
-  int bit0 = (command >> 26) & 1;
-
-  return lut[(bit1 << 1) | bit0];
+  return get_factor(coord_factor_lut, command);
 }
 
 static gpu::color_t decode_color(gpu_state_t *state, int n) {
@@ -152,57 +156,6 @@ static gpu::point_t point_lerp(const gpu::point_t *t, int w0, int w1, int w2) {
   return point;
 }
 
-static gpu::color_t color_from_uint16(uint16_t value) {
-  gpu::color_t color;
-  color.r = (value << 3) & 0xf8;
-  color.g = (value >> 2) & 0xf8;
-  color.b = (value >> 7) & 0xf8;
-
-  return color;
-}
-
-static gpu::color_t get_color__4bpp(gpu::tev_t &tev, gpu::point_t &coord) {
-  uint16_t texel = vram::read(tev.texture_page_x + coord.x / 4,
-                              tev.texture_page_y + coord.y);
-
-  texel = (texel >> ((coord.x & 3) * 4)) & 0x0f;
-
-  uint16_t pixel = vram::read(tev.palette_page_x + texel,
-                              tev.palette_page_y);
-
-  return color_from_uint16(pixel);
-}
-
-static gpu::color_t get_color__8bpp(gpu::tev_t &tev, gpu::point_t &coord) {
-  uint16_t texel = vram::read(tev.texture_page_x + coord.x / 2,
-                              tev.texture_page_y + coord.y);
-
-  texel = (texel >> ((coord.x & 1) * 8)) & 0xff;
-
-  uint16_t pixel = vram::read(tev.palette_page_x + texel,
-                              tev.palette_page_y);
-
-  return color_from_uint16(pixel);
-}
-
-static gpu::color_t get_color_15bpp(gpu::tev_t &tev, gpu::point_t &coord) {
-  uint16_t pixel = vram::read(tev.texture_page_x + coord.x,
-                              tev.texture_page_y + coord.y);
-
-  return color_from_uint16(pixel);
-}
-
-static gpu::color_t get_texture_color(triangle_t &triangle, int w0, int w1, int w2) {
-  gpu::point_t coord = point_lerp(triangle.coords, w0, w1, w2);
-
-  switch (triangle.tev.texture_colors) {
-  case 0: return get_color__4bpp(triangle.tev, coord);
-  case 1: return get_color__8bpp(triangle.tev, coord);
-  case 2: return get_color_15bpp(triangle.tev, coord);
-  case 3: return get_color_15bpp(triangle.tev, coord);
-  }
-}
-
 static bool get_color(uint32_t command, triangle_t &triangle, int w0, int w1, int w2, gpu::color_t &color) {
   bool shaded  = (command & (1 << 26)) == 0;
   bool blended = (command & (1 << 24)) != 0;
@@ -212,11 +165,13 @@ static bool get_color(uint32_t command, triangle_t &triangle, int w0, int w1, in
     return true;
   }
 
+  gpu::point_t coord = point_lerp(triangle.coords, w0, w1, w2);
+
   if (blended) {
-    color = get_texture_color(triangle, w0, w1, w2);
+    color = gpu::get_texture_color(triangle.tev, coord);
   }
   else {
-    gpu::color_t color1 = get_texture_color(triangle, w0, w1, w2);
+    gpu::color_t color1 = gpu::get_texture_color(triangle.tev, coord);
     gpu::color_t color2 = color_lerp(triangle.colors, w0, w1, w2);
 
     color.r = std::min(255, (color1.r * color2.r) / 128);
@@ -276,7 +231,7 @@ static void draw_triangle(gpu_state_t *state, uint32_t command, triangle_t &tria
 
         if (get_color(command, triangle, w0, w1, w2, color)) {
           if (command & (1 << 25)) {
-            gpu::color_t bg = color_from_uint16(vram::read(point.x, point.y));
+            gpu::color_t bg = gpu::color_from_uint16(vram::read(point.x, point.y));
 
             switch (triangle.tev.color_mix_mode) {
             case 0:

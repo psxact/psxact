@@ -3,14 +3,13 @@
 
 // Rect Commands
 //
-// 24    | Texture Mode      (0=Blended, 1=Raw)       (Textured only)
 // 25    | Semi Transparency (0=Off, 1=On)
 
 static int32_t get_x_length(gpu_state_t *state) {
   switch ((state->fifo.buffer[0] >> 27) & 3) {
   case 0:
     return
-      ((state->fifo.buffer[0] >> 26) & 1)
+      (state->fifo.buffer[0] & (1 << 26))
         ? uint16_t(state->fifo.buffer[3])
         : uint16_t(state->fifo.buffer[2]);
 
@@ -32,7 +31,7 @@ static int32_t get_y_length(gpu_state_t *state) {
   switch ((state->fifo.buffer[0] >> 27) & 3) {
   case 0:
     return
-      ((state->fifo.buffer[0] >> 26) & 1)
+      (state->fifo.buffer[0] & (1 << 26))
         ? uint16_t(state->fifo.buffer[3] >> 16)
         : uint16_t(state->fifo.buffer[2] >> 16);
 
@@ -50,101 +49,66 @@ static int32_t get_y_length(gpu_state_t *state) {
   }
 }
 
-static gpu::color_t color_from_halfword(uint16_t color) {
-  gpu::color_t result;
-  result.r = (color & 0x001f) << 3;
-  result.g = (color & 0x03e0) >> 2;
-  result.b = (color & 0x7c00) >> 7;
+static bool get_color(uint32_t command, gpu::color_t &color, gpu::tev_t &tev, gpu::point_t &coord) {
+  bool blended = (command & (1 << 24)) != 0;
+  bool textured = (command & (1 << 26)) != 0;
 
-  return result;
-}
-
-static gpu::color_t get_texture_color_4bpp(gpu_state_t *state, int clut_x, int clut_y, int u, int v, int x, int y) {
-  auto base_u = ((state->status >> 0) & 0xf) << 6;
-  auto base_v = ((state->status >> 4) & 0x1) << 8;
-  auto texel = vram::read(base_u + (x / 4),
-                          base_v + y);
-
-  auto index = (texel >> ((x & 3) * 4)) & 15;
-
-  auto color = vram::read(clut_x + index,
-                          clut_y);
-
-  return color_from_halfword(color);
-}
-
-static gpu::color_t get_texture_color_8bpp(gpu_state_t *state, int clut_x, int clut_y, int u, int v, int x, int y) {
-  auto base_u = ((state->status >> 0) & 0xf) << 6;
-  auto base_v = ((state->status >> 4) & 0x1) << 8;
-
-  u += x;
-  v += y;
-
-  auto texel = vram::read(base_u + (u / 2),
-                          base_v + v);
-
-  auto index = (texel >> ((x & 1) * 8)) & 0xff;
-
-  auto color = vram::read(clut_x + index,
-                          clut_y);
-
-  return color_from_halfword(color);
-}
-
-static gpu::color_t get_texture_color(gpu_state_t *state, int x, int y) {
-  uint32_t clut_x = (state->fifo.buffer[2] >> 12) & 0x3f0;
-  uint32_t clut_y = (state->fifo.buffer[2] >> 22) & 0x1ff;
-
-  uint32_t u = (state->fifo.buffer[2] >> 0) & 0xff;
-  uint32_t v = (state->fifo.buffer[2] >> 8) & 0xff;
-
-  switch ((state->status >> 7) & 3) {
-  case 0:
-    return get_texture_color_4bpp(state, clut_x, clut_y, u, v, x, y);
-
-  case 1: // 8BPP
-    return get_texture_color_8bpp(state, clut_x, clut_y, u, v, x, y);
-
-  case 2:
-  case 3: // 15BPP
-    return {};
-
-  default:
-    return {};
+  if (!textured) {
+    return true;
   }
-}
 
-static gpu::color_t get_color(gpu_state_t *state, int x, int y) {
-  if (state->fifo.buffer[0] & (1 << 26)) {
-    return get_texture_color(state, x, y);
+  gpu::color_t pixel = gpu::get_texture_color(tev, coord);
+
+  if (blended) {
+    color.r = std::min(255, (pixel.r * color.r) / 2);
+    color.g = std::min(255, (pixel.g * color.g) / 2);
+    color.b = std::min(255, (pixel.b * color.b) / 2);
   }
   else {
-    gpu::color_t result;
-
-    result.r = (state->fifo.buffer[0] >> (0 * 8)) & 0xff;
-    result.g = (state->fifo.buffer[0] >> (1 * 8)) & 0xff;
-    result.b = (state->fifo.buffer[0] >> (2 * 8)) & 0xff;
-
-    return result;
+    color.r = pixel.r;
+    color.g = pixel.g;
+    color.b = pixel.b;
   }
+
+  return (color.r | color.g | color.b) > 0;
 }
 
 void gpu::draw_rectangle(gpu_state_t *state) {
-  uint32_t xofs = state->x_offset + int16_t(state->fifo.buffer[1]);
-  uint32_t yofs = state->y_offset + int16_t(state->fifo.buffer[1] >> 16);
+  gpu::tev_t tev;
+  tev.palette_page_x = (state->fifo.buffer[2] >> 12) & 0x3f0;
+  tev.palette_page_y = (state->fifo.buffer[2] >> 22) & 0x1ff;
+  tev.texture_page_x = (state->status << 6) & 0x3c0;
+  tev.texture_page_y = (state->status << 4) & 0x100;
+  tev.texture_colors = (state->status >> 7) & 3;
+
+  gpu::color_t color;
+  color.r = (state->fifo.buffer[0] >> (0 * 8)) & 0xff;
+  color.g = (state->fifo.buffer[0] >> (1 * 8)) & 0xff;
+  color.b = (state->fifo.buffer[0] >> (2 * 8)) & 0xff;
+
+  gpu::point_t tex_coord;
+  tex_coord.x = (state->fifo.buffer[2] >> 0) & 0xff;
+  tex_coord.y = (state->fifo.buffer[2] >> 8) & 0xff;
+
+  int32_t xofs = state->x_offset + int16_t(state->fifo.buffer[1]);
+  int32_t yofs = state->y_offset + int16_t(state->fifo.buffer[1] >> 16);
 
   int32_t w = get_x_length(state);
   int32_t h = get_y_length(state);
 
-  for (int y = 0; y < h; y++) {
-    for (int x = 0; x < w; x++) {
-      color_t color = get_color(state, x, y);
-      point_t point;
+  for (int32_t y = 0; y < h; y++) {
+    for (int32_t x = 0; x < w; x++) {
+      point_t coord;
+      coord.x = tex_coord.x + x;
+      coord.y = tex_coord.y + y;
 
-      point.x = xofs + x;
-      point.y = yofs + y;
+      if (get_color(state->fifo.buffer[0], color, tev, coord)) {
+        point_t point;
+        point.x = xofs + x;
+        point.y = yofs + y;
 
-      gpu::draw_point(state, point, color);
+        gpu::draw_point(state, point, color);
+      }
     }
   }
 }
