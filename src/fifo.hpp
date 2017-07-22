@@ -4,16 +4,14 @@
 template<typename T, int bits>
 class fifo_t {
 private:
-  enum {
-    MASK = (1 << (bits + 1)) - 1,
-    MASK_LSB = (1 << bits) - 1,
-    MASK_MSB = (1 << bits),
-    SIZE = (1 << bits)
-  };
+  static const int32_t mask     = (1 << (bits + 1)) - 1;
+  static const int32_t mask_lsb = (1 << bits) - 1;
+  static const int32_t mask_msb = (1 << bits);
+  static const int32_t size     = (1 << bits);
 
-  T buffer[SIZE];
-  unsigned rd_ptr;
-  unsigned wr_ptr;
+  T buffer[size];
+  uint32_t rd_ptr;
+  uint32_t wr_ptr;
 
 public:
   void clear() {
@@ -22,15 +20,15 @@ public:
   }
 
   const T &read() {
-    T &value = buffer[rd_ptr & MASK_LSB];
-    rd_ptr = (rd_ptr + 1) & MASK;
+    T &value = buffer[rd_ptr & mask_lsb];
+    rd_ptr = (rd_ptr + 1) & mask;
 
     return value;
   }
 
   void write(const T &value) {
-    buffer[wr_ptr & MASK_LSB] = value;
-    wr_ptr = (wr_ptr + 1) & MASK;
+    buffer[wr_ptr & mask_lsb] = value;
+    wr_ptr = (wr_ptr + 1) & mask;
   }
 
   bool is_empty() const {
@@ -38,7 +36,7 @@ public:
   }
 
   bool is_full() const {
-    return rd_ptr == (wr_ptr ^ MASK_MSB);
+    return rd_ptr == (wr_ptr ^ mask_msb);
   }
 
   bool has_data() const {

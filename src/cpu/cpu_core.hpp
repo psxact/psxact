@@ -1,7 +1,7 @@
 #ifndef __PSXACT_CPU_CORE_HPP__
 #define __PSXACT_CPU_CORE_HPP__
 
-#include <cstdint>
+#include "../bus.hpp"
 #include "../state.hpp"
 
 namespace cpu {
@@ -18,17 +18,17 @@ namespace cpu {
 
   void read_code(cpu_state_t *state);
 
-  uint32_t read_data(cpu_state_t *state, int width, uint32_t address);
+  uint32_t read_data(cpu_state_t *state, bus::bus_width_t width, uint32_t address);
 
-  void write_data(cpu_state_t *state, int width, uint32_t address, uint32_t data);
+  void write_data(cpu_state_t *state, bus::bus_width_t width, uint32_t address, uint32_t data);
 
   void set_imask(cpu_state_t *state, uint32_t value);
 
   void set_istat(cpu_state_t *state, uint32_t value);
 
-  uint32_t io_read(cpu_state_t *state, int width, uint32_t address);
+  uint32_t io_read(cpu_state_t *state, bus::bus_width_t width, uint32_t address);
 
-  void io_write(cpu_state_t *state, int width, uint32_t address, uint32_t data);
+  void io_write(cpu_state_t *state, bus::bus_width_t width, uint32_t address, uint32_t data);
 
   // --============--
   //   Instructions

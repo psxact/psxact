@@ -1,9 +1,7 @@
 #include "timer_core.hpp"
-#include "../bus.hpp"
 #include "../utility.hpp"
-#include "../state.hpp"
 
-uint32_t timer::io_read(timer_state_t *state, int width, uint32_t address) {
+uint32_t timer::io_read(timer_state_t *state, bus::bus_width_t width, uint32_t address) {
   if (utility::log_timer) {
     printf("timer::io_read(%d, 0x%08x)\n", width, address);
   }
@@ -19,7 +17,7 @@ uint32_t timer::io_read(timer_state_t *state, int width, uint32_t address) {
   return 0;
 }
 
-void timer::io_write(timer_state_t *state, int width, uint32_t address, uint32_t data) {
+void timer::io_write(timer_state_t *state, bus::bus_width_t width, uint32_t address, uint32_t data) {
   if (utility::log_timer) {
     printf("timer::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
   }
@@ -42,10 +40,10 @@ void timer::io_write(timer_state_t *state, int width, uint32_t address, uint32_t
   }
 }
 
-void timer::tick_timer_0(timer_state_t *state) {
+static void tick_timer_0(timer_state_t *state) {
 }
 
-void timer::tick_timer_1(timer_state_t *state) {
+static void tick_timer_1(timer_state_t *state) {
   auto &timer = state->timers[1];
 
   timer.divider += 11;
@@ -56,25 +54,33 @@ void timer::tick_timer_1(timer_state_t *state) {
   }
 }
 
-void timer::tick_timer_2(timer_state_t *state) {
+static void tick_timer_2(timer_state_t *state) {
+  auto &timer = state->timers[2];
+
   // system clock/8
-  state->timers[2].divider++;
+  timer.divider++;
 
-  if (state->timers[2].divider == 8) {
-    state->timers[2].divider = 0;
-    state->timers[2].counter++;
+  if (timer.divider == 8) {
+    timer.divider = 0;
+    timer.counter++;
 
-    if (state->timers[2].counter == state->timers[2].compare) {
-      state->timers[2].control |= 0x800;
+    if (timer.counter == timer.compare) {
+      timer.control |= 0x800;
 
-      if (state->timers[2].control & 0x0008) {
-        state->timers[2].counter = 0;
+      if (timer.control & 0x0008) {
+        timer.counter = 0;
       }
 
-      if (state->timers[2].control & 0x0010) {
-        state->timers[2].control &= ~0x0400;
+      if (timer.control & 0x0010) {
+        timer.control &= ~0x0400;
         bus::irq(6);
       }
     }
   }
+}
+
+void timer::tick(timer_state_t *state) {
+  tick_timer_0(state);
+  tick_timer_1(state);
+  tick_timer_2(state);
 }

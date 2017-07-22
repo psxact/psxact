@@ -1,7 +1,7 @@
 #include "spu_core.hpp"
 #include "../utility.hpp"
 
-uint32_t spu::io_read(spu_state_t *state, int width, uint32_t address) {
+uint32_t spu::io_read(spu_state_t *state, bus::bus_width_t width, uint32_t address) {
   if (address >= 0x1f801c00 && address <= 0x1f801d7f) {
     auto n = (address >> 4) & 31;
     auto m = (address >> 1) & 7;
@@ -30,7 +30,7 @@ uint32_t spu::io_read(spu_state_t *state, int width, uint32_t address) {
   return 0;
 }
 
-void spu::io_write(spu_state_t *state, int width, uint32_t address, uint32_t data) {
+void spu::io_write(spu_state_t *state, bus::bus_width_t width, uint32_t address, uint32_t data) {
   if (address >= 0x1f801c00 && address <= 0x1f801d7f) {
     auto n = (address >> 4) & 31;
     auto m = (address >> 1) & 7;
@@ -46,7 +46,7 @@ void spu::io_write(spu_state_t *state, int width, uint32_t address, uint32_t dat
     return;
 
   case 0x1f801da8:
-    utility::write_half(state->sound_ram, state->sound_ram_address, data);
+    state->sound_ram.write_half(state->sound_ram_address, data);
     state->sound_ram_address = (state->sound_ram_address + 1) & 0x7ffff;
     return;
 

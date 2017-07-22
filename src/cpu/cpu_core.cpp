@@ -1,6 +1,4 @@
-#include <stdexcept>
 #include "cpu_core.hpp"
-#include "../bus.hpp"
 #include "cpu_cop0.hpp"
 #include "../utility.hpp"
 
@@ -43,8 +41,8 @@ void cpu::tick(cpu_state_t *state) {
   state->is_load_delay_slot = state->is_load;
   state->is_load = false;
 
-  auto iec = (state->cop0.regs[12] & 1) != 0;
-  auto irq = (state->cop0.regs[12] & state->cop0.regs[13] & 0xff00) != 0;
+  bool iec = (state->cop0.regs[12] & 1) != 0;
+  bool irq = (state->cop0.regs[12] & state->cop0.regs[13] & 0xff00) != 0;
 
   if (iec && irq) {
     cop0::enter_exception(state, 0x0);
@@ -54,7 +52,7 @@ void cpu::tick(cpu_state_t *state) {
       cpu::disassemble(state, stdout);
     }
 
-    auto code = (state->code >> 26) & 63;
+    uint32_t code = (state->code >> 26) & 63;
     if (code)
       op_table[code](state);
     else
@@ -98,9 +96,9 @@ void cpu::read_code(cpu_state_t *state) {
   state->regs.pc = state->regs.next_pc;
   state->regs.next_pc += 4;
 
-  if (state->regs.this_pc == 0x00b0 && state->regs.gp[9] == 0x3d) {
-    printf("%c", state->regs.gp[4]);
-  }
+//  if (state->regs.this_pc == 0x00b0 && state->regs.gp[9] == 0x3d) {
+//    printf("%c", state->regs.gp[4]);
+//  }
 
 //  if (utility::log_cpu) {
 //    log_bios_calls(state);
@@ -111,7 +109,7 @@ void cpu::read_code(cpu_state_t *state) {
   state->code = bus::read(bus::BUS_WIDTH_WORD, map_address(state->regs.this_pc));
 }
 
-uint32_t cpu::read_data(cpu_state_t *state, int width, uint32_t address) {
+uint32_t cpu::read_data(cpu_state_t *state, bus::bus_width_t width, uint32_t address) {
   if (state->cop0.regs[12] & (1 << 16)) {
     return 0; // isc=1
   }
@@ -121,7 +119,7 @@ uint32_t cpu::read_data(cpu_state_t *state, int width, uint32_t address) {
   return bus::read(width, map_address(address));
 }
 
-void cpu::write_data(cpu_state_t *state, int width, uint32_t address, uint32_t data) {
+void cpu::write_data(cpu_state_t *state, bus::bus_width_t width, uint32_t address, uint32_t data) {
   if (state->cop0.regs[12] & (1 << 16)) {
     return; // isc=1
   }
@@ -151,16 +149,16 @@ void cpu::set_istat(cpu_state_t *state, uint32_t value) {
   update_irq(state, value, state->i_mask);
 }
 
-uint32_t cpu::io_read(cpu_state_t *state, int width, uint32_t address) {
+uint32_t cpu::io_read(cpu_state_t *state, bus::bus_width_t width, uint32_t address) {
   if (utility::log_cpu) {
     printf("cpu::io_read(%d, 0x%08x)\n", width, address);
   }
 
-  switch (address) {
-  case 0x1f801070:
+  switch (address - 0x1f801070) {
+  case 0:
     return state->i_stat;
 
-  case 0x1f801074:
+  case 4:
     return state->i_mask;
 
   default:
@@ -168,17 +166,17 @@ uint32_t cpu::io_read(cpu_state_t *state, int width, uint32_t address) {
   }
 }
 
-void cpu::io_write(cpu_state_t *state, int width, uint32_t address, uint32_t data) {
+void cpu::io_write(cpu_state_t *state, bus::bus_width_t width, uint32_t address, uint32_t data) {
   if (utility::log_cpu) {
     printf("cpu::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
   }
 
-  switch (address) {
-  case 0x1f801070:
+  switch (address - 0x1f801070) {
+  case 0:
     set_istat(state, data & state->i_stat);
     break;
 
-  case 0x1f801074:
+  case 4:
     set_imask(state, data & 0x7ff);
     break;
   }

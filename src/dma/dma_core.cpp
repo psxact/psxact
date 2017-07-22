@@ -1,13 +1,10 @@
 #include "dma_core.hpp"
-#include "../bus.hpp"
-#include "../gpu/gpu_core.hpp"
-#include "../state.hpp"
 
 static void update_irq_active_flag(dma_state_t *state) {
-  auto forced = ((state->dicr >> 15) & 1) != 0;
-  auto master = ((state->dicr >> 23) & 1) != 0;
-  auto signal = ((state->dicr >> 16) & (state->dicr >> 24) & 0x7f) != 0;
-  auto active = forced || (master && signal);
+  bool forced = ((state->dicr >> 15) & 1) != 0;
+  bool master = ((state->dicr >> 23) & 1) != 0;
+  bool signal = ((state->dicr >> 16) & (state->dicr >> 24) & 0x7f) != 0;
+  bool active = forced || (master && signal);
 
   if (active) {
     if (!(state->dicr & 0x80000000)) {
@@ -29,12 +26,12 @@ static uint32_t get_register_index(uint32_t address) {
   return (address >> 2) & 3;
 }
 
-uint32_t dma::io_read(dma_state_t *state, int width, uint32_t address) {
+uint32_t dma::io_read(dma_state_t *state, bus::bus_width_t width, uint32_t address) {
   if (utility::log_dma) {
     printf("dma::io_read(%d, 0x%08x)\n", width, address);
   }
 
-  auto channel = get_channel_index(address);
+  uint32_t channel = get_channel_index(address);
   if (channel == 7) {
     switch (get_register_index(address)) {
     case 0: return state->dpcr;
@@ -54,12 +51,12 @@ uint32_t dma::io_read(dma_state_t *state, int width, uint32_t address) {
   return 0;
 }
 
-void dma::io_write(dma_state_t *state, int width, uint32_t address, uint32_t data) {
+void dma::io_write(dma_state_t *state, bus::bus_width_t width, uint32_t address, uint32_t data) {
   if (utility::log_dma) {
     printf("dma::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
   }
 
-  auto channel = get_channel_index(address);
+  uint32_t channel = get_channel_index(address);
   if (channel == 7) {
     switch (get_register_index(address)) {
     case 0: state->dpcr = data; break;
@@ -109,16 +106,16 @@ static void run_channel_1(dma_state_t *state) {
 }
 
 static void run_channel_2_data_read(dma_state_t *state) {
-  auto address = state->channels[2].address;
-  auto bs = (state->channels[2].counter >>  0) & 0xffff;
-  auto ba = (state->channels[2].counter >> 16) & 0xffff;
+  uint32_t address = state->channels[2].address;
+  uint32_t bs = (state->channels[2].counter >>  0) & 0xffff;
+  uint32_t ba = (state->channels[2].counter >> 16) & 0xffff;
 
   bs = bs ? bs : 0x10000;
   ba = ba ? ba : 0x10000;
 
-  for (unsigned a = 0; a < ba; a++) {
-    for (unsigned s = 0; s < bs; s++) {
-      unsigned data = bus::read(bus::BUS_WIDTH_WORD, 0x1f801810);
+  for (uint32_t a = 0; a < ba; a++) {
+    for (uint32_t s = 0; s < bs; s++) {
+      uint32_t data = bus::read(bus::BUS_WIDTH_WORD, 0x1f801810);
       bus::write(bus::BUS_WIDTH_WORD, address, data);
       address += 4;
     }
@@ -130,16 +127,16 @@ static void run_channel_2_data_read(dma_state_t *state) {
 }
 
 static void run_channel_2_data_write(dma_state_t *state) {
-  auto address = state->channels[2].address;
-  auto bs = (state->channels[2].counter >>  0) & 0xffff;
-  auto ba = (state->channels[2].counter >> 16) & 0xffff;
+  uint32_t address = state->channels[2].address;
+  uint32_t bs = (state->channels[2].counter >>  0) & 0xffff;
+  uint32_t ba = (state->channels[2].counter >> 16) & 0xffff;
 
   bs = bs ? bs : 0x10000;
   ba = ba ? ba : 0x10000;
 
-  for (unsigned a = 0; a < ba; a++) {
-    for (unsigned s = 0; s < bs; s++) {
-      unsigned data = bus::read(bus::BUS_WIDTH_WORD, address);
+  for (uint32_t a = 0; a < ba; a++) {
+    for (uint32_t s = 0; s < bs; s++) {
+      uint32_t data = bus::read(bus::BUS_WIDTH_WORD, address);
       bus::write(bus::BUS_WIDTH_WORD, 0x1f801810, data);
       address += 4;
     }
@@ -151,13 +148,13 @@ static void run_channel_2_data_write(dma_state_t *state) {
 }
 
 static void run_channel_2_list(dma_state_t *state) {
-  auto address = state->channels[2].address;
+  uint32_t address = state->channels[2].address;
 
   while (address != 0xffffff) {
-    auto value = bus::read(bus::BUS_WIDTH_WORD, address);
+    uint32_t value = bus::read(bus::BUS_WIDTH_WORD, address);
     address += 4;
 
-    auto count = value >> 24;
+    uint32_t count = value >> 24;
 
     for (unsigned index = 0; index < count; index++) {
       unsigned data = bus::read(bus::BUS_WIDTH_WORD, address);
@@ -174,13 +171,13 @@ static void run_channel_2_list(dma_state_t *state) {
 }
 
 static void run_channel_3(dma_state_t *state) {
-  auto address = state->channels[3].address;
-  auto counter = state->channels[3].counter & 0xffff;
+  uint32_t address = state->channels[3].address;
+  uint32_t counter = state->channels[3].counter & 0xffff;
 
   counter = counter ? counter : 0x10000;
 
-  for (unsigned i = 0; i < counter; i++) {
-    auto data = bus::read(bus::BUS_WIDTH_WORD, 0x1f801800);
+  for (uint32_t i = 0; i < counter; i++) {
+    uint32_t data = bus::read(bus::BUS_WIDTH_WORD, 0x1f801800);
     bus::write(bus::BUS_WIDTH_WORD, address, data);
 
     address += 4;
@@ -198,12 +195,12 @@ static void run_channel_4_write(dma_state_t *state) {
 }
 
 static void run_channel_6(dma_state_t *state) {
-  auto address = state->channels[6].address;
-  auto counter = state->channels[6].counter & 0xffff;
+  uint32_t address = state->channels[6].address;
+  uint32_t counter = state->channels[6].counter & 0xffff;
 
   counter = counter ? counter : 0x10000;
 
-  for (unsigned i = 1; i < counter; i++) {
+  for (uint32_t i = 1; i < counter; i++) {
     bus::write(bus::BUS_WIDTH_WORD, address, address - 4);
     address -= 4;
   }
@@ -255,9 +252,9 @@ void dma::run_channel(dma_state_t *state, int n) {
   }
 }
 
-void dma::irq_channel(dma_state_t *state, int n) {
-  int flag = 1 << (n + 24);
-  int mask = 1 << (n + 16);
+void dma::irq_channel(dma_state_t *state, int32_t n) {
+  uint32_t flag = 1 << (n + 24);
+  uint32_t mask = 1 << (n + 16);
 
   if (state->dicr & mask) {
     state->dicr |= flag;

@@ -85,6 +85,9 @@ void cop2::run(cop2_state_t *state, uint32_t code) {
 //  Helpers
 // -=======-
 
+typedef int32_t matrix_t[3][3];
+typedef int32_t vector_t[3];
+
 enum {
   MX_ROT = 0,
   MX_LLM = 1,
@@ -99,19 +102,19 @@ enum {
   CV_ZR = 3
 };
 
-static inline int get_sf(uint32_t code) {
+static inline int32_t get_sf(uint32_t code) {
   return (code & (1 << 19)) ? 12 : 0;
 }
 
-static inline int get_mx(uint32_t code) {
+static inline int32_t get_mx(uint32_t code) {
   return (code >> 17) & 3;
 }
 
-static inline int get_v(uint32_t code) {
+static inline int32_t get_v(uint32_t code) {
   return (code >> 15) & 3;
 }
 
-static inline int get_cv(uint32_t code) {
+static inline int32_t get_cv(uint32_t code) {
   return (code >> 13) & 3;
 }
 
@@ -142,7 +145,7 @@ static inline void depth_cue(cop2_state_t *state, uint32_t code, int32_t r, int3
   int64_t gfc = int64_t(state->ccr.vector[CV_FC][1]) << 12;
   int64_t bfc = int64_t(state->ccr.vector[CV_FC][2]) << 12;
 
-  int sf = get_sf(code);
+  int32_t sf = get_sf(code);
 
   gpr.mac[1] = cop2::flags::a(state, 0, rfc - r) >> sf;
   gpr.mac[1] = cop2::flags::a(state, 0, r + gpr.ir0 * cop2::flags::b(state, 0, 0, gpr.mac[1])) >> sf;
@@ -183,19 +186,19 @@ static inline void transform_xy(cop2_state_t *state, int64_t div) {
 }
 
 template<bool buggy = false>
-static inline int64_t transform(cop2_state_t *state, uint32_t code, int mx, int cv, int v) {
+static inline int64_t transform(cop2_state_t *state, uint32_t code, int32_t mx, int32_t cv, int32_t v) {
   auto &ccr = state->ccr;
   auto &gpr = state->gpr;
 
   int64_t mac = 0;
 
-  auto &matrix = ccr.matrix[mx];
-  auto &offset = ccr.vector[cv];
-  auto &vector = gpr.vector[v];
+  matrix_t &matrix = ccr.matrix[mx];
+  vector_t &offset = ccr.vector[cv];
+  vector_t &vector = gpr.vector[v];
 
-  int shift = get_sf(code);
+  int32_t shift = get_sf(code);
 
-  for (int i = 0; i < 3; i++) {
+  for (int32_t i = 0; i < 3; i++) {
     if (buggy) {
 
       int32_t mulr[3];
@@ -209,9 +212,9 @@ static inline int64_t transform(cop2_state_t *state, uint32_t code, int mx, int 
           mulr[2] = gpr.ir0 * vector[2];
         }
         else {
-          int cr = i == 1
-                   ? ccr.matrix[MX_ROT][0][2]
-                   : ccr.matrix[MX_ROT][1][1];
+          int32_t cr = i == 1
+                       ? ccr.matrix[MX_ROT][0][2]
+                       : ccr.matrix[MX_ROT][1][1];
 
           mulr[0] = cr * vector[0];
           mulr[1] = cr * vector[1];
@@ -249,7 +252,7 @@ static inline int64_t transform(cop2_state_t *state, uint32_t code, int mx, int 
   return mac;
 }
 
-static inline int64_t transform_pt(cop2_state_t *state, uint32_t code, int mx, int cv, int v) {
+static inline int64_t transform_pt(cop2_state_t *state, uint32_t code, int32_t mx, int32_t cv, int32_t v) {
   auto &gpr = state->gpr;
 
   int32_t z = int32_t(transform(state, code, mx, cv, v) >> 12);
@@ -296,11 +299,11 @@ void cop2::op_cc(cop2_state_t *state, uint32_t code) {
 
   auto &gpr = state->gpr;
 
-  int sf = get_sf(code);
+  int32_t shift = get_sf(code);
 
-  gpr.mac[1] = flags::a(state, 0, (gpr.rgbc.r << 4) * gpr.vector[3][0]) >> sf;
-  gpr.mac[2] = flags::a(state, 1, (gpr.rgbc.g << 4) * gpr.vector[3][1]) >> sf;
-  gpr.mac[3] = flags::a(state, 2, (gpr.rgbc.b << 4) * gpr.vector[3][2]) >> sf;
+  gpr.mac[1] = flags::a(state, 0, (gpr.rgbc.r << 4) * gpr.vector[3][0]) >> shift;
+  gpr.mac[2] = flags::a(state, 1, (gpr.rgbc.g << 4) * gpr.vector[3][1]) >> shift;
+  gpr.mac[3] = flags::a(state, 2, (gpr.rgbc.b << 4) * gpr.vector[3][2]) >> shift;
 
   mac_to_ir(state, code);
   mac_to_rgb(state);
@@ -340,7 +343,7 @@ void cop2::op_dpcs(cop2_state_t *state, uint32_t code) {
 }
 
 void cop2::op_dpct(cop2_state_t *state, uint32_t code) {
-  for (int i = 0; i < 3; i++) {
+  for (int32_t i = 0; i < 3; i++) {
     auto &gpr = state->gpr;
 
     int32_t r = gpr.rgb[0].r << 16;
@@ -354,7 +357,7 @@ void cop2::op_dpct(cop2_state_t *state, uint32_t code) {
 void cop2::op_gpf(cop2_state_t *state, uint32_t code) {
   auto &gpr = state->gpr;
 
-  int shift = get_sf(code);
+  int32_t shift = get_sf(code);
 
   gpr.mac[1] = (gpr.ir0 * gpr.vector[3][0]) >> shift;
   gpr.mac[2] = (gpr.ir0 * gpr.vector[3][1]) >> shift;
@@ -367,7 +370,7 @@ void cop2::op_gpf(cop2_state_t *state, uint32_t code) {
 void cop2::op_gpl(cop2_state_t *state, uint32_t code) {
   auto &gpr = state->gpr;
 
-  int shift = get_sf(code);
+  int32_t shift = get_sf(code);
 
   int64_t mac1 = int64_t(gpr.mac[1]) << shift;
   int64_t mac2 = int64_t(gpr.mac[2]) << shift;
@@ -388,7 +391,7 @@ void cop2::op_intpl(cop2_state_t *state, uint32_t code) {
   int64_t gfc = int64_t(state->ccr.vector[CV_FC][1]) << 12;
   int64_t bfc = int64_t(state->ccr.vector[CV_FC][2]) << 12;
 
-  int shift = get_sf(code);
+  int32_t shift = get_sf(code);
 
   gpr.mac[1] = flags::a(state, 0, (rfc - (gpr.vector[3][0] << 12))) >> shift;
   gpr.mac[2] = flags::a(state, 1, (gfc - (gpr.vector[3][1] << 12))) >> shift;
@@ -403,9 +406,9 @@ void cop2::op_intpl(cop2_state_t *state, uint32_t code) {
 }
 
 void cop2::op_mvmva(cop2_state_t *state, uint32_t code) {
-  int mx = get_mx(code);
-  int cv = get_cv(code);
-  int v  = get_v (code);
+  int32_t mx = get_mx(code);
+  int32_t cv = get_cv(code);
+  int32_t v  = get_v (code);
 
   transform<1>(state, code, mx, cv, v);
 
@@ -420,7 +423,7 @@ void cop2::op_nccs(cop2_state_t *state, uint32_t code) {
 }
 
 void cop2::op_ncct(cop2_state_t *state, uint32_t code) {
-  for (int i = 0; i < 3; i++) {
+  for (int32_t i = 0; i < 3; i++) {
     transform(state, code, MX_LLM, CV_ZR, i);
     mac_to_ir(state, code);
 
@@ -445,7 +448,7 @@ void cop2::op_ncds(cop2_state_t *state, uint32_t code) {
 }
 
 void cop2::op_ncdt(cop2_state_t *state, uint32_t code) {
-  for (int i = 0; i < 3; i++) {
+  for (int32_t i = 0; i < 3; i++) {
     transform(state, code, MX_LLM, CV_ZR, i);
     mac_to_ir(state, code);
 
@@ -483,7 +486,7 @@ void cop2::op_ncs(cop2_state_t *state, uint32_t code) {
 }
 
 void cop2::op_nct(cop2_state_t *state, uint32_t code) {
-  for (int i = 0; i < 3; i++) {
+  for (int32_t i = 0; i < 3; i++) {
     transform(state, code, MX_LLM, CV_ZR, i);
     mac_to_ir(state, code);
 
@@ -494,10 +497,11 @@ void cop2::op_nct(cop2_state_t *state, uint32_t code) {
 }
 
 void cop2::op_op(cop2_state_t *state, uint32_t code) {
-  int shift = get_sf(code);
-
-  auto &matrix = state->ccr.matrix[MX_ROT];
   auto &gpr = state->gpr;
+
+  matrix_t &matrix = state->ccr.matrix[MX_ROT];
+
+  int32_t shift = get_sf(code);
 
   gpr.mac[1] = ((matrix[1][1] * gpr.vector[3][2]) - (matrix[2][2] * gpr.vector[3][1])) >> shift;
   gpr.mac[2] = ((matrix[2][2] * gpr.vector[3][0]) - (matrix[0][0] * gpr.vector[3][2])) >> shift;
@@ -530,7 +534,7 @@ void cop2::op_rtpt(cop2_state_t *state, uint32_t code) {
 void cop2::op_sqr(cop2_state_t *state, uint32_t code) {
   auto &gpr = state->gpr;
 
-  int shift = get_sf(code);
+  int32_t shift = get_sf(code);
 
   gpr.mac[1] = (gpr.vector[3][0] * gpr.vector[3][0]) >> shift;
   gpr.mac[2] = (gpr.vector[3][1] * gpr.vector[3][1]) >> shift;

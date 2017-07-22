@@ -68,13 +68,13 @@ void gpu::gp1(gpu_state_t *state, uint32_t data) {
       break;
 
     default:
-      printf("unhandled gp1 command: 0x%08x\n", data);
+      printf("gpu::gp1(0x%08x)\n", data);
       break;
     }
     break;
 
   default:
-    printf("unhandled gp1 command: 0x%08x\n", data);
+    printf("gpu::gp1(0x%08x)\n", data);
     break;
   }
 }

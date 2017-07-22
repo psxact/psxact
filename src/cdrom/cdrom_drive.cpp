@@ -1,11 +1,10 @@
 #include <cassert>
 #include "cdrom_drive.hpp"
-#include "../bus.hpp"
 #include "../utility.hpp"
 
-void cdrom::initialize(cdrom_state_t *state, const std::string &game_file_name) {
+void cdrom::initialize(cdrom_state_t *state, const char *game_file_name) {
   state->game_file_name = game_file_name;
-  state->game_file = fopen(game_file_name.c_str(), "rb+");
+  state->game_file = fopen(game_file_name, "rb+");
 
   cdrom::logic::transition(state, &cdrom::logic::idling, 1000);
   cdrom::drive::transition(state, &cdrom::drive::idling, 1000);
@@ -69,12 +68,12 @@ static uint32_t io_read_internal(cdrom_state_t *state, uint32_t port) {
   }
 }
 
-uint32_t cdrom::io_read(cdrom_state_t *state, int width, uint32_t address) {
+uint32_t cdrom::io_read(cdrom_state_t *state, bus::bus_width_t width, uint32_t address) {
   if (width == bus::BUS_WIDTH_WORD && address == 0x1f801800) {
-    auto b0 = state->data.read();
-    auto b1 = state->data.read();
-    auto b2 = state->data.read();
-    auto b3 = state->data.read();
+    uint8_t b0 = state->data.read();
+    uint8_t b1 = state->data.read();
+    uint8_t b2 = state->data.read();
+    uint8_t b3 = state->data.read();
 
     return (b0 << 0) | (b1 << 8) | (b2 << 16) | (b3 << 24);
   }
@@ -114,7 +113,7 @@ static void io_write_port_2_0(cdrom_state_t *state, uint8_t data) {
 }
 
 static void io_write_port_2_1(cdrom_state_t *state, uint8_t data) {
-  auto flags = data & 0x1f;
+  int32_t flags = data & 0x1f;
   state->interrupt_enable = flags;
 }
 
@@ -141,7 +140,7 @@ static void io_write_port_3_0(cdrom_state_t *state, uint8_t data) {
 }
 
 static void io_write_port_3_1(cdrom_state_t *state, uint8_t data) {
-  auto flags = data & 0x1f;
+  int32_t flags = data & 0x1f;
   state->interrupt_request &= ~flags;
 
   if (data & 0x40) {
@@ -155,7 +154,7 @@ static void io_write_port_3_2(cdrom_state_t *state, uint8_t data) {
 static void io_write_port_3_3(cdrom_state_t *state, uint8_t data) {
 }
 
-void cdrom::io_write(cdrom_state_t *state, int width, uint32_t address, uint32_t data) {
+void cdrom::io_write(cdrom_state_t *state, bus::bus_width_t width, uint32_t address, uint32_t data) {
   assert(width == bus::BUS_WIDTH_BYTE);
 
   uint32_t port = get_port(address);
@@ -210,7 +209,7 @@ void cdrom::tick(cdrom_state_t *state) {
   }
 
   if (state->interrupt_request) {
-    auto signal = state->interrupt_request & state->interrupt_enable;
+    int32_t signal = state->interrupt_request & state->interrupt_enable;
     if (signal == state->interrupt_request) {
       bus::irq(2);
     }
@@ -243,13 +242,13 @@ void cdrom::read_sector(cdrom_state_t *state) {
            state->read_timecode.sector);
   }
 
-  auto &tc = state->read_timecode;
-  auto cursor =
+  cdrom_sector_timecode_t &tc = state->read_timecode;
+  int32_t cursor =
       (tc.minute * sectors_per_minute) +
       (tc.second * sectors_per_second) +
       (tc.sector);
 
-  auto target = bytes_per_sector * (cursor - lead_in_duration);
+  int32_t target = bytes_per_sector * (cursor - lead_in_duration);
 
   fseek(state->game_file, target, SEEK_SET);
   fread(state->data_buffer, sizeof(uint8_t), 0x930, state->game_file);

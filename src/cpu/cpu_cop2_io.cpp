@@ -1,5 +1,5 @@
-#include <cstdint>
 #include "cpu_cop2.hpp"
+#include "../limits.hpp"
 
 static uint32_t read_matrix_vector_group(cop2_state_t *state, uint32_t n) {
   auto &matrix = state->ccr.matrix[n >> 3];
@@ -233,9 +233,9 @@ uint32_t cop2::read_gpr(cop2_state_t *state, uint32_t n) {
   case 0x1c:
   case 0x1d:
     return uint32_t(
-        (utility::sclamp<0, 31>(gpr.vector[3][0] >> 7) <<  0) |
-        (utility::sclamp<0, 31>(gpr.vector[3][1] >> 7) <<  5) |
-        (utility::sclamp<0, 31>(gpr.vector[3][2] >> 7) << 10)
+        (limits::uclamp<5>(gpr.vector[3][0] >> 7) <<  0) |
+        (limits::uclamp<5>(gpr.vector[3][1] >> 7) <<  5) |
+        (limits::uclamp<5>(gpr.vector[3][2] >> 7) << 10)
     );
 
   case 0x1e:

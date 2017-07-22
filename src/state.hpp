@@ -1,7 +1,7 @@
 #ifndef __PSXACT_STATE_HPP__
 #define __PSXACT_STATE_HPP__
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include "fifo.hpp"
 #include "utility.hpp"
@@ -24,9 +24,9 @@ struct cdrom_sector_timecode_t {
 };
 
 struct cdrom_state_t {
-  int index;
-  int interrupt_enable;
-  int interrupt_request;
+  int32_t index;
+  int32_t interrupt_enable;
+  int32_t interrupt_request;
 
   cdrom_sector_timecode_t seek_timecode;
   cdrom_sector_timecode_t read_timecode;
@@ -48,9 +48,9 @@ struct cdrom_state_t {
 
   struct {
     stage_t stage;
-    int timer;
+    int32_t timer;
 
-    int interrupt_request;
+    int32_t interrupt_request;
 
     fifo_t<uint8_t, 4> parameter;
     fifo_t<uint8_t, 4> response;
@@ -59,7 +59,7 @@ struct cdrom_state_t {
 
   struct {
     stage_t stage;
-    int timer;
+    int32_t timer;
   } drive;
 
   struct {
@@ -164,37 +164,37 @@ struct gpu_state_t {
 
   struct {
     uint32_t buffer[16];
-    int wr;
-    int rd;
+    int32_t wr;
+    int32_t rd;
   } fifo;
 
   struct {
     struct {
-      int x;
-      int y;
-      int w;
-      int h;
+      int32_t x;
+      int32_t y;
+      int32_t w;
+      int32_t h;
     } reg;
 
     struct {
       bool active;
-      int x;
-      int y;
+      int32_t x;
+      int32_t y;
     } run;
   } cpu_to_gpu_transfer;
 
   struct {
     struct {
-      int x;
-      int y;
-      int w;
-      int h;
+      int32_t x;
+      int32_t y;
+      int32_t w;
+      int32_t h;
     } reg;
 
     struct {
       bool active;
-      int x;
-      int y;
+      int32_t x;
+      int32_t y;
     } run;
   } gpu_to_cpu_transfer;
 };
@@ -212,7 +212,7 @@ struct spu_state_t {
 
   uint16_t registers[24][8];
 
-  utility::memory_t<19> sound_ram;
+  memory_t<19> sound_ram;
 
   uint32_t sound_ram_address;
   uint16_t sound_ram_address_latch;
@@ -224,7 +224,7 @@ struct timer_state_t {
     uint16_t counter;
     uint16_t control;
     uint16_t compare;
-    int divider;
+    int32_t divider;
   } timers[3];
 };
 

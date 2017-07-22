@@ -2,15 +2,16 @@
 #define __PSXACT_CDROM_DRIVE_HPP__
 
 #include <cstdint>
+#include "../bus.hpp"
 #include "../fifo.hpp"
 #include "../state.hpp"
 
 namespace cdrom {
-  void initialize(cdrom_state_t *state, const std::string &game_file_name);
+  void initialize(cdrom_state_t *state, const char *game_file_name);
 
-  uint32_t io_read(cdrom_state_t *state, int width, uint32_t address);
+  uint32_t io_read(cdrom_state_t *state, bus::bus_width_t width, uint32_t address);
 
-  void io_write(cdrom_state_t *state, int width, uint32_t address, uint32_t data);
+  void io_write(cdrom_state_t *state, bus::bus_width_t width, uint32_t address, uint32_t data);
 
   void tick(cdrom_state_t *state);
 

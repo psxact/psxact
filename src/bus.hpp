@@ -12,13 +12,13 @@ namespace bus {
     BUS_WIDTH_WORD
   };
 
-  void initialize(system_state_t *state, const std::string &bios_file_name);
+  bool initialize(system_state_t *state, const char *bios_file_name);
 
-  void irq(int interrupt);
+  void irq(int32_t interrupt);
 
-  uint32_t read(int width, uint32_t address);
+  uint32_t read(bus_width_t width, uint32_t address);
 
-  void write(int width, uint32_t address, uint32_t data);
+  void write(bus_width_t width, uint32_t address, uint32_t data);
 }
 
 #endif // __PSXACT_BUS_HPP__

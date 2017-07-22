@@ -71,7 +71,7 @@ void disassemble_special(cpu_state_t *state, FILE *file) {
 }
 
 void disassemble_reg_imm(cpu_state_t *state, FILE *file) {
-  auto pc = state->regs.this_pc;
+  uint32_t pc = state->regs.this_pc;
 
   switch (cpu::decoder::rt(state)) {
   case 0x00: fprintf(file, "bltz      %s, 0x%08x\n", get_rs(), pc + 4 + (get_iconst() << 2)); break;
@@ -87,7 +87,7 @@ void disassemble_reg_imm(cpu_state_t *state, FILE *file) {
 }
 
 void cpu::disassemble(cpu_state_t *state, FILE *file) {
-  auto pc = state->regs.this_pc;
+  uint32_t pc = state->regs.this_pc;
 
   fprintf(file, "%08X: ", pc);
 
@@ -121,7 +121,7 @@ void cpu::disassemble(cpu_state_t *state, FILE *file) {
   case 0x11:
   case 0x12:
   case 0x13: {
-    auto co = (state->code >> 26) & 3;
+    uint32_t co = (state->code >> 26) & 3;
 
     switch (cpu::decoder::rs(state)) {
     case 0x00: fprintf(file, "mfc%d      %s, %s\n", co, get_rt(), get_rd()); break;

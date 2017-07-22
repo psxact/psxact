@@ -1,8 +1,8 @@
 #include "renderer.hpp"
 #include "memory/vram.hpp"
 
-const unsigned width = 1024;
-const unsigned height = 512;
+const uint32_t width = 1024;
+const uint32_t height = 512;
 
 SDL_Window *window;
 SDL_Surface *surface;
@@ -38,10 +38,10 @@ uint32_t color_16_to_24(uint16_t color) {
 bool renderer::render() {
   SDL_LockSurface(surface);
 
-  auto pixels = (uint32_t *)surface->pixels;
-  auto colors = vram::get_pointer();
+  uint32_t *pixels = (uint32_t *)surface->pixels;
+  uint16_t *colors = vram::get_pointer();
 
-  for (int i = 0; i < 1024 * 512; i++) {
+  for (int32_t i = 0; i < 1024 * 512; i++) {
     *pixels++ = color_16_to_24(colors[i]);
   }
 

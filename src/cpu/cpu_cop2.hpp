@@ -64,13 +64,13 @@ namespace cop2 {
       H = 12
     };
 
-    int64_t a(cop2_state_t *state, int n, int64_t value);
+    int64_t a(cop2_state_t *state, int32_t n, int64_t value);
 
-    int32_t b(cop2_state_t *state, int n, uint32_t code, int32_t value);
+    int32_t b(cop2_state_t *state, int32_t n, uint32_t code, int32_t value);
 
-    int32_t b(cop2_state_t *state, int n, uint32_t code, int32_t value, int32_t shifted);
+    int32_t b(cop2_state_t *state, int32_t n, uint32_t code, int32_t value, int32_t shifted);
 
-    int32_t c(cop2_state_t *state, int n, int32_t value);
+    int32_t c(cop2_state_t *state, int32_t n, int32_t value);
 
     int32_t d(cop2_state_t *state, int32_t value);
 
@@ -78,7 +78,7 @@ namespace cop2 {
 
     int64_t f(cop2_state_t *state, int64_t value);
 
-    int32_t g(cop2_state_t *state, int n, int32_t value);
+    int32_t g(cop2_state_t *state, int32_t n, int32_t value);
 
     int32_t h(cop2_state_t *state, int64_t value);
   }

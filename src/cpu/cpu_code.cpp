@@ -1,8 +1,7 @@
 #include "cpu_core.hpp"
-#include "../bus.hpp"
-#include "../utility.hpp"
 #include "cpu_cop0.hpp"
 #include "cpu_cop2.hpp"
+#include "../utility.hpp"
 
 // --========--
 //   Decoding
@@ -29,7 +28,7 @@ static inline void set_rd(cpu_state_t *state, uint32_t value) {
 
 template<bool load = false>
 static inline void set_rt(cpu_state_t *state, uint32_t value) {
-  auto t = cpu::decoder::rt(state);
+  uint32_t t = cpu::decoder::rt(state);
 
   if (load) {
     if (state->is_load_delay_slot && state->load_index == t) {
@@ -59,9 +58,9 @@ static inline uint32_t get_rs(cpu_state_t *state) {
 // --============--
 
 void cpu::op_add(cpu_state_t *state) {
-  auto x = get_rs(state);
-  auto y = get_rt(state);
-  auto z = x + y;
+  uint32_t x = get_rs(state);
+  uint32_t y = get_rt(state);
+  uint32_t z = x + y;
 
   if (overflow(x, y, z)) {
     cop0::enter_exception(state, 0xc);
@@ -72,9 +71,9 @@ void cpu::op_add(cpu_state_t *state) {
 }
 
 void cpu::op_addi(cpu_state_t *state) {
-  auto x = get_rs(state);
-  auto y = decoder::iconst(state);
-  auto z = x + y;
+  uint32_t x = get_rs(state);
+  uint32_t y = decoder::iconst(state);
+  uint32_t z = x + y;
 
   if (overflow(x, y, z)) {
     cop0::enter_exception(state, 0xc);
@@ -156,8 +155,8 @@ void cpu::op_cop0(cpu_state_t *state) {
     return cop0::run(state, state->code & 0x1ffffff);
   }
 
-  auto rd = cpu::decoder::rd(state);
-  auto rt = cpu::decoder::rt(state);
+  uint32_t rd = cpu::decoder::rd(state);
+  uint32_t rt = cpu::decoder::rt(state);
 
   switch (cpu::decoder::rs(state)) {
   case 0x00: return set_rt(state, cop0::read_gpr(state, rd));
@@ -166,7 +165,7 @@ void cpu::op_cop0(cpu_state_t *state) {
   case 0x06: return cop0::write_ccr(state, rd, get_register(state, rt));
   }
 
-  printf("cop0 $%08x\n", state->code);
+  printf("cpu::op_cop0(0x%08x)\n", state->code);
 }
 
 void cpu::op_cop1(cpu_state_t *state) {
@@ -178,8 +177,8 @@ void cpu::op_cop2(cpu_state_t *state) {
     return cop2::run(&state->cop2, state->code & 0x1ffffff);
   }
 
-  auto rd = cpu::decoder::rd(state);
-  auto rt = cpu::decoder::rt(state);
+  uint32_t rd = cpu::decoder::rd(state);
+  uint32_t rt = cpu::decoder::rt(state);
 
   switch (cpu::decoder::rs(state)) {
   case 0x00: return set_rt(state, cop2::read_gpr(&state->cop2, rd));
@@ -188,7 +187,7 @@ void cpu::op_cop2(cpu_state_t *state) {
   case 0x06: return cop2::write_ccr(&state->cop2, rd, get_register(state, rt));
   }
 
-  printf("cop2 $%08x\n", state->code);
+  printf("cpu::op_cop2(0x%08x)\n", state->code);
 }
 
 void cpu::op_cop3(cpu_state_t *state) {
@@ -218,8 +217,8 @@ void cpu::op_div(cpu_state_t *state) {
 }
 
 void cpu::op_divu(cpu_state_t *state) {
-  auto dividend = get_rs(state);
-  auto divisor = get_rt(state);
+  uint32_t dividend = get_rs(state);
+  uint32_t divisor = get_rt(state);
 
   if (divisor) {
     state->regs.lo = dividend / divisor;
@@ -243,7 +242,7 @@ void cpu::op_jal(cpu_state_t *state) {
 }
 
 void cpu::op_jalr(cpu_state_t *state) {
-  auto ra = state->regs.next_pc;
+  uint32_t ra = state->regs.next_pc;
 
   state->regs.next_pc = get_rs(state);
   set_rd(state, ra);
@@ -257,27 +256,27 @@ void cpu::op_jr(cpu_state_t *state) {
 }
 
 void cpu::op_lb(cpu_state_t *state) {
-  auto address = get_rs(state) + decoder::iconst(state);
-  auto data = read_data(state, bus::BUS_WIDTH_BYTE, address);
+  uint32_t address = get_rs(state) + decoder::iconst(state);
+  uint32_t data = read_data(state, bus::BUS_WIDTH_BYTE, address);
   data = utility::sclip<8>(data);
 
   set_rt<1>(state, data);
 }
 
 void cpu::op_lbu(cpu_state_t *state) {
-  auto address = get_rs(state) + decoder::iconst(state);
-  auto data = read_data(state, bus::BUS_WIDTH_BYTE, address);
+  uint32_t address = get_rs(state) + decoder::iconst(state);
+  uint32_t data = read_data(state, bus::BUS_WIDTH_BYTE, address);
 
   set_rt<1>(state, data);
 }
 
 void cpu::op_lh(cpu_state_t *state) {
-  auto address = get_rs(state) + decoder::iconst(state);
+  uint32_t address = get_rs(state) + decoder::iconst(state);
   if (address & 1) {
     cop0::enter_exception(state, 0x4);
   }
   else {
-    auto data = read_data(state, bus::BUS_WIDTH_HALF, address);
+    uint32_t data = read_data(state, bus::BUS_WIDTH_HALF, address);
     data = utility::sclip<16>(data);
 
     set_rt<1>(state, data);
@@ -285,12 +284,12 @@ void cpu::op_lh(cpu_state_t *state) {
 }
 
 void cpu::op_lhu(cpu_state_t *state) {
-  auto address = get_rs(state) + decoder::iconst(state);
+  uint32_t address = get_rs(state) + decoder::iconst(state);
   if (address & 1) {
     cop0::enter_exception(state, 0x4);
   }
   else {
-    auto data = read_data(state, bus::BUS_WIDTH_HALF, address);
+    uint32_t data = read_data(state, bus::BUS_WIDTH_HALF, address);
 
     set_rt<1>(state, data);
   }
@@ -301,44 +300,44 @@ void cpu::op_lui(cpu_state_t *state) {
 }
 
 void cpu::op_lw(cpu_state_t *state) {
-  auto address = get_rs(state) + decoder::iconst(state);
+  uint32_t address = get_rs(state) + decoder::iconst(state);
   if (address & 3) {
     cop0::enter_exception(state, 0x4);
   }
   else {
-    auto data = read_data(state, bus::BUS_WIDTH_WORD, address);
+    uint32_t data = read_data(state, bus::BUS_WIDTH_WORD, address);
 
     set_rt<1>(state, data);
   }
 }
 
 void cpu::op_lwc0(cpu_state_t *state) {
-  throw "unimplemented lwc0\n";
+  printf("cpu::op_lwc0(0x%08x)\n", state->code);
 }
 
 void cpu::op_lwc1(cpu_state_t *state) {
-  throw "unimplemented lwc1\n";
+  printf("cpu::op_lwc1(0x%08x)\n", state->code);
 }
 
 void cpu::op_lwc2(cpu_state_t *state) {
-  auto address = get_rs(state) + decoder::iconst(state);
+  uint32_t address = get_rs(state) + decoder::iconst(state);
   if (address & 3) {
     cop0::enter_exception(state, 0x4);
   }
   else {
-    auto data = read_data(state, bus::BUS_WIDTH_WORD, address);
+    uint32_t data = read_data(state, bus::BUS_WIDTH_WORD, address);
 
     cop2::write_gpr(&state->cop2, decoder::rt(state), data);
   }
 }
 
 void cpu::op_lwc3(cpu_state_t *state) {
-  throw "unimplemented lwc3\n";
+  printf("cpu::op_lwc3(0x%08x)\n", state->code);
 }
 
 void cpu::op_lwl(cpu_state_t *state) {
-  auto address = get_rs(state) + decoder::iconst(state);
-  auto data = read_data(state, bus::BUS_WIDTH_WORD, address & ~3);
+  uint32_t address = get_rs(state) + decoder::iconst(state);
+  uint32_t data = read_data(state, bus::BUS_WIDTH_WORD, address & ~3);
 
   switch (address & 3) {
   default: data = (data << 24) | (get_rt<1>(state) & 0x00ffffff); break;
@@ -351,8 +350,8 @@ void cpu::op_lwl(cpu_state_t *state) {
 }
 
 void cpu::op_lwr(cpu_state_t *state) {
-  auto address = get_rs(state) + decoder::iconst(state);
-  auto data = read_data(state, bus::BUS_WIDTH_WORD, address & ~3);
+  uint32_t address = get_rs(state) + decoder::iconst(state);
+  uint32_t data = read_data(state, bus::BUS_WIDTH_WORD, address & ~3);
 
   switch (address & 3) {
   default: data = (data >>  0) | (get_rt<1>(state) & 0x00000000); break;
@@ -381,17 +380,17 @@ void cpu::op_mtlo(cpu_state_t *state) {
 }
 
 void cpu::op_mult(cpu_state_t *state) {
-  auto s = int32_t(get_rs(state));
-  auto t = int32_t(get_rt(state));
+  int32_t rs = int32_t(get_rs(state));
+  int32_t rt = int32_t(get_rt(state));
 
-  int64_t result = int64_t(s) * int64_t(t);
+  int64_t result = int64_t(rs) * int64_t(rt);
   state->regs.lo = uint32_t(result >> 0);
   state->regs.hi = uint32_t(result >> 32);
 }
 
 void cpu::op_multu(cpu_state_t *state) {
-  auto s = get_rs(state);
-  auto t = get_rt(state);
+  uint32_t s = get_rs(state);
+  uint32_t t = get_rt(state);
 
   uint64_t result = uint64_t(s) * uint64_t(t);
   state->regs.lo = uint32_t(result >> 0);
@@ -411,19 +410,19 @@ void cpu::op_ori(cpu_state_t *state) {
 }
 
 void cpu::op_sb(cpu_state_t *state) {
-  auto address = get_rs(state) + decoder::iconst(state);
-  auto data = get_rt(state);
+  uint32_t address = get_rs(state) + decoder::iconst(state);
+  uint32_t data = get_rt(state);
 
   write_data(state, bus::BUS_WIDTH_BYTE, address, data);
 }
 
 void cpu::op_sh(cpu_state_t *state) {
-  auto address = get_rs(state) + decoder::iconst(state);
+  uint32_t address = get_rs(state) + decoder::iconst(state);
   if (address & 1) {
     cop0::enter_exception(state, 0x5);
   }
   else {
-    auto data = get_rt(state);
+    uint32_t data = get_rt(state);
 
     write_data(state, bus::BUS_WIDTH_HALF, address, data);
   }
@@ -470,9 +469,9 @@ void cpu::op_srlv(cpu_state_t *state) {
 }
 
 void cpu::op_sub(cpu_state_t *state) {
-  auto x = get_rs(state);
-  auto y = get_rt(state);
-  auto z = x - y;
+  uint32_t x = get_rs(state);
+  uint32_t y = get_rt(state);
+  uint32_t z = x - y;
 
   if (overflow(x, ~y, z)) {
     cop0::enter_exception(state, 0xc);
@@ -487,44 +486,44 @@ void cpu::op_subu(cpu_state_t *state) {
 }
 
 void cpu::op_sw(cpu_state_t *state) {
-  auto address = get_rs(state) + decoder::iconst(state);
+  uint32_t address = get_rs(state) + decoder::iconst(state);
   if (address & 3) {
     cop0::enter_exception(state, 0x5);
   }
   else {
-    auto data = get_rt(state);
+    uint32_t data = get_rt(state);
 
     write_data(state, bus::BUS_WIDTH_WORD, address, data);
   }
 }
 
 void cpu::op_swc0(cpu_state_t *state) {
-  throw "unimplemented swc0\n";
+  printf("cpu::op_swc0(0x%08x)\n", state->code);
 }
 
 void cpu::op_swc1(cpu_state_t *state) {
-  throw "unimplemented swc1\n";
+  printf("cpu::op_swc1(0x%08x)\n", state->code);
 }
 
 void cpu::op_swc2(cpu_state_t *state) {
-  auto address = get_rs(state) + decoder::iconst(state);
+  uint32_t address = get_rs(state) + decoder::iconst(state);
   if (address & 3) {
     cop0::enter_exception(state, 0x5);
   }
   else {
-    auto data = cop2::read_gpr(&state->cop2, decoder::rt(state));
+    uint32_t data = cop2::read_gpr(&state->cop2, decoder::rt(state));
 
     write_data(state, bus::BUS_WIDTH_WORD, address, data);
   }
 }
 
 void cpu::op_swc3(cpu_state_t *state) {
-  throw "unimplemented swc3\n";
+  printf("cpu::op_swc3(0x%08x)\n", state->code);
 }
 
 void cpu::op_swl(cpu_state_t *state) {
-  auto address = get_rs(state) + decoder::iconst(state);
-  auto data = read_data(state, bus::BUS_WIDTH_WORD, address & ~3);
+  uint32_t address = get_rs(state) + decoder::iconst(state);
+  uint32_t data = read_data(state, bus::BUS_WIDTH_WORD, address & ~3);
 
   switch (address & 3) {
   default: data = (data & 0xffffff00) | (get_rt(state) >> 24); break;
@@ -537,8 +536,8 @@ void cpu::op_swl(cpu_state_t *state) {
 }
 
 void cpu::op_swr(cpu_state_t *state) {
-  auto address = get_rs(state) + decoder::iconst(state);
-  auto data = read_data(state, bus::BUS_WIDTH_WORD, address & ~3);
+  uint32_t address = get_rs(state) + decoder::iconst(state);
+  uint32_t data = read_data(state, bus::BUS_WIDTH_WORD, address & ~3);
 
   switch (address & 3) {
   default: data = (data & 0x00000000) | (get_rt(state) <<  0); break;

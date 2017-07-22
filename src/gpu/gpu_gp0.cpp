@@ -1,7 +1,5 @@
-#include <cassert>
 #include "gpu_core.hpp"
 #include "../memory/vram.hpp"
-#include "../state.hpp"
 
 static int command_size[256] = {
   1, 1, 3, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $00
@@ -27,8 +25,8 @@ static int command_size[256] = {
 
 void gpu::gp0(gpu_state_t *state, uint32_t data) {
   if (state->cpu_to_gpu_transfer.run.active) {
-    auto lower = uint16_t(data >>  0);
-    auto upper = uint16_t(data >> 16);
+    uint16_t lower = uint16_t(data >>  0);
+    uint16_t upper = uint16_t(data >> 16);
 
     vram_transfer(state, lower);
     vram_transfer(state, upper);
@@ -38,7 +36,7 @@ void gpu::gp0(gpu_state_t *state, uint32_t data) {
   state->fifo.buffer[state->fifo.wr] = data;
   state->fifo.wr = (state->fifo.wr + 1) & 0xf;
 
-  auto command = state->fifo.buffer[0] >> 24;
+  uint32_t command = state->fifo.buffer[0] >> 24;
 
   if (state->fifo.wr == command_size[command]) {
     state->fifo.wr = 0;
@@ -67,8 +65,8 @@ void gpu::gp0(gpu_state_t *state, uint32_t data) {
       count.x = (state->fifo.buffer[2] + 0xf) & 0x7f0;
       count.y = (state->fifo.buffer[2] >> 16) & 0x1ff;
 
-      for (int y = 0; y < count.y; y++) {
-        for (int x = 0; x < count.x; x++) {
+      for (int32_t y = 0; y < count.y; y++) {
+        for (int32_t x = 0; x < count.x; x++) {
           vram::write(point.x + x,
                       point.y + y,
                       color);
@@ -141,7 +139,7 @@ void gpu::gp0(gpu_state_t *state, uint32_t data) {
 
     default:
       if (command_size[command] == 1) {
-        printf("unhandled gp0 command: 0x%08x\n", state->fifo.buffer[0]);
+        printf("gpu::gp0(0x%08x)\n", state->fifo.buffer[0]);
       }
       break;
     }

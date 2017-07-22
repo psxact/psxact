@@ -1,8 +1,7 @@
-#include <cstdint>
 #include "cpu_cop2.hpp"
 #include "../limits.hpp"
 
-static inline void set_flag(cop2_state_t *state, int flag) {
+static inline void set_flag(cop2_state_t *state, int32_t flag) {
   state->ccr.flag |= 1 << flag;
 }
 
@@ -12,7 +11,7 @@ static inline int32_t get_lm(uint32_t code) {
          : slimit<15>::min;
 }
 
-int64_t cop2::flags::a(cop2_state_t *state, int n, int64_t value) {
+int64_t cop2::flags::a(cop2_state_t *state, int32_t n, int64_t value) {
   const int64_t max = slimit<43>::max;
   const int64_t min = slimit<43>::min;
 
@@ -26,7 +25,7 @@ int64_t cop2::flags::a(cop2_state_t *state, int n, int64_t value) {
   return (value << 20) >> 20;
 }
 
-int32_t cop2::flags::b(cop2_state_t *state, int n, uint32_t code, int32_t value) {
+int32_t cop2::flags::b(cop2_state_t *state, int32_t n, uint32_t code, int32_t value) {
   int32_t max = slimit<15>::max;
   int32_t min = get_lm(code);
 
@@ -43,7 +42,7 @@ int32_t cop2::flags::b(cop2_state_t *state, int n, uint32_t code, int32_t value)
   return value;
 }
 
-int32_t cop2::flags::b(cop2_state_t *state, int n, uint32_t code, int32_t value, int32_t shifted) {
+int32_t cop2::flags::b(cop2_state_t *state, int32_t n, uint32_t code, int32_t value, int32_t shifted) {
   const int32_t max = slimit<15>::max;
   const int32_t min = slimit<15>::min;
 
@@ -64,7 +63,7 @@ int32_t cop2::flags::b(cop2_state_t *state, int n, uint32_t code, int32_t value,
   return value;
 }
 
-int32_t cop2::flags::c(cop2_state_t *state, int n, int32_t value) {
+int32_t cop2::flags::c(cop2_state_t *state, int32_t n, int32_t value) {
   const int32_t max = ulimit<8>::max;
   const int32_t min = ulimit<8>::min;
 
@@ -135,7 +134,7 @@ int64_t cop2::flags::f(cop2_state_t *state, int64_t value) {
   return value;
 }
 
-int32_t cop2::flags::g(cop2_state_t *state, int n, int32_t value) {
+int32_t cop2::flags::g(cop2_state_t *state, int32_t n, int32_t value) {
   const int32_t max = slimit<10>::max;
   const int32_t min = slimit<10>::min;
 

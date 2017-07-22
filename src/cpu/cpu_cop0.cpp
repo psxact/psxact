@@ -49,8 +49,7 @@ void cop0::enter_exception(cpu_state_t *state, uint32_t code) {
 
   state->regs.pc = (status & (1 << 22))
                    ? 0xbfc00180
-                   : 0x80000080
-      ;
+                   : 0x80000080;
 
   state->regs.next_pc = state->regs.pc + 4;
 }
