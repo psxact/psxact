@@ -208,6 +208,11 @@ static void draw_triangle(gpu_state_t *state, uint32_t command, triangle_t &tria
   dy[1] = v[2].x - v[0].x;
   dy[2] = v[0].x - v[1].x;
 
+  int32_t c[3];
+  c[0] = (dy[0] > 0 || (dy[0] == 0 && dx[0] > 0)) ? (-1) : 0;
+  c[1] = (dy[1] > 0 || (dy[1] == 0 && dx[1] > 0)) ? (-1) : 0;
+  c[2] = (dy[2] > 0 || (dy[2] == 0 && dx[2] > 0)) ? (-1) : 0;
+
   int32_t row[3];
   row[0] = edge_function(min, v[1], v[2]);
   row[1] = edge_function(min, v[2], v[0]);
@@ -226,7 +231,7 @@ static void draw_triangle(gpu_state_t *state, uint32_t command, triangle_t &tria
     row[2] += dy[2];
 
     for (point.x = min.x; point.x <= max.x; point.x++) {
-      if ((w0 | w1 | w2) > 0) {
+      if (w0 > c[0] && w1 > c[1] && w2 > c[2]) {
         gpu::color_t color;
 
         if (get_color(command, triangle, w0, w1, w2, color)) {
