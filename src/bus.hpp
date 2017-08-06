@@ -12,7 +12,7 @@ namespace bus {
     BUS_WIDTH_WORD
   };
 
-  bool initialize(system_state_t *state, const char *bios_file_name);
+  bool init(system_state_t *state, const char *bios_file_name);
 
   void irq(int32_t interrupt);
 

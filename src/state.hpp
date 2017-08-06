@@ -44,7 +44,7 @@ struct cdrom_state_t {
   std::string game_file_name;
   FILE *game_file;
 
-  typedef void (*stage_t)(cdrom_state_t *state);
+  typedef void (*stage_t)(cdrom_state_t &state);
 
   struct {
     stage_t stage;
@@ -201,6 +201,10 @@ struct gpu_state_t {
 
 struct input_state_t {
   uint32_t status;
+
+  int32_t baud_rate_factor;
+  int32_t baud_rate_reload;
+  int32_t baud_rate_timer;
 };
 
 struct mdec_state_t {

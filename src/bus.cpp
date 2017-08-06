@@ -6,7 +6,7 @@
 #include "cpu/cpu_core.hpp"
 #include "dma/dma_core.hpp"
 #include "gpu/gpu_core.hpp"
-#include "input/input.hpp"
+#include "input/input_core.hpp"
 #include "mdec/mdec_core.hpp"
 #include "spu/spu_core.hpp"
 #include "timer/timer_core.hpp"
@@ -14,28 +14,14 @@
 #include "utility.hpp"
 #include "state.hpp"
 
-static cdrom_state_t *cdrom_state;
-static cpu_state_t *cpu_state;
-static dma_state_t *dma_state;
-static gpu_state_t *gpu_state;
-static input_state_t *input_state;
-static mdec_state_t *mdec_state;
-static spu_state_t *spu_state;
-static timer_state_t *timer_state;
+static system_state_t *state;
 
 static memory_t<19> bios;
 static memory_t<21> wram;
 static memory_t<10> dmem;
 
-bool bus::initialize(system_state_t *state, const char *bios_file_name) {
-  cdrom_state = &state->cdrom_state;
-  cpu_state = &state->cpu_state;
-  dma_state = &state->dma_state;
-  gpu_state = &state->gpu_state;
-  input_state = &state->input_state;
-  mdec_state = &state->mdec_state;
-  spu_state = &state->spu_state;
-  timer_state = &state->timer_state;
+bool bus::init(system_state_t *s, const char *bios_file_name) {
+  state = s;
 
   memset(bios.b, 0, size_t(bios.size));
   memset(wram.b, 0, size_t(wram.size));
@@ -48,7 +34,7 @@ bool bus::initialize(system_state_t *state, const char *bios_file_name) {
 
 void bus::irq(int32_t interrupt) {
   int32_t flag = 1 << interrupt;
-  cpu::set_istat(cpu_state, cpu_state->i_stat | flag);
+  cpu::set_istat(state->cpu_state, state->cpu_state.i_stat | flag);
 }
 
 uint32_t bus::read(bus_width_t width, uint32_t address) {
@@ -77,37 +63,37 @@ uint32_t bus::read(bus_width_t width, uint32_t address) {
   }
 
   if (limits::between<0x1f801040, 0x1f80104f>(address)) {
-    return input::io_read(input_state, width, address);
+    return input::io_read(state->input_state, width, address);
   }
 
   if (limits::between<0x1f801070, 0x1f801077>(address)) {
-    return cpu::io_read(cpu_state, width, address);
+    return cpu::io_read(state->cpu_state, width, address);
   }
 
   if (limits::between<0x1f801080, 0x1f8010ff>(address)) {
-    return dma::io_read(dma_state, width, address);
+    return dma::io_read(state->dma_state, width, address);
   }
 
   if (limits::between<0x1f801100, 0x1f80110f>(address) ||
       limits::between<0x1f801110, 0x1f80111f>(address) ||
       limits::between<0x1f801120, 0x1f80112f>(address)) {
-    return timer::io_read(timer_state, width, address);
+    return timer::io_read(state->timer_state, width, address);
   }
 
   if (limits::between<0x1f801800, 0x1f801803>(address)) {
-    return cdrom::io_read(cdrom_state, width, address);
+    return cdrom::io_read(state->cdrom_state, width, address);
   }
 
   if (limits::between<0x1f801810, 0x1f801817>(address)) {
-    return gpu::io_read(gpu_state, width, address);
+    return gpu::io_read(state->gpu_state, width, address);
   }
 
   if (limits::between<0x1f801820, 0x1f801827>(address)) {
-    return mdec::io_read(mdec_state, width, address);
+    return mdec::io_read(state->mdec_state, width, address);
   }
 
   if (limits::between<0x1f801c00, 0x1f801fff>(address)) {
-    return spu::io_read(spu_state, width, address);
+    return spu::io_read(state->spu_state, width, address);
   }
 
   if (limits::between<0x1f000000, 0x1f7fffff>(address) || // expansion region 1
@@ -147,7 +133,7 @@ static void load_executable() {
   (getc(file) << 24)    \
   )
 
-  FILE *game = fopen(cdrom_state->game_file_name.c_str(), "rb+");
+  FILE *game = fopen(state->cdrom_state.game_file_name.c_str(), "rb+");
 
   fseek(game, 0x010, SEEK_SET);
 
@@ -161,11 +147,11 @@ static void load_executable() {
 
   uint32_t sp = get_word(game) + get_word(game);
 
-  cpu_state->regs.pc = pc;
-  cpu_state->regs.next_pc = pc + 4;
-  cpu_state->regs.gp[28] = gp;
-  cpu_state->regs.gp[29] = sp;
-  cpu_state->regs.gp[30] = sp;
+  state->cpu_state.regs.pc = pc;
+  state->cpu_state.regs.next_pc = pc + 4;
+  state->cpu_state.regs.gp[28] = gp;
+  state->cpu_state.regs.gp[29] = sp;
+  state->cpu_state.regs.gp[30] = sp;
 
   fseek(game, 0x800, SEEK_SET);
 
@@ -201,38 +187,38 @@ void bus::write(bus_width_t width, uint32_t address, uint32_t data) {
   }
 
   if (limits::between<0x1f801040, 0x1f80104f>(address)) {
-    return input::io_write(input_state, width, address, data);
+    return input::io_write(state->input_state, width, address, data);
   }
 
   if (limits::between<0x1f801070, 0x1f801077>(address)) {
-    return cpu::io_write(cpu_state, width, address, data);
+    return cpu::io_write(state->cpu_state, width, address, data);
   }
 
   if (limits::between<0x1f801080, 0x1f8010ff>(address)) {
-    return dma::io_write(dma_state, width, address, data);
+    return dma::io_write(state->dma_state, width, address, data);
   }
 
   if (limits::between<0x1f801100, 0x1f80110f>(address) ||
       limits::between<0x1f801110, 0x1f80111f>(address) ||
       limits::between<0x1f801120, 0x1f80112f>(address)) {
-    return timer::io_write(timer_state, width, address, data);
+    return timer::io_write(state->timer_state, width, address, data);
   }
 
   if (limits::between<0x1f801800, 0x1f801803>(address)) {
     // return load_executable();
-    return cdrom::io_write(cdrom_state, width, address, data);
+    return cdrom::io_write(state->cdrom_state, width, address, data);
   }
 
   if (limits::between<0x1f801810, 0x1f801817>(address)) {
-    return gpu::io_write(gpu_state, width, address, data);
+    return gpu::io_write(state->gpu_state, width, address, data);
   }
 
   if (limits::between<0x1f801820, 0x1f801827>(address)) {
-    return mdec::io_write(mdec_state, width, address, data);
+    return mdec::io_write(state->mdec_state, width, address, data);
   }
 
   if (limits::between<0x1f801c00, 0x1f801fff>(address)) {
-    return spu::io_write(spu_state, width, address, data);
+    return spu::io_write(state->spu_state, width, address, data);
   }
 
   if (limits::between<0x1f000000, 0x1f7fffff>(address) || // expansion region 1

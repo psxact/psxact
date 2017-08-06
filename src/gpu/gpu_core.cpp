@@ -3,27 +3,27 @@
 #include "../bus.hpp"
 #include "../memory/vram.hpp"
 
-uint32_t gpu::data(gpu_state_t *state) {
-  if (state->gpu_to_cpu_transfer.run.active) {
+uint32_t gpu::data(gpu_state_t &state) {
+  if (state.gpu_to_cpu_transfer.run.active) {
     uint16_t lower = vram_transfer(state);
     uint16_t upper = vram_transfer(state);
 
     return (upper << 16) | lower;
   }
 
-  return state->data_latch;
+  return state.data_latch;
 }
 
-uint32_t gpu::stat(gpu_state_t *state) {
+uint32_t gpu::stat(gpu_state_t &state) {
   //  19    Vertical Resolution         (0=240, 1=480, when Bit22=1)  ;GP1(08h).2
   //  26    Ready to receive Cmd Word   (0=No, 1=Ready)  ;GP0(...) ;via GP0
   //  27    Ready to send VRAM to CPU   (0=No, 1=Ready)  ;GP0(C0h) ;via GPUREAD
   //  28    Ready to receive DMA Block  (0=No, 1=Ready)  ;GP0(...) ;via GP0
 
-  return (state->status & ~0x00080000) | 0x1c002000;
+  return (state.status & ~0x00080000) | 0x1c002000;
 }
 
-uint32_t gpu::io_read(gpu_state_t *state, bus::bus_width_t width, uint32_t address) {
+uint32_t gpu::io_read(gpu_state_t &state, bus::bus_width_t width, uint32_t address) {
   assert(width == bus::BUS_WIDTH_WORD);
 
   if (utility::log_gpu) {
@@ -42,7 +42,7 @@ uint32_t gpu::io_read(gpu_state_t *state, bus::bus_width_t width, uint32_t addre
   }
 }
 
-void gpu::io_write(gpu_state_t *state, bus::bus_width_t width, uint32_t address, uint32_t data) {
+void gpu::io_write(gpu_state_t &state, bus::bus_width_t width, uint32_t address, uint32_t data) {
   assert(width == bus::BUS_WIDTH_WORD);
 
   if (utility::log_gpu) {
@@ -58,8 +58,8 @@ void gpu::io_write(gpu_state_t *state, bus::bus_width_t width, uint32_t address,
   }
 }
 
-uint16_t gpu::vram_transfer(gpu_state_t *state) {
-  auto &transfer = state->gpu_to_cpu_transfer;
+uint16_t gpu::vram_transfer(gpu_state_t &state) {
+  auto &transfer = state.gpu_to_cpu_transfer;
   if (!transfer.run.active) {
     return 0;
   }
@@ -83,8 +83,8 @@ uint16_t gpu::vram_transfer(gpu_state_t *state) {
   return data;
 }
 
-void gpu::vram_transfer(gpu_state_t *state, uint16_t data) {
-  auto &transfer = state->cpu_to_gpu_transfer;
+void gpu::vram_transfer(gpu_state_t &state, uint16_t data) {
+  auto &transfer = state.cpu_to_gpu_transfer;
   if (!transfer.run.active) {
     return;
   }

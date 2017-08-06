@@ -9,9 +9,13 @@ static const int dither_lut[4][4] = {
   {  3, -1,  2, -2 }
 };
 
-void gpu::draw_point(gpu_state_t *state, point_t point, color_t color) {
-  if (point.x < int(state->drawing_area_x1) || point.x > int(state->drawing_area_x2)) return;
-  if (point.y < int(state->drawing_area_y1) || point.y > int(state->drawing_area_y2)) return;
+void gpu::draw_point(gpu_state_t &state, point_t point, color_t color) {
+  if (point.x < state.drawing_area_x1 ||
+      point.x > state.drawing_area_x2 ||
+      point.y < state.drawing_area_y1 ||
+      point.y > state.drawing_area_y2) {
+    return;
+  }
 
   auto dither = dither_lut[point.y & 3][point.x & 3];
 

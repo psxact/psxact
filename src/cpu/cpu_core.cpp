@@ -26,23 +26,23 @@ cpu::opcode cpu::op_table_special[64] = {
   cpu::op_und,  cpu::op_und,   cpu::op_und,  cpu::op_und,  cpu::op_und,     cpu::op_und,   cpu::op_und,  cpu::op_und
 };
 
-void cpu::initialize(cpu_state_t *state) {
-  state->regs.gp[0] = 0;
-  state->regs.pc = 0xbfc00000;
-  state->regs.next_pc = state->regs.pc + 4;
+void cpu::init(cpu_state_t &state) {
+  state.regs.gp[0] = 0;
+  state.regs.pc = 0xbfc00000;
+  state.regs.next_pc = state.regs.pc + 4;
 }
 
-void cpu::tick(cpu_state_t *state) {
+void cpu::tick(cpu_state_t &state) {
   cpu::read_code(state);
 
-  state->is_branch_delay_slot = state->is_branch;
-  state->is_branch = false;
+  state.is_branch_delay_slot = state.is_branch;
+  state.is_branch = false;
 
-  state->is_load_delay_slot = state->is_load;
-  state->is_load = false;
+  state.is_load_delay_slot = state.is_load;
+  state.is_load = false;
 
-  bool iec = (state->cop0.regs[12] & 1) != 0;
-  bool irq = (state->cop0.regs[12] & state->cop0.regs[13] & 0xff00) != 0;
+  bool iec = (state.cop0.regs[12] & 1) != 0;
+  bool irq = (state.cop0.regs[12] & state.cop0.regs[13] & 0xff00) != 0;
 
   if (iec && irq) {
     cop0::enter_exception(state, 0x0);
@@ -52,11 +52,11 @@ void cpu::tick(cpu_state_t *state) {
       cpu::disassemble(state, stdout);
     }
 
-    uint32_t code = (state->code >> 26) & 63;
+    uint32_t code = (state.code >> 26) & 63;
     if (code)
       op_table[code](state);
     else
-      op_table_special[state->code & 63](state);
+      op_table_special[state.code & 63](state);
   }
 }
 
@@ -87,16 +87,16 @@ static void log_bios_calls(const cpu_state_t *state) {
   }
 }
 
-void cpu::read_code(cpu_state_t *state) {
-  if (state->regs.pc & 3) {
+void cpu::read_code(cpu_state_t &state) {
+  if (state.regs.pc & 3) {
     cop0::enter_exception(state, 0x4);
   }
 
-  state->regs.this_pc = state->regs.pc;
-  state->regs.pc = state->regs.next_pc;
-  state->regs.next_pc += 4;
+  state.regs.this_pc = state.regs.pc;
+  state.regs.pc = state.regs.next_pc;
+  state.regs.next_pc += 4;
 
-//  if (state->regs.this_pc == 0x00b0 && state->regs.gp[9] == 0x3d) {
+//  if (state.regs.this_pc == 0x00b0 && state.regs.gp[9] == 0x3d) {
 //    printf("%c", state->regs.gp[4]);
 //  }
 
@@ -106,11 +106,11 @@ void cpu::read_code(cpu_state_t *state) {
 
   // todo: read i-cache
 
-  state->code = bus::read(bus::BUS_WIDTH_WORD, map_address(state->regs.this_pc));
+  state.code = bus::read(bus::BUS_WIDTH_WORD, map_address(state.regs.this_pc));
 }
 
-uint32_t cpu::read_data(cpu_state_t *state, bus::bus_width_t width, uint32_t address) {
-  if (state->cop0.regs[12] & (1 << 16)) {
+uint32_t cpu::read_data(cpu_state_t &state, bus::bus_width_t width, uint32_t address) {
+  if (state.cop0.regs[12] & (1 << 16)) {
     return 0; // isc=1
   }
 
@@ -119,8 +119,8 @@ uint32_t cpu::read_data(cpu_state_t *state, bus::bus_width_t width, uint32_t add
   return bus::read(width, map_address(address));
 }
 
-void cpu::write_data(cpu_state_t *state, bus::bus_width_t width, uint32_t address, uint32_t data) {
-  if (state->cop0.regs[12] & (1 << 16)) {
+void cpu::write_data(cpu_state_t &state, bus::bus_width_t width, uint32_t address, uint32_t data) {
+  if (state.cop0.regs[12] & (1 << 16)) {
     return; // isc=1
   }
 
@@ -129,51 +129,51 @@ void cpu::write_data(cpu_state_t *state, bus::bus_width_t width, uint32_t addres
   return bus::write(width, map_address(address), data);
 }
 
-static void update_irq(cpu_state_t *state, uint32_t stat, uint32_t mask) {
-  state->i_stat = stat;
-  state->i_mask = mask;
+static void update_irq(cpu_state_t &state, uint32_t stat, uint32_t mask) {
+  state.i_stat = stat;
+  state.i_mask = mask;
 
-  if (state->i_stat & state->i_mask) {
-    state->cop0.regs[13] |= (1 << 10);
+  if (state.i_stat & state.i_mask) {
+    state.cop0.regs[13] |= (1 << 10);
   }
   else {
-    state->cop0.regs[13] &= ~(1 << 10);
+    state.cop0.regs[13] &= ~(1 << 10);
   }
 }
 
-void cpu::set_imask(cpu_state_t *state, uint32_t value) {
-  update_irq(state, state->i_stat, value);
+void cpu::set_imask(cpu_state_t &state, uint32_t value) {
+  update_irq(state, state.i_stat, value);
 }
 
-void cpu::set_istat(cpu_state_t *state, uint32_t value) {
-  update_irq(state, value, state->i_mask);
+void cpu::set_istat(cpu_state_t &state, uint32_t value) {
+  update_irq(state, value, state.i_mask);
 }
 
-uint32_t cpu::io_read(cpu_state_t *state, bus::bus_width_t width, uint32_t address) {
+uint32_t cpu::io_read(cpu_state_t &state, bus::bus_width_t width, uint32_t address) {
   if (utility::log_cpu) {
     printf("cpu::io_read(%d, 0x%08x)\n", width, address);
   }
 
   switch (address - 0x1f801070) {
   case 0:
-    return state->i_stat;
+    return state.i_stat;
 
   case 4:
-    return state->i_mask;
+    return state.i_mask;
 
   default:
     return 0;
   }
 }
 
-void cpu::io_write(cpu_state_t *state, bus::bus_width_t width, uint32_t address, uint32_t data) {
+void cpu::io_write(cpu_state_t &state, bus::bus_width_t width, uint32_t address, uint32_t data) {
   if (utility::log_cpu) {
     printf("cpu::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
   }
 
   switch (address - 0x1f801070) {
   case 0:
-    set_istat(state, data & state->i_stat);
+    set_istat(state, data & state.i_stat);
     break;
 
   case 4:

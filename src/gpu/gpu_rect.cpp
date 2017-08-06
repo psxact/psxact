@@ -5,13 +5,13 @@
 //
 // 25    | Semi Transparency (0=Off, 1=On)
 
-static int32_t get_x_length(gpu_state_t *state) {
-  switch ((state->fifo.buffer[0] >> 27) & 3) {
+static int32_t get_x_length(gpu_state_t &state) {
+  switch ((state.fifo.buffer[0] >> 27) & 3) {
   case 0:
     return
-      (state->fifo.buffer[0] & (1 << 26))
-        ? uint16_t(state->fifo.buffer[3])
-        : uint16_t(state->fifo.buffer[2]);
+      (state.fifo.buffer[0] & (1 << 26))
+        ? uint16_t(state.fifo.buffer[3])
+        : uint16_t(state.fifo.buffer[2]);
 
   case 1:
     return 1;
@@ -27,13 +27,13 @@ static int32_t get_x_length(gpu_state_t *state) {
   }
 }
 
-static int32_t get_y_length(gpu_state_t *state) {
-  switch ((state->fifo.buffer[0] >> 27) & 3) {
+static int32_t get_y_length(gpu_state_t &state) {
+  switch ((state.fifo.buffer[0] >> 27) & 3) {
   case 0:
     return
-      (state->fifo.buffer[0] & (1 << 26))
-        ? uint16_t(state->fifo.buffer[3] >> 16)
-        : uint16_t(state->fifo.buffer[2] >> 16);
+      (state.fifo.buffer[0] & (1 << 26))
+        ? uint16_t(state.fifo.buffer[3] >> 16)
+        : uint16_t(state.fifo.buffer[2] >> 16);
 
   case 1:
     return 1;
@@ -73,25 +73,25 @@ static bool get_color(uint32_t command, gpu::color_t &color, gpu::tev_t &tev, gp
   return (color.r | color.g | color.b) > 0;
 }
 
-void gpu::draw_rectangle(gpu_state_t *state) {
+void gpu::draw_rectangle(gpu_state_t &state) {
   gpu::tev_t tev;
-  tev.palette_page_x = (state->fifo.buffer[2] >> 12) & 0x3f0;
-  tev.palette_page_y = (state->fifo.buffer[2] >> 22) & 0x1ff;
-  tev.texture_page_x = (state->status << 6) & 0x3c0;
-  tev.texture_page_y = (state->status << 4) & 0x100;
-  tev.texture_colors = (state->status >> 7) & 3;
+  tev.palette_page_x = (state.fifo.buffer[2] >> 12) & 0x3f0;
+  tev.palette_page_y = (state.fifo.buffer[2] >> 22) & 0x1ff;
+  tev.texture_page_x = (state.status << 6) & 0x3c0;
+  tev.texture_page_y = (state.status << 4) & 0x100;
+  tev.texture_colors = (state.status >> 7) & 3;
 
   gpu::color_t color;
-  color.r = (state->fifo.buffer[0] >> (0 * 8)) & 0xff;
-  color.g = (state->fifo.buffer[0] >> (1 * 8)) & 0xff;
-  color.b = (state->fifo.buffer[0] >> (2 * 8)) & 0xff;
+  color.r = (state.fifo.buffer[0] >> (0 * 8)) & 0xff;
+  color.g = (state.fifo.buffer[0] >> (1 * 8)) & 0xff;
+  color.b = (state.fifo.buffer[0] >> (2 * 8)) & 0xff;
 
   gpu::point_t tex_coord;
-  tex_coord.x = (state->fifo.buffer[2] >> 0) & 0xff;
-  tex_coord.y = (state->fifo.buffer[2] >> 8) & 0xff;
+  tex_coord.x = (state.fifo.buffer[2] >> 0) & 0xff;
+  tex_coord.y = (state.fifo.buffer[2] >> 8) & 0xff;
 
-  int32_t xofs = state->x_offset + int16_t(state->fifo.buffer[1]);
-  int32_t yofs = state->y_offset + int16_t(state->fifo.buffer[1] >> 16);
+  int32_t xofs = state.x_offset + int16_t(state.fifo.buffer[1]);
+  int32_t yofs = state.y_offset + int16_t(state.fifo.buffer[1] >> 16);
 
   int32_t w = get_x_length(state);
   int32_t h = get_y_length(state);
@@ -102,7 +102,7 @@ void gpu::draw_rectangle(gpu_state_t *state) {
       coord.x = tex_coord.x + x;
       coord.y = tex_coord.y + y;
 
-      if (get_color(state->fifo.buffer[0], color, tev, coord)) {
+      if (get_color(state.fifo.buffer[0], color, tev, coord)) {
         point_t point;
         point.x = xofs + x;
         point.y = yofs + y;

@@ -40,8 +40,8 @@ static int32_t get_coord_factor(uint32_t command) {
   return get_factor(coord_factor_lut, command);
 }
 
-static gpu::color_t decode_color(gpu_state_t *state, int32_t n) {
-  uint32_t value = state->fifo.buffer[n];
+static gpu::color_t decode_color(gpu_state_t &state, int32_t n) {
+  uint32_t value = state.fifo.buffer[n];
 
   gpu::color_t result;
 
@@ -52,19 +52,19 @@ static gpu::color_t decode_color(gpu_state_t *state, int32_t n) {
   return result;
 }
 
-static gpu::point_t decode_point(gpu_state_t *state, int32_t n) {
-  uint32_t value = state->fifo.buffer[n];
+static gpu::point_t decode_point(gpu_state_t &state, int32_t n) {
+  uint32_t value = state.fifo.buffer[n];
 
   gpu::point_t result;
 
-  result.x = state->x_offset + utility::sclip<11>(value);
-  result.y = state->y_offset + utility::sclip<11>(value >> 16);
+  result.x = state.x_offset + utility::sclip<11>(value);
+  result.y = state.y_offset + utility::sclip<11>(value >> 16);
 
   return result;
 }
 
-static gpu::point_t decode_coord(gpu_state_t *state, int32_t n) {
-  uint32_t value = state->fifo.buffer[n];
+static gpu::point_t decode_coord(gpu_state_t &state, int32_t n) {
+  uint32_t value = state.fifo.buffer[n];
 
   gpu::point_t result;
 
@@ -74,7 +74,7 @@ static gpu::point_t decode_coord(gpu_state_t *state, int32_t n) {
   return result;
 }
 
-static void get_colors(gpu_state_t *state, uint32_t command, gpu::color_t *colors, int32_t n) {
+static void get_colors(gpu_state_t &state, uint32_t command, gpu::color_t *colors, int32_t n) {
   int32_t factor = get_color_factor(command);
 
   for (int32_t i = 0; i < n; i++) {
@@ -82,7 +82,7 @@ static void get_colors(gpu_state_t *state, uint32_t command, gpu::color_t *color
   }
 }
 
-static void get_points(gpu_state_t *state, uint32_t command, gpu::point_t *points, int32_t n) {
+static void get_points(gpu_state_t &state, uint32_t command, gpu::point_t *points, int32_t n) {
   int32_t factor = get_point_factor(command);
 
   for (int32_t i = 0; i < n; i++) {
@@ -90,7 +90,7 @@ static void get_points(gpu_state_t *state, uint32_t command, gpu::point_t *point
   }
 }
 
-static void get_coords(gpu_state_t *state, uint32_t command, gpu::point_t *coords, int32_t n) {
+static void get_coords(gpu_state_t &state, uint32_t command, gpu::point_t *coords, int32_t n) {
   int32_t factor = get_coord_factor(command);
 
   for (int32_t i = 0; i < n; i++) {
@@ -98,11 +98,11 @@ static void get_coords(gpu_state_t *state, uint32_t command, gpu::point_t *coord
   }
 }
 
-static gpu::tev_t get_tev(gpu_state_t *state, uint32_t command) {
+static gpu::tev_t get_tev(gpu_state_t &state, uint32_t command) {
   int32_t factor = get_coord_factor(command);
 
-  uint32_t palette = state->fifo.buffer[0 * factor + 2] >> 16;
-  uint32_t texpage = state->fifo.buffer[1 * factor + 2] >> 16;
+  uint32_t palette = state.fifo.buffer[0 * factor + 2] >> 16;
+  uint32_t texpage = state.fifo.buffer[1 * factor + 2] >> 16;
 
   gpu::tev_t result;
 
@@ -118,7 +118,7 @@ static gpu::tev_t get_tev(gpu_state_t *state, uint32_t command) {
     result.color_mix_mode = (texpage >> 5) & 3;
   }
   else {
-    result.color_mix_mode = (state->status >> 5) & 3;
+    result.color_mix_mode = (state.status >> 5) & 3;
   }
 
   return result;
@@ -182,7 +182,7 @@ static bool get_color(uint32_t command, triangle_t &triangle, int32_t w0, int32_
   return (color.r | color.g | color.b) > 0;
 }
 
-static void draw_triangle(gpu_state_t *state, uint32_t command, triangle_t &triangle) {
+static void draw_triangle(gpu_state_t &state, uint32_t command, triangle_t &triangle) {
   const gpu::point_t *v = triangle.points;
 
   gpu::point_t min;
@@ -193,10 +193,10 @@ static void draw_triangle(gpu_state_t *state, uint32_t command, triangle_t &tria
   max.x = std::max(v[0].x, std::max(v[1].x, v[2].x));
   max.y = std::max(v[0].y, std::max(v[1].y, v[2].y));
 
-  min.x = std::max(min.x, state->drawing_area_x1);
-  min.y = std::max(min.y, state->drawing_area_y1);
-  max.x = std::min(max.x, state->drawing_area_x2);
-  max.y = std::min(max.y, state->drawing_area_y2);
+  min.x = std::max(min.x, state.drawing_area_x1);
+  min.y = std::max(min.y, state.drawing_area_y1);
+  max.x = std::min(max.x, state.drawing_area_x2);
+  max.y = std::min(max.y, state.drawing_area_y2);
 
   int32_t dx[3];
   dx[0] = v[2].y - v[1].y;
@@ -303,12 +303,12 @@ static void put_in_clockwise_order(gpu::point_t *points, gpu::color_t *colors, g
   triangle->points[2] = points[indices[2]];
 }
 
-void gpu::draw_polygon(gpu_state_t *state) {
+void gpu::draw_polygon(gpu_state_t &state) {
   gpu::color_t colors[4];
   gpu::point_t coords[4];
   gpu::point_t points[4];
 
-  uint32_t command = state->fifo.buffer[0];
+  uint32_t command = state.fifo.buffer[0];
 
   int32_t num_polygons = (command & (1 << 27)) ? 2 : 1;
   int32_t num_vertices = (command & (1 << 27)) ? 4 : 3;

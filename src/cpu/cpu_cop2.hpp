@@ -4,42 +4,65 @@
 #include "../state.hpp"
 
 namespace cop2 {
-  void run(cop2_state_t *state, uint32_t code);
+  void run(cop2_state_t &state, uint32_t code);
 
-  uint32_t read_ccr(cop2_state_t *state, uint32_t n);
-  void write_ccr(cop2_state_t *state, uint32_t n, uint32_t value);
+  uint32_t read_ccr(cop2_state_t &state, uint32_t n);
 
-  uint32_t read_gpr(cop2_state_t *state, uint32_t n);
-  void write_gpr(cop2_state_t *state, uint32_t n, uint32_t value);
+  void write_ccr(cop2_state_t &state, uint32_t n, uint32_t value);
 
-  uint32_t divide(cop2_state_t *state);
+  uint32_t read_gpr(cop2_state_t &state, uint32_t n);
+
+  void write_gpr(cop2_state_t &state, uint32_t n, uint32_t value);
+
+  uint32_t divide(cop2_state_t &state);
 
   // -============-
   //  Instructions
   // -============-
 
-  void op_avsz3(cop2_state_t *state, uint32_t code);
-  void op_avsz4(cop2_state_t *state, uint32_t code);
-  void op_cc(cop2_state_t *state, uint32_t code);
-  void op_cdp(cop2_state_t *state, uint32_t code);
-  void op_dcpl(cop2_state_t *state, uint32_t code);
-  void op_dpcs(cop2_state_t *state, uint32_t code);
-  void op_dpct(cop2_state_t *state, uint32_t code);
-  void op_gpf(cop2_state_t *state, uint32_t code);
-  void op_gpl(cop2_state_t *state, uint32_t code);
-  void op_intpl(cop2_state_t *state, uint32_t code);
-  void op_mvmva(cop2_state_t *state, uint32_t code);
-  void op_nccs(cop2_state_t *state, uint32_t code);
-  void op_ncct(cop2_state_t *state, uint32_t code);
-  void op_ncds(cop2_state_t *state, uint32_t code);
-  void op_ncdt(cop2_state_t *state, uint32_t code);
-  void op_nclip(cop2_state_t *state, uint32_t code);
-  void op_ncs(cop2_state_t *state, uint32_t code);
-  void op_nct(cop2_state_t *state, uint32_t code);
-  void op_op(cop2_state_t *state, uint32_t code);
-  void op_rtps(cop2_state_t *state, uint32_t code);
-  void op_rtpt(cop2_state_t *state, uint32_t code);
-  void op_sqr(cop2_state_t *state, uint32_t code);
+  void op_avsz3(cop2_state_t &state, uint32_t code);
+
+  void op_avsz4(cop2_state_t &state, uint32_t code);
+
+  void op_cc(cop2_state_t &state, uint32_t code);
+
+  void op_cdp(cop2_state_t &state, uint32_t code);
+
+  void op_dcpl(cop2_state_t &state, uint32_t code);
+
+  void op_dpcs(cop2_state_t &state, uint32_t code);
+
+  void op_dpct(cop2_state_t &state, uint32_t code);
+
+  void op_gpf(cop2_state_t &state, uint32_t code);
+
+  void op_gpl(cop2_state_t &state, uint32_t code);
+
+  void op_intpl(cop2_state_t &state, uint32_t code);
+
+  void op_mvmva(cop2_state_t &state, uint32_t code);
+
+  void op_nccs(cop2_state_t &state, uint32_t code);
+
+  void op_ncct(cop2_state_t &state, uint32_t code);
+
+  void op_ncds(cop2_state_t &state, uint32_t code);
+
+  void op_ncdt(cop2_state_t &state, uint32_t code);
+
+  void op_nclip(cop2_state_t &state, uint32_t code);
+
+  void op_ncs(cop2_state_t &state, uint32_t code);
+
+  void op_nct(cop2_state_t &state, uint32_t code);
+
+  void op_op(cop2_state_t &state, uint32_t code);
+
+  void op_rtps(cop2_state_t &state, uint32_t code);
+
+  void op_rtpt(cop2_state_t &state, uint32_t code);
+
+  void op_sqr(cop2_state_t &state, uint32_t code);
 
   namespace flags {
     enum {
@@ -64,23 +87,23 @@ namespace cop2 {
       H = 12
     };
 
-    int64_t a(cop2_state_t *state, int32_t n, int64_t value);
+    int64_t a(cop2_state_t &state, int32_t n, int64_t value);
 
-    int32_t b(cop2_state_t *state, int32_t n, uint32_t code, int32_t value);
+    int32_t b(cop2_state_t &state, int32_t n, uint32_t code, int32_t value);
 
-    int32_t b(cop2_state_t *state, int32_t n, uint32_t code, int32_t value, int32_t shifted);
+    int32_t b(cop2_state_t &state, int32_t n, uint32_t code, int32_t value, int32_t shifted);
 
-    int32_t c(cop2_state_t *state, int32_t n, int32_t value);
+    int32_t c(cop2_state_t &state, int32_t n, int32_t value);
 
-    int32_t d(cop2_state_t *state, int32_t value);
+    int32_t d(cop2_state_t &state, int32_t value);
 
-    int32_t e(cop2_state_t *state);
+    int32_t e(cop2_state_t &state);
 
-    int64_t f(cop2_state_t *state, int64_t value);
+    int64_t f(cop2_state_t &state, int64_t value);
 
-    int32_t g(cop2_state_t *state, int32_t n, int32_t value);
+    int32_t g(cop2_state_t &state, int32_t n, int32_t value);
 
-    int32_t h(cop2_state_t *state, int64_t value);
+    int32_t h(cop2_state_t &state, int64_t value);
   }
 }
 

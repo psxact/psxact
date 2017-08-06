@@ -21,9 +21,9 @@ static const uint8_t unr_table[0x101] = {
   0x00
 };
 
-uint32_t cop2::divide(cop2_state_t *state) {
-  auto &ccr = state->ccr;
-  auto &gpr = state->gpr;
+uint32_t cop2::divide(cop2_state_t &state) {
+  auto &ccr = state.ccr;
+  auto &gpr = state.gpr;
 
   if (gpr.sz[3] <= (ccr.h / 2)) {
     return flags::e(state);
@@ -41,8 +41,8 @@ uint32_t cop2::divide(cop2_state_t *state) {
   return std::min(d, 0x1ffffu);
 }
 
-void cop2::run(cop2_state_t *state, uint32_t code) {
-  auto &ccr = state->ccr;
+void cop2::run(cop2_state_t &state, uint32_t code) {
+  auto &ccr = state.ccr;
 
   ccr.flag = 0;
 
@@ -118,16 +118,16 @@ static inline int32_t get_cv(uint32_t code) {
   return (code >> 13) & 3;
 }
 
-static inline void mac_to_ir(cop2_state_t *state, uint32_t code) {
-  auto &gpr = state->gpr;
+static inline void mac_to_ir(cop2_state_t &state, uint32_t code) {
+  auto &gpr = state.gpr;
 
   gpr.vector[3][0] = cop2::flags::b(state, 0, code, gpr.mac[1]);
   gpr.vector[3][1] = cop2::flags::b(state, 1, code, gpr.mac[2]);
   gpr.vector[3][2] = cop2::flags::b(state, 2, code, gpr.mac[3]);
 }
 
-static inline void mac_to_rgb(cop2_state_t *state) {
-  auto &gpr = state->gpr;
+static inline void mac_to_rgb(cop2_state_t &state) {
+  auto &gpr = state.gpr;
 
   gpr.rgb[0] = gpr.rgb[1];
   gpr.rgb[1] = gpr.rgb[2];
@@ -138,12 +138,12 @@ static inline void mac_to_rgb(cop2_state_t *state) {
   gpr.rgb[2].c = gpr.rgbc.c;
 }
 
-static inline void depth_cue(cop2_state_t *state, uint32_t code, int32_t r, int32_t g, int32_t b) {
-  auto &gpr = state->gpr;
+static inline void depth_cue(cop2_state_t &state, uint32_t code, int32_t r, int32_t g, int32_t b) {
+  auto &gpr = state.gpr;
 
-  int64_t rfc = int64_t(state->ccr.vector[CV_FC][0]) << 12;
-  int64_t gfc = int64_t(state->ccr.vector[CV_FC][1]) << 12;
-  int64_t bfc = int64_t(state->ccr.vector[CV_FC][2]) << 12;
+  int64_t rfc = int64_t(state.ccr.vector[CV_FC][0]) << 12;
+  int64_t gfc = int64_t(state.ccr.vector[CV_FC][1]) << 12;
+  int64_t bfc = int64_t(state.ccr.vector[CV_FC][2]) << 12;
 
   int32_t sf = get_sf(code);
 
@@ -160,17 +160,17 @@ static inline void depth_cue(cop2_state_t *state, uint32_t code, int32_t r, int3
   mac_to_rgb(state);
 }
 
-static inline void transform_dq(cop2_state_t *state, int64_t div) {
-  auto &ccr = state->ccr;
-  auto &gpr = state->gpr;
+static inline void transform_dq(cop2_state_t &state, int64_t div) {
+  auto &ccr = state.ccr;
+  auto &gpr = state.gpr;
 
   gpr.mac[0] = cop2::flags::f(state, ccr.dqb + ccr.dqa * div);
   gpr.ir0 = cop2::flags::h(state, (ccr.dqb + ccr.dqa * div) >> 12);
 }
 
-static inline void transform_xy(cop2_state_t *state, int64_t div) {
-  auto &ccr = state->ccr;
-  auto &gpr = state->gpr;
+static inline void transform_xy(cop2_state_t &state, int64_t div) {
+  auto &ccr = state.ccr;
+  auto &gpr = state.gpr;
 
   gpr.mac[0] = cop2::flags::f(state, int64_t(ccr.ofx) + gpr.vector[3][0] * div) >> 16;
 
@@ -186,9 +186,9 @@ static inline void transform_xy(cop2_state_t *state, int64_t div) {
 }
 
 template<bool buggy = false>
-static inline int64_t transform(cop2_state_t *state, uint32_t code, int32_t mx, int32_t cv, int32_t v) {
-  auto &ccr = state->ccr;
-  auto &gpr = state->gpr;
+static inline int64_t transform(cop2_state_t &state, uint32_t code, int32_t mx, int32_t cv, int32_t v) {
+  auto &ccr = state.ccr;
+  auto &gpr = state.gpr;
 
   int64_t mac = 0;
 
@@ -252,8 +252,8 @@ static inline int64_t transform(cop2_state_t *state, uint32_t code, int32_t mx, 
   return mac;
 }
 
-static inline int64_t transform_pt(cop2_state_t *state, uint32_t code, int32_t mx, int32_t cv, int32_t v) {
-  auto &gpr = state->gpr;
+static inline int64_t transform_pt(cop2_state_t &state, uint32_t code, int32_t mx, int32_t cv, int32_t v) {
+  auto &gpr = state.gpr;
 
   int32_t z = int32_t(transform(state, code, mx, cv, v) >> 12);
 
@@ -273,9 +273,9 @@ static inline int64_t transform_pt(cop2_state_t *state, uint32_t code, int32_t m
 //  Instructions
 // -============-
 
-void cop2::op_avsz3(cop2_state_t *state, uint32_t code) {
-  auto &ccr = state->ccr;
-  auto &gpr = state->gpr;
+void cop2::op_avsz3(cop2_state_t &state, uint32_t code) {
+  auto &ccr = state.ccr;
+  auto &gpr = state.gpr;
 
   int64_t temp = int64_t(ccr.zsf3) * (gpr.sz[1] + gpr.sz[2] + gpr.sz[3]);
 
@@ -283,9 +283,9 @@ void cop2::op_avsz3(cop2_state_t *state, uint32_t code) {
   gpr.otz = flags::d(state, temp >> 12);
 }
 
-void cop2::op_avsz4(cop2_state_t *state, uint32_t code) {
-  auto &ccr = state->ccr;
-  auto &gpr = state->gpr;
+void cop2::op_avsz4(cop2_state_t &state, uint32_t code) {
+  auto &ccr = state.ccr;
+  auto &gpr = state.gpr;
 
   int64_t temp = int64_t(ccr.zsf4) * (gpr.sz[0] + gpr.sz[1] + gpr.sz[2] + gpr.sz[3]);
 
@@ -293,11 +293,11 @@ void cop2::op_avsz4(cop2_state_t *state, uint32_t code) {
   gpr.otz = flags::d(state, temp >> 12);
 }
 
-void cop2::op_cc(cop2_state_t *state, uint32_t code) {
+void cop2::op_cc(cop2_state_t &state, uint32_t code) {
   transform(state, code, MX_LCM, CV_BK, 3);
   mac_to_ir(state, code);
 
-  auto &gpr = state->gpr;
+  auto &gpr = state.gpr;
 
   int32_t shift = get_sf(code);
 
@@ -309,11 +309,11 @@ void cop2::op_cc(cop2_state_t *state, uint32_t code) {
   mac_to_rgb(state);
 }
 
-void cop2::op_cdp(cop2_state_t *state, uint32_t code) {
+void cop2::op_cdp(cop2_state_t &state, uint32_t code) {
   transform(state, code, MX_LCM, CV_BK, 3);
   mac_to_ir(state, code);
 
-  auto &gpr = state->gpr;
+  auto &gpr = state.gpr;
 
   int32_t r = (gpr.rgbc.r << 4) * gpr.vector[3][0];
   int32_t g = (gpr.rgbc.g << 4) * gpr.vector[3][1];
@@ -322,8 +322,8 @@ void cop2::op_cdp(cop2_state_t *state, uint32_t code) {
   depth_cue(state, code, r, g, b);
 }
 
-void cop2::op_dcpl(cop2_state_t *state, uint32_t code) {
-  auto &gpr = state->gpr;
+void cop2::op_dcpl(cop2_state_t &state, uint32_t code) {
+  auto &gpr = state.gpr;
 
   int32_t r = (gpr.rgbc.r << 4) * gpr.vector[3][0];
   int32_t g = (gpr.rgbc.g << 4) * gpr.vector[3][1];
@@ -332,8 +332,8 @@ void cop2::op_dcpl(cop2_state_t *state, uint32_t code) {
   depth_cue(state, code, r, g, b);
 }
 
-void cop2::op_dpcs(cop2_state_t *state, uint32_t code) {
-  auto &gpr = state->gpr;
+void cop2::op_dpcs(cop2_state_t &state, uint32_t code) {
+  auto &gpr = state.gpr;
 
   int32_t r = gpr.rgbc.r << 16;
   int32_t g = gpr.rgbc.g << 16;
@@ -342,9 +342,9 @@ void cop2::op_dpcs(cop2_state_t *state, uint32_t code) {
   depth_cue(state, code, r, g, b);
 }
 
-void cop2::op_dpct(cop2_state_t *state, uint32_t code) {
+void cop2::op_dpct(cop2_state_t &state, uint32_t code) {
   for (int32_t i = 0; i < 3; i++) {
-    auto &gpr = state->gpr;
+    auto &gpr = state.gpr;
 
     int32_t r = gpr.rgb[0].r << 16;
     int32_t g = gpr.rgb[0].g << 16;
@@ -354,8 +354,8 @@ void cop2::op_dpct(cop2_state_t *state, uint32_t code) {
   }
 }
 
-void cop2::op_gpf(cop2_state_t *state, uint32_t code) {
-  auto &gpr = state->gpr;
+void cop2::op_gpf(cop2_state_t &state, uint32_t code) {
+  auto &gpr = state.gpr;
 
   int32_t shift = get_sf(code);
 
@@ -367,8 +367,8 @@ void cop2::op_gpf(cop2_state_t *state, uint32_t code) {
   mac_to_rgb(state);
 }
 
-void cop2::op_gpl(cop2_state_t *state, uint32_t code) {
-  auto &gpr = state->gpr;
+void cop2::op_gpl(cop2_state_t &state, uint32_t code) {
+  auto &gpr = state.gpr;
 
   int32_t shift = get_sf(code);
 
@@ -384,12 +384,12 @@ void cop2::op_gpl(cop2_state_t *state, uint32_t code) {
   mac_to_rgb(state);
 }
 
-void cop2::op_intpl(cop2_state_t *state, uint32_t code) {
-  auto &gpr = state->gpr;
+void cop2::op_intpl(cop2_state_t &state, uint32_t code) {
+  auto &gpr = state.gpr;
 
-  int64_t rfc = int64_t(state->ccr.vector[CV_FC][0]) << 12;
-  int64_t gfc = int64_t(state->ccr.vector[CV_FC][1]) << 12;
-  int64_t bfc = int64_t(state->ccr.vector[CV_FC][2]) << 12;
+  int64_t rfc = int64_t(state.ccr.vector[CV_FC][0]) << 12;
+  int64_t gfc = int64_t(state.ccr.vector[CV_FC][1]) << 12;
+  int64_t bfc = int64_t(state.ccr.vector[CV_FC][2]) << 12;
 
   int32_t shift = get_sf(code);
 
@@ -405,7 +405,7 @@ void cop2::op_intpl(cop2_state_t *state, uint32_t code) {
   mac_to_rgb(state);
 }
 
-void cop2::op_mvmva(cop2_state_t *state, uint32_t code) {
+void cop2::op_mvmva(cop2_state_t &state, uint32_t code) {
   int32_t mx = get_mx(code);
   int32_t cv = get_cv(code);
   int32_t v  = get_v (code);
@@ -415,14 +415,14 @@ void cop2::op_mvmva(cop2_state_t *state, uint32_t code) {
   mac_to_ir(state, code);
 }
 
-void cop2::op_nccs(cop2_state_t *state, uint32_t code) {
+void cop2::op_nccs(cop2_state_t &state, uint32_t code) {
   transform(state, code, MX_LLM, CV_ZR, 0);
   mac_to_ir(state, code);
 
   op_cc(state, code);
 }
 
-void cop2::op_ncct(cop2_state_t *state, uint32_t code) {
+void cop2::op_ncct(cop2_state_t &state, uint32_t code) {
   for (int32_t i = 0; i < 3; i++) {
     transform(state, code, MX_LLM, CV_ZR, i);
     mac_to_ir(state, code);
@@ -431,14 +431,14 @@ void cop2::op_ncct(cop2_state_t *state, uint32_t code) {
   }
 }
 
-void cop2::op_ncds(cop2_state_t *state, uint32_t code) {
+void cop2::op_ncds(cop2_state_t &state, uint32_t code) {
   transform(state, code, MX_LLM, CV_ZR, 0);
   mac_to_ir(state, code);
 
   transform(state, code, MX_LCM, CV_BK, 3);
   mac_to_ir(state, code);
 
-  auto &gpr = state->gpr;
+  auto &gpr = state.gpr;
 
   int32_t r = (gpr.rgbc.r << 4) * gpr.vector[3][0];
   int32_t g = (gpr.rgbc.g << 4) * gpr.vector[3][1];
@@ -447,7 +447,7 @@ void cop2::op_ncds(cop2_state_t *state, uint32_t code) {
   depth_cue(state, code, r, g, b);
 }
 
-void cop2::op_ncdt(cop2_state_t *state, uint32_t code) {
+void cop2::op_ncdt(cop2_state_t &state, uint32_t code) {
   for (int32_t i = 0; i < 3; i++) {
     transform(state, code, MX_LLM, CV_ZR, i);
     mac_to_ir(state, code);
@@ -455,7 +455,7 @@ void cop2::op_ncdt(cop2_state_t *state, uint32_t code) {
     transform(state, code, MX_LCM, CV_BK, 3);
     mac_to_ir(state, code);
 
-    auto &gpr = state->gpr;
+    auto &gpr = state.gpr;
 
     int32_t r = (gpr.rgbc.r << 4) * gpr.vector[3][0];
     int32_t g = (gpr.rgbc.g << 4) * gpr.vector[3][1];
@@ -465,8 +465,8 @@ void cop2::op_ncdt(cop2_state_t *state, uint32_t code) {
   }
 }
 
-void cop2::op_nclip(cop2_state_t *state, uint32_t code) {
-  auto &gpr = state->gpr;
+void cop2::op_nclip(cop2_state_t &state, uint32_t code) {
+  auto &gpr = state.gpr;
 
   int64_t temp =
     (gpr.sx[0] * int64_t(gpr.sy[1] - gpr.sy[2])) +
@@ -476,7 +476,7 @@ void cop2::op_nclip(cop2_state_t *state, uint32_t code) {
   gpr.mac[0] = flags::f(state, temp);
 }
 
-void cop2::op_ncs(cop2_state_t *state, uint32_t code) {
+void cop2::op_ncs(cop2_state_t &state, uint32_t code) {
   transform(state, code, MX_LLM, CV_ZR, 0);
   mac_to_ir(state, code);
 
@@ -485,7 +485,7 @@ void cop2::op_ncs(cop2_state_t *state, uint32_t code) {
   mac_to_rgb(state);
 }
 
-void cop2::op_nct(cop2_state_t *state, uint32_t code) {
+void cop2::op_nct(cop2_state_t &state, uint32_t code) {
   for (int32_t i = 0; i < 3; i++) {
     transform(state, code, MX_LLM, CV_ZR, i);
     mac_to_ir(state, code);
@@ -496,10 +496,10 @@ void cop2::op_nct(cop2_state_t *state, uint32_t code) {
   }
 }
 
-void cop2::op_op(cop2_state_t *state, uint32_t code) {
-  auto &gpr = state->gpr;
+void cop2::op_op(cop2_state_t &state, uint32_t code) {
+  auto &gpr = state.gpr;
 
-  matrix_t &matrix = state->ccr.matrix[MX_ROT];
+  matrix_t &matrix = state.ccr.matrix[MX_ROT];
 
   int32_t shift = get_sf(code);
 
@@ -510,14 +510,14 @@ void cop2::op_op(cop2_state_t *state, uint32_t code) {
   mac_to_ir(state, code);
 }
 
-void cop2::op_rtps(cop2_state_t *state, uint32_t code) {
+void cop2::op_rtps(cop2_state_t &state, uint32_t code) {
   int64_t div = transform_pt(state, code, MX_ROT, CV_TR, 0);
 
   transform_xy(state, div);
   transform_dq(state, div);
 }
 
-void cop2::op_rtpt(cop2_state_t *state, uint32_t code) {
+void cop2::op_rtpt(cop2_state_t &state, uint32_t code) {
   int64_t div = 0;
 
   div = transform_pt(state, code, MX_ROT, CV_TR, 0);
@@ -531,8 +531,8 @@ void cop2::op_rtpt(cop2_state_t *state, uint32_t code) {
   transform_dq(state, div);
 }
 
-void cop2::op_sqr(cop2_state_t *state, uint32_t code) {
-  auto &gpr = state->gpr;
+void cop2::op_sqr(cop2_state_t &state, uint32_t code) {
+  auto &gpr = state.gpr;
 
   int32_t shift = get_sf(code);
 

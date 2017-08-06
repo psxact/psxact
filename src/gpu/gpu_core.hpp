@@ -6,21 +6,21 @@
 #include "../state.hpp"
 
 namespace gpu {
-  uint32_t io_read(gpu_state_t *state, bus::bus_width_t width, uint32_t address);
+  uint32_t io_read(gpu_state_t &state, bus::bus_width_t width, uint32_t address);
 
-  void io_write(gpu_state_t *state, bus::bus_width_t width, uint32_t address, uint32_t data);
+  void io_write(gpu_state_t &state, bus::bus_width_t width, uint32_t address, uint32_t data);
 
-  uint32_t data(gpu_state_t *state);
+  uint32_t data(gpu_state_t &state);
 
-  uint32_t stat(gpu_state_t *state);
+  uint32_t stat(gpu_state_t &state);
 
-  void gp0(gpu_state_t *state, uint32_t data);
+  void gp0(gpu_state_t &state, uint32_t data);
 
-  void gp1(gpu_state_t *state, uint32_t data);
+  void gp1(gpu_state_t &state, uint32_t data);
 
-  void vram_transfer(gpu_state_t *state, uint16_t data);
+  void vram_transfer(gpu_state_t &state, uint16_t data);
 
-  uint16_t vram_transfer(gpu_state_t *state);
+  uint16_t vram_transfer(gpu_state_t &state);
 
   struct color_t {
     uint8_t r;
@@ -45,13 +45,13 @@ namespace gpu {
     int32_t color_mix_mode;
   };
 
-  void draw_point(gpu_state_t *state, point_t point, color_t color);
+  void draw_point(gpu_state_t &state, point_t point, color_t color);
 
-  void draw_line(gpu_state_t *state);
+  void draw_line(gpu_state_t &state);
 
-  void draw_polygon(gpu_state_t *state);
+  void draw_polygon(gpu_state_t &state);
 
-  void draw_rectangle(gpu_state_t *state);
+  void draw_rectangle(gpu_state_t &state);
 
   // common functionality
 
