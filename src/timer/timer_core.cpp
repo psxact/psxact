@@ -1,7 +1,7 @@
 #include "timer_core.hpp"
 #include "../utility.hpp"
 
-uint32_t timer::io_read(timer_state_t &state, bus::bus_width_t width, uint32_t address) {
+uint32_t timer::io_read(timer_state_t &state, bus_width_t width, uint32_t address) {
   if (utility::log_timer) {
     printf("timer::io_read(%d, 0x%08x)\n", width, address);
   }
@@ -17,7 +17,7 @@ uint32_t timer::io_read(timer_state_t &state, bus::bus_width_t width, uint32_t a
   return 0;
 }
 
-void timer::io_write(timer_state_t &state, bus::bus_width_t width, uint32_t address, uint32_t data) {
+void timer::io_write(timer_state_t &state, bus_width_t width, uint32_t address, uint32_t data) {
   if (utility::log_timer) {
     printf("timer::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
   }

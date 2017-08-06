@@ -106,10 +106,10 @@ void cpu::read_code(cpu_state_t &state) {
 
   // todo: read i-cache
 
-  state.code = bus::read(bus::BUS_WIDTH_WORD, map_address(state.regs.this_pc));
+  state.code = bus::read(BUS_WIDTH_WORD, map_address(state.regs.this_pc));
 }
 
-uint32_t cpu::read_data(cpu_state_t &state, bus::bus_width_t width, uint32_t address) {
+uint32_t cpu::read_data(cpu_state_t &state, bus_width_t width, uint32_t address) {
   if (state.cop0.regs[12] & (1 << 16)) {
     return 0; // isc=1
   }
@@ -119,7 +119,7 @@ uint32_t cpu::read_data(cpu_state_t &state, bus::bus_width_t width, uint32_t add
   return bus::read(width, map_address(address));
 }
 
-void cpu::write_data(cpu_state_t &state, bus::bus_width_t width, uint32_t address, uint32_t data) {
+void cpu::write_data(cpu_state_t &state, bus_width_t width, uint32_t address, uint32_t data) {
   if (state.cop0.regs[12] & (1 << 16)) {
     return; // isc=1
   }
@@ -149,7 +149,7 @@ void cpu::set_istat(cpu_state_t &state, uint32_t value) {
   update_irq(state, value, state.i_mask);
 }
 
-uint32_t cpu::io_read(cpu_state_t &state, bus::bus_width_t width, uint32_t address) {
+uint32_t cpu::io_read(cpu_state_t &state, bus_width_t width, uint32_t address) {
   if (utility::log_cpu) {
     printf("cpu::io_read(%d, 0x%08x)\n", width, address);
   }
@@ -166,7 +166,7 @@ uint32_t cpu::io_read(cpu_state_t &state, bus::bus_width_t width, uint32_t addre
   }
 }
 
-void cpu::io_write(cpu_state_t &state, bus::bus_width_t width, uint32_t address, uint32_t data) {
+void cpu::io_write(cpu_state_t &state, bus_width_t width, uint32_t address, uint32_t data) {
   if (utility::log_cpu) {
     printf("cpu::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
   }

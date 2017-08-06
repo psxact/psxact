@@ -68,8 +68,8 @@ static uint32_t io_read_internal(cdrom_state_t &state, uint32_t port) {
   }
 }
 
-uint32_t cdrom::io_read(cdrom_state_t &state, bus::bus_width_t width, uint32_t address) {
-  if (width == bus::BUS_WIDTH_WORD && address == 0x1f801800) {
+uint32_t cdrom::io_read(cdrom_state_t &state, bus_width_t width, uint32_t address) {
+  if (width == BUS_WIDTH_WORD && address == 0x1f801800) {
     uint8_t b0 = state.data.read();
     uint8_t b1 = state.data.read();
     uint8_t b2 = state.data.read();
@@ -78,7 +78,7 @@ uint32_t cdrom::io_read(cdrom_state_t &state, bus::bus_width_t width, uint32_t a
     return (b0 << 0) | (b1 << 8) | (b2 << 16) | (b3 << 24);
   }
 
-  assert(width == bus::BUS_WIDTH_BYTE);
+  assert(width == BUS_WIDTH_BYTE);
 
   uint32_t port = get_port(address);
   uint32_t data = io_read_internal(state, port);
@@ -154,8 +154,8 @@ static void io_write_port_3_2(cdrom_state_t &state, uint8_t data) {
 static void io_write_port_3_3(cdrom_state_t &state, uint8_t data) {
 }
 
-void cdrom::io_write(cdrom_state_t &state, bus::bus_width_t width, uint32_t address, uint32_t data) {
-  assert(width == bus::BUS_WIDTH_BYTE);
+void cdrom::io_write(cdrom_state_t &state, bus_width_t width, uint32_t address, uint32_t data) {
+  assert(width == BUS_WIDTH_BYTE);
 
   uint32_t port = get_port(address);
 

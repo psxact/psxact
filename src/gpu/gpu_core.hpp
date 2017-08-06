@@ -6,9 +6,9 @@
 #include "../state.hpp"
 
 namespace gpu {
-  uint32_t io_read(gpu_state_t &state, bus::bus_width_t width, uint32_t address);
+  uint32_t io_read(gpu_state_t &state, bus_width_t width, uint32_t address);
 
-  void io_write(gpu_state_t &state, bus::bus_width_t width, uint32_t address, uint32_t data);
+  void io_write(gpu_state_t &state, bus_width_t width, uint32_t address, uint32_t data);
 
   uint32_t data(gpu_state_t &state);
 

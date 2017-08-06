@@ -5,7 +5,7 @@ static uint32_t get_index(uint32_t address) {
   return address - 0x1f801040;
 }
 
-uint32_t input::io_read(input_state_t &state, bus::bus_width_t width, uint32_t address) {
+uint32_t input::io_read(input_state_t &state, bus_width_t width, uint32_t address) {
   if (utility::log_input) {
     printf("input::io_read(%d, 0x%08x)\n", width, address);
   }
@@ -33,7 +33,7 @@ static int32_t get_baud_rate_factor(uint32_t data) {
   return 0;
 }
 
-void input::io_write(input_state_t &state, bus::bus_width_t width, uint32_t address, uint32_t data) {
+void input::io_write(input_state_t &state, bus_width_t width, uint32_t address, uint32_t data) {
   if (utility::log_input) {
     printf("input::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
   }

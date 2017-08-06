@@ -10,7 +10,7 @@ static uint32_t read_stat(mdec_state_t &state) {
   return 0;
 }
 
-uint32_t mdec::io_read(mdec_state_t& state, bus::bus_width_t width, uint32_t address) {
+uint32_t mdec::io_read(mdec_state_t& state, bus_width_t width, uint32_t address) {
   switch (address - 0x1f801820) {
   case 0:
     return read_data(state);
@@ -30,7 +30,7 @@ static void write_control(mdec_state_t &state, uint32_t data) {
   printf("mdec::write_control(0x%08x)\n", data);
 }
 
-void mdec::io_write(mdec_state_t &state, bus::bus_width_t width, uint32_t address, uint32_t data) {
+void mdec::io_write(mdec_state_t &state, bus_width_t width, uint32_t address, uint32_t data) {
   switch (address - 0x1f801820) {
   case 0:
     return write_command(state, data);

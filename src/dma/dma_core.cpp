@@ -26,7 +26,7 @@ static uint32_t get_register_index(uint32_t address) {
   return (address >> 2) & 3;
 }
 
-uint32_t dma::io_read(dma_state_t &state, bus::bus_width_t width, uint32_t address) {
+uint32_t dma::io_read(dma_state_t &state, bus_width_t width, uint32_t address) {
   if (utility::log_dma) {
     printf("dma::io_read(%d, 0x%08x)\n", width, address);
   }
@@ -51,7 +51,7 @@ uint32_t dma::io_read(dma_state_t &state, bus::bus_width_t width, uint32_t addre
   return 0;
 }
 
-void dma::io_write(dma_state_t &state, bus::bus_width_t width, uint32_t address, uint32_t data) {
+void dma::io_write(dma_state_t &state, bus_width_t width, uint32_t address, uint32_t data) {
   if (utility::log_dma) {
     printf("dma::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
   }
@@ -115,8 +115,8 @@ static void run_channel_2_data_read(dma_state_t &state) {
 
   for (uint32_t a = 0; a < ba; a++) {
     for (uint32_t s = 0; s < bs; s++) {
-      uint32_t data = bus::read(bus::BUS_WIDTH_WORD, 0x1f801810);
-      bus::write(bus::BUS_WIDTH_WORD, address, data);
+      uint32_t data = bus::read(BUS_WIDTH_WORD, 0x1f801810);
+      bus::write(BUS_WIDTH_WORD, address, data);
       address += 4;
     }
   }
@@ -136,8 +136,8 @@ static void run_channel_2_data_write(dma_state_t &state) {
 
   for (uint32_t a = 0; a < ba; a++) {
     for (uint32_t s = 0; s < bs; s++) {
-      uint32_t data = bus::read(bus::BUS_WIDTH_WORD, address);
-      bus::write(bus::BUS_WIDTH_WORD, 0x1f801810, data);
+      uint32_t data = bus::read(BUS_WIDTH_WORD, address);
+      bus::write(BUS_WIDTH_WORD, 0x1f801810, data);
       address += 4;
     }
   }
@@ -151,14 +151,14 @@ static void run_channel_2_list(dma_state_t &state) {
   uint32_t address = state.channels[2].address;
 
   while (address != 0xffffff) {
-    uint32_t value = bus::read(bus::BUS_WIDTH_WORD, address);
+    uint32_t value = bus::read(BUS_WIDTH_WORD, address);
     address += 4;
 
     uint32_t count = value >> 24;
 
     for (unsigned index = 0; index < count; index++) {
-      unsigned data = bus::read(bus::BUS_WIDTH_WORD, address);
-      bus::write(bus::BUS_WIDTH_WORD, 0x1f801810, data);
+      unsigned data = bus::read(BUS_WIDTH_WORD, address);
+      bus::write(BUS_WIDTH_WORD, 0x1f801810, data);
       address += 4;
     }
 
@@ -177,8 +177,8 @@ static void run_channel_3(dma_state_t &state) {
   counter = counter ? counter : 0x10000;
 
   for (uint32_t i = 0; i < counter; i++) {
-    uint32_t data = bus::read(bus::BUS_WIDTH_WORD, 0x1f801800);
-    bus::write(bus::BUS_WIDTH_WORD, address, data);
+    uint32_t data = bus::read(BUS_WIDTH_WORD, 0x1f801800);
+    bus::write(BUS_WIDTH_WORD, address, data);
 
     address += 4;
   }
@@ -201,11 +201,11 @@ static void run_channel_6(dma_state_t &state) {
   counter = counter ? counter : 0x10000;
 
   for (uint32_t i = 1; i < counter; i++) {
-    bus::write(bus::BUS_WIDTH_WORD, address, address - 4);
+    bus::write(BUS_WIDTH_WORD, address, address - 4);
     address -= 4;
   }
 
-  bus::write(bus::BUS_WIDTH_WORD, address, 0x00ffffff);
+  bus::write(BUS_WIDTH_WORD, address, 0x00ffffff);
 
   state.channels[6].control &= ~0x01000000;
 

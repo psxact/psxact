@@ -5,13 +5,13 @@
 #include <string>
 #include "state.hpp"
 
-namespace bus {
-  enum bus_width_t {
-    BUS_WIDTH_BYTE,
-    BUS_WIDTH_HALF,
-    BUS_WIDTH_WORD
-  };
+enum bus_width_t {
+  BUS_WIDTH_BYTE,
+  BUS_WIDTH_HALF,
+  BUS_WIDTH_WORD
+};
 
+namespace bus {
   bool init(system_state_t *state, const char *bios_file_name);
 
   void irq(int32_t interrupt);

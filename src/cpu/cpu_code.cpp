@@ -257,7 +257,7 @@ void cpu::op_jr(cpu_state_t &state) {
 
 void cpu::op_lb(cpu_state_t &state) {
   uint32_t address = get_rs(state) + decoder::iconst(state);
-  uint32_t data = read_data(state, bus::BUS_WIDTH_BYTE, address);
+  uint32_t data = read_data(state, BUS_WIDTH_BYTE, address);
   data = utility::sclip<8>(data);
 
   set_rt<1>(state, data);
@@ -265,7 +265,7 @@ void cpu::op_lb(cpu_state_t &state) {
 
 void cpu::op_lbu(cpu_state_t &state) {
   uint32_t address = get_rs(state) + decoder::iconst(state);
-  uint32_t data = read_data(state, bus::BUS_WIDTH_BYTE, address);
+  uint32_t data = read_data(state, BUS_WIDTH_BYTE, address);
 
   set_rt<1>(state, data);
 }
@@ -276,7 +276,7 @@ void cpu::op_lh(cpu_state_t &state) {
     cop0::enter_exception(state, 0x4);
   }
   else {
-    uint32_t data = read_data(state, bus::BUS_WIDTH_HALF, address);
+    uint32_t data = read_data(state, BUS_WIDTH_HALF, address);
     data = utility::sclip<16>(data);
 
     set_rt<1>(state, data);
@@ -289,7 +289,7 @@ void cpu::op_lhu(cpu_state_t &state) {
     cop0::enter_exception(state, 0x4);
   }
   else {
-    uint32_t data = read_data(state, bus::BUS_WIDTH_HALF, address);
+    uint32_t data = read_data(state, BUS_WIDTH_HALF, address);
 
     set_rt<1>(state, data);
   }
@@ -305,7 +305,7 @@ void cpu::op_lw(cpu_state_t &state) {
     cop0::enter_exception(state, 0x4);
   }
   else {
-    uint32_t data = read_data(state, bus::BUS_WIDTH_WORD, address);
+    uint32_t data = read_data(state, BUS_WIDTH_WORD, address);
 
     set_rt<1>(state, data);
   }
@@ -325,7 +325,7 @@ void cpu::op_lwc2(cpu_state_t &state) {
     cop0::enter_exception(state, 0x4);
   }
   else {
-    uint32_t data = read_data(state, bus::BUS_WIDTH_WORD, address);
+    uint32_t data = read_data(state, BUS_WIDTH_WORD, address);
 
     cop2::write_gpr(state.cop2, decoder::rt(state), data);
   }
@@ -337,7 +337,7 @@ void cpu::op_lwc3(cpu_state_t &state) {
 
 void cpu::op_lwl(cpu_state_t &state) {
   uint32_t address = get_rs(state) + decoder::iconst(state);
-  uint32_t data = read_data(state, bus::BUS_WIDTH_WORD, address & ~3);
+  uint32_t data = read_data(state, BUS_WIDTH_WORD, address & ~3);
 
   switch (address & 3) {
   default: data = (data << 24) | (get_rt<1>(state) & 0x00ffffff); break;
@@ -351,7 +351,7 @@ void cpu::op_lwl(cpu_state_t &state) {
 
 void cpu::op_lwr(cpu_state_t &state) {
   uint32_t address = get_rs(state) + decoder::iconst(state);
-  uint32_t data = read_data(state, bus::BUS_WIDTH_WORD, address & ~3);
+  uint32_t data = read_data(state, BUS_WIDTH_WORD, address & ~3);
 
   switch (address & 3) {
   default: data = (data >>  0) | (get_rt<1>(state) & 0x00000000); break;
@@ -413,7 +413,7 @@ void cpu::op_sb(cpu_state_t &state) {
   uint32_t address = get_rs(state) + decoder::iconst(state);
   uint32_t data = get_rt(state);
 
-  write_data(state, bus::BUS_WIDTH_BYTE, address, data);
+  write_data(state, BUS_WIDTH_BYTE, address, data);
 }
 
 void cpu::op_sh(cpu_state_t &state) {
@@ -424,7 +424,7 @@ void cpu::op_sh(cpu_state_t &state) {
   else {
     uint32_t data = get_rt(state);
 
-    write_data(state, bus::BUS_WIDTH_HALF, address, data);
+    write_data(state, BUS_WIDTH_HALF, address, data);
   }
 }
 
@@ -493,7 +493,7 @@ void cpu::op_sw(cpu_state_t &state) {
   else {
     uint32_t data = get_rt(state);
 
-    write_data(state, bus::BUS_WIDTH_WORD, address, data);
+    write_data(state, BUS_WIDTH_WORD, address, data);
   }
 }
 
@@ -513,7 +513,7 @@ void cpu::op_swc2(cpu_state_t &state) {
   else {
     uint32_t data = cop2::read_gpr(state.cop2, decoder::rt(state));
 
-    write_data(state, bus::BUS_WIDTH_WORD, address, data);
+    write_data(state, BUS_WIDTH_WORD, address, data);
   }
 }
 
@@ -523,7 +523,7 @@ void cpu::op_swc3(cpu_state_t &state) {
 
 void cpu::op_swl(cpu_state_t &state) {
   uint32_t address = get_rs(state) + decoder::iconst(state);
-  uint32_t data = read_data(state, bus::BUS_WIDTH_WORD, address & ~3);
+  uint32_t data = read_data(state, BUS_WIDTH_WORD, address & ~3);
 
   switch (address & 3) {
   default: data = (data & 0xffffff00) | (get_rt(state) >> 24); break;
@@ -532,12 +532,12 @@ void cpu::op_swl(cpu_state_t &state) {
   case  3: data = (data & 0x00000000) | (get_rt(state) >>  0); break;
   }
 
-  write_data(state, bus::BUS_WIDTH_WORD, address & ~3, data);
+  write_data(state, BUS_WIDTH_WORD, address & ~3, data);
 }
 
 void cpu::op_swr(cpu_state_t &state) {
   uint32_t address = get_rs(state) + decoder::iconst(state);
-  uint32_t data = read_data(state, bus::BUS_WIDTH_WORD, address & ~3);
+  uint32_t data = read_data(state, BUS_WIDTH_WORD, address & ~3);
 
   switch (address & 3) {
   default: data = (data & 0x00000000) | (get_rt(state) <<  0); break;
@@ -546,7 +546,7 @@ void cpu::op_swr(cpu_state_t &state) {
   case  3: data = (data & 0x00ffffff) | (get_rt(state) << 24); break;
   }
 
-  write_data(state, bus::BUS_WIDTH_WORD, address & ~3, data);
+  write_data(state, BUS_WIDTH_WORD, address & ~3, data);
 }
 
 void cpu::op_syscall(cpu_state_t &state) {
