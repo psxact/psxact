@@ -1,9 +1,10 @@
 #include "cpu_cop2.hpp"
 #include "../limits.hpp"
+#include "../utility.hpp"
 
-static uint32_t read_matrix_vector_group(cop2_state_t &state, uint32_t n) {
-  auto &matrix = state.ccr.matrix[n >> 3];
-  auto &vector = state.ccr.vector[n >> 3];
+uint32_t cop2_core::read_matrix_vector_group(uint32_t n) {
+  auto &matrix = ccr.matrix[n >> 3];
+  auto &vector = ccr.vector[n >> 3];
 
   switch (n & 7) {
   case 0: return uint16_t(matrix[0][0]) | (matrix[0][1] << 16);
@@ -20,12 +21,10 @@ static uint32_t read_matrix_vector_group(cop2_state_t &state, uint32_t n) {
   }
 }
 
-uint32_t cop2::read_ccr(cop2_state_t &state, uint32_t n) {
+uint32_t cop2_core::read_ccr(uint32_t n) {
   if (n <= 0x17) {
-    return read_matrix_vector_group(state, n);
+    return read_matrix_vector_group(n);
   }
-
-  auto &ccr = state.ccr;
 
   switch (n) {
   case 0x18:
@@ -57,9 +56,9 @@ uint32_t cop2::read_ccr(cop2_state_t &state, uint32_t n) {
   }
 }
 
-static void write_matrix_vector_group(cop2_state_t &state, uint32_t n, uint32_t value) {
-  auto &matrix = state.ccr.matrix[n >> 3];
-  auto &vector = state.ccr.vector[n >> 3];
+void cop2_core::write_matrix_vector_group(uint32_t n, uint32_t value) {
+  auto &matrix = ccr.matrix[n >> 3];
+  auto &vector = ccr.vector[n >> 3];
 
   switch (n & 7) {
   case 0:
@@ -100,12 +99,10 @@ static void write_matrix_vector_group(cop2_state_t &state, uint32_t n, uint32_t 
   }
 }
 
-void cop2::write_ccr(cop2_state_t &state, uint32_t n, uint32_t value) {
+void cop2_core::write_ccr(uint32_t n, uint32_t value) {
   if (n <= 0x17) {
-    return write_matrix_vector_group(state, n, value);
+    return write_matrix_vector_group(n, value);
   }
-
-  auto &ccr = state.ccr;
 
   switch (n) {
   case 0x18:
@@ -144,9 +141,7 @@ void cop2::write_ccr(cop2_state_t &state, uint32_t n, uint32_t value) {
   }
 }
 
-uint32_t cop2::read_gpr(cop2_state_t &state, uint32_t n) {
-  auto &gpr = state.gpr;
-
+uint32_t cop2_core::read_gpr(uint32_t n) {
   switch (n) {
   case 0x00:
     return uint16_t(gpr.vector[0][0]) | (uint16_t(gpr.vector[0][1]) << 16);
@@ -249,9 +244,7 @@ uint32_t cop2::read_gpr(cop2_state_t &state, uint32_t n) {
   }
 }
 
-void cop2::write_gpr(cop2_state_t &state, uint32_t n, uint32_t value) {
-  auto &gpr = state.gpr;
-
+void cop2_core::write_gpr(uint32_t n, uint32_t value) {
   switch (n) {
   case 0x00:
     gpr.vector[0][0] = int16_t(value);

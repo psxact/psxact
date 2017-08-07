@@ -1,26 +1,81 @@
 #ifndef __PSXACT_GPU_CORE_HPP__
 #define __PSXACT_GPU_CORE_HPP__
 
-#include <queue>
 #include "../bus.hpp"
-#include "../state.hpp"
 
-namespace gpu {
-  uint32_t io_read(gpu_state_t &state, bus_width_t width, uint32_t address);
+struct gpu_core {
+  uint32_t data_latch = 0;
+  uint32_t status = 0x14802000;
+  uint32_t texture_window_mask_x;
+  uint32_t texture_window_mask_y;
+  uint32_t texture_window_offset_x;
+  uint32_t texture_window_offset_y;
+  int32_t drawing_area_x1;
+  int32_t drawing_area_y1;
+  int32_t drawing_area_x2;
+  int32_t drawing_area_y2;
+  int32_t x_offset;
+  int32_t y_offset;
+  uint32_t display_area_x;
+  uint32_t display_area_y;
+  uint32_t display_area_x1;
+  uint32_t display_area_y1;
+  uint32_t display_area_x2;
+  uint32_t display_area_y2;
+  bool textured_rectangle_x_flip;
+  bool textured_rectangle_y_flip;
 
-  void io_write(gpu_state_t &state, bus_width_t width, uint32_t address, uint32_t data);
+  struct {
+    uint32_t buffer[16];
+    int32_t wr;
+    int32_t rd;
+  } fifo;
 
-  uint32_t data(gpu_state_t &state);
+  struct {
+    struct {
+      int32_t x;
+      int32_t y;
+      int32_t w;
+      int32_t h;
+    } reg;
 
-  uint32_t stat(gpu_state_t &state);
+    struct {
+      bool active;
+      int32_t x;
+      int32_t y;
+    } run;
+  } cpu_to_gpu_transfer;
 
-  void gp0(gpu_state_t &state, uint32_t data);
+  struct {
+    struct {
+      int32_t x;
+      int32_t y;
+      int32_t w;
+      int32_t h;
+    } reg;
 
-  void gp1(gpu_state_t &state, uint32_t data);
+    struct {
+      bool active;
+      int32_t x;
+      int32_t y;
+    } run;
+  } gpu_to_cpu_transfer;
 
-  void vram_transfer(gpu_state_t &state, uint16_t data);
+  uint32_t io_read(bus_width_t width, uint32_t address);
 
-  uint16_t vram_transfer(gpu_state_t &state);
+  void io_write(bus_width_t width, uint32_t address, uint32_t data);
+
+  uint32_t data();
+
+  uint32_t stat();
+
+  void gp0(uint32_t data);
+
+  void gp1(uint32_t data);
+
+  void vram_transfer(uint16_t data);
+
+  uint16_t vram_transfer();
 
   struct color_t {
     uint8_t r;
@@ -45,27 +100,35 @@ namespace gpu {
     int32_t color_mix_mode;
   };
 
-  void draw_point(gpu_state_t &state, point_t point, color_t color);
+  void copy_vram_to_vram();
 
-  void draw_line(gpu_state_t &state);
+  void copy_wram_to_vram();
 
-  void draw_polygon(gpu_state_t &state);
+  void copy_vram_to_wram();
 
-  void draw_rectangle(gpu_state_t &state);
+  void draw_point(point_t point, color_t color);
+
+  void draw_line();
+
+  void draw_polygon();
+
+  void draw_rectangle();
+
+  void fill_rectangle();
 
   // common functionality
 
-  color_t uint16_to_color(uint16_t value);
+  static color_t uint16_to_color(uint16_t value);
 
-  uint16_t color_to_uint16(color_t color);
+  static uint16_t color_to_uint16(color_t color);
 
-  color_t get_texture_color__4bpp(gpu::tev_t &tev, gpu::point_t &coord);
+  static color_t get_texture_color__4bpp(tev_t &tev, point_t &coord);
 
-  color_t get_texture_color__8bpp(gpu::tev_t &tev, gpu::point_t &coord);
+  static color_t get_texture_color__8bpp(tev_t &tev, point_t &coord);
 
-  color_t get_texture_color_15bpp(gpu::tev_t &tev, gpu::point_t &coord);
+  static color_t get_texture_color_15bpp(tev_t &tev, point_t &coord);
 
-  color_t get_texture_color(gpu::tev_t &tev, gpu::point_t &coord);
-}
+  static color_t get_texture_color(tev_t &tev, point_t &coord);
+};
 
 #endif // __PSXACT_GPU_CORE_HPP__

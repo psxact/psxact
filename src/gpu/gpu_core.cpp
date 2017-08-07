@@ -2,28 +2,29 @@
 #include "gpu_core.hpp"
 #include "../bus.hpp"
 #include "../memory/vram.hpp"
+#include "../utility.hpp"
 
-uint32_t gpu::data(gpu_state_t &state) {
-  if (state.gpu_to_cpu_transfer.run.active) {
-    uint16_t lower = vram_transfer(state);
-    uint16_t upper = vram_transfer(state);
+uint32_t gpu_core::data() {
+  if (gpu_to_cpu_transfer.run.active) {
+    uint16_t lower = vram_transfer();
+    uint16_t upper = vram_transfer();
 
     return (upper << 16) | lower;
   }
 
-  return state.data_latch;
+  return data_latch;
 }
 
-uint32_t gpu::stat(gpu_state_t &state) {
+uint32_t gpu_core::stat() {
   //  19    Vertical Resolution         (0=240, 1=480, when Bit22=1)  ;GP1(08h).2
   //  26    Ready to receive Cmd Word   (0=No, 1=Ready)  ;GP0(...) ;via GP0
   //  27    Ready to send VRAM to CPU   (0=No, 1=Ready)  ;GP0(C0h) ;via GPUREAD
   //  28    Ready to receive DMA Block  (0=No, 1=Ready)  ;GP0(...) ;via GP0
 
-  return (state.status & ~0x00080000) | 0x1c002000;
+  return (status & ~0x00080000) | 0x1c002000;
 }
 
-uint32_t gpu::io_read(gpu_state_t &state, bus_width_t width, uint32_t address) {
+uint32_t gpu_core::io_read(bus_width_t width, uint32_t address) {
   assert(width == BUS_WIDTH_WORD);
 
   if (utility::log_gpu) {
@@ -32,17 +33,17 @@ uint32_t gpu::io_read(gpu_state_t &state, bus_width_t width, uint32_t address) {
 
   switch (address) {
   case 0x1f801810:
-    return data(state);
+    return data();
 
   case 0x1f801814:
-    return stat(state);
+    return stat();
 
   default:
     return 0;
   }
 }
 
-void gpu::io_write(gpu_state_t &state, bus_width_t width, uint32_t address, uint32_t data) {
+void gpu_core::io_write(bus_width_t width, uint32_t address, uint32_t data) {
   assert(width == BUS_WIDTH_WORD);
 
   if (utility::log_gpu) {
@@ -51,15 +52,15 @@ void gpu::io_write(gpu_state_t &state, bus_width_t width, uint32_t address, uint
 
   switch (address) {
   case 0x1f801810:
-    return gp0(state, data);
+    return gp0(data);
 
   case 0x1f801814:
-    return gp1(state, data);
+    return gp1(data);
   }
 }
 
-uint16_t gpu::vram_transfer(gpu_state_t &state) {
-  auto &transfer = state.gpu_to_cpu_transfer;
+uint16_t gpu_core::vram_transfer() {
+  auto &transfer = gpu_to_cpu_transfer;
   if (!transfer.run.active) {
     return 0;
   }
@@ -83,8 +84,8 @@ uint16_t gpu::vram_transfer(gpu_state_t &state) {
   return data;
 }
 
-void gpu::vram_transfer(gpu_state_t &state, uint16_t data) {
-  auto &transfer = state.cpu_to_gpu_transfer;
+void gpu_core::vram_transfer(uint16_t data) {
+  auto &transfer = cpu_to_gpu_transfer;
   if (!transfer.run.active) {
     return;
   }
@@ -108,7 +109,7 @@ void gpu::vram_transfer(gpu_state_t &state, uint16_t data) {
 
 // common functionality
 
-gpu::color_t gpu::uint16_to_color(uint16_t value) {
+gpu_core::color_t gpu_core::uint16_to_color(uint16_t value) {
   color_t color;
   color.r = (value << 3) & 0xf8;
   color.g = (value >> 2) & 0xf8;
@@ -117,14 +118,14 @@ gpu::color_t gpu::uint16_to_color(uint16_t value) {
   return color;
 }
 
-uint16_t gpu::color_to_uint16(color_t color) {
+uint16_t gpu_core::color_to_uint16(color_t color) {
   return
     ((color.r >> 3) & 0x001f) |
     ((color.g << 2) & 0x03e0) |
     ((color.b << 7) & 0x7c00);
 }
 
-gpu::color_t gpu::get_texture_color__4bpp(gpu::tev_t &tev, gpu::point_t &coord) {
+gpu_core::color_t gpu_core::get_texture_color__4bpp(gpu_core::tev_t &tev, gpu_core::point_t &coord) {
   uint16_t texel = vram::read(tev.texture_page_x + coord.x / 4,
                               tev.texture_page_y + coord.y);
 
@@ -136,7 +137,7 @@ gpu::color_t gpu::get_texture_color__4bpp(gpu::tev_t &tev, gpu::point_t &coord) 
   return uint16_to_color(pixel);
 }
 
-gpu::color_t gpu::get_texture_color__8bpp(gpu::tev_t &tev, gpu::point_t &coord) {
+gpu_core::color_t gpu_core::get_texture_color__8bpp(gpu_core::tev_t &tev, gpu_core::point_t &coord) {
   uint16_t texel = vram::read(tev.texture_page_x + coord.x / 2,
                               tev.texture_page_y + coord.y);
 
@@ -148,27 +149,27 @@ gpu::color_t gpu::get_texture_color__8bpp(gpu::tev_t &tev, gpu::point_t &coord) 
   return uint16_to_color(pixel);
 }
 
-gpu::color_t gpu::get_texture_color_15bpp(gpu::tev_t &tev, gpu::point_t &coord) {
+gpu_core::color_t gpu_core::get_texture_color_15bpp(gpu_core::tev_t &tev, gpu_core::point_t &coord) {
   uint16_t pixel = vram::read(tev.texture_page_x + coord.x,
                               tev.texture_page_y + coord.y);
 
   return uint16_to_color(pixel);
 }
 
-gpu::color_t gpu::get_texture_color(gpu::tev_t &tev, gpu::point_t &coord) {
+gpu_core::color_t gpu_core::get_texture_color(gpu_core::tev_t &tev, gpu_core::point_t &coord) {
   switch (tev.texture_colors) {
   default:
 
   case 0:
-    return gpu::get_texture_color__4bpp(tev, coord);
+    return get_texture_color__4bpp(tev, coord);
 
   case 1:
-    return gpu::get_texture_color__8bpp(tev, coord);
+    return get_texture_color__8bpp(tev, coord);
 
   case 2:
-    return gpu::get_texture_color_15bpp(tev, coord);
+    return get_texture_color_15bpp(tev, coord);
 
   case 3:
-    return gpu::get_texture_color_15bpp(tev, coord);
+    return get_texture_color_15bpp(tev, coord);
   }
 }

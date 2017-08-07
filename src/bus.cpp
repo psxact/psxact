@@ -2,7 +2,7 @@
 #include <cstring>
 #include <exception>
 #include "bus.hpp"
-#include "cdrom/cdrom_drive.hpp"
+#include "cdrom/cdrom_core.hpp"
 #include "cpu/cpu_core.hpp"
 #include "dma/dma_core.hpp"
 #include "gpu/gpu_core.hpp"
@@ -12,16 +12,36 @@
 #include "timer/timer_core.hpp"
 #include "limits.hpp"
 #include "utility.hpp"
-#include "state.hpp"
 
-static system_state_t *state;
+static cpu_core *cpu;
+static cdrom_core *cdrom;
+static dma_core *dma;
+static gpu_core *gpu;
+static input_core *input;
+static mdec_core *mdec;
+static spu_core *spu;
+static timer_core *timer;
 
 static memory_t<19> bios;
 static memory_t<21> wram;
 static memory_t<10> dmem;
 
-bool bus::init(system_state_t *s, const char *bios_file_name) {
-  state = s;
+bool bus::init(const char *bios_file_name, const char *game_file_name) {
+  cpu = new cpu_core();
+  cpu->init();
+
+  mdec = new mdec_core();
+  timer = new timer_core();
+
+  cdrom = new cdrom_core();
+  cdrom->init(game_file_name);
+
+  dma = new dma_core();
+
+  gpu = new gpu_core();
+
+  input = new input_core();
+  input->init();
 
   memset(bios.b, 0, size_t(bios.size));
   memset(wram.b, 0, size_t(wram.size));
@@ -34,7 +54,7 @@ bool bus::init(system_state_t *s, const char *bios_file_name) {
 
 void bus::irq(int32_t interrupt) {
   int32_t flag = 1 << interrupt;
-  cpu::set_istat(state->cpu_state, state->cpu_state.i_stat | flag);
+  cpu->set_istat(cpu->i_stat | flag);
 }
 
 uint32_t bus::read(bus_width_t width, uint32_t address) {
@@ -63,37 +83,37 @@ uint32_t bus::read(bus_width_t width, uint32_t address) {
   }
 
   if (limits::between<0x1f801040, 0x1f80104f>(address)) {
-    return input::io_read(state->input_state, width, address);
+    return input->io_read(width, address);
   }
 
   if (limits::between<0x1f801070, 0x1f801077>(address)) {
-    return cpu::io_read(state->cpu_state, width, address);
+    return cpu->io_read(width, address);
   }
 
   if (limits::between<0x1f801080, 0x1f8010ff>(address)) {
-    return dma::io_read(state->dma_state, width, address);
+    return dma->io_read(width, address);
   }
 
   if (limits::between<0x1f801100, 0x1f80110f>(address) ||
       limits::between<0x1f801110, 0x1f80111f>(address) ||
       limits::between<0x1f801120, 0x1f80112f>(address)) {
-    return timer::io_read(state->timer_state, width, address);
+    return timer->io_read(width, address);
   }
 
   if (limits::between<0x1f801800, 0x1f801803>(address)) {
-    return cdrom::io_read(state->cdrom_state, width, address);
+    return cdrom->io_read(width, address);
   }
 
   if (limits::between<0x1f801810, 0x1f801817>(address)) {
-    return gpu::io_read(state->gpu_state, width, address);
+    return gpu->io_read(width, address);
   }
 
   if (limits::between<0x1f801820, 0x1f801827>(address)) {
-    return mdec::io_read(state->mdec_state, width, address);
+    return mdec->io_read(width, address);
   }
 
   if (limits::between<0x1f801c00, 0x1f801fff>(address)) {
-    return spu::io_read(state->spu_state, width, address);
+    return spu->io_read(width, address);
   }
 
   if (limits::between<0x1f000000, 0x1f7fffff>(address) || // expansion region 1
@@ -124,7 +144,7 @@ uint32_t bus::read(bus_width_t width, uint32_t address) {
   throw std::exception();
 }
 
-static void load_executable() {
+static void load_executable(const char *file_name) {
 #define get_word(file)  \
   (                     \
   (getc(file) <<  0) |  \
@@ -133,7 +153,7 @@ static void load_executable() {
   (getc(file) << 24)    \
   )
 
-  FILE *game = fopen(state->cdrom_state.game_file_name.c_str(), "rb+");
+  FILE *game = fopen(file_name, "rb+");
 
   fseek(game, 0x010, SEEK_SET);
 
@@ -147,11 +167,11 @@ static void load_executable() {
 
   uint32_t sp = get_word(game) + get_word(game);
 
-  state->cpu_state.regs.pc = pc;
-  state->cpu_state.regs.next_pc = pc + 4;
-  state->cpu_state.regs.gp[28] = gp;
-  state->cpu_state.regs.gp[29] = sp;
-  state->cpu_state.regs.gp[30] = sp;
+  cpu->regs.pc = pc;
+  cpu->regs.next_pc = pc + 4;
+  cpu->regs.gp[28] = gp;
+  cpu->regs.gp[29] = sp;
+  cpu->regs.gp[30] = sp;
 
   fseek(game, 0x800, SEEK_SET);
 
@@ -187,38 +207,38 @@ void bus::write(bus_width_t width, uint32_t address, uint32_t data) {
   }
 
   if (limits::between<0x1f801040, 0x1f80104f>(address)) {
-    return input::io_write(state->input_state, width, address, data);
+    return input->io_write(width, address, data);
   }
 
   if (limits::between<0x1f801070, 0x1f801077>(address)) {
-    return cpu::io_write(state->cpu_state, width, address, data);
+    return cpu->io_write(width, address, data);
   }
 
   if (limits::between<0x1f801080, 0x1f8010ff>(address)) {
-    return dma::io_write(state->dma_state, width, address, data);
+    return dma->io_write(width, address, data);
   }
 
   if (limits::between<0x1f801100, 0x1f80110f>(address) ||
       limits::between<0x1f801110, 0x1f80111f>(address) ||
       limits::between<0x1f801120, 0x1f80112f>(address)) {
-    return timer::io_write(state->timer_state, width, address, data);
+    return timer->io_write(width, address, data);
   }
 
   if (limits::between<0x1f801800, 0x1f801803>(address)) {
     // return load_executable();
-    return cdrom::io_write(state->cdrom_state, width, address, data);
+    return cdrom->io_write(width, address, data);
   }
 
   if (limits::between<0x1f801810, 0x1f801817>(address)) {
-    return gpu::io_write(state->gpu_state, width, address, data);
+    return gpu->io_write(width, address, data);
   }
 
   if (limits::between<0x1f801820, 0x1f801827>(address)) {
-    return mdec::io_write(state->mdec_state, width, address, data);
+    return mdec->io_write(width, address, data);
   }
 
   if (limits::between<0x1f801c00, 0x1f801fff>(address)) {
-    return spu::io_write(state->spu_state, width, address, data);
+    return spu->io_write(width, address, data);
   }
 
   if (limits::between<0x1f000000, 0x1f7fffff>(address) || // expansion region 1
@@ -267,4 +287,23 @@ void bus::write(bus_width_t width, uint32_t address, uint32_t data) {
 
   printf("bus::write(%d, 0x%08x, 0x%08x)\n", width, address, data);
   throw std::exception();
+}
+
+void bus::run_for_one_frame() {
+  const int ITERATIONS = 2;
+
+  const int CPU_FREQ = 33868800;
+  const int CYCLES_PER_FRAME = CPU_FREQ / 60 / ITERATIONS;
+
+  for (int i = 0; i < CYCLES_PER_FRAME; i++) {
+    cpu->tick();
+
+    for (int j = 0; j < ITERATIONS; j++) {
+      timer->tick();
+      cdrom->tick();
+      input->tick();
+    }
+  }
+
+  bus::irq(0);
 }

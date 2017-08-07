@@ -1,7 +1,7 @@
 #include "timer_core.hpp"
 #include "../utility.hpp"
 
-uint32_t timer::io_read(timer_state_t &state, bus_width_t width, uint32_t address) {
+uint32_t timer_core::io_read(bus_width_t width, uint32_t address) {
   if (utility::log_timer) {
     printf("timer::io_read(%d, 0x%08x)\n", width, address);
   }
@@ -9,15 +9,20 @@ uint32_t timer::io_read(timer_state_t &state, bus_width_t width, uint32_t addres
   int n = (address >> 4) & 3;
 
   switch ((address & 0xf) / 4) {
-  case 0: return state.timers[n].counter;
-  case 1: return state.timers[n].control;
-  case 2: return state.timers[n].compare;
+  case 0:
+    return timers[n].counter;
+
+  case 1:
+    return timers[n].control;
+
+  case 2:
+    return timers[n].compare;
   }
 
   return 0;
 }
 
-void timer::io_write(timer_state_t &state, bus_width_t width, uint32_t address, uint32_t data) {
+void timer_core::io_write(bus_width_t width, uint32_t address, uint32_t data) {
   if (utility::log_timer) {
     printf("timer::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
   }
@@ -26,25 +31,31 @@ void timer::io_write(timer_state_t &state, bus_width_t width, uint32_t address, 
 
   switch ((address & 0xf) / 4) {
   case 0:
-    state.timers[n].counter = uint16_t(data);
+    timers[n].counter = uint16_t(data);
     break;
 
   case 1:
-    state.timers[n].control = uint16_t(data | 0x400);
-    state.timers[n].counter = 0;
+    timers[n].control = uint16_t(data | 0x400);
+    timers[n].counter = 0;
     break;
 
   case 2:
-    state.timers[n].compare = uint16_t(data);
+    timers[n].compare = uint16_t(data);
     break;
   }
 }
 
-static void tick_timer_0(timer_state_t &state) {
+void timer_core::tick() {
+  tick_timer_0();
+  tick_timer_1();
+  tick_timer_2();
 }
 
-static void tick_timer_1(timer_state_t &state) {
-  auto &timer = state.timers[1];
+void timer_core::tick_timer_0() {
+}
+
+void timer_core::tick_timer_1() {
+  auto &timer = timers[1];
 
   timer.divider += 11;
 
@@ -54,8 +65,8 @@ static void tick_timer_1(timer_state_t &state) {
   }
 }
 
-static void tick_timer_2(timer_state_t &state) {
-  auto &timer = state.timers[2];
+void timer_core::tick_timer_2() {
+  auto &timer = timers[2];
 
   // system clock/8
   timer.divider++;
@@ -77,10 +88,4 @@ static void tick_timer_2(timer_state_t &state) {
       }
     }
   }
-}
-
-void timer::tick(timer_state_t &state) {
-  tick_timer_0(state);
-  tick_timer_1(state);
-  tick_timer_2(state);
 }

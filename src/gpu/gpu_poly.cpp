@@ -1,12 +1,14 @@
+#include <algorithm>
 #include "gpu_core.hpp"
 #include "../memory/vram.hpp"
+#include "../utility.hpp"
 
 struct triangle_t {
-  gpu::color_t colors[3];
-  gpu::point_t coords[3];
-  gpu::point_t points[3];
+  gpu_core::color_t colors[3];
+  gpu_core::point_t coords[3];
+  gpu_core::point_t points[3];
 
-  gpu::tev_t tev;
+  gpu_core::tev_t tev;
 };
 
 static const int32_t point_factor_lut[4] = {
@@ -40,10 +42,10 @@ static int32_t get_coord_factor(uint32_t command) {
   return get_factor(coord_factor_lut, command);
 }
 
-static gpu::color_t decode_color(gpu_state_t &state, int32_t n) {
+static gpu_core::color_t decode_color(gpu_core &state, int32_t n) {
   uint32_t value = state.fifo.buffer[n];
 
-  gpu::color_t result;
+  gpu_core::color_t result;
 
   result.r = utility::uclip<8>(value >> (8 * 0));
   result.g = utility::uclip<8>(value >> (8 * 1));
@@ -52,10 +54,10 @@ static gpu::color_t decode_color(gpu_state_t &state, int32_t n) {
   return result;
 }
 
-static gpu::point_t decode_point(gpu_state_t &state, int32_t n) {
+static gpu_core::point_t decode_point(gpu_core &state, int32_t n) {
   uint32_t value = state.fifo.buffer[n];
 
-  gpu::point_t result;
+  gpu_core::point_t result;
 
   result.x = state.x_offset + utility::sclip<11>(value);
   result.y = state.y_offset + utility::sclip<11>(value >> 16);
@@ -63,10 +65,10 @@ static gpu::point_t decode_point(gpu_state_t &state, int32_t n) {
   return result;
 }
 
-static gpu::point_t decode_coord(gpu_state_t &state, int32_t n) {
+static gpu_core::point_t decode_coord(gpu_core &state, int32_t n) {
   uint32_t value = state.fifo.buffer[n];
 
-  gpu::point_t result;
+  gpu_core::point_t result;
 
   result.x = utility::uclip<8>(value >> 0);
   result.y = utility::uclip<8>(value >> 8);
@@ -74,7 +76,7 @@ static gpu::point_t decode_coord(gpu_state_t &state, int32_t n) {
   return result;
 }
 
-static void get_colors(gpu_state_t &state, uint32_t command, gpu::color_t *colors, int32_t n) {
+static void get_colors(gpu_core &state, uint32_t command, gpu_core::color_t *colors, int32_t n) {
   int32_t factor = get_color_factor(command);
 
   for (int32_t i = 0; i < n; i++) {
@@ -82,7 +84,7 @@ static void get_colors(gpu_state_t &state, uint32_t command, gpu::color_t *color
   }
 }
 
-static void get_points(gpu_state_t &state, uint32_t command, gpu::point_t *points, int32_t n) {
+static void get_points(gpu_core &state, uint32_t command, gpu_core::point_t *points, int32_t n) {
   int32_t factor = get_point_factor(command);
 
   for (int32_t i = 0; i < n; i++) {
@@ -90,7 +92,7 @@ static void get_points(gpu_state_t &state, uint32_t command, gpu::point_t *point
   }
 }
 
-static void get_coords(gpu_state_t &state, uint32_t command, gpu::point_t *coords, int32_t n) {
+static void get_coords(gpu_core &state, uint32_t command, gpu_core::point_t *coords, int32_t n) {
   int32_t factor = get_coord_factor(command);
 
   for (int32_t i = 0; i < n; i++) {
@@ -98,13 +100,13 @@ static void get_coords(gpu_state_t &state, uint32_t command, gpu::point_t *coord
   }
 }
 
-static gpu::tev_t get_tev(gpu_state_t &state, uint32_t command) {
+static gpu_core::tev_t get_tev(gpu_core &state, uint32_t command) {
   int32_t factor = get_coord_factor(command);
 
   uint32_t palette = state.fifo.buffer[0 * factor + 2] >> 16;
   uint32_t texpage = state.fifo.buffer[1 * factor + 2] >> 16;
 
-  gpu::tev_t result;
+  gpu_core::tev_t result;
 
   //  11    Texture Disable (0=Normal, 1=Disable if GP1(09h).Bit0=1)   ;GPUSTAT.15
 
@@ -124,7 +126,7 @@ static gpu::tev_t get_tev(gpu_state_t &state, uint32_t command) {
   return result;
 }
 
-static bool is_clockwise(const gpu::point_t *p) {
+static bool is_clockwise(const gpu_core::point_t *p) {
   int32_t sum =
       (p[1].x - p[0].x) * (p[1].y + p[0].y) +
       (p[2].x - p[1].x) * (p[2].y + p[1].y) +
@@ -133,14 +135,14 @@ static bool is_clockwise(const gpu::point_t *p) {
   return sum >= 0;
 }
 
-static int32_t edge_function(const gpu::point_t &a, const gpu::point_t &b, const gpu::point_t &c) {
+static int32_t edge_function(const gpu_core::point_t &a, const gpu_core::point_t &b, const gpu_core::point_t &c) {
   return
     (a.x - b.x) * (c.y - b.y) -
     (a.y - b.y) * (c.x - b.x);
 }
 
-static gpu::color_t color_lerp(const gpu::color_t *c, int32_t w0, int32_t w1, int32_t w2) {
-  gpu::color_t color;
+static gpu_core::color_t color_lerp(const gpu_core::color_t *c, int32_t w0, int32_t w1, int32_t w2) {
+  gpu_core::color_t color;
   color.r = ((w0 * c[0].r) + (w1 * c[1].r) + (w2 * c[2].r)) / (w0 + w1 + w2);
   color.g = ((w0 * c[0].g) + (w1 * c[1].g) + (w2 * c[2].g)) / (w0 + w1 + w2);
   color.b = ((w0 * c[0].b) + (w1 * c[1].b) + (w2 * c[2].b)) / (w0 + w1 + w2);
@@ -148,15 +150,15 @@ static gpu::color_t color_lerp(const gpu::color_t *c, int32_t w0, int32_t w1, in
   return color;
 }
 
-static gpu::point_t point_lerp(const gpu::point_t *t, int32_t w0, int32_t w1, int32_t w2) {
-  gpu::point_t point;
+static gpu_core::point_t point_lerp(const gpu_core::point_t *t, int32_t w0, int32_t w1, int32_t w2) {
+  gpu_core::point_t point;
   point.x = ((w0 * t[0].x) + (w1 * t[1].x) + (w2 * t[2].x)) / (w0 + w1 + w2);
   point.y = ((w0 * t[0].y) + (w1 * t[1].y) + (w2 * t[2].y)) / (w0 + w1 + w2);
 
   return point;
 }
 
-static bool get_color(uint32_t command, triangle_t &triangle, int32_t w0, int32_t w1, int32_t w2, gpu::color_t &color) {
+static bool get_color(uint32_t command, triangle_t &triangle, int32_t w0, int32_t w1, int32_t w2, gpu_core::color_t &color) {
   bool shaded  = (command & (1 << 26)) == 0;
   bool blended = (command & (1 << 24)) != 0;
 
@@ -165,14 +167,14 @@ static bool get_color(uint32_t command, triangle_t &triangle, int32_t w0, int32_
     return true;
   }
 
-  gpu::point_t coord = point_lerp(triangle.coords, w0, w1, w2);
+  gpu_core::point_t coord = point_lerp(triangle.coords, w0, w1, w2);
 
   if (blended) {
-    color = gpu::get_texture_color(triangle.tev, coord);
+    color = gpu_core::get_texture_color(triangle.tev, coord);
   }
   else {
-    gpu::color_t color1 = gpu::get_texture_color(triangle.tev, coord);
-    gpu::color_t color2 = color_lerp(triangle.colors, w0, w1, w2);
+    gpu_core::color_t color1 = gpu_core::get_texture_color(triangle.tev, coord);
+    gpu_core::color_t color2 = color_lerp(triangle.colors, w0, w1, w2);
 
     color.r = std::min(255, (color1.r * color2.r) / 128);
     color.g = std::min(255, (color1.g * color2.g) / 128);
@@ -182,14 +184,14 @@ static bool get_color(uint32_t command, triangle_t &triangle, int32_t w0, int32_
   return (color.r | color.g | color.b) > 0;
 }
 
-static void draw_triangle(gpu_state_t &state, uint32_t command, triangle_t &triangle) {
-  const gpu::point_t *v = triangle.points;
+static void draw_triangle(gpu_core &state, uint32_t command, triangle_t &triangle) {
+  const gpu_core::point_t *v = triangle.points;
 
-  gpu::point_t min;
+  gpu_core::point_t min;
   min.x = std::min(v[0].x, std::min(v[1].x, v[2].x));
   min.y = std::min(v[0].y, std::min(v[1].y, v[2].y));
 
-  gpu::point_t max;
+  gpu_core::point_t max;
   max.x = std::max(v[0].x, std::max(v[1].x, v[2].x));
   max.y = std::max(v[0].y, std::max(v[1].y, v[2].y));
 
@@ -218,7 +220,7 @@ static void draw_triangle(gpu_state_t &state, uint32_t command, triangle_t &tria
   row[1] = edge_function(min, v[2], v[0]);
   row[2] = edge_function(min, v[0], v[1]);
 
-  gpu::point_t point;
+  gpu_core::point_t point;
 
   for (point.y = min.y; point.y <= max.y; point.y++) {
     int32_t w0 = row[0];
@@ -232,11 +234,11 @@ static void draw_triangle(gpu_state_t &state, uint32_t command, triangle_t &tria
 
     for (point.x = min.x; point.x <= max.x; point.x++) {
       if (w0 > c[0] && w1 > c[1] && w2 > c[2]) {
-        gpu::color_t color;
+        gpu_core::color_t color;
 
         if (get_color(command, triangle, w0, w1, w2, color)) {
           if (command & (1 << 25)) {
-            gpu::color_t bg = gpu::uint16_to_color(vram::read(point.x, point.y));
+            gpu_core::color_t bg = gpu_core::uint16_to_color(vram::read(point.x, point.y));
 
             switch (triangle.tev.color_mix_mode) {
             case 0:
@@ -265,7 +267,7 @@ static void draw_triangle(gpu_state_t &state, uint32_t command, triangle_t &tria
             }
           }
 
-          gpu::draw_point(state, point, color);
+          state.draw_point(point, color);
         }
       }
 
@@ -276,7 +278,7 @@ static void draw_triangle(gpu_state_t &state, uint32_t command, triangle_t &tria
   }
 }
 
-static void put_in_clockwise_order(gpu::point_t *points, gpu::color_t *colors, gpu::point_t *coords, triangle_t *triangle) {
+static void put_in_clockwise_order(gpu_core::point_t *points, gpu_core::color_t *colors, gpu_core::point_t *coords, triangle_t *triangle) {
   int32_t indices[3];
 
   if (is_clockwise(points)) {
@@ -303,28 +305,28 @@ static void put_in_clockwise_order(gpu::point_t *points, gpu::color_t *colors, g
   triangle->points[2] = points[indices[2]];
 }
 
-void gpu::draw_polygon(gpu_state_t &state) {
-  gpu::color_t colors[4];
-  gpu::point_t coords[4];
-  gpu::point_t points[4];
+void gpu_core::draw_polygon() {
+  gpu_core::color_t colors[4];
+  gpu_core::point_t coords[4];
+  gpu_core::point_t points[4];
 
-  uint32_t command = state.fifo.buffer[0];
+  uint32_t command = fifo.buffer[0];
 
   int32_t num_polygons = (command & (1 << 27)) ? 2 : 1;
   int32_t num_vertices = (command & (1 << 27)) ? 4 : 3;
 
-  get_colors(state, command, colors, num_vertices);
-  get_coords(state, command, coords, num_vertices);
-  get_points(state, command, points, num_vertices);
+  get_colors(*this, command, colors, num_vertices);
+  get_coords(*this, command, coords, num_vertices);
+  get_points(*this, command, points, num_vertices);
 
   triangle_t triangle;
-  triangle.tev = get_tev(state, command);
+  triangle.tev = get_tev(*this, command);
 
   for (int32_t i = 0; i < num_polygons; i++) {
     put_in_clockwise_order(&points[i],
                            &colors[i],
                            &coords[i], &triangle);
 
-    draw_triangle(state, command, triangle);
+    draw_triangle(*this, command, triangle);
   }
 }

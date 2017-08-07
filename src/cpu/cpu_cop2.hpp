@@ -1,110 +1,169 @@
 #ifndef __PSXACT_CPU_COP2_HPP__
 #define __PSXACT_CPU_COP2_HPP__
 
-#include "../state.hpp"
+#include <cstdint>
 
-namespace cop2 {
-  void run(cop2_state_t &state, uint32_t code);
+struct cop2_core {
+  union color_t {
+    struct {
+      uint8_t r;
+      uint8_t g;
+      uint8_t b;
+      uint8_t c;
+    };
 
-  uint32_t read_ccr(cop2_state_t &state, uint32_t n);
+    uint32_t value;
+  };
 
-  void write_ccr(cop2_state_t &state, uint32_t n, uint32_t value);
+  struct {
+    int32_t matrix[4][3][3];
+    int32_t vector[4][3];
+    int32_t ofx;
+    int32_t ofy;
+    int32_t h;
+    int32_t dqa;
+    int32_t dqb;
+    int32_t zsf3;
+    int32_t zsf4;
+    uint32_t flag;
+  } ccr;
 
-  uint32_t read_gpr(cop2_state_t &state, uint32_t n);
+  struct {
+    int32_t vector[4][3];
+    color_t rgbc;
+    int32_t otz;
+    int32_t ir0; //[4];
+    int32_t sx[3];
+    int32_t sy[3];
+    int32_t sz[4];
+    color_t rgb[3];
+    int32_t res;
+    int32_t mac[4];
+    int32_t lzcs;
+    int32_t lzcr;
+  } gpr;
 
-  void write_gpr(cop2_state_t &state, uint32_t n, uint32_t value);
+  void run(uint32_t code);
 
-  uint32_t divide(cop2_state_t &state);
+  uint32_t read_matrix_vector_group(uint32_t n);
+
+  uint32_t read_ccr(uint32_t n);
+
+  void write_matrix_vector_group(uint32_t n, uint32_t value);
+
+  void write_ccr(uint32_t n, uint32_t value);
+
+  uint32_t read_gpr(uint32_t n);
+
+  void write_gpr(uint32_t n, uint32_t value);
+
+  uint32_t divide();
 
   // -============-
   //  Instructions
   // -============-
 
-  void op_avsz3(cop2_state_t &state, uint32_t code);
+  void mac_to_ir(uint32_t code);
 
-  void op_avsz4(cop2_state_t &state, uint32_t code);
+  void mac_to_rgb();
 
-  void op_cc(cop2_state_t &state, uint32_t code);
+  void depth_cue(uint32_t code, int32_t r, int32_t g, int32_t b);
 
-  void op_cdp(cop2_state_t &state, uint32_t code);
+  void transform_dq(int64_t div);
 
-  void op_dcpl(cop2_state_t &state, uint32_t code);
+  void transform_xy(int64_t div);
 
-  void op_dpcs(cop2_state_t &state, uint32_t code);
+  int64_t transform(uint32_t code, int32_t mx, int32_t cv, int32_t v);
 
-  void op_dpct(cop2_state_t &state, uint32_t code);
+  int64_t transform_buggy(uint32_t code, int32_t mx, int32_t cv, int32_t v);
 
-  void op_gpf(cop2_state_t &state, uint32_t code);
+  int64_t transform_pt(uint32_t code, int32_t mx, int32_t cv, int32_t v);
 
-  void op_gpl(cop2_state_t &state, uint32_t code);
+  void op_avsz3(uint32_t code);
 
-  void op_intpl(cop2_state_t &state, uint32_t code);
+  void op_avsz4(uint32_t code);
 
-  void op_mvmva(cop2_state_t &state, uint32_t code);
+  void op_cc(uint32_t code);
 
-  void op_nccs(cop2_state_t &state, uint32_t code);
+  void op_cdp(uint32_t code);
 
-  void op_ncct(cop2_state_t &state, uint32_t code);
+  void op_dcpl(uint32_t code);
 
-  void op_ncds(cop2_state_t &state, uint32_t code);
+  void op_dpcs(uint32_t code);
 
-  void op_ncdt(cop2_state_t &state, uint32_t code);
+  void op_dpct(uint32_t code);
 
-  void op_nclip(cop2_state_t &state, uint32_t code);
+  void op_gpf(uint32_t code);
 
-  void op_ncs(cop2_state_t &state, uint32_t code);
+  void op_gpl(uint32_t code);
 
-  void op_nct(cop2_state_t &state, uint32_t code);
+  void op_intpl(uint32_t code);
 
-  void op_op(cop2_state_t &state, uint32_t code);
+  void op_mvmva(uint32_t code);
 
-  void op_rtps(cop2_state_t &state, uint32_t code);
+  void op_nccs(uint32_t code);
 
-  void op_rtpt(cop2_state_t &state, uint32_t code);
+  void op_ncct(uint32_t code);
 
-  void op_sqr(cop2_state_t &state, uint32_t code);
+  void op_ncds(uint32_t code);
 
-  namespace flags {
-    enum {
-      A1_MAX = 30,
-      A2_MAX = 29,
-      A3_MAX = 28,
-      A1_MIN = 27,
-      A2_MIN = 26,
-      A3_MIN = 25,
-      B1 = 24,
-      B2 = 23,
-      B3 = 22,
-      C1 = 21,
-      C2 = 20,
-      C3 = 19,
-      D = 18,
-      E = 17,
-      F_MAX = 16,
-      F_MIN = 15,
-      G1 = 14,
-      G2 = 13,
-      H = 12
-    };
+  void op_ncdt(uint32_t code);
 
-    int64_t a(cop2_state_t &state, int32_t n, int64_t value);
+  void op_nclip(uint32_t code);
 
-    int32_t b(cop2_state_t &state, int32_t n, uint32_t code, int32_t value);
+  void op_ncs(uint32_t code);
 
-    int32_t b(cop2_state_t &state, int32_t n, uint32_t code, int32_t value, int32_t shifted);
+  void op_nct(uint32_t code);
 
-    int32_t c(cop2_state_t &state, int32_t n, int32_t value);
+  void op_op(uint32_t code);
 
-    int32_t d(cop2_state_t &state, int32_t value);
+  void op_rtps(uint32_t code);
 
-    int32_t e(cop2_state_t &state);
+  void op_rtpt(uint32_t code);
 
-    int64_t f(cop2_state_t &state, int64_t value);
+  void op_sqr(uint32_t code);
 
-    int32_t g(cop2_state_t &state, int32_t n, int32_t value);
+  enum {
+    A1_MAX = 30,
+    A2_MAX = 29,
+    A3_MAX = 28,
+    A1_MIN = 27,
+    A2_MIN = 26,
+    A3_MIN = 25,
+    B1 = 24,
+    B2 = 23,
+    B3 = 22,
+    C1 = 21,
+    C2 = 20,
+    C3 = 19,
+    D = 18,
+    E = 17,
+    F_MAX = 16,
+    F_MIN = 15,
+    G1 = 14,
+    G2 = 13,
+    H = 12
+  };
 
-    int32_t h(cop2_state_t &state, int64_t value);
-  }
-}
+  void set_flag(int32_t flag);
+
+  int64_t flag_a(int32_t n, int64_t value);
+
+  int32_t flag_b(int32_t n, uint32_t code, int32_t value);
+
+  int32_t flag_b(int32_t n, uint32_t code, int32_t value, int32_t shifted);
+
+  int32_t flag_c(int32_t n, int32_t value);
+
+  int32_t flag_d(int32_t value);
+
+  int32_t flag_e();
+
+  int64_t flag_f(int64_t value);
+
+  int32_t flag_g(int32_t n, int32_t value);
+
+  int32_t flag_h(int64_t value);
+};
 
 #endif //__PSXACT_CPU_COP2_HPP__

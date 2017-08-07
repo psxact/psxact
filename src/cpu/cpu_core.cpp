@@ -2,61 +2,71 @@
 #include "cpu_cop0.hpp"
 #include "../utility.hpp"
 
-bool log_cpu_instr = 0;
-
-cpu::opcode cpu::op_table[64] = {
-  nullptr,      cpu::op_bxx,   cpu::op_j,    cpu::op_jal,   cpu::op_beq,  cpu::op_bne, cpu::op_blez, cpu::op_bgtz,
-  cpu::op_addi, cpu::op_addiu, cpu::op_slti, cpu::op_sltiu, cpu::op_andi, cpu::op_ori, cpu::op_xori, cpu::op_lui,
-  cpu::op_cop0, cpu::op_cop1,  cpu::op_cop2, cpu::op_cop3,  cpu::op_und,  cpu::op_und, cpu::op_und,  cpu::op_und,
-  cpu::op_und,  cpu::op_und,   cpu::op_und,  cpu::op_und,   cpu::op_und,  cpu::op_und, cpu::op_und,  cpu::op_und,
-  cpu::op_lb,   cpu::op_lh,    cpu::op_lwl,  cpu::op_lw,    cpu::op_lbu,  cpu::op_lhu, cpu::op_lwr,  cpu::op_und,
-  cpu::op_sb,   cpu::op_sh,    cpu::op_swl,  cpu::op_sw,    cpu::op_und,  cpu::op_und, cpu::op_swr,  cpu::op_und,
-  cpu::op_lwc0, cpu::op_lwc1,  cpu::op_lwc2, cpu::op_lwc3,  cpu::op_und,  cpu::op_und, cpu::op_und,  cpu::op_und,
-  cpu::op_swc0, cpu::op_swc1,  cpu::op_swc2, cpu::op_swc3,  cpu::op_und,  cpu::op_und, cpu::op_und,  cpu::op_und
+cpu_core::opcode cpu_core::op_table[64] = {
+  nullptr,            &cpu_core::op_bxx,   &cpu_core::op_j,    &cpu_core::op_jal,
+  &cpu_core::op_beq,  &cpu_core::op_bne,   &cpu_core::op_blez, &cpu_core::op_bgtz,
+  &cpu_core::op_addi, &cpu_core::op_addiu, &cpu_core::op_slti, &cpu_core::op_sltiu,
+  &cpu_core::op_andi, &cpu_core::op_ori,   &cpu_core::op_xori, &cpu_core::op_lui,
+  &cpu_core::op_cop0, &cpu_core::op_cop1,  &cpu_core::op_cop2, &cpu_core::op_cop3,
+  &cpu_core::op_und,  &cpu_core::op_und,   &cpu_core::op_und,  &cpu_core::op_und,
+  &cpu_core::op_und,  &cpu_core::op_und,   &cpu_core::op_und,  &cpu_core::op_und,
+  &cpu_core::op_und,  &cpu_core::op_und,   &cpu_core::op_und,  &cpu_core::op_und,
+  &cpu_core::op_lb,   &cpu_core::op_lh,    &cpu_core::op_lwl,  &cpu_core::op_lw,
+  &cpu_core::op_lbu,  &cpu_core::op_lhu,   &cpu_core::op_lwr,  &cpu_core::op_und,
+  &cpu_core::op_sb,   &cpu_core::op_sh,    &cpu_core::op_swl,  &cpu_core::op_sw,
+  &cpu_core::op_und,  &cpu_core::op_und,   &cpu_core::op_swr,  &cpu_core::op_und,
+  &cpu_core::op_lwc0, &cpu_core::op_lwc1,  &cpu_core::op_lwc2, &cpu_core::op_lwc3,
+  &cpu_core::op_und,  &cpu_core::op_und,   &cpu_core::op_und,  &cpu_core::op_und,
+  &cpu_core::op_swc0, &cpu_core::op_swc1,  &cpu_core::op_swc2, &cpu_core::op_swc3,
+  &cpu_core::op_und,  &cpu_core::op_und,   &cpu_core::op_und,  &cpu_core::op_und
 };
 
-cpu::opcode cpu::op_table_special[64] = {
-  cpu::op_sll,  cpu::op_und,   cpu::op_srl,  cpu::op_sra,  cpu::op_sllv,    cpu::op_und,   cpu::op_srlv, cpu::op_srav,
-  cpu::op_jr,   cpu::op_jalr,  cpu::op_und,  cpu::op_und,  cpu::op_syscall, cpu::op_break, cpu::op_und,  cpu::op_und,
-  cpu::op_mfhi, cpu::op_mthi,  cpu::op_mflo, cpu::op_mtlo, cpu::op_und,     cpu::op_und,   cpu::op_und,  cpu::op_und,
-  cpu::op_mult, cpu::op_multu, cpu::op_div,  cpu::op_divu, cpu::op_und,     cpu::op_und,   cpu::op_und,  cpu::op_und,
-  cpu::op_add,  cpu::op_addu,  cpu::op_sub,  cpu::op_subu, cpu::op_and,     cpu::op_or,    cpu::op_xor,  cpu::op_nor,
-  cpu::op_und,  cpu::op_und,   cpu::op_slt,  cpu::op_sltu, cpu::op_und,     cpu::op_und,   cpu::op_und,  cpu::op_und,
-  cpu::op_und,  cpu::op_und,   cpu::op_und,  cpu::op_und,  cpu::op_und,     cpu::op_und,   cpu::op_und,  cpu::op_und,
-  cpu::op_und,  cpu::op_und,   cpu::op_und,  cpu::op_und,  cpu::op_und,     cpu::op_und,   cpu::op_und,  cpu::op_und
+cpu_core::opcode cpu_core::op_table_special[64] = {
+  &cpu_core::op_sll,     &cpu_core::op_und,   &cpu_core::op_srl,  &cpu_core::op_sra,
+  &cpu_core::op_sllv,    &cpu_core::op_und,   &cpu_core::op_srlv, &cpu_core::op_srav,
+  &cpu_core::op_jr,      &cpu_core::op_jalr,  &cpu_core::op_und,  &cpu_core::op_und,
+  &cpu_core::op_syscall, &cpu_core::op_break, &cpu_core::op_und,  &cpu_core::op_und,
+  &cpu_core::op_mfhi,    &cpu_core::op_mthi,  &cpu_core::op_mflo, &cpu_core::op_mtlo,
+  &cpu_core::op_und,     &cpu_core::op_und,   &cpu_core::op_und,  &cpu_core::op_und,
+  &cpu_core::op_mult,    &cpu_core::op_multu, &cpu_core::op_div,  &cpu_core::op_divu,
+  &cpu_core::op_und,     &cpu_core::op_und,   &cpu_core::op_und,  &cpu_core::op_und,
+  &cpu_core::op_add,     &cpu_core::op_addu,  &cpu_core::op_sub,  &cpu_core::op_subu,
+  &cpu_core::op_and,     &cpu_core::op_or,    &cpu_core::op_xor,  &cpu_core::op_nor,
+  &cpu_core::op_und,     &cpu_core::op_und,   &cpu_core::op_slt,  &cpu_core::op_sltu,
+  &cpu_core::op_und,     &cpu_core::op_und,   &cpu_core::op_und,  &cpu_core::op_und,
+  &cpu_core::op_und,     &cpu_core::op_und,   &cpu_core::op_und,  &cpu_core::op_und,
+  &cpu_core::op_und,     &cpu_core::op_und,   &cpu_core::op_und,  &cpu_core::op_und,
+  &cpu_core::op_und,     &cpu_core::op_und,   &cpu_core::op_und,  &cpu_core::op_und,
+  &cpu_core::op_und,     &cpu_core::op_und,   &cpu_core::op_und,  &cpu_core::op_und
 };
 
-void cpu::init(cpu_state_t &state) {
-  state.regs.gp[0] = 0;
-  state.regs.pc = 0xbfc00000;
-  state.regs.next_pc = state.regs.pc + 4;
+void cpu_core::init() {
+  regs.gp[0] = 0;
+  regs.pc = 0xbfc00000;
+  regs.next_pc = regs.pc + 4;
 }
 
-void cpu::tick(cpu_state_t &state) {
-  cpu::read_code(state);
+void cpu_core::tick() {
+  read_code();
 
-  state.is_branch_delay_slot = state.is_branch;
-  state.is_branch = false;
+  is_branch_delay_slot = is_branch;
+  is_branch = false;
 
-  state.is_load_delay_slot = state.is_load;
-  state.is_load = false;
+  is_load_delay_slot = is_load;
+  is_load = false;
 
-  bool iec = (state.cop0.regs[12] & 1) != 0;
-  bool irq = (state.cop0.regs[12] & state.cop0.regs[13] & 0xff00) != 0;
+  bool iec = (cop0.regs[12] & 1) != 0;
+  bool irq = (cop0.regs[12] & cop0.regs[13] & 0xff00) != 0;
 
   if (iec && irq) {
-    cop0::enter_exception(state, 0x0);
+    enter_exception(0x0);
   }
   else {
-    if (log_cpu_instr) {
-      cpu::disassemble(state, stdout);
-    }
-
-    uint32_t code = (state.code >> 26) & 63;
+    uint32_t code = (this->code >> 26) & 63;
     if (code)
-      op_table[code](state);
+      (*this.*op_table[code])();
     else
-      op_table_special[state.code & 63](state);
+      (*this.*op_table_special[this->code & 63])();
   }
 }
 
@@ -75,42 +85,41 @@ static inline uint32_t map_address(uint32_t address) {
   return address & segments[address >> 29];
 }
 
-static void log_bios_calls(const cpu_state_t *state) {
-  if (state->regs.this_pc == 0x00a0) {
-    printf("bios::a(0x%02x)\n", state->regs.gp[9]);
+void cpu_core::log_bios_calls() {
+  if (regs.this_pc == 0x00a0) {
+    printf("bios::a(0x%02x)\n", regs.gp[9]);
   }
-  else if (state->regs.this_pc == 0x00b0) {
-    printf("bios::b(0x%02x)\n", state->regs.gp[9]);
+  else if (regs.this_pc == 0x00b0) {
+    printf("bios::b(0x%02x)\n", regs.gp[9]);
   }
-  else if (state->regs.this_pc == 0x00c0) {
-    printf("bios::c(0x%02x)\n", state->regs.gp[9]);
+  else if (regs.this_pc == 0x00c0) {
+    printf("bios::c(0x%02x)\n", regs.gp[9]);
   }
 }
 
-void cpu::read_code(cpu_state_t &state) {
-  if (state.regs.pc & 3) {
-    cop0::enter_exception(state, 0x4);
+void cpu_core::enter_exception(uint32_t code) {
+  uint32_t pc = cop0.enter_exception(code, regs.this_pc, is_branch_delay_slot);
+
+  regs.pc = pc;
+  regs.next_pc = pc + 4;
+}
+
+void cpu_core::read_code() {
+  if (regs.pc & 3) {
+    enter_exception(0x4);
   }
 
-  state.regs.this_pc = state.regs.pc;
-  state.regs.pc = state.regs.next_pc;
-  state.regs.next_pc += 4;
-
-//  if (state.regs.this_pc == 0x00b0 && state.regs.gp[9] == 0x3d) {
-//    printf("%c", state->regs.gp[4]);
-//  }
-
-//  if (utility::log_cpu) {
-//    log_bios_calls(state);
-//  }
+  regs.this_pc = regs.pc;
+  regs.pc = regs.next_pc;
+  regs.next_pc += 4;
 
   // todo: read i-cache
 
-  state.code = bus::read(BUS_WIDTH_WORD, map_address(state.regs.this_pc));
+  code = bus::read(BUS_WIDTH_WORD, map_address(regs.this_pc));
 }
 
-uint32_t cpu::read_data(cpu_state_t &state, bus_width_t width, uint32_t address) {
-  if (state.cop0.regs[12] & (1 << 16)) {
+uint32_t cpu_core::read_data(bus_width_t width, uint32_t address) {
+  if (cop0.regs[12] & (1 << 16)) {
     return 0; // isc=1
   }
 
@@ -119,8 +128,8 @@ uint32_t cpu::read_data(cpu_state_t &state, bus_width_t width, uint32_t address)
   return bus::read(width, map_address(address));
 }
 
-void cpu::write_data(cpu_state_t &state, bus_width_t width, uint32_t address, uint32_t data) {
-  if (state.cop0.regs[12] & (1 << 16)) {
+void cpu_core::write_data(bus_width_t width, uint32_t address, uint32_t data) {
+  if (cop0.regs[12] & (1 << 16)) {
     return; // isc=1
   }
 
@@ -129,55 +138,55 @@ void cpu::write_data(cpu_state_t &state, bus_width_t width, uint32_t address, ui
   return bus::write(width, map_address(address), data);
 }
 
-static void update_irq(cpu_state_t &state, uint32_t stat, uint32_t mask) {
-  state.i_stat = stat;
-  state.i_mask = mask;
+void cpu_core::update_irq(uint32_t stat, uint32_t mask) {
+  i_stat = stat;
+  i_mask = mask;
 
-  if (state.i_stat & state.i_mask) {
-    state.cop0.regs[13] |= (1 << 10);
+  if (i_stat & i_mask) {
+    cop0.regs[13] |= (1 << 10);
   }
   else {
-    state.cop0.regs[13] &= ~(1 << 10);
+    cop0.regs[13] &= ~(1 << 10);
   }
 }
 
-void cpu::set_imask(cpu_state_t &state, uint32_t value) {
-  update_irq(state, state.i_stat, value);
+void cpu_core::set_imask(uint32_t value) {
+  update_irq(i_stat, value);
 }
 
-void cpu::set_istat(cpu_state_t &state, uint32_t value) {
-  update_irq(state, value, state.i_mask);
+void cpu_core::set_istat(uint32_t value) {
+  update_irq(value, i_mask);
 }
 
-uint32_t cpu::io_read(cpu_state_t &state, bus_width_t width, uint32_t address) {
+uint32_t cpu_core::io_read(bus_width_t width, uint32_t address) {
   if (utility::log_cpu) {
-    printf("cpu::io_read(%d, 0x%08x)\n", width, address);
+    printf("cpu_core::io_read(%d, 0x%08x)\n", width, address);
   }
 
   switch (address - 0x1f801070) {
   case 0:
-    return state.i_stat;
+    return i_stat;
 
   case 4:
-    return state.i_mask;
+    return i_mask;
 
   default:
     return 0;
   }
 }
 
-void cpu::io_write(cpu_state_t &state, bus_width_t width, uint32_t address, uint32_t data) {
+void cpu_core::io_write(bus_width_t width, uint32_t address, uint32_t data) {
   if (utility::log_cpu) {
-    printf("cpu::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
+    printf("cpu_core::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
   }
 
   switch (address - 0x1f801070) {
   case 0:
-    set_istat(state, data & state.i_stat);
+    set_istat(data & i_stat);
     break;
 
   case 4:
-    set_imask(state, data & 0x7ff);
+    set_imask(data & 0x7ff);
     break;
   }
 }

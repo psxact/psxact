@@ -1,6 +1,6 @@
 #include "gpu_core.hpp"
 #include "../memory/vram.hpp"
-#include "../state.hpp"
+#include "../utility.hpp"
 
 static int command_size[256] = {
   1, 1, 3, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $00
@@ -24,19 +24,19 @@ static int command_size[256] = {
   1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // $f0
 };
 
-static void fill_rectangle(gpu_state_t &state) {
+void gpu_core::fill_rectangle() {
   uint16_t color =
-      ((state.fifo.buffer[0] >> 3) & 0x001f) |
-      ((state.fifo.buffer[0] >> 6) & 0x03e0) |
-      ((state.fifo.buffer[0] >> 9) & 0x7c00);
+      ((fifo.buffer[0] >> 3) & 0x001f) |
+      ((fifo.buffer[0] >> 6) & 0x03e0) |
+      ((fifo.buffer[0] >> 9) & 0x7c00);
 
-  gpu::point_t point;
-  point.x = (state.fifo.buffer[1] + 0x0) & 0x3f0;
-  point.y = (state.fifo.buffer[1] >> 16) & 0x1ff;
+  gpu_core::point_t point;
+  point.x = (fifo.buffer[1] + 0x0) & 0x3f0;
+  point.y = (fifo.buffer[1] >> 16) & 0x1ff;
 
-  gpu::point_t count;
-  count.x = (state.fifo.buffer[2] + 0xf) & 0x7f0;
-  count.y = (state.fifo.buffer[2] >> 16) & 0x1ff;
+  gpu_core::point_t count;
+  count.x = (fifo.buffer[2] + 0xf) & 0x7f0;
+  count.y = (fifo.buffer[2] >> 16) & 0x1ff;
   count.x += point.x;
   count.y += point.y;
 
@@ -49,68 +49,68 @@ static void fill_rectangle(gpu_state_t &state) {
   }
 }
 
-static void copy_vram_to_vram(gpu_state_t &state) {}
+void gpu_core::copy_vram_to_vram() {}
 
-static void copy_wram_to_vram(gpu_state_t &state) {
-  auto &transfer = state.cpu_to_gpu_transfer;
-  transfer.reg.x = state.fifo.buffer[1] & 0xffff;
-  transfer.reg.y = state.fifo.buffer[1] >> 16;
-  transfer.reg.w = state.fifo.buffer[2] & 0xffff;
-  transfer.reg.h = state.fifo.buffer[2] >> 16;
-
-  transfer.run.x = 0;
-  transfer.run.y = 0;
-  transfer.run.active = true;
-}
-
-static void copy_vram_to_wram(gpu_state_t &state) {
-  auto &transfer = state.gpu_to_cpu_transfer;
-  transfer.reg.x = state.fifo.buffer[1] & 0xffff;
-  transfer.reg.y = state.fifo.buffer[1] >> 16;
-  transfer.reg.w = state.fifo.buffer[2] & 0xffff;
-  transfer.reg.h = state.fifo.buffer[2] >> 16;
+void gpu_core::copy_wram_to_vram() {
+  auto &transfer = cpu_to_gpu_transfer;
+  transfer.reg.x = fifo.buffer[1] & 0xffff;
+  transfer.reg.y = fifo.buffer[1] >> 16;
+  transfer.reg.w = fifo.buffer[2] & 0xffff;
+  transfer.reg.h = fifo.buffer[2] >> 16;
 
   transfer.run.x = 0;
   transfer.run.y = 0;
   transfer.run.active = true;
 }
 
-void gpu::gp0(gpu_state_t &state, uint32_t data) {
-  if (state.cpu_to_gpu_transfer.run.active) {
+void gpu_core::copy_vram_to_wram() {
+  auto &transfer = gpu_to_cpu_transfer;
+  transfer.reg.x = fifo.buffer[1] & 0xffff;
+  transfer.reg.y = fifo.buffer[1] >> 16;
+  transfer.reg.w = fifo.buffer[2] & 0xffff;
+  transfer.reg.h = fifo.buffer[2] >> 16;
+
+  transfer.run.x = 0;
+  transfer.run.y = 0;
+  transfer.run.active = true;
+}
+
+void gpu_core::gp0(uint32_t data) {
+  if (cpu_to_gpu_transfer.run.active) {
     uint16_t lower = uint16_t(data >>  0);
     uint16_t upper = uint16_t(data >> 16);
 
-    vram_transfer(state, lower);
-    vram_transfer(state, upper);
+    vram_transfer(lower);
+    vram_transfer(upper);
     return;
   }
 
-  state.fifo.buffer[state.fifo.wr] = data;
-  state.fifo.wr = (state.fifo.wr + 1) & 0xf;
+  fifo.buffer[fifo.wr] = data;
+  fifo.wr = (fifo.wr + 1) & 0xf;
 
-  uint32_t command = state.fifo.buffer[0] >> 24;
+  uint32_t command = fifo.buffer[0] >> 24;
 
-  if (state.fifo.wr == command_size[command]) {
-    state.fifo.wr = 0;
+  if (fifo.wr == command_size[command]) {
+    fifo.wr = 0;
 
     switch (command & 0xe0) {
     case 0x20:
-      return draw_polygon(state);
+      return draw_polygon();
 
     case 0x40:
-      return draw_line(state);
+      return draw_line();
 
     case 0x60:
-      return draw_rectangle(state);
+      return draw_rectangle();
 
     case 0x80:
-      return copy_vram_to_vram(state);
+      return copy_vram_to_vram();
 
     case 0xa0:
-      return copy_wram_to_vram(state);
+      return copy_wram_to_vram();
 
     case 0xc0:
-      return copy_vram_to_wram(state);
+      return copy_vram_to_wram();
     }
 
     switch (command) {
@@ -121,47 +121,47 @@ void gpu::gp0(gpu_state_t &state, uint32_t data) {
       break;
 
     case 0x02:
-      return fill_rectangle(state);
+      return fill_rectangle();
 
     case 0xe1:
-      state.status &= ~0x87ff;
-      state.status |= (state.fifo.buffer[0] << 0) & 0x7ff;
-      state.status |= (state.fifo.buffer[0] << 4) & 0x8000;
+      status &= ~0x87ff;
+      status |= (fifo.buffer[0] << 0) & 0x7ff;
+      status |= (fifo.buffer[0] << 4) & 0x8000;
 
-      state.textured_rectangle_x_flip = ((state.fifo.buffer[0] >> 12) & 1) != 0;
-      state.textured_rectangle_y_flip = ((state.fifo.buffer[0] >> 13) & 1) != 0;
+      textured_rectangle_x_flip = ((fifo.buffer[0] >> 12) & 1) != 0;
+      textured_rectangle_y_flip = ((fifo.buffer[0] >> 13) & 1) != 0;
       break;
 
     case 0xe2:
-      state.texture_window_mask_x = utility::uclip<5>(state.fifo.buffer[0] >> 0);
-      state.texture_window_mask_y = utility::uclip<5>(state.fifo.buffer[0] >> 5);
-      state.texture_window_offset_x = utility::uclip<5>(state.fifo.buffer[0] >> 10);
-      state.texture_window_offset_y = utility::uclip<5>(state.fifo.buffer[0] >> 15);
+      texture_window_mask_x = utility::uclip<5>(fifo.buffer[0] >> 0);
+      texture_window_mask_y = utility::uclip<5>(fifo.buffer[0] >> 5);
+      texture_window_offset_x = utility::uclip<5>(fifo.buffer[0] >> 10);
+      texture_window_offset_y = utility::uclip<5>(fifo.buffer[0] >> 15);
       break;
 
     case 0xe3:
-      state.drawing_area_x1 = (state.fifo.buffer[0] >>  0) & 0x3ff;
-      state.drawing_area_y1 = (state.fifo.buffer[0] >> 10) & 0x3ff;
+      drawing_area_x1 = (fifo.buffer[0] >>  0) & 0x3ff;
+      drawing_area_y1 = (fifo.buffer[0] >> 10) & 0x3ff;
       break;
 
     case 0xe4:
-      state.drawing_area_x2 = (state.fifo.buffer[0] >>  0) & 0x3ff;
-      state.drawing_area_y2 = (state.fifo.buffer[0] >> 10) & 0x3ff;
+      drawing_area_x2 = (fifo.buffer[0] >>  0) & 0x3ff;
+      drawing_area_y2 = (fifo.buffer[0] >> 10) & 0x3ff;
       break;
 
     case 0xe5:
-      state.x_offset = utility::sclip<11>(state.fifo.buffer[0] >> 0);
-      state.y_offset = utility::sclip<11>(state.fifo.buffer[0] >> 11);
+      x_offset = utility::sclip<11>(fifo.buffer[0] >> 0);
+      y_offset = utility::sclip<11>(fifo.buffer[0] >> 11);
       break;
 
     case 0xe6:
-      state.status &= ~0x1800;
-      state.status |= (state.fifo.buffer[0] << 11) & 0x1800;
+      status &= ~0x1800;
+      status |= (fifo.buffer[0] << 11) & 0x1800;
       break;
 
     default:
       if (command_size[command] == 1) {
-        printf("gpu::gp0(0x%08x)\n", state.fifo.buffer[0]);
+        printf("gpu::gp0(0x%08x)\n", fifo.buffer[0]);
       }
       break;
     }

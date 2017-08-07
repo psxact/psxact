@@ -2,12 +2,11 @@
 #define __PSXACT_MDEC_CORE_HPP__
 
 #include "../bus.hpp"
-#include "../state.hpp"
 
-namespace mdec {
-  uint32_t io_read(mdec_state_t &state, bus_width_t width, uint32_t address);
+struct mdec_core {
+  uint32_t io_read(bus_width_t width, uint32_t address);
 
-  void io_write(mdec_state_t &state, bus_width_t width, uint32_t address, uint32_t data);
-}
+  void io_write(bus_width_t width, uint32_t address, uint32_t data);
+};
 
 #endif // __PSXACT_MDEC_CORE_HPP__
