@@ -39,7 +39,7 @@ bool renderer::render() {
   SDL_LockSurface(surface);
 
   uint32_t *pixels = (uint32_t *)surface->pixels;
-  uint16_t *colors = vram::get_pointer();
+  uint16_t *colors = psxact::vram::get_pointer();
 
   for (int32_t i = 0; i < 1024 * 512; i++) {
     *pixels++ = color_16_to_24(colors[i]);

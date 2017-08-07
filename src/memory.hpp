@@ -2,6 +2,7 @@
 #define __PSXACT_MEMORY_HPP__
 
 #include <cstdint>
+#include <cstring>
 
 template<int bits>
 struct memory_t {
@@ -13,6 +14,10 @@ struct memory_t {
     uint16_t h[size / 2];
     uint32_t w[size / 4];
   };
+
+  memory_t() {
+    memset(b, 0, size_t(size));
+  }
 
   uint32_t read_byte(uint32_t address) {
     return b[(address & mask) / 1];

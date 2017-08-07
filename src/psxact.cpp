@@ -1,5 +1,8 @@
-#include "bus.hpp"
+#include <cstdio>
+#include "system_core.hpp"
 #include "renderer.hpp"
+
+psxact::system_core *psxact::system;
 
 int main(int argc, char *argv[]) {
   if (argc != 3) {
@@ -8,12 +11,12 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  bus::init(argv[1], argv[2]);
+  psxact::system = new psxact::system_core(argv[1], argv[2]);
 
   renderer::initialize();
 
   while (renderer::render()) {
-    bus::run_for_one_frame();
+    psxact::system->run_for_one_frame();
   }
 
   renderer::destroy();

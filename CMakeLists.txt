@@ -17,6 +17,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(SOURCE_FILES
         src/cdrom/cdrom_core.cpp
         src/cdrom/cdrom_core.hpp
+        src/cdrom/cdrom_core_io.cpp
         src/cpu/cpu_code.cpp
         src/cpu/cpu_cop0.cpp
         src/cpu/cpu_cop0.hpp
@@ -48,8 +49,8 @@ set(SOURCE_FILES
         src/spu/spu_core.hpp
         src/timer/timer_core.cpp
         src/timer/timer_core.hpp
-        src/bus.cpp
-        src/bus.hpp
+        src/system_core.cpp
+        src/system_core.hpp
         src/psxact.cpp
         src/renderer.cpp
         src/renderer.hpp

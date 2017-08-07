@@ -4,158 +4,160 @@
 #include <cstdint>
 #include <cstdio>
 #include <string>
-#include "../bus.hpp"
+#include "../system_core.hpp"
 #include "../fifo.hpp"
 
-struct cdrom_sector_timecode_t {
-  uint8_t minute;
-  uint8_t second;
-  uint8_t sector;
-};
+namespace psxact {
+  struct cdrom_sector_timecode_t {
+    uint8_t minute;
+    uint8_t second;
+    uint8_t sector;
+  };
 
-struct cdrom_core {
-  int32_t index;
-  int32_t interrupt_enable;
-  int32_t interrupt_request;
-
-  cdrom_sector_timecode_t seek_timecode;
-  cdrom_sector_timecode_t read_timecode;
-  bool seek_unprocessed;
-
-  fifo_t<uint8_t, 4> parameter;
-  fifo_t<uint8_t, 4> response;
-  fifo_t<uint8_t, 12> data;
-  uint8_t data_buffer[4096];
-
-  uint8_t command;
-  bool command_is_new;
-  bool busy;
-
-  std::string game_file_name;
-  FILE *game_file;
-
-  typedef void (cdrom_core::*stage_t)();
-
-  struct {
-    stage_t stage;
-    int32_t timer;
-
+  struct cdrom_core {
+    int32_t index;
+    int32_t interrupt_enable;
     int32_t interrupt_request;
+
+    cdrom_sector_timecode_t seek_timecode;
+    cdrom_sector_timecode_t read_timecode;
+    bool seek_unprocessed;
 
     fifo_t<uint8_t, 4> parameter;
     fifo_t<uint8_t, 4> response;
+    fifo_t<uint8_t, 12> data;
+    uint8_t data_buffer[4096];
+
     uint8_t command;
-  } logic;
+    bool command_is_new;
+    bool busy;
 
-  struct {
-    stage_t stage;
-    int32_t timer;
-  } drive;
+    std::string game_file_name;
+    FILE *game_file;
 
-  struct {
-    bool double_speed;
-    bool read_whole_sector;
-  } mode;
+    typedef void (cdrom_core::*stage_t)();
 
-  uint32_t io_read(bus_width_t width, uint32_t address);
+    struct {
+      stage_t stage;
+      int32_t timer;
 
-  uint8_t io_read_port_0();
+      int32_t interrupt_request;
 
-  uint8_t io_read_port_1();
+      fifo_t<uint8_t, 4> parameter;
+      fifo_t<uint8_t, 4> response;
+      uint8_t command;
+    } logic;
 
-  uint8_t io_read_port_2();
+    struct {
+      stage_t stage;
+      int32_t timer;
+    } drive;
 
-  uint8_t io_read_port_3();
+    struct {
+      bool double_speed;
+      bool read_whole_sector;
+    } mode;
 
-  uint8_t io_read_internal(uint32_t port);
+    cdrom_core(const char *game_file_name);
 
-  void io_write(bus_width_t width, uint32_t address, uint32_t data);
+    uint32_t io_read(bus_width_t width, uint32_t address);
 
-  void io_write_port_0_n(uint8_t data);
+    uint8_t io_read_port_0();
 
-  void io_write_port_1_0(uint8_t data);
+    uint8_t io_read_port_1();
 
-  void io_write_port_1_1(uint8_t data);
+    uint8_t io_read_port_2();
 
-  void io_write_port_1_2(uint8_t data);
+    uint8_t io_read_port_3();
 
-  void io_write_port_1_3(uint8_t data);
+    uint8_t io_read_internal(uint32_t port);
 
-  void io_write_port_2_0(uint8_t data);
+    void io_write(bus_width_t width, uint32_t address, uint32_t data);
 
-  void io_write_port_2_1(uint8_t data);
+    void io_write_port_0_n(uint8_t data);
 
-  void io_write_port_2_2(uint8_t data);
+    void io_write_port_1_0(uint8_t data);
 
-  void io_write_port_2_3(uint8_t data);
+    void io_write_port_1_1(uint8_t data);
 
-  void io_write_port_3_0(uint8_t data);
+    void io_write_port_1_2(uint8_t data);
 
-  void io_write_port_3_1(uint8_t data);
+    void io_write_port_1_3(uint8_t data);
 
-  void io_write_port_3_2(uint8_t data);
+    void io_write_port_2_0(uint8_t data);
 
-  void io_write_port_3_3(uint8_t data);
+    void io_write_port_2_1(uint8_t data);
 
-  void init(const char *game_file_name);
+    void io_write_port_2_2(uint8_t data);
 
-  void tick();
+    void io_write_port_2_3(uint8_t data);
 
-  void do_seek();
+    void io_write_port_3_0(uint8_t data);
 
-  int get_cycles_per_sector();
+    void io_write_port_3_1(uint8_t data);
 
-  uint8_t get_status_byte();
+    void io_write_port_3_2(uint8_t data);
 
-  void read_sector();
+    void io_write_port_3_3(uint8_t data);
 
-  void command_get_id();
+    void tick();
 
-  void command_get_status();
+    void do_seek();
 
-  void command_init();
+    int get_cycles_per_sector();
 
-  void command_pause();
+    uint8_t get_status_byte();
 
-  void command_read_n();
+    void read_sector();
 
-  void command_read_table_of_contents();
+    void command_get_id();
 
-  void command_seek_data_mode();
+    void command_get_status();
 
-  void command_set_mode(uint8_t mode);
+    void command_init();
 
-  void command_set_seek_target(uint8_t minute, uint8_t second, uint8_t sector);
+    void command_pause();
 
-  void command_test(uint8_t function);
+    void command_read_n();
 
-  void command_unmute();
+    void command_read_table_of_contents();
 
-  void logic_transition(stage_t stage, int timer);
+    void command_seek_data_mode();
 
-  void logic_idling();
+    void command_set_mode(uint8_t mode);
 
-  void logic_transferring_parameters();
+    void command_set_seek_target(uint8_t minute, uint8_t second, uint8_t sector);
 
-  void logic_transferring_command();
+    void command_test(uint8_t function);
 
-  void logic_executing_command();
+    void command_unmute();
 
-  void logic_clearing_response();
+    void logic_transition(stage_t stage, int timer);
 
-  void logic_transferring_response();
+    void logic_idling();
 
-  void logic_deliver_interrupt();
+    void logic_transferring_parameters();
 
-  void drive_transition(stage_t stage, int timer);
+    void logic_transferring_command();
 
-  void drive_idling();
+    void logic_executing_command();
 
-  void drive_int2();
+    void logic_clearing_response();
 
-  void drive_getting_id();
+    void logic_transferring_response();
 
-  void drive_reading();
-};
+    void logic_deliver_interrupt();
+
+    void drive_transition(stage_t stage, int timer);
+
+    void drive_idling();
+
+    void drive_int2();
+
+    void drive_getting_id();
+
+    void drive_reading();
+  };
+}
 
 #endif // __PSXACT_CDROM_DRIVE_HPP__
