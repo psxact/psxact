@@ -19,7 +19,7 @@ namespace psxact {
 
   struct gpu_core;
 
-  struct input_core;
+  namespace input { struct input_core; }
 
   struct mdec_core;
 
@@ -36,7 +36,7 @@ namespace psxact {
     cpu_core *cpu;
     dma_core *dma;
     gpu_core *gpu;
-    input_core *input;
+    input::input_core *input;
     mdec_core *mdec;
     spu_core *spu;
     timer_core *timer;

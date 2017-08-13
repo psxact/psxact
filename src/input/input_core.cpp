@@ -2,6 +2,8 @@
 #include "../utility.hpp"
 
 namespace psxact {
+namespace input {
+
   input_core::input_core() {
     baud_rate_factor = 1;
     baud_rate_reload = 0x0088;
@@ -31,14 +33,9 @@ namespace psxact {
   }
 
   static int32_t get_baud_rate_factor(uint32_t data) {
-    switch (data & 3) {
-    case 0: return 1;
-    case 1: return 1;
-    case 2: return 16;
-    case 3: return 64;
-    }
+    static const int lut[4] = { 1, 1, 16, 64 };
 
-    return 0;
+    return lut[data & 3];
   }
 
   void input_core::io_write(bus_width_t width, uint32_t address, uint32_t data) {
@@ -78,4 +75,6 @@ namespace psxact {
       baud_reload();
     }
   }
+
+}
 }

@@ -19,7 +19,7 @@ namespace psxact {
     cpu = new cpu_core();
     dma = new dma_core();
     gpu = new gpu_core();
-    input = new input_core();
+    input = new input::input_core();
     mdec = new mdec_core();
     spu = new spu_core();
     timer = new timer_core();

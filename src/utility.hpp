@@ -8,6 +8,8 @@
 #define likely(n) __builtin_expect(!!(n), 1)
 #define unlikely(n) __builtin_expect(!!(n), 0)
 
+#define ref
+
 namespace utility {
   const bool log_cdrom = 0;
   const bool log_cpu   = 0;

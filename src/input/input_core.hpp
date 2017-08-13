@@ -2,14 +2,19 @@
 #define __PSXACT_INPUT_HPP__
 
 #include "../system_core.hpp"
+#include "../fifo.hpp"
 
 namespace psxact {
+namespace input {
+
   struct input_core {
     uint32_t status;
 
     int32_t baud_rate_factor;
     int32_t baud_rate_reload;
     int32_t baud_rate_timer;
+
+    fifo_t<uint8_t, 3> rx_fifo;
 
     input_core();
 
@@ -21,6 +26,8 @@ namespace psxact {
 
     void baud_reload();
   };
+
+}
 }
 
 #endif // __PSXACT_INPUT_HPP__
