@@ -1,8 +1,11 @@
 #include <cstdio>
 #include "system_core.hpp"
-#include "renderer.hpp"
+#include "sdl2.hpp"
+#include "memory/vram.hpp"
 
-psxact::system_core *psxact::system;
+using namespace psxact;
+
+system_core *psxact::system;
 
 int main(int argc, char *argv[]) {
   if (argc != 3) {
@@ -11,15 +14,18 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  psxact::system = new psxact::system_core(argv[1], argv[2]);
+  psxact::system = new system_core(argv[1], argv[2]);
 
-  renderer::initialize();
+  sdl2 renderer;
 
-  while (renderer::render()) {
-    psxact::system->run_for_one_frame();
+  int x = 0;
+  int y = 0;
+  int w = 640;
+  int h = 480;
+
+  while (renderer.render(vram::get_pointer(), x, y, w, h)) {
+    psxact::system->run_for_one_frame(&x, &y, &w, &h);
   }
-
-  renderer::destroy();
 
   return 0;
 }

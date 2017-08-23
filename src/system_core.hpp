@@ -49,7 +49,7 @@ namespace psxact {
 
     void write(bus_width_t width, uint32_t address, uint32_t data);
 
-    void run_for_one_frame();
+    void run_for_one_frame(int *x, int *y, int *w, int *h);
   };
 
   extern system_core *system;

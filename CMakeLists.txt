@@ -59,8 +59,8 @@ set(SOURCE_FILES
         src/system_core.cpp
         src/system_core.hpp
         src/psxact.cpp
-        src/renderer.cpp
-        src/renderer.hpp
+        src/sdl2.cpp
+        src/sdl2.hpp
         src/utility.hpp)
 
 add_executable(psxact ${SOURCE_FILES})

@@ -224,7 +224,7 @@ namespace psxact {
     throw std::exception();
   }
 
-  void system_core::run_for_one_frame() {
+  void system_core::run_for_one_frame(int *x, int *y, int *w, int *h) {
     const int ITERATIONS = 2;
 
     const int CPU_FREQ = 33868800;
@@ -241,5 +241,22 @@ namespace psxact {
     }
 
     irq(0);
+
+    *x = (gpu->display_area_x);
+    *y = (gpu->display_area_y);
+    //*w = (gpu->display_area_x2 - gpu->display_area_x1) / 4;
+    //*h = (gpu->display_area_y2 - gpu->display_area_y1);
+
+    switch ((gpu->status >> 17) & 3) {
+    case 0: *w = 256; break;
+    case 1: *w = 320; break;
+    case 2: *w = 512; break;
+    case 3: *w = 640; break;
+    }
+
+    switch ((gpu->status >> 19) & 1) {
+    case 0: *h = 240; break;
+    case 1: *h = 480; break;
+    }
   }
 }
