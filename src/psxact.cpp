@@ -23,8 +23,15 @@ int main(int argc, char *argv[]) {
   int w = 640;
   int h = 480;
 
-  while (renderer.render(vram::get_pointer(), x, y, w, h)) {
-    psxact::system->run_for_one_frame(&x, &y, &w, &h);
+  while (1) {
+    auto fb = vram::get_pointer(x, y);
+
+    if (renderer.render(fb, w, h)) {
+      psxact::system->run_for_one_frame(&x, &y, &w, &h);
+    }
+    else {
+      break;
+    }
   }
 
   return 0;

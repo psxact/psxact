@@ -17,7 +17,7 @@ namespace psxact {
 
     ~sdl2();
 
-    bool render(uint16_t *fb, int x, int y, int w, int h);
+    bool render(uint16_t *src_pixels, int w, int h);
 
   private:
     bool handle_events();

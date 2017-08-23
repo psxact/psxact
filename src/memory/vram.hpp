@@ -5,7 +5,7 @@
 
 namespace psxact {
   namespace vram {
-    uint16_t *get_pointer();
+    uint16_t *get_pointer(int32_t x, int32_t y);
 
     uint16_t read(int32_t x, int32_t y);
 

@@ -33,27 +33,25 @@ psxact::sdl2::~sdl2() {
   SDL_DestroyTexture(texture);
 }
 
-bool psxact::sdl2::render(uint16_t *fb, int x, int y, int w, int h) {
+bool psxact::sdl2::render(uint16_t *src_pixels, int w, int h) {
   resize(w, h);
 
-  void *texture_pixels;
-  int pitch;
+  void *dst_pixels;
+  int dst_pitch;
+  int src_pitch = 1024 * sizeof(int16_t);
 
-  SDL_LockTexture(texture, nullptr, &texture_pixels, &pitch);
+  SDL_LockTexture(texture, nullptr, &dst_pixels, &dst_pitch);
 
-  uint16_t *pixels = (uint16_t *)texture_pixels;
-  uint16_t *colors = fb;
-
-  colors += (y * 1024) + x;
+  uint16_t *dst = (uint16_t *)dst_pixels;
+  uint16_t *src = (uint16_t *)src_pixels;
 
   for (int py = 0; py < h; py++) {
     for (int px = 0; px < w; px++) {
-      pixels[0] = colors[px];
-      pixels++;
+      dst[px] = src[px];
     }
 
-    colors += 1024;
-    // pixels += 640;
+    src += src_pitch / sizeof(uint16_t);
+    dst += dst_pitch / sizeof(uint16_t);
   }
 
   SDL_UnlockTexture(texture);
@@ -82,8 +80,6 @@ void psxact::sdl2::resize(int w, int h) {
 
   texture_size_x = w;
   texture_size_y = h;
-
-  printf("resizing texture to %d x %d\n", w, h);
 
   SDL_DestroyTexture(texture);
 
