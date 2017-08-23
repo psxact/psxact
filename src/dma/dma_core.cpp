@@ -132,21 +132,24 @@ namespace psxact {
   }
 
   void dma_core::run_channel_2_list() {
-    uint32_t address = channels[2].address;
+    uint32_t address = channels[2].address & 0x1ffffc;
 
-    while (address != 0xffffff) {
-      uint32_t value = system->read(BUS_WIDTH_WORD, address);
-      address += 4;
+    while (1) {
+      uint32_t header = system->read(BUS_WIDTH_WORD, address);
+      uint32_t length = header >> 24;
 
-      uint32_t count = value >> 24;
+      for (uint32_t i = 0; i < length; i++) {
+        address = (address + 4) & 0x1ffffc;
 
-      for (unsigned index = 0; index < count; index++) {
-        unsigned data = system->read(BUS_WIDTH_WORD, address);
+        uint32_t data = system->read(BUS_WIDTH_WORD, address);
         system->write(BUS_WIDTH_WORD, 0x1f801810, data);
-        address += 4;
       }
 
-      address = value & 0xffffff;
+      if (header & 0x800000) {
+        break;
+      }
+
+      address = header & 0x1ffffc;
     }
 
     channels[2].control &= ~0x01000000;
