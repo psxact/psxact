@@ -33,9 +33,9 @@ namespace psxact {
     uint32_t d = gpr.sz[3] << z;
     uint32_t u = unr_table[((d & 0x7fff) + 0x40) >> 7] + 0x101;
 
-    d = (0x2000080 - (d * u)) >> (8 * 1);
-    d = (0x0000080 + (d * u)) >> (8 * 1);
-    d = (0x0008000 + (d * n)) >> (8 * 2);
+    d = uint32_t((0x2000080 - (d * u)) >> (8 * 1));
+    d = uint32_t((0x0000080 + (d * u)) >> (8 * 1));
+    d = uint32_t((0x0008000 + (d * n)) >> (8 * 2));
 
     return std::min(d, 0x1ffffu);
   }
@@ -44,30 +44,30 @@ namespace psxact {
     ccr.flag = 0;
 
     switch (code & 0x3f) {
-    case 0x00: cop2_core::op_rtps(code); break;
-    case 0x01: cop2_core::op_rtps(code); break;
-    case 0x06: cop2_core::op_nclip(code); break;
-    case 0x0c: cop2_core::op_op(code); break;
-    case 0x10: cop2_core::op_dpcs(code); break;
-    case 0x11: cop2_core::op_intpl(code); break;
-    case 0x12: cop2_core::op_mvmva(code); break;
-    case 0x13: cop2_core::op_ncds(code); break;
-    case 0x14: cop2_core::op_cdp(code); break;
-    case 0x16: cop2_core::op_ncdt(code); break;
-    case 0x1a: cop2_core::op_dcpl(code); break;
-    case 0x1b: cop2_core::op_nccs(code); break;
-    case 0x1c: cop2_core::op_cc(code); break;
-    case 0x1e: cop2_core::op_ncs(code); break;
-    case 0x20: cop2_core::op_nct(code); break;
-    case 0x28: cop2_core::op_sqr(code); break;
-    case 0x29: cop2_core::op_dcpl(code); break;
-    case 0x2a: cop2_core::op_dpct(code); break;
-    case 0x2d: cop2_core::op_avsz3(code); break;
-    case 0x2e: cop2_core::op_avsz4(code); break;
-    case 0x30: cop2_core::op_rtpt(code); break;
-    case 0x3d: cop2_core::op_gpf(code); break;
-    case 0x3e: cop2_core::op_gpl(code); break;
-    case 0x3f: cop2_core::op_ncct(code); break;
+    case 0x00: op_rtps(code); break;
+    case 0x01: op_rtps(code); break;
+    case 0x06: op_nclip(code); break;
+    case 0x0c: op_op(code); break;
+    case 0x10: op_dpcs(code); break;
+    case 0x11: op_intpl(code); break;
+    case 0x12: op_mvmva(code); break;
+    case 0x13: op_ncds(code); break;
+    case 0x14: op_cdp(code); break;
+    case 0x16: op_ncdt(code); break;
+    case 0x1a: op_dcpl(code); break;
+    case 0x1b: op_nccs(code); break;
+    case 0x1c: op_cc(code); break;
+    case 0x1e: op_ncs(code); break;
+    case 0x20: op_nct(code); break;
+    case 0x28: op_sqr(code); break;
+    case 0x29: op_dcpl(code); break;
+    case 0x2a: op_dpct(code); break;
+    case 0x2d: op_avsz3(code); break;
+    case 0x2e: op_avsz4(code); break;
+    case 0x30: op_rtpt(code); break;
+    case 0x3d: op_gpf(code); break;
+    case 0x3e: op_gpl(code); break;
+    case 0x3f: op_ncct(code); break;
 
     default:
       printf("cop2::run(0x%08x)\n", code);
@@ -138,32 +138,32 @@ namespace psxact {
 
     int32_t shift = get_sf(code);
 
-    gpr.mac[1] = flag_a(0, rfc - r) >> shift;
-    gpr.mac[1] = flag_a(0, r + gpr.ir0 * flag_b(0, 0, gpr.mac[1])) >> shift;
+    gpr.mac[1] = int32_t(flag_a(0, rfc - r) >> shift);
+    gpr.mac[1] = int32_t(flag_a(0, r + gpr.ir0 * flag_b(0, 0, gpr.mac[1])) >> shift);
 
-    gpr.mac[2] = flag_a(1, gfc - g) >> shift;
-    gpr.mac[2] = flag_a(1, g + gpr.ir0 * flag_b(1, 0, gpr.mac[2])) >> shift;
+    gpr.mac[2] = int32_t(flag_a(1, gfc - g) >> shift);
+    gpr.mac[2] = int32_t(flag_a(1, g + gpr.ir0 * flag_b(1, 0, gpr.mac[2])) >> shift);
 
-    gpr.mac[3] = flag_a(2, bfc - b) >> shift;
-    gpr.mac[3] = flag_a(2, b + gpr.ir0 * flag_b(2, 0, gpr.mac[3])) >> shift;
+    gpr.mac[3] = int32_t(flag_a(2, bfc - b) >> shift);
+    gpr.mac[3] = int32_t(flag_a(2, b + gpr.ir0 * flag_b(2, 0, gpr.mac[3])) >> shift);
 
     mac_to_ir(code);
     mac_to_rgb();
   }
 
   void cop2_core::transform_dq(int64_t div) {
-    gpr.mac[0] = flag_f(ccr.dqb + ccr.dqa * div);
+    gpr.mac[0] = int32_t(flag_f(ccr.dqb + ccr.dqa * div));
     gpr.ir0 = flag_h((ccr.dqb + ccr.dqa * div) >> 12);
   }
 
   void cop2_core::transform_xy(int64_t div) {
-    gpr.mac[0] = flag_f(int64_t(ccr.ofx) + gpr.vector[3][0] * div) >> 16;
+    gpr.mac[0] = int32_t(flag_f(int64_t(ccr.ofx) + gpr.vector[3][0] * div) >> 16);
 
     gpr.sx[0] = gpr.sx[1];
     gpr.sx[1] = gpr.sx[2];
     gpr.sx[2] = flag_g(0, gpr.mac[0]);
 
-    gpr.mac[0] = flag_f(int64_t(ccr.ofy) + gpr.vector[3][1] * div) >> 16;
+    gpr.mac[0] = int32_t(flag_f(int64_t(ccr.ofy) + gpr.vector[3][1] * div) >> 16);
 
     gpr.sy[0] = gpr.sy[1];
     gpr.sy[1] = gpr.sy[2];
@@ -230,7 +230,7 @@ namespace psxact {
       mac = flag_a(i, mac + mulr[0]);
 
       if (cv == CV_FC) {
-        flag_b(i, 0, mac >> shift);
+        flag_b(i, 0, int32_t(mac >> shift));
         mac = 0;
       }
 
@@ -265,15 +265,15 @@ namespace psxact {
   void cop2_core::op_avsz3(uint32_t code) {
     int64_t temp = int64_t(ccr.zsf3) * (gpr.sz[1] + gpr.sz[2] + gpr.sz[3]);
 
-    gpr.mac[0] = flag_f(temp);
-    gpr.otz = flag_d(temp >> 12);
+    gpr.mac[0] = int32_t(flag_f(temp));
+    gpr.otz = flag_d(int32_t(temp >> 12));
   }
 
   void cop2_core::op_avsz4(uint32_t code) {
     int64_t temp = int64_t(ccr.zsf4) * (gpr.sz[0] + gpr.sz[1] + gpr.sz[2] + gpr.sz[3]);
 
-    gpr.mac[0] = flag_f(temp);
-    gpr.otz = flag_d(temp >> 12);
+    gpr.mac[0] = int32_t(flag_f(temp));
+    gpr.otz = flag_d(int32_t(temp >> 12));
   }
 
   void cop2_core::op_cc(uint32_t code) {
@@ -282,9 +282,9 @@ namespace psxact {
 
     int32_t shift = get_sf(code);
 
-    gpr.mac[1] = flag_a(0, (gpr.rgbc.r << 4) * gpr.vector[3][0]) >> shift;
-    gpr.mac[2] = flag_a(1, (gpr.rgbc.g << 4) * gpr.vector[3][1]) >> shift;
-    gpr.mac[3] = flag_a(2, (gpr.rgbc.b << 4) * gpr.vector[3][2]) >> shift;
+    gpr.mac[1] = int32_t(flag_a(0, (gpr.rgbc.r << 4) * gpr.vector[3][0]) >> shift);
+    gpr.mac[2] = int32_t(flag_a(1, (gpr.rgbc.g << 4) * gpr.vector[3][1]) >> shift);
+    gpr.mac[3] = int32_t(flag_a(2, (gpr.rgbc.b << 4) * gpr.vector[3][2]) >> shift);
 
     mac_to_ir(code);
     mac_to_rgb();
@@ -345,9 +345,9 @@ namespace psxact {
     int64_t mac2 = int64_t(gpr.mac[2]) << shift;
     int64_t mac3 = int64_t(gpr.mac[3]) << shift;
 
-    gpr.mac[1] = flag_a(0, mac1 + (gpr.ir0 * gpr.vector[3][0])) >> shift;
-    gpr.mac[2] = flag_a(1, mac2 + (gpr.ir0 * gpr.vector[3][1])) >> shift;
-    gpr.mac[3] = flag_a(2, mac3 + (gpr.ir0 * gpr.vector[3][2])) >> shift;
+    gpr.mac[1] = int32_t(flag_a(0, mac1 + (gpr.ir0 * gpr.vector[3][0])) >> shift);
+    gpr.mac[2] = int32_t(flag_a(1, mac2 + (gpr.ir0 * gpr.vector[3][1])) >> shift);
+    gpr.mac[3] = int32_t(flag_a(2, mac3 + (gpr.ir0 * gpr.vector[3][2])) >> shift);
 
     mac_to_ir(code);
     mac_to_rgb();
@@ -360,13 +360,18 @@ namespace psxact {
 
     int32_t shift = get_sf(code);
 
-    gpr.mac[1] = flag_a(0, (rfc - (gpr.vector[3][0] << 12))) >> shift;
-    gpr.mac[2] = flag_a(1, (gfc - (gpr.vector[3][1] << 12))) >> shift;
-    gpr.mac[3] = flag_a(2, (bfc - (gpr.vector[3][2] << 12))) >> shift;
+    gpr.mac[1] = int32_t(flag_a(0, rfc - (gpr.vector[3][0] << 12)) >> shift);
+    gpr.mac[2] = int32_t(flag_a(1, gfc - (gpr.vector[3][1] << 12)) >> shift);
+    gpr.mac[3] = int32_t(flag_a(2, bfc - (gpr.vector[3][2] << 12)) >> shift);
 
-    gpr.mac[1] = flag_a(0, ((int64_t(gpr.vector[3][0]) << 12) + gpr.ir0 * flag_b(0, 0, gpr.mac[1])) >> shift);
-    gpr.mac[2] = flag_a(1, ((int64_t(gpr.vector[3][1]) << 12) + gpr.ir0 * flag_b(1, 0, gpr.mac[2])) >> shift);
-    gpr.mac[3] = flag_a(2, ((int64_t(gpr.vector[3][2]) << 12) + gpr.ir0 * flag_b(2, 0, gpr.mac[3])) >> shift);
+    gpr.mac[1] =
+        int32_t(flag_a(0, ((int64_t(gpr.vector[3][0]) << 12) + gpr.ir0 * flag_b(0, 0, gpr.mac[1])) >> shift));
+
+    gpr.mac[2] =
+        int32_t(flag_a(1, ((int64_t(gpr.vector[3][1]) << 12) + gpr.ir0 * flag_b(1, 0, gpr.mac[2])) >> shift));
+
+    gpr.mac[3] =
+        int32_t(flag_a(2, ((int64_t(gpr.vector[3][2]) << 12) + gpr.ir0 * flag_b(2, 0, gpr.mac[3])) >> shift));
 
     mac_to_ir(code);
     mac_to_rgb();
@@ -434,7 +439,7 @@ namespace psxact {
         (gpr.sx[1] * int64_t(gpr.sy[2] - gpr.sy[0])) +
         (gpr.sx[2] * int64_t(gpr.sy[0] - gpr.sy[1]));
 
-    gpr.mac[0] = flag_f(temp);
+    gpr.mac[0] = int32_t(flag_f(temp));
   }
 
   void cop2_core::op_ncs(uint32_t code) {
