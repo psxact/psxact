@@ -1,4 +1,4 @@
-#include "null_guest_input_device.hpp"
+#include "null_device.hpp"
 
 namespace pgi = psxact::input::guest;
 

@@ -1,4 +1,4 @@
-#include "digital_input_device.hpp"
+#include "digital_device.hpp"
 
 namespace pgi = psxact::input::guest;
 
