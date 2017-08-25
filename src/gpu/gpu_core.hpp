@@ -4,7 +4,9 @@
 #include "../system_core.hpp"
 
 namespace psxact {
-  struct gpu_core {
+namespace gpu {
+
+  struct core {
     uint32_t data_latch = 0;
     uint32_t status = 0x14802000;
     uint32_t texture_window_mask_x;
@@ -131,6 +133,8 @@ namespace psxact {
 
     static color_t get_texture_color(tev_t &tev, point_t &coord);
   };
+
+}
 }
 
 #endif // __PSXACT_GPU_CORE_HPP__

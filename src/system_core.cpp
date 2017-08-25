@@ -15,14 +15,14 @@
 
 namespace psxact {
   system_core::system_core(const char *bios_file_name, const char *game_file_name) {
-    cdrom = new cdrom_core(game_file_name);
-    cpu = new cpu_core();
-    dma = new dma_core();
-    gpu = new gpu_core();
-    input = new input::input_core();
-    mdec = new mdec_core();
-    spu = new spu_core();
-    timer = new timer_core();
+    cdrom = new cdrom::core(game_file_name);
+    cpu = new cpu::core();
+    dma = new dma::core();
+    gpu = new gpu::core();
+    input = new input::core();
+    mdec = new mdec::core();
+    spu = new spu::core();
+    timer = new timer::core();
 
     utility::read_all_bytes(bios_file_name, bios);
   }

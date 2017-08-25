@@ -7,7 +7,7 @@
 namespace psxact {
 namespace input {
 
-  struct input_core {
+  struct core {
     uint32_t status;
 
     int32_t baud_rate_factor;
@@ -16,7 +16,7 @@ namespace input {
 
     fifo_t<uint8_t, 3> rx_fifo;
 
-    input_core();
+    core();
 
     uint32_t io_read(bus_width_t width, uint32_t address);
 

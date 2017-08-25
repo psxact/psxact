@@ -1,14 +1,14 @@
 #include "input_port.hpp"
 #include "../utility.hpp"
 
-namespace pgi = psxact::input;
+using namespace psxact::input;
 
-void pgi::input_port::reset() {
+void port::reset() {
   active = true;
   step = 0;
 }
 
-bool pgi::input_port::send_request(uint8_t request, uint8_t &response) {
+bool port::send_request(uint8_t request, uint8_t &response) {
   if (!active || !device) {
     response = 0xff;
     return false;

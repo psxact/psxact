@@ -7,7 +7,7 @@
 namespace psxact {
 namespace input {
 
-  struct input_port {
+  struct port {
     guest::device *device;
     uint8_t step;
     bool active;

@@ -4,7 +4,10 @@
 #include <cstdint>
 
 namespace psxact {
-  struct cop2_core {
+namespace cpu {
+namespace cop2 {
+
+  struct core {
     union color_t {
       struct {
         uint8_t r;
@@ -166,6 +169,9 @@ namespace psxact {
 
     int32_t flag_h(int64_t value);
   };
+
+}
+}
 }
 
 #endif //__PSXACT_CPU_COP2_HPP__

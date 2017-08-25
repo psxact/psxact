@@ -4,7 +4,10 @@
 #include <cstdint>
 
 namespace psxact {
-  struct cop0_core {
+namespace cpu {
+namespace cop0 {
+
+  struct core {
     uint32_t regs[16];
 
     void run(uint32_t n);
@@ -21,6 +24,9 @@ namespace psxact {
 
     void leave_exception();
   };
+
+}
+}
 }
 
 #endif //__PSXACT_CPU_COP0_HPP__

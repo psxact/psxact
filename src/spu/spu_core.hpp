@@ -5,7 +5,9 @@
 #include "../memory.hpp"
 
 namespace psxact {
-  struct spu_core {
+namespace spu {
+
+  struct core {
     uint16_t control;
     uint16_t status;
 
@@ -21,6 +23,8 @@ namespace psxact {
 
     void io_write(bus_width_t width, uint32_t address, uint32_t data);
   };
+
+}
 }
 
 #endif // __PSXACT_SPU_CORE_HPP__

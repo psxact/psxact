@@ -11,35 +11,51 @@ namespace psxact {
     BUS_WIDTH_WORD
   };
 
-  struct cdrom_core;
+  namespace cdrom {
+    struct core;
+  }
 
-  struct cpu_core;
+  namespace cpu {
+    struct core;
+  }
 
-  struct dma_core;
+  namespace dma {
+    struct core;
+  }
 
-  struct gpu_core;
+  namespace gpu {
+    struct core;
+  }
 
-  namespace input { struct input_core; }
+  namespace input {
+    struct core;
+  }
 
-  struct mdec_core;
+  namespace mdec {
+    struct core;
+  }
 
-  struct spu_core;
+  namespace spu {
+    struct core;
+  }
 
-  struct timer_core;
+  namespace timer {
+    struct core;
+  }
 
   struct system_core {
     memory_t<19> bios;
     memory_t<21> wram;
     memory_t<10> dmem;
 
-    cdrom_core *cdrom;
-    cpu_core *cpu;
-    dma_core *dma;
-    gpu_core *gpu;
-    input::input_core *input;
-    mdec_core *mdec;
-    spu_core *spu;
-    timer_core *timer;
+    cdrom::core *cdrom;
+    cpu::core *cpu;
+    dma::core *dma;
+    gpu::core *gpu;
+    input::core *input;
+    mdec::core *mdec;
+    spu::core *spu;
+    timer::core *timer;
 
     system_core(const char *bios_file_name, const char *game_file_name);
 

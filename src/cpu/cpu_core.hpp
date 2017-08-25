@@ -7,9 +7,11 @@
 #include "cpu_cop2.hpp"
 
 namespace psxact {
-  struct cpu_core {
-    cop0_core cop0;
-    cop2_core cop2;
+namespace cpu {
+
+  struct core {
+    cop0::core cop0;
+    cop2::core cop2;
 
     struct {
       uint32_t gp[32];
@@ -33,13 +35,13 @@ namespace psxact {
     uint32_t i_stat;
     uint32_t i_mask;
 
-    typedef void (cpu_core::*opcode)();
+    typedef void (core::*opcode)();
 
     static opcode op_table[64];
 
     static opcode op_table_special[64];
 
-    cpu_core();
+    core();
 
     void disassemble(FILE *file);
 
@@ -238,6 +240,8 @@ namespace psxact {
 
     uint32_t get_rs();
   };
+
+}
 }
 
 #endif // __PSXACT_CPU_CORE_HPP__

@@ -4,7 +4,9 @@
 #include "../system_core.hpp"
 
 namespace psxact {
-  struct dma_core {
+namespace dma {
+
+  struct core {
     uint32_t dpcr = 0x07654321;
     uint32_t dicr = 0x00000000;
 
@@ -42,6 +44,8 @@ namespace psxact {
 
     void update_irq_active_flag();
   };
+
+}
 }
 
 #endif // __PSXACT_DMA_CORE_HPP__

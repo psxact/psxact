@@ -8,19 +8,21 @@
 #include "../fifo.hpp"
 
 namespace psxact {
-  struct cdrom_sector_timecode_t {
+namespace cdrom {
+
+  struct sector_timecode_t {
     uint8_t minute;
     uint8_t second;
     uint8_t sector;
   };
 
-  struct cdrom_core {
+  struct core {
     int32_t index;
     int32_t interrupt_enable;
     int32_t interrupt_request;
 
-    cdrom_sector_timecode_t seek_timecode;
-    cdrom_sector_timecode_t read_timecode;
+    sector_timecode_t seek_timecode;
+    sector_timecode_t read_timecode;
     bool seek_unprocessed;
 
     fifo_t<uint8_t, 4> parameter;
@@ -35,7 +37,7 @@ namespace psxact {
     std::string game_file_name;
     FILE *game_file;
 
-    typedef void (cdrom_core::*stage_t)();
+    typedef void (core::*stage_t)();
 
     struct {
       stage_t stage;
@@ -58,7 +60,7 @@ namespace psxact {
       bool read_whole_sector;
     } mode;
 
-    cdrom_core(const char *game_file_name);
+    core(const char *game_file_name);
 
     uint32_t io_read(bus_width_t width, uint32_t address);
 
@@ -158,6 +160,8 @@ namespace psxact {
 
     void drive_reading();
   };
+
+}
 }
 
 #endif // __PSXACT_CDROM_DRIVE_HPP__

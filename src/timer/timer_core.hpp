@@ -4,7 +4,9 @@
 #include "../system_core.hpp"
 
 namespace psxact {
-  struct timer_core {
+namespace timer {
+
+  struct core {
     struct {
       uint16_t counter;
       uint16_t control;
@@ -24,6 +26,8 @@ namespace psxact {
 
     void tick_timer_2();
   };
+
+}
 }
 
 #endif // __PSXACT_TIMER_CORE_HPP__

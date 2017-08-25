@@ -56,6 +56,9 @@ set(SOURCE_FILES
         src/spu/spu_core.hpp
         src/timer/timer_core.cpp
         src/timer/timer_core.hpp
+        src/fifo.hpp
+        src/limits.hpp
+        src/memory.hpp
         src/psxact.cpp
         src/sdl2.cpp
         src/sdl2.hpp
