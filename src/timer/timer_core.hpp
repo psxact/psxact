@@ -6,13 +6,41 @@
 namespace psxact {
 namespace timer {
 
+  struct timer {
+    uint16_t compare;
+    uint16_t counter;
+    bool running;
+
+    // compare
+
+    bool compare_reached;
+    bool compare_irq_enable;
+    bool compare_reset_counter;
+
+    // maximum
+
+    bool maximum_reached;
+    bool maximum_irq_enable;
+
+    // irq
+
+    bool irq_repeat;
+    bool irq_enable;
+    bool irq_toggle;
+    bool irq_bit;
+
+    int clock_mode;
+    int synch_enable;
+    int synch_mode;
+
+    int prescaler;
+  };
+
   struct core {
-    struct {
-      uint16_t counter;
-      uint16_t control;
-      uint16_t compare;
-      int32_t divider;
-    } timers[3];
+    bool in_hblank;
+    bool in_vblank;
+
+    timer timers[3];
 
     uint32_t io_read(bus_width_t width, uint32_t address);
 
@@ -20,11 +48,32 @@ namespace timer {
 
     void tick();
 
-    void tick_timer_0();
+    void hblank(bool active);
 
-    void tick_timer_1();
+    void vblank(bool active);
 
-    void tick_timer_2();
+  private:
+    void timer_irq(int n);
+
+    void timer_tick(int n);
+
+    void timer_prescale_0();
+
+    void timer_prescale_1();
+
+    void timer_prescale_2();
+
+    uint16_t timer_get_compare(int n);
+
+    uint16_t timer_get_control(int n);
+
+    uint16_t timer_get_counter(int n);
+
+    void timer_set_compare(int n, uint16_t data);
+
+    void timer_set_control(int n, uint16_t data);
+
+    void timer_set_counter(int n, uint16_t data);
   };
 
 }
