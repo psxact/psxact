@@ -230,9 +230,9 @@ uint32_t core::read_gpr(uint32_t n) {
   case 0x1c:
   case 0x1d:
     return uint32_t(
-        (limits::uclamp<5>(gpr.vector[3][0] >> 7) << 0) |
-        (limits::uclamp<5>(gpr.vector[3][1] >> 7) << 5) |
-        (limits::uclamp<5>(gpr.vector[3][2] >> 7) << 10)
+        (ulimit<5>::clamp(gpr.vector[3][0] >> 7) << 0) |
+        (ulimit<5>::clamp(gpr.vector[3][1] >> 7) << 5) |
+        (ulimit<5>::clamp(gpr.vector[3][2] >> 7) << 10)
     );
 
   case 0x1e:

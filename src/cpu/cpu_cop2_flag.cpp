@@ -9,13 +9,13 @@ void core::set_flag(int32_t flag) {
 
 static inline int32_t get_lm(uint32_t code) {
   return (code & (1 << 10))
-         ? ulimit<15>::min
-         : slimit<15>::min;
+         ? 0
+         : slimit<16>::min;
 }
 
 int64_t core::flag_a(int32_t n, int64_t value) {
-  const int64_t max = slimit<43>::max;
-  const int64_t min = slimit<43>::min;
+  const int64_t max = slimit<44>::max;
+  const int64_t min = slimit<44>::min;
 
   if (value > max) {
     set_flag(A1_MAX - n);
@@ -28,7 +28,7 @@ int64_t core::flag_a(int32_t n, int64_t value) {
 }
 
 int32_t core::flag_b(int32_t n, uint32_t code, int32_t value) {
-  int32_t max = slimit<15>::max;
+  int32_t max = slimit<16>::max;
   int32_t min = get_lm(code);
 
   if (value < min) {
@@ -45,8 +45,8 @@ int32_t core::flag_b(int32_t n, uint32_t code, int32_t value) {
 }
 
 int32_t core::flag_b(int32_t n, uint32_t code, int32_t value, int32_t shifted) {
-  const int32_t max = slimit<15>::max;
-  const int32_t min = slimit<15>::min;
+  const int32_t max = slimit<16>::max;
+  const int32_t min = slimit<16>::min;
 
   if (shifted < min || shifted > max) {
     set_flag(B1 - n);
@@ -105,8 +105,8 @@ int32_t core::flag_e() {
 }
 
 int64_t core::flag_f(int64_t value) {
-  const int32_t max = slimit<31>::max;
-  const int32_t min = slimit<31>::min;
+  const int32_t max = slimit<32>::max;
+  const int32_t min = slimit<32>::min;
 
   if (value < min) {
     set_flag(F_MIN);
@@ -120,8 +120,8 @@ int64_t core::flag_f(int64_t value) {
 }
 
 int32_t core::flag_g(int32_t n, int32_t value) {
-  const int32_t max = slimit<10>::max;
-  const int32_t min = slimit<10>::min;
+  const int32_t max = slimit<11>::max;
+  const int32_t min = slimit<11>::min;
 
   if (value < min) {
     set_flag(G1 - n);

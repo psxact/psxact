@@ -4,9 +4,8 @@
 travis_before_install() {
   cd ..
   if [ "$TARGET_OS" = "Linux" ]; then
-    sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test;
-    sudo apt-get update -qq;
-    sudo apt-get install -qq libsdl2-dev gcc-5 g++-5 cmake;
+    sudo apt-get update -y;
+    sudo apt-get install -y libegl1-mesa-dev libgles2-mesa-dev libsdl2-dev;
   elif [ "$TARGET_OS" = "OSX" ]; then
     brew update
     brew install sdl2
@@ -19,7 +18,9 @@ travis_script() {
   pushd build
 
   if [ "$TARGET_OS" = "Linux" ]; then
-    if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
+    export CXX="clang++";
+    export CC="clang";
+
     cmake .. -G"$BUILD_TYPE" -DCMAKE_BUILD_TYPE=Release;
     cmake --build .
   elif [ "$TARGET_OS" = "OSX" ]; then
@@ -35,3 +36,4 @@ set -e
 set -x
 
 $1;
+

@@ -21,9 +21,9 @@ void pg::core::draw_point(point_t point, color_t color) {
 
   auto dither = dither_lut[point.y & 3][point.x & 3];
 
-  color.r = limits::uclamp<8>(color.r + dither);
-  color.g = limits::uclamp<8>(color.g + dither);
-  color.b = limits::uclamp<8>(color.b + dither);
+  color.r = ulimit<8>::clamp(color.r + dither);
+  color.g = ulimit<8>::clamp(color.g + dither);
+  color.b = ulimit<8>::clamp(color.b + dither);
 
   vram::write(point.x, point.y, color_to_uint16(color));
 }
