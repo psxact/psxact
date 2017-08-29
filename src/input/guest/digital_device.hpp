@@ -12,7 +12,7 @@ namespace guest {
 
     digital_device();
 
-    bool send_request(uint8_t step, uint8_t request, uint8_t &response);
+    bool send_request(int step, uint8_t request, uint8_t *response);
 
     void press(button_t button);
 

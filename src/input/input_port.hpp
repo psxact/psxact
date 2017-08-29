@@ -14,7 +14,7 @@ namespace input {
 
     void reset();
 
-    bool send_request(uint8_t request, uint8_t &response);
+    bool send_request(uint8_t request, uint8_t *response);
   };
 
 }

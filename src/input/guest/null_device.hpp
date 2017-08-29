@@ -8,7 +8,7 @@ namespace input {
 namespace guest {
 
   struct null_device : public device {
-    bool send_request(uint8_t, uint8_t, uint8_t &response);
+    bool send_request(int step, uint8_t request, uint8_t *response);
 
     void press(button_t button);
 

@@ -25,7 +25,7 @@ namespace guest {
   };
 
   struct device {
-    virtual bool send_request(int step, uint8_t request, uint8_t &response) = 0;
+    virtual bool send_request(int step, uint8_t request, uint8_t *response) = 0;
 
     virtual void press(button_t button) = 0;
 
