@@ -21,12 +21,26 @@ uint32_t core::io_read(bus_width_t width, uint32_t address) {
     printf("timer::io_read(%d, 0x%08x)\n", width, address);
   }
 
-  int n = (address >> 4) & 3;
+  switch (address & ~3) {
+  case 0x1f801100: return timer_get_counter(0);
+  case 0x1f801104: return timer_get_control(0);
+  case 0x1f801108: return timer_get_compare(0);
+  case 0x1f80110c: return 0;
 
-  switch (address & 15) {
-  case 0: return timer_get_counter(n);
-  case 4: return timer_get_control(n);
-  case 8: return timer_get_compare(n);
+  case 0x1f801110: return timer_get_counter(1);
+  case 0x1f801114: return timer_get_control(1);
+  case 0x1f801118: return timer_get_compare(1);
+  case 0x1f80111c: return 0;
+
+  case 0x1f801120: return timer_get_counter(2);
+  case 0x1f801124: return timer_get_control(2);
+  case 0x1f801128: return timer_get_compare(2);
+  case 0x1f80112c: return 0;
+
+  case 0x1f801130: return 0;
+  case 0x1f801134: return 0;
+  case 0x1f801138: return 0;
+  case 0x1f80113c: return 0;
   }
 
   return 0;
@@ -37,12 +51,26 @@ void core::io_write(bus_width_t width, uint32_t address, uint32_t data) {
     printf("timer::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
   }
 
-  int n = (address >> 4) & 3;
+  switch (address & ~3) {
+  case 0x1f801100: return timer_set_counter(0, data);
+  case 0x1f801104: return timer_set_control(0, data);
+  case 0x1f801108: return timer_set_compare(0, data);
+  case 0x1f80110c: return;
 
-  switch (address & 0xf) {
-  case 0: timer_set_counter(n, data); break;
-  case 4: timer_set_control(n, data); break;
-  case 8: timer_set_compare(n, data); break;
+  case 0x1f801110: return timer_set_counter(1, data);
+  case 0x1f801114: return timer_set_control(1, data);
+  case 0x1f801118: return timer_set_compare(1, data);
+  case 0x1f80111c: return;
+
+  case 0x1f801120: return timer_set_counter(2, data);
+  case 0x1f801124: return timer_set_control(2, data);
+  case 0x1f801128: return timer_set_compare(2, data);
+  case 0x1f80112c: return;
+
+  case 0x1f801130: return;
+  case 0x1f801134: return;
+  case 0x1f801138: return;
+  case 0x1f80113c: return;
   }
 }
 
@@ -110,10 +138,10 @@ static int decode_synch_mode(uint16_t data) {
 
 static bool is_running(int synch_mode, bool b = 1) {
   switch (synch_mode) {
-  case 0: return b == 0; break;
-  case 1: return 1 == 1; break;
-  case 2: return b == 1; break;
-  case 3: return 1 == 0; break;
+  case 0: return b == 0;
+  case 1: return 1 == 1;
+  case 2: return b == 1;
+  case 3: return 1 == 0;
   }
 
   return 0;
@@ -169,8 +197,6 @@ void core::timer_irq(int n) {
     else {
       timer.irq_bit = 0;
       system->irq(4 + n);
-
-      // printf("timer::core::timer_irq(%d)\n", 4+n);
     }
   }
 }
@@ -203,7 +229,7 @@ void core::timer_tick(int n) {
   }
 }
 
-void core::timer_prescale_0() {
+void core::timer_0_prescale() {
   auto &timer = timers[0];
 
   if (timer.clock_mode == 0 || timer.clock_mode == 2) {
@@ -222,7 +248,7 @@ void core::timer_prescale_0() {
   }
 }
 
-void core::timer_prescale_1() {
+void core::timer_1_prescale() {
   auto &timer = timers[1];
 
   if (timer.clock_mode == 0 || timer.clock_mode == 2) {
@@ -241,7 +267,7 @@ void core::timer_prescale_1() {
   }
 }
 
-void core::timer_prescale_2() {
+void core::timer_2_prescale() {
   auto &timer = timers[2];
 
   if (timer.clock_mode == 0 || timer.clock_mode == 1) {
@@ -261,9 +287,9 @@ void core::timer_prescale_2() {
 }
 
 void core::tick() {
-  timer_prescale_0();
-  timer_prescale_1();
-  timer_prescale_2();
+  timer_0_prescale();
+  timer_1_prescale();
+  timer_2_prescale();
 }
 
 void core::hblank(bool active) {

@@ -69,9 +69,7 @@ namespace psxact {
       return dma->io_read(width, address);
     }
 
-    if (limits::between<0x1f801100, 0x1f80110f>(address) ||
-        limits::between<0x1f801110, 0x1f80111f>(address) ||
-        limits::between<0x1f801120, 0x1f80112f>(address)) {
+    if (limits::between<0x1f801100, 0x1f80113f>(address)) {
       return timer->io_read(width, address);
     }
 
@@ -153,9 +151,7 @@ namespace psxact {
       return dma->io_write(width, address, data);
     }
 
-    if (limits::between<0x1f801100, 0x1f80110f>(address) ||
-        limits::between<0x1f801110, 0x1f80111f>(address) ||
-        limits::between<0x1f801120, 0x1f80112f>(address)) {
+    if (limits::between<0x1f801100, 0x1f80113f>(address)) {
       return timer->io_write(width, address, data);
     }
 

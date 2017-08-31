@@ -57,11 +57,11 @@ namespace timer {
 
     void timer_tick(int n);
 
-    void timer_prescale_0();
+    void timer_0_prescale();
 
-    void timer_prescale_1();
+    void timer_1_prescale();
 
-    void timer_prescale_2();
+    void timer_2_prescale();
 
     uint16_t timer_get_compare(int n);
 
