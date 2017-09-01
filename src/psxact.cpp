@@ -24,14 +24,11 @@ int main(int argc, char *argv[]) {
   int h = 480;
 
   while (1) {
-    auto fb = vram::get_pointer(x, y);
-
-    if (renderer.render(fb, w, h)) {
-      psxact::system->run_for_one_frame(&x, &y, &w, &h);
-    }
-    else {
+    if (renderer.render(vram::get_pointer(x, y), w, h) == 0) {
       break;
     }
+
+    psxact::system->run_for_one_frame(&x, &y, &w, &h);
   }
 
   return 0;

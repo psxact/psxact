@@ -1,5 +1,7 @@
 #include "sdl2.hpp"
 
+static const int window_width = 640;
+static const int window_height = 480;
 
 psxact::sdl2::sdl2() {
   SDL_Init(SDL_INIT_VIDEO);
@@ -10,8 +12,8 @@ psxact::sdl2::sdl2() {
       "psxact",
       SDL_WINDOWPOS_CENTERED,
       SDL_WINDOWPOS_CENTERED,
-      640,
-      480,
+      window_width,
+      window_height,
       0);
 
   renderer = SDL_CreateRenderer(
@@ -23,8 +25,8 @@ psxact::sdl2::sdl2() {
       renderer,
       SDL_PIXELFORMAT_BGR555,
       SDL_TEXTUREACCESS_STREAMING,
-      640,
-      480);
+      window_width,
+      window_height);
 }
 
 psxact::sdl2::~sdl2() {
@@ -38,7 +40,7 @@ bool psxact::sdl2::render(uint16_t *src_pixels, int w, int h) {
 
   void *dst_pixels;
   int dst_pitch;
-  int src_pitch = 1024 * sizeof(int16_t);
+  int src_pitch = 1024 * sizeof(uint16_t);
 
   SDL_LockTexture(texture, nullptr, &dst_pixels, &dst_pitch);
 
@@ -67,6 +69,12 @@ bool psxact::sdl2::handle_events() {
   while (SDL_PollEvent(&event)) {
     if (event.type == SDL_QUIT) {
       return false;
+    }
+
+    if (event.type == SDL_KEYDOWN) {
+      if (event.key.keysym.sym == SDLK_ESCAPE) {
+        return false;
+      }
     }
   }
 
