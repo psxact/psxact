@@ -62,8 +62,9 @@ void core::tick() {
   bool irq = (cop0.regs[12] & cop0.regs[13] & 0xff00) != 0;
 
   if (iec && irq) {
-    enter_exception(0x0);
-  } else {
+    enter_exception(cop0::exception_code_t::interrupt);
+  }
+  else {
     uint32_t code = (this->code >> 26) & 63;
     if (code)
       (*this.*op_table[code])();
@@ -90,14 +91,16 @@ static inline uint32_t map_address(uint32_t address) {
 void core::log_bios_calls() {
   if (regs.this_pc == 0x00a0) {
     printf("bios::a(0x%02x)\n", regs.gp[9]);
-  } else if (regs.this_pc == 0x00b0) {
+  }
+  else if (regs.this_pc == 0x00b0) {
     printf("bios::b(0x%02x)\n", regs.gp[9]);
-  } else if (regs.this_pc == 0x00c0) {
+  }
+  else if (regs.this_pc == 0x00c0) {
     printf("bios::c(0x%02x)\n", regs.gp[9]);
   }
 }
 
-void core::enter_exception(uint32_t code) {
+void core::enter_exception(cop0::exception_code_t code) {
   uint32_t pc = cop0.enter_exception(code, regs.this_pc, is_branch_delay_slot);
 
   regs.pc = pc;
@@ -106,7 +109,7 @@ void core::enter_exception(uint32_t code) {
 
 void core::read_code() {
   if (regs.pc & 3) {
-    enter_exception(0x4);
+    enter_exception(cop0::exception_code_t::address_error_load);
   }
 
   regs.this_pc = regs.pc;
@@ -144,7 +147,8 @@ void core::update_irq(uint32_t stat, uint32_t mask) {
 
   if (i_stat & i_mask) {
     cop0.regs[13] |= (1 << 10);
-  } else {
+  }
+  else {
     cop0.regs[13] &= ~(1 << 10);
   }
 }

@@ -73,7 +73,7 @@ void core::op_add() {
   uint32_t z = x + y;
 
   if (overflow(x, y, z)) {
-    enter_exception(0xc);
+    enter_exception(cop0::exception_code_t::overflow);
   }
   else {
     set_rd(z);
@@ -86,7 +86,7 @@ void core::op_addi() {
   uint32_t z = x + y;
 
   if (overflow(x, y, z)) {
-    enter_exception(0xc);
+    enter_exception(cop0::exception_code_t::overflow);
   }
   else {
     set_rt(z);
@@ -138,7 +138,7 @@ void core::op_bne() {
 }
 
 void core::op_break() {
-  enter_exception(0x09);
+  enter_exception(cop0::exception_code_t::breakpoint);
 }
 
 void core::op_bxx() {
@@ -179,7 +179,7 @@ void core::op_cop0() {
 }
 
 void core::op_cop1() {
-  enter_exception(0xb);
+  enter_exception(cop0::exception_code_t::cop_unusable);
 }
 
 void core::op_cop2() {
@@ -201,7 +201,7 @@ void core::op_cop2() {
 }
 
 void core::op_cop3() {
-  enter_exception(0xb);
+  enter_exception(cop0::exception_code_t::cop_unusable);
 }
 
 void core::op_div() {
@@ -283,7 +283,7 @@ void core::op_lbu() {
 void core::op_lh() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    enter_exception(0x4);
+    enter_exception(cop0::exception_code_t::address_error_load);
   }
   else {
     uint32_t data = read_data(BUS_WIDTH_HALF, address);
@@ -296,7 +296,7 @@ void core::op_lh() {
 void core::op_lhu() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    enter_exception(0x4);
+    enter_exception(cop0::exception_code_t::address_error_load);
   }
   else {
     uint32_t data = read_data(BUS_WIDTH_HALF, address);
@@ -312,7 +312,7 @@ void core::op_lui() {
 void core::op_lw() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    enter_exception(0x4);
+    enter_exception(cop0::exception_code_t::address_error_load);
   }
   else {
     uint32_t data = read_data(BUS_WIDTH_WORD, address);
@@ -332,7 +332,7 @@ void core::op_lwc1() {
 void core::op_lwc2() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    enter_exception(0x4);
+    enter_exception(cop0::exception_code_t::address_error_load);
   }
   else {
     uint32_t data = read_data(BUS_WIDTH_WORD, address);
@@ -429,7 +429,7 @@ void core::op_sb() {
 void core::op_sh() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    enter_exception(0x5);
+    enter_exception(cop0::exception_code_t::address_error_store);
   }
   else {
     uint32_t data = get_rt();
@@ -484,7 +484,7 @@ void core::op_sub() {
   uint32_t z = x - y;
 
   if (overflow(x, ~y, z)) {
-    enter_exception(0xc);
+    enter_exception(cop0::exception_code_t::overflow);
   }
   else {
     set_rd(z);
@@ -498,7 +498,7 @@ void core::op_subu() {
 void core::op_sw() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    enter_exception(0x5);
+    enter_exception(cop0::exception_code_t::address_error_store);
   }
   else {
     uint32_t data = get_rt();
@@ -518,7 +518,7 @@ void core::op_swc1() {
 void core::op_swc2() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    enter_exception(0x5);
+    enter_exception(cop0::exception_code_t::address_error_store);
   }
   else {
     uint32_t data = cop2.read_gpr(decode_rt());
@@ -560,7 +560,7 @@ void core::op_swr() {
 }
 
 void core::op_syscall() {
-  enter_exception(0x08);
+  enter_exception(cop0::exception_code_t::syscall);
 }
 
 void core::op_xor() {
@@ -572,5 +572,5 @@ void core::op_xori() {
 }
 
 void core::op_und() {
-  enter_exception(0xa);
+  enter_exception(cop0::exception_code_t::reserved_instruction);
 }

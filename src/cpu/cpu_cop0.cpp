@@ -27,12 +27,12 @@ void core::write_gpr(uint32_t n, uint32_t value) {
   regs[n] = value;
 }
 
-uint32_t core::enter_exception(uint32_t code, uint32_t pc, bool is_branch_delay_slot) {
+uint32_t core::enter_exception(exception_code_t code, uint32_t pc, bool is_branch_delay_slot) {
   uint32_t status = regs[12];
   status = (status & ~0x3f) | ((status << 2) & 0x3f);
 
   uint32_t cause = regs[13];
-  cause = (cause & ~0x7f) | ((code << 2) & 0x7f);
+  cause = (cause & ~0x7f) | ((int(code) << 2) & 0x7f);
 
   uint32_t epc;
 

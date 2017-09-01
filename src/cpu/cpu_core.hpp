@@ -51,7 +51,7 @@ namespace cpu {
 
     void tick();
 
-    void enter_exception(uint32_t code);
+    void enter_exception(cop0::exception_code_t code);
 
     void log_bios_calls();
 
