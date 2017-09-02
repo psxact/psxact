@@ -240,14 +240,16 @@ namespace psxact {
 
     *x = (gpu->display_area_x);
     *y = (gpu->display_area_y);
-    //*w = (gpu->display_area_x2 - gpu->display_area_x1) / 4;
-    //*h = (gpu->display_area_y2 - gpu->display_area_y1);
 
-    switch ((gpu->status >> 17) & 3) {
+    switch ((gpu->status >> 16) & 7) {
     case 0: *w = 256; break;
-    case 1: *w = 320; break;
-    case 2: *w = 512; break;
-    case 3: *w = 640; break;
+    case 1: *w = 368; break;
+    case 2: *w = 320; break;
+    case 3: *w = 368; break;
+    case 4: *w = 512; break;
+    case 5: *w = 368; break;
+    case 6: *w = 640; break;
+    case 7: *w = 368; break;
     }
 
     switch ((gpu->status >> 19) & 1) {
