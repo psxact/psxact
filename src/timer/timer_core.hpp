@@ -6,41 +6,53 @@
 namespace psxact {
 namespace timer {
 
-  struct timer {
-    uint16_t compare;
+  struct unit {
     uint16_t counter;
     bool running;
 
     // compare
 
-    bool compare_reached;
-    bool compare_irq_enable;
-    bool compare_reset_counter;
+    struct {
+      bool reached;
+      bool irq_enable;
+      bool reset_counter;
+      uint16_t value;
+    } compare;
 
     // maximum
 
-    bool maximum_reached;
-    bool maximum_irq_enable;
+    struct {
+      bool reached;
+      bool irq_enable;
+    } maximum;
 
     // irq
 
-    bool irq_repeat;
-    bool irq_enable;
-    bool irq_toggle;
-    bool irq_bit;
+    struct {
+      bool repeat;
+      bool enable;
+      bool toggle;
+      bool bit;
+    } irq;
 
-    int clock_mode;
     int synch_enable;
     int synch_mode;
 
-    int prescaler;
+    struct {
+      bool enable;
+      int cycles;
+      int single;
+      int period;
+    } prescaler;
   };
 
   struct core {
     bool in_hblank;
     bool in_vblank;
 
-    timer timers[3];
+    unit units[3];
+
+    core();
 
     uint32_t io_read(bus_width_t width, uint32_t address);
 
@@ -53,27 +65,23 @@ namespace timer {
     void vblank(bool active);
 
   private:
-    void timer_irq(int n);
+    void unit_irq(int n);
 
-    void timer_tick(int n);
+    void unit_tick(int n);
 
-    void timer_0_prescale();
+    void unit_prescale(int n);
 
-    void timer_1_prescale();
+    uint16_t unit_get_compare(int n);
 
-    void timer_2_prescale();
+    uint16_t unit_get_control(int n);
 
-    uint16_t timer_get_compare(int n);
+    uint16_t unit_get_counter(int n);
 
-    uint16_t timer_get_control(int n);
+    void unit_set_compare(int n, uint16_t data);
 
-    uint16_t timer_get_counter(int n);
+    void unit_set_control(int n, uint16_t data);
 
-    void timer_set_compare(int n, uint16_t data);
-
-    void timer_set_control(int n, uint16_t data);
-
-    void timer_set_counter(int n, uint16_t data);
+    void unit_set_counter(int n, uint16_t data);
   };
 
 }
