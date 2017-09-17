@@ -1,12 +1,12 @@
 #include "digital_device.hpp"
 
-namespace pgi = psxact::input::guest;
+using namespace psxact::input::guest;
 
-pgi::digital_device::digital_device()
+digital_device::digital_device()
     : data(0xffff) {
 }
 
-bool pgi::digital_device::send_request(int step, uint8_t request, uint8_t *response) {
+bool digital_device::send_request(int step, uint8_t request, uint8_t *response) {
   switch (step) {
   case 0:
     *response = 0xff;
@@ -38,10 +38,10 @@ static int get_button_mask(int button) {
   return 1 << button;
 }
 
-void pgi::digital_device::press(button_t button) {
+void digital_device::press(button_t button) {
   data = data & ~get_button_mask(button);
 }
 
-void pgi::digital_device::release(button_t button) {
+void digital_device::release(button_t button) {
   data = data | get_button_mask(button);
 }

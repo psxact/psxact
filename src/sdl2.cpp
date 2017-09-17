@@ -4,7 +4,7 @@ static const int window_width = 640;
 static const int window_height = 480;
 
 psxact::sdl2::sdl2() {
-  SDL_Init(SDL_INIT_VIDEO);
+  SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
 
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 
@@ -27,6 +27,26 @@ psxact::sdl2::sdl2() {
       SDL_TEXTUREACCESS_STREAMING,
       window_width,
       window_height);
+
+  //
+  // Game Controller
+  //
+
+  controller = nullptr;
+
+  for (int i = 0; i < SDL_NumJoysticks(); i++) {
+    if (SDL_IsGameController(i)) {
+      controller = SDL_GameControllerOpen(i);
+
+      if (controller) {
+        break;
+      }
+    }
+  }
+
+  if (controller == nullptr) {
+    printf("[SDL2] No controller connected.\n");
+  }
 }
 
 psxact::sdl2::~sdl2() {
@@ -63,22 +83,100 @@ bool psxact::sdl2::render(uint16_t *src_pixels, int w, int h) {
   return handle_events();
 }
 
+static void controller_button(psxact::controller_state &ctrl, uint8_t button, bool isPressed) {
+  switch (button) {
+  case SDL_CONTROLLER_BUTTON_DPAD_UP:
+    ctrl.dpad_up = isPressed;
+    break;
+
+  case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+    ctrl.dpad_down = isPressed;
+    break;
+
+  case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+    ctrl.dpad_left = isPressed;
+    break;
+
+  case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+    ctrl.dpad_right = isPressed;
+    break;
+
+  case SDL_CONTROLLER_BUTTON_A:
+    ctrl.cross = isPressed;
+    break;
+
+  case SDL_CONTROLLER_BUTTON_B:
+    ctrl.circle = isPressed;
+    break;
+
+  case SDL_CONTROLLER_BUTTON_X:
+    ctrl.square = isPressed;
+    break;
+
+  case SDL_CONTROLLER_BUTTON_Y:
+    ctrl.triangle = isPressed;
+    break;
+
+  case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+    ctrl.l1 = isPressed;
+    break;
+
+  case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+    ctrl.r1 = isPressed;
+    break;
+
+  case SDL_CONTROLLER_BUTTON_BACK:
+    ctrl.select = isPressed;
+    break;
+
+  case SDL_CONTROLLER_BUTTON_START:
+    ctrl.start = isPressed;
+    break;
+  }
+}
+
+static void controller_axis(psxact::controller_state &ctrl, uint8_t axis, int value) {
+  switch (axis) {
+  case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+    ctrl.l2 = value > 16383;
+    break;
+
+  case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+    ctrl.r2 = value > 16383;
+    break;
+  }
+}
+
 bool psxact::sdl2::handle_events() {
   SDL_Event event;
 
-  while (SDL_PollEvent(&event)) {
-    if (event.type == SDL_QUIT) {
-      return false;
-    }
+  bool alive = true;
 
-    if (event.type == SDL_KEYDOWN) {
-      if (event.key.keysym.sym == SDLK_ESCAPE) {
-        return false;
-      }
+  while (SDL_PollEvent(&event)) {
+    switch (event.type) {
+    case SDL_QUIT:
+      alive = false;
+      break;
+
+    case SDL_KEYDOWN:
+      alive = event.key.keysym.sym != SDLK_ESCAPE;
+      break;
+
+    case SDL_CONTROLLERBUTTONDOWN:
+      controller_button(ctrl, event.cbutton.button, 0);
+      break;
+
+    case SDL_CONTROLLERBUTTONUP:
+      controller_button(ctrl, event.cbutton.button, 1);
+      break;
+
+    case SDL_CONTROLLERAXISMOTION:
+      controller_axis(ctrl, event.caxis.axis, event.caxis.value);
+      break;
     }
   }
 
-  return true;
+  return alive;
 }
 
 void psxact::sdl2::resize(int w, int h) {
