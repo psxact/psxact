@@ -17,17 +17,9 @@ using namespace psxact;
 using namespace psxact::timer;
 
 core::core() {
-  units[0].prescaler.single = 11;
-  units[0].prescaler.period = 7 * 4;
-  units[0].prescaler.cycles = units[0].prescaler.period;
-
-  units[1].prescaler.single = 11;
-  units[1].prescaler.period = 7 * 3413;
-  units[1].prescaler.cycles = units[1].prescaler.period;
-
-  units[2].prescaler.single = 1;
-  units[2].prescaler.period = 8;
-  units[2].prescaler.cycles = units[2].prescaler.period;
+  unit_init(0, 11, 7 * 4);
+  unit_init(1, 11, 7 * 3413);
+  unit_init(2,  1, 8);
 }
 
 uint32_t core::io_read(bus_width_t width, uint32_t address) {
@@ -127,6 +119,12 @@ static bool is_running(int synch_mode, bool b = 1) {
   }
 
   return 0;
+}
+
+void core::unit_init(int n, int single, int period) {
+  units[n].prescaler.single = single;
+  units[n].prescaler.period = period;
+  units[n].prescaler.cycles = period;
 }
 
 void core::unit_set_control(int n, uint16_t data) {

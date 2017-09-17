@@ -65,6 +65,8 @@ namespace timer {
     void vblank(bool active);
 
   private:
+    void unit_init(int n, int single, int period);
+
     void unit_irq(int n);
 
     void unit_tick(int n);
