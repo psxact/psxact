@@ -38,15 +38,8 @@ set(SOURCE_FILES
         src/gpu/gpu_line.cpp
         src/gpu/gpu_poly.cpp
         src/gpu/gpu_rect.cpp
-        src/input/guest/digital_device.cpp
-        src/input/guest/digital_device.hpp
-        src/input/guest/input_device.hpp
-        src/input/guest/null_device.cpp
-        src/input/guest/null_device.hpp
         src/input/input_core.cpp
         src/input/input_core.hpp
-        src/input/input_port.cpp
-        src/input/input_port.hpp
         src/mdec/mdec_core.cpp
         src/mdec/mdec_core.hpp
         src/memory/vram.cpp

@@ -178,6 +178,16 @@ void core::run_channel_3() {
 }
 
 void core::run_channel_4_write() {
+  uint32_t address = channels[4].address;
+  uint32_t counter = channels[4].counter & 0xffff;
+
+  counter = counter ? counter : 0x10000;
+
+  for (uint32_t i = 0; i < counter; i++) {
+    uint32_t data = system->read(BUS_WIDTH_WORD, address);
+    system->write(BUS_WIDTH_WORD, 0, data);
+  }
+
   channels[4].control &= ~0x01000000;
 
   irq_channel(4);
@@ -204,12 +214,14 @@ void core::run_channel_6() {
 void core::run_channel(int32_t n) {
   if (n == 0) {
     switch (channels[0].control) {
+    case 0x00000000: return;
     case 0x01000201: return run_channel_0();
     }
   }
 
   if (n == 1) {
     switch (channels[1].control) {
+    case 0x00000000: return;
     case 0x01000200: return run_channel_1();
     }
   }
@@ -217,28 +229,38 @@ void core::run_channel(int32_t n) {
   if (n == 2) {
     switch (channels[2].control) {
     case 0x01000200: return run_channel_2_data_read();
+    case 0x00000201: return;
     case 0x01000201: return run_channel_2_data_write();
+    case 0x00000401: return;
     case 0x01000401: return run_channel_2_list();
     }
   }
 
   if (n == 3) {
     switch (channels[3].control) {
+    case 0x00000000: return;
+    case 0x10000000: return;
     case 0x11000000: return run_channel_3();
     }
   }
 
   if (n == 4) {
     switch (channels[4].control) {
+    case 0x00000000: return;
+    case 0x00000201: return;
     case 0x01000201: return run_channel_4_write();
     }
   }
 
   if (n == 6) {
     switch (channels[6].control) {
+    case 0x00000000: return;
+    case 0x10000002: return;
     case 0x11000002: return run_channel_6();
     }
   }
+
+  printf("[DMA] Unhandled DMA %d control value: 0x%08x\n", n, channels[n].control);
 }
 
 void core::irq_channel(int32_t n) {
