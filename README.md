@@ -4,15 +4,14 @@
 ![Logo](images/logo.png)
 
 This project aims to emulate the PlayStation&trade; 1 console in an accurate
-fashion. No hacks or proprietary software will be used to accomplish this goal.
-
-This emulator is designed to work "out of the box", no plug-in hell required!
+fashion. No hacks or shortcuts will be used to accomplish this goal. Everything
+needed will be provided by default, this means there aren't any plug-ins to
+locate, maintain, or configure.
 
 ## Current Status
 
 Currently, the emulator is capable of booting a small amount of commercial
-games. A software rasterizer is used to attempt pixel accurate graphical output,
-the results are quite nice!
+games with compatibility constantly evolving.
 
 ![Current status](images/current.png)
 
@@ -33,12 +32,8 @@ This project uses CMake for builds, and requires SDL2.
 
 ## Contributing
 
-If you'd like to contribute, please create a fork and issue pull requests! I am
-very open to newcomers, and will need all the help I can get to make the best
-PS1 emulator available.
-
-However, do try and follow the syntax used by the project when contributing, I
-**will** rewrite any code to make it match the project style before accepting.
+If you'd like to contribute, please create a fork and issue pull requests!
+Newcomers and experts alike are welcome to [.github/CONTRIBUTING.md](contribute).
 
 ## Communication
 
