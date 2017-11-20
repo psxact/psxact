@@ -25,9 +25,9 @@ namespace cdrom {
     sector_timecode_t read_timecode;
     bool seek_unprocessed;
 
-    fifo_t<uint8_t, 4> parameter;
-    fifo_t<uint8_t, 4> response;
-    fifo_t<uint8_t, 12> data;
+    fifo_t<uint8_t, 4> parameter_fifo;
+    fifo_t<uint8_t, 4> response_fifo;
+    fifo_t<uint8_t, 12> data_fifo;
     uint8_t data_buffer[4096];
 
     uint8_t command;
@@ -45,8 +45,8 @@ namespace cdrom {
 
       int32_t interrupt_request;
 
-      fifo_t<uint8_t, 4> parameter;
-      fifo_t<uint8_t, 4> response;
+      fifo_t<uint8_t, 4> parameter_fifo;
+      fifo_t<uint8_t, 4> response_fifo;
       uint8_t command;
     } logic;
 

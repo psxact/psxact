@@ -83,33 +83,33 @@ void core::do_seek() {
 }
 
 void core::command_get_id() {
-  logic.response.write(get_status_byte());
+  logic.response_fifo.write(get_status_byte());
   logic.interrupt_request = 3;
 
   drive_transition(&core::drive_getting_id, 40000);
 }
 
 void core::command_get_status() {
-  logic.response.write(get_status_byte());
+  logic.response_fifo.write(get_status_byte());
   logic.interrupt_request = 3;
 }
 
 void core::command_init() {
-  logic.response.write(get_status_byte());
+  logic.response_fifo.write(get_status_byte());
   logic.interrupt_request = 3;
 
   drive_transition(&core::drive_int2, 1000);
 }
 
 void core::command_pause() {
-  logic.response.write(get_status_byte());
+  logic.response_fifo.write(get_status_byte());
   logic.interrupt_request = 3;
 
   drive_transition(&core::drive_int2, 1000);
 }
 
 void core::command_read_n() {
-  logic.response.write(get_status_byte());
+  logic.response_fifo.write(get_status_byte());
   logic.interrupt_request = 3;
 
   do_seek();
@@ -120,14 +120,14 @@ void core::command_read_n() {
 }
 
 void core::command_read_table_of_contents() {
-  logic.response.write(get_status_byte());
+  logic.response_fifo.write(get_status_byte());
   logic.interrupt_request = 3;
 
   drive_transition(&core::drive_int2, 40000);
 }
 
 void core::command_seek_data_mode() {
-  logic.response.write(get_status_byte());
+  logic.response_fifo.write(get_status_byte());
   logic.interrupt_request = 3;
 
   do_seek();
@@ -136,7 +136,7 @@ void core::command_seek_data_mode() {
 }
 
 void core::command_set_mode(uint8_t value) {
-  logic.response.write(get_status_byte());
+  logic.response_fifo.write(get_status_byte());
   logic.interrupt_request = 3;
 
   mode.double_speed = (value & 0x80) != 0;
@@ -144,7 +144,7 @@ void core::command_set_mode(uint8_t value) {
 }
 
 void core::command_set_seek_target(uint8_t minute, uint8_t second, uint8_t sector) {
-  logic.response.write(get_status_byte());
+  logic.response_fifo.write(get_status_byte());
   logic.interrupt_request = 3;
 
   seek_timecode.minute = minute;
@@ -160,17 +160,17 @@ void core::command_test(uint8_t function) {
 
   switch (function) {
   case 0x20:
-    logic.response.write(0x98);
-    logic.response.write(0x06);
-    logic.response.write(0x10);
-    logic.response.write(0xc3);
+    logic.response_fifo.write(0x98);
+    logic.response_fifo.write(0x06);
+    logic.response_fifo.write(0x10);
+    logic.response_fifo.write(0xc3);
     logic.interrupt_request = 3;
     break;
   }
 }
 
 void core::command_unmute() {
-  logic.response.write(get_status_byte());
+  logic.response_fifo.write(get_status_byte());
   logic.interrupt_request = 3;
 }
 
@@ -187,7 +187,7 @@ void core::logic_idling() {
   if (command_is_new) {
     command_is_new = 0;
 
-    if (parameter.is_empty()) {
+    if (parameter_fifo.is_empty()) {
       logic_transition(&core::logic_transferring_command, 1000);
     } else {
       logic_transition(&core::logic_transferring_parameters, 1000);
@@ -198,9 +198,9 @@ void core::logic_idling() {
 }
 
 void core::logic_transferring_parameters() {
-  logic.parameter.write(parameter.read());
+  logic.parameter_fifo.write(parameter_fifo.read());
 
-  if (parameter.is_empty()) {
+  if (parameter_fifo.is_empty()) {
     logic_transition(&core::logic_transferring_command, 1000);
   } else {
     logic_transition(&core::logic_transferring_parameters, 1000);
@@ -214,7 +214,7 @@ void core::logic_transferring_command() {
 }
 
 void core::logic_executing_command() {
-#define get_param() logic.parameter.read()
+#define get_param() logic.parameter_fifo.read()
 
   if (utility::log_cdrom) {
     printf("cdrom_core::control::executing_command(0x%02x)\n", logic.command);
@@ -286,15 +286,15 @@ void core::logic_executing_command() {
 }
 
 void core::logic_clearing_response() {
-  response.clear();
+  response_fifo.clear();
 
   logic_transition(&core::logic_transferring_response, 1000);
 }
 
 void core::logic_transferring_response() {
-  response.write(logic.response.read());
+  response_fifo.write(logic.response_fifo.read());
 
-  if (logic.response.is_empty()) {
+  if (logic.response_fifo.is_empty()) {
     logic_transition(&core::logic_deliver_interrupt, 1000);
   } else {
     logic_transition(&core::logic_transferring_response, 1000);
@@ -327,16 +327,16 @@ void core::drive_getting_id() {
   if (interrupt_request == 0) {
     // INT2(02h,00h, 20h,00h, 53h,43h,45h,4xh)
 
-    logic.response.write(0x02);
-    logic.response.write(0x00);
+    logic.response_fifo.write(0x02);
+    logic.response_fifo.write(0x00);
 
-    logic.response.write(0x20);
-    logic.response.write(0x00);
+    logic.response_fifo.write(0x20);
+    logic.response_fifo.write(0x00);
 
-    logic.response.write('S');
-    logic.response.write('C');
-    logic.response.write('E');
-    logic.response.write('A');
+    logic.response_fifo.write('S');
+    logic.response_fifo.write('C');
+    logic.response_fifo.write('E');
+    logic.response_fifo.write('A');
     logic.interrupt_request = 2;
 
     drive_transition(&core::drive_idling, 1000);
@@ -348,7 +348,7 @@ void core::drive_getting_id() {
 
 void core::drive_int2() {
   if (interrupt_request == 0) {
-    logic.response.write(get_status_byte());
+    logic.response_fifo.write(get_status_byte());
     logic.interrupt_request = 2;
 
     drive_transition(&core::drive_idling, 1000);
@@ -359,7 +359,7 @@ void core::drive_int2() {
 }
 
 void core::drive_reading() {
-  logic.response.write(core::get_status_byte());
+  logic.response_fifo.write(core::get_status_byte());
   logic.interrupt_request = 1;
 
   read_sector();

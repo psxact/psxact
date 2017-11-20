@@ -2,32 +2,38 @@
 #include "cdrom_core.hpp"
 #include "../utility.hpp"
 
+
 using namespace psxact;
 using namespace psxact::cdrom;
+
 
 static uint32_t get_port(uint32_t address) {
   return address - 0x1f801800;
 }
 
+
 uint8_t core::io_read_port_0() {
   return uint8_t(
-      (index) |
-      //(xa_adpcm.has_data() << 2) |
-      (parameter.is_empty() << 3) |
-      (parameter.has_room() << 4) |
-      (response.has_data() << 5) |
-      (data.has_data() << 6) |
-      (busy << 7)
+      (index                     << 0) |
+//    (xa_adpcm.has_data()       << 2) |
+      (parameter_fifo.is_empty() << 3) |
+      (parameter_fifo.has_room() << 4) |
+      (response_fifo.has_data()  << 5) |
+      (data_fifo.has_data()      << 6) |
+      (busy                      << 7)
   );
 }
 
+
 uint8_t core::io_read_port_1() {
-  return response.read();
+  return response_fifo.read();
 }
 
+
 uint8_t core::io_read_port_2() {
-  return data.read();
+  return data_fifo.read();
 }
+
 
 uint8_t core::io_read_port_3() {
   switch (index) {
@@ -43,6 +49,7 @@ uint8_t core::io_read_port_3() {
     return 0;
   }
 }
+
 
 uint8_t core::io_read_internal(uint32_t port) {
   switch (port) {
@@ -63,12 +70,13 @@ uint8_t core::io_read_internal(uint32_t port) {
   }
 }
 
+
 uint32_t core::io_read(bus_width_t width, uint32_t address) {
   if (width == BUS_WIDTH_WORD && address == 0x1f801800) {
-    uint8_t b0 = data.read();
-    uint8_t b1 = data.read();
-    uint8_t b2 = data.read();
-    uint8_t b3 = data.read();
+    uint8_t b0 = data_fifo.read();
+    uint8_t b1 = data_fifo.read();
+    uint8_t b2 = data_fifo.read();
+    uint8_t b3 = data_fifo.read();
 
     return (b0 << 0) | (b1 << 8) | (b2 << 16) | (b3 << 24);
   }
@@ -85,66 +93,73 @@ uint32_t core::io_read(bus_width_t width, uint32_t address) {
   return data;
 }
 
+
 void core::io_write_port_0_n(uint8_t data) {
   index = data & 3;
 }
+
 
 void core::io_write_port_1_0(uint8_t data) {
   command = data;
   command_is_new = 1;
 }
 
-void core::io_write_port_1_1(uint8_t data) {
-}
 
-void core::io_write_port_1_2(uint8_t data) {
-}
+void core::io_write_port_1_1(uint8_t data) {}
 
-void core::io_write_port_1_3(uint8_t data) {
-}
+
+void core::io_write_port_1_2(uint8_t data) {}
+
+
+void core::io_write_port_1_3(uint8_t data) {}
+
 
 void core::io_write_port_2_0(uint8_t data) {
-  parameter.write(data);
+  parameter_fifo.write(data);
 }
+
 
 void core::io_write_port_2_1(uint8_t data) {
   int32_t flags = data & 0x1f;
   interrupt_enable = flags;
 }
 
-void core::io_write_port_2_2(uint8_t data) {
-}
 
-void core::io_write_port_2_3(uint8_t data) {
-}
+void core::io_write_port_2_2(uint8_t data) {}
+
+
+void core::io_write_port_2_3(uint8_t data) {}
+
 
 void core::io_write_port_3_0(uint8_t data) {
-  this->data.clear();
+  data_fifo.clear();
 
   if (data & 0x80) {
     int skip = mode.read_whole_sector ? 12 : 24;
     int size = mode.read_whole_sector ? 0x924 : 0x800;
 
     for (int i = 0; i < size; i++) {
-      this->data.write(data_buffer[i + skip]);
+      data_fifo.write(data_buffer[i + skip]);
     }
   }
 }
+
 
 void core::io_write_port_3_1(uint8_t data) {
   int32_t flags = data & 0x1f;
   interrupt_request &= ~flags;
 
   if (data & 0x40) {
-    parameter.clear();
+    parameter_fifo.clear();
   }
 }
 
-void core::io_write_port_3_2(uint8_t data) {
-}
 
-void core::io_write_port_3_3(uint8_t data) {
-}
+void core::io_write_port_3_2(uint8_t data) {}
+
+
+void core::io_write_port_3_3(uint8_t data) {}
+
 
 void core::io_write(bus_width_t width, uint32_t address, uint32_t data) {
   assert(width == BUS_WIDTH_BYTE);
