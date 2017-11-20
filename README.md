@@ -33,7 +33,7 @@ This project uses CMake for builds, and requires SDL2.
 ## Contributing
 
 If you'd like to contribute, please create a fork and issue pull requests!
-Newcomers and experts alike are welcome to [.github/CONTRIBUTING.md](contribute).
+Newcomers and experts alike are welcome to [contribute](.github/CONTRIBUTING.md).
 
 ## Communication
 

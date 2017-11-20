@@ -69,4 +69,4 @@ contact us!
 
 Having strong test cases to validate against is also helpful, if you'd like to
 contribute on that front then
-[https://github.com/adam-becker/teststation](please do)!
+[please do](https://github.com/adam-becker/teststation])!
