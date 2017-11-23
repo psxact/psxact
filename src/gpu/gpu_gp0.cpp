@@ -1,8 +1,7 @@
-#include "gpu_core.hpp"
+#include "gpu.hpp"
 #include "../memory/vram.hpp"
 #include "../utility.hpp"
 
-namespace pg = psxact::gpu;
 
 static int command_size[256] = {
   1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $00
@@ -26,7 +25,8 @@ static int command_size[256] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $f0
 };
 
-void pg::core::fill_rectangle() {
+
+void gpu_t::fill_rectangle() {
   uint16_t color =
       ((fifo.buffer[0] >> 3) & 0x001f) |
       ((fifo.buffer[0] >> 6) & 0x03e0) |
@@ -49,9 +49,11 @@ void pg::core::fill_rectangle() {
   }
 }
 
-void pg::core::copy_vram_to_vram() {}
 
-void pg::core::copy_wram_to_vram() {
+void gpu_t::copy_vram_to_vram() {}
+
+
+void gpu_t::copy_wram_to_vram() {
   auto &transfer = cpu_to_gpu_transfer;
   transfer.reg.x = fifo.buffer[1] & 0xffff;
   transfer.reg.y = fifo.buffer[1] >> 16;
@@ -63,7 +65,8 @@ void pg::core::copy_wram_to_vram() {
   transfer.run.active = true;
 }
 
-void pg::core::copy_vram_to_wram() {
+
+void gpu_t::copy_vram_to_wram() {
   auto &transfer = gpu_to_cpu_transfer;
   transfer.reg.x = fifo.buffer[1] & 0xffff;
   transfer.reg.y = fifo.buffer[1] >> 16;
@@ -75,7 +78,8 @@ void pg::core::copy_vram_to_wram() {
   transfer.run.active = true;
 }
 
-void pg::core::gp0(uint32_t data) {
+
+void gpu_t::gp0(uint32_t data) {
   if (cpu_to_gpu_transfer.run.active) {
     uint16_t lower = uint16_t(data >> 0);
     uint16_t upper = uint16_t(data >> 16);

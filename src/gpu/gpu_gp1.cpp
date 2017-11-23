@@ -1,9 +1,8 @@
-#include "gpu_core.hpp"
+#include "gpu.hpp"
 #include "../utility.hpp"
 
-namespace pg = psxact::gpu;
 
-void pg::core::gp1(uint32_t data) {
+void gpu_t::gp1(uint32_t data) {
   switch ((data >> 24) & 0x3f) {
   case 0x00:
     status = 0x14802000;

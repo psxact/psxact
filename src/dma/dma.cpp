@@ -1,18 +1,18 @@
-#include "dma_core.hpp"
+#include "dma.hpp"
 #include "../utility.hpp"
 
-using namespace psxact;
-using namespace psxact::dma;
 
 static uint32_t get_channel_index(uint32_t address) {
   return (address >> 4) & 7;
 }
 
+
 static uint32_t get_register_index(uint32_t address) {
   return (address >> 2) & 3;
 }
 
-uint32_t core::io_read(bus_width_t width, uint32_t address) {
+
+uint32_t dma_t::io_read(bus_width_t width, uint32_t address) {
   if (utility::log_dma) {
     printf("dma::io_read(%d, 0x%08x)\n", width, address);
   }
@@ -37,7 +37,8 @@ uint32_t core::io_read(bus_width_t width, uint32_t address) {
   return 0;
 }
 
-void core::io_write(bus_width_t width, uint32_t address, uint32_t data) {
+
+void dma_t::io_write(bus_width_t width, uint32_t address, uint32_t data) {
   if (utility::log_dma) {
     printf("dma::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
   }
@@ -69,7 +70,8 @@ void core::io_write(bus_width_t width, uint32_t address, uint32_t data) {
   main();
 }
 
-void core::main() {
+
+void dma_t::main() {
   if (dpcr & 0x08000000) { run_channel(6); }
   if (dpcr & 0x00800000) { run_channel(5); }
   if (dpcr & 0x00080000) { run_channel(4); }
@@ -79,19 +81,22 @@ void core::main() {
   if (dpcr & 0x00000008) { run_channel(0); }
 }
 
-void core::run_channel_0() {
+
+void dma_t::run_channel_0() {
   channels[0].control &= ~0x01000000;
 
   irq_channel(0);
 }
 
-void core::run_channel_1() {
+
+void dma_t::run_channel_1() {
   channels[1].control &= ~0x01000000;
 
   irq_channel(1);
 }
 
-void core::run_channel_2_data_read() {
+
+void dma_t::run_channel_2_data_read() {
   uint32_t address = channels[2].address;
   uint32_t bs = (channels[2].counter >> 0) & 0xffff;
   uint32_t ba = (channels[2].counter >> 16) & 0xffff;
@@ -101,8 +106,8 @@ void core::run_channel_2_data_read() {
 
   for (uint32_t a = 0; a < ba; a++) {
     for (uint32_t s = 0; s < bs; s++) {
-      uint32_t data = system->read(BUS_WIDTH_WORD, 0x1f801810);
-      system->write(BUS_WIDTH_WORD, address, data);
+      uint32_t data = bus->read(bus_width_t::word, 0x1f801810);
+      bus->write(bus_width_t::word, address, data);
       address += 4;
     }
   }
@@ -112,7 +117,8 @@ void core::run_channel_2_data_read() {
   irq_channel(2);
 }
 
-void core::run_channel_2_data_write() {
+
+void dma_t::run_channel_2_data_write() {
   uint32_t address = channels[2].address;
   uint32_t bs = (channels[2].counter >> 0) & 0xffff;
   uint32_t ba = (channels[2].counter >> 16) & 0xffff;
@@ -122,8 +128,8 @@ void core::run_channel_2_data_write() {
 
   for (uint32_t a = 0; a < ba; a++) {
     for (uint32_t s = 0; s < bs; s++) {
-      uint32_t data = system->read(BUS_WIDTH_WORD, address);
-      system->write(BUS_WIDTH_WORD, 0x1f801810, data);
+      uint32_t data = bus->read(bus_width_t::word, address);
+      bus->write(bus_width_t::word, 0x1f801810, data);
       address += 4;
     }
   }
@@ -133,18 +139,19 @@ void core::run_channel_2_data_write() {
   irq_channel(2);
 }
 
-void core::run_channel_2_list() {
+
+void dma_t::run_channel_2_list() {
   uint32_t address = channels[2].address & 0x1ffffc;
 
   while (1) {
-    uint32_t header = system->read(BUS_WIDTH_WORD, address);
+    uint32_t header = bus->read(bus_width_t::word, address);
     uint32_t length = header >> 24;
 
     for (uint32_t i = 0; i < length; i++) {
       address = (address + 4) & 0x1ffffc;
 
-      uint32_t data = system->read(BUS_WIDTH_WORD, address);
-      system->write(BUS_WIDTH_WORD, 0x1f801810, data);
+      uint32_t data = bus->read(bus_width_t::word, address);
+      bus->write(bus_width_t::word, 0x1f801810, data);
     }
 
     if (header & 0x800000) {
@@ -159,15 +166,16 @@ void core::run_channel_2_list() {
   irq_channel(2);
 }
 
-void core::run_channel_3() {
+
+void dma_t::run_channel_3() {
   uint32_t address = channels[3].address;
   uint32_t counter = channels[3].counter & 0xffff;
 
   counter = counter ? counter : 0x10000;
 
   for (uint32_t i = 0; i < counter; i++) {
-    uint32_t data = system->read(BUS_WIDTH_WORD, 0x1f801800);
-    system->write(BUS_WIDTH_WORD, address, data);
+    uint32_t data = bus->read(bus_width_t::word, 0x1f801800);
+    bus->write(bus_width_t::word, address, data);
 
     address += 4;
   }
@@ -177,15 +185,16 @@ void core::run_channel_3() {
   irq_channel(3);
 }
 
-void core::run_channel_4_write() {
+
+void dma_t::run_channel_4_write() {
   uint32_t address = channels[4].address;
   uint32_t counter = channels[4].counter & 0xffff;
 
   counter = counter ? counter : 0x10000;
 
   for (uint32_t i = 0; i < counter; i++) {
-    uint32_t data = system->read(BUS_WIDTH_WORD, address);
-    system->write(BUS_WIDTH_WORD, 0, data);
+    uint32_t data = bus->read(bus_width_t::word, address);
+    bus->write(bus_width_t::word, 0, data);
   }
 
   channels[4].control &= ~0x01000000;
@@ -193,25 +202,27 @@ void core::run_channel_4_write() {
   irq_channel(4);
 }
 
-void core::run_channel_6() {
+
+void dma_t::run_channel_6() {
   uint32_t address = channels[6].address;
   uint32_t counter = channels[6].counter & 0xffff;
 
   counter = counter ? counter : 0x10000;
 
   for (uint32_t i = 1; i < counter; i++) {
-    system->write(BUS_WIDTH_WORD, address, address - 4);
+    bus->write(bus_width_t::word, address, address - 4);
     address -= 4;
   }
 
-  system->write(BUS_WIDTH_WORD, address, 0x00ffffff);
+  bus->write(bus_width_t::word, address, 0x00ffffff);
 
   channels[6].control &= ~0x01000000;
 
   irq_channel(6);
 }
 
-void core::run_channel(int32_t n) {
+
+void dma_t::run_channel(int32_t n) {
   if (n == 0) {
     switch (channels[0].control) {
     case 0x00000000: return;
@@ -263,7 +274,8 @@ void core::run_channel(int32_t n) {
   printf("[DMA] Unhandled DMA %d control value: 0x%08x\n", n, channels[n].control);
 }
 
-void core::irq_channel(int32_t n) {
+
+void dma_t::irq_channel(int32_t n) {
   uint32_t flag = 1 << (n + 24);
   uint32_t mask = 1 << (n + 16);
 
@@ -274,7 +286,8 @@ void core::irq_channel(int32_t n) {
   update_irq_active_flag();
 }
 
-void core::update_irq_active_flag() {
+
+void dma_t::update_irq_active_flag() {
   bool forced = ((dicr >> 15) & 1) != 0;
   bool master = ((dicr >> 23) & 1) != 0;
   bool signal = ((dicr >> 16) & (dicr >> 24) & 0x7f) != 0;
@@ -282,7 +295,7 @@ void core::update_irq_active_flag() {
 
   if (active) {
     if (!(dicr & 0x80000000)) {
-      system->irq(3);
+      bus->irq(3);
     }
 
     dicr |= 0x80000000;

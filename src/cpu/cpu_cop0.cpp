@@ -1,8 +1,7 @@
 #include "cpu_cop0.hpp"
 
-using namespace psxact::cpu::cop0;
 
-void core::run(uint32_t n) {
+void cop0_core::run(uint32_t n) {
   switch (n) {
   case 0x10:
     return leave_exception();
@@ -12,22 +11,22 @@ void core::run(uint32_t n) {
   }
 }
 
-uint32_t core::read_ccr(uint32_t n) {
+uint32_t cop0_core::read_ccr(uint32_t n) {
   return 0;
 }
 
-void core::write_ccr(uint32_t n, uint32_t value) {
+void cop0_core::write_ccr(uint32_t n, uint32_t value) {
 }
 
-uint32_t core::read_gpr(uint32_t n) {
+uint32_t cop0_core::read_gpr(uint32_t n) {
   return regs[n];
 }
 
-void core::write_gpr(uint32_t n, uint32_t value) {
+void cop0_core::write_gpr(uint32_t n, uint32_t value) {
   regs[n] = value;
 }
 
-uint32_t core::enter_exception(exception_code_t code, uint32_t pc, bool is_branch_delay_slot) {
+uint32_t cop0_core::enter_exception(cop0_exception_code code, uint32_t pc, bool is_branch_delay_slot) {
   uint32_t status = regs[12];
   status = (status & ~0x3f) | ((status << 2) & 0x3f);
 
@@ -54,7 +53,7 @@ uint32_t core::enter_exception(exception_code_t code, uint32_t pc, bool is_branc
          : 0x80000080;
 }
 
-void core::leave_exception() {
+void cop0_core::leave_exception() {
   uint32_t sr = regs[12];
   sr = (sr & ~0xf) | ((sr >> 2) & 0xf);
 

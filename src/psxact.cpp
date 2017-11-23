@@ -1,11 +1,11 @@
 #include <cstdio>
-#include "system_core.hpp"
+#include "console.hpp"
 #include "sdl2.hpp"
 #include "memory/vram.hpp"
 
-using namespace psxact;
 
-system_core *psxact::system;
+console_t *bus;
+
 
 int main(int argc, char *argv[]) {
   if (argc != 3) {
@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  psxact::system = new system_core(argv[1], argv[2]);
+  bus = new console_t(argv[1], argv[2]);
 
   sdl2 renderer;
 
@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
       break;
     }
 
-    psxact::system->run_for_one_frame(&x, &y, &w, &h);
+    bus->run_for_one_frame(&x, &y, &w, &h);
   }
 
   return 0;

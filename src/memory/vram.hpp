@@ -1,16 +1,17 @@
-#ifndef __PSXACT_VRAM_HPP__
-#define __PSXACT_VRAM_HPP__
+#ifndef __psxact_vram_hpp__
+#define __psxact_vram_hpp__
+
 
 #include <cstdint>
 
-namespace psxact {
-  namespace vram {
-    uint16_t *get_pointer(int32_t x, int32_t y);
 
-    uint16_t read(int32_t x, int32_t y);
+namespace vram {
+  uint16_t *get_pointer(int32_t x, int32_t y);
 
-    void write(int32_t x, int32_t y, uint16_t data);
-  }
+  uint16_t read(int32_t x, int32_t y);
+
+  void write(int32_t x, int32_t y, uint16_t data);
 }
 
-#endif // __PSXACT_VRAM_HPP__
+
+#endif // __psxact_vram_hpp__

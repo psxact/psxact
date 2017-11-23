@@ -1,8 +1,7 @@
-#include "gpu_core.hpp"
+#include "gpu.hpp"
 #include "../limits.hpp"
 #include "../memory/vram.hpp"
 
-namespace pg = psxact::gpu;
 
 static const int dither_lut[4][4] = {
   { -4,  0, -3,  1 },
@@ -11,7 +10,8 @@ static const int dither_lut[4][4] = {
   {  3, -1,  2, -2 }
 };
 
-void pg::core::draw_point(point_t point, color_t color) {
+
+void gpu_t::draw_point(point_t point, color_t color) {
   if (point.x < drawing_area_x1 ||
       point.x > drawing_area_x2 ||
       point.y < drawing_area_y1 ||

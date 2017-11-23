@@ -1,12 +1,12 @@
 #include <algorithm>
-#include "gpu_core.hpp"
+#include "gpu.hpp"
 #include "../memory/vram.hpp"
+
 
 // Rect Commands
 //
 // 25    | Semi Transparency (0=Off, 1=On)
 
-namespace pg = psxact::gpu;
 
 static int32_t get_x_length(uint32_t *fifo) {
   switch ((fifo[0] >> 27) & 3) {
@@ -30,6 +30,7 @@ static int32_t get_x_length(uint32_t *fifo) {
   }
 }
 
+
 static int32_t get_y_length(uint32_t *fifo) {
   switch ((fifo[0] >> 27) & 3) {
   case 0:
@@ -52,7 +53,8 @@ static int32_t get_y_length(uint32_t *fifo) {
   }
 }
 
-static bool get_color(uint32_t command, pg::core::color_t &color, pg::core::tev_t &tev, pg::core::point_t &coord) {
+
+static bool get_color(uint32_t command, gpu_t::color_t &color, gpu_t::tev_t &tev, gpu_t::point_t &coord) {
   bool blended = (command & (1 << 24)) != 0;
   bool textured = (command & (1 << 26)) != 0;
 
@@ -60,7 +62,7 @@ static bool get_color(uint32_t command, pg::core::color_t &color, pg::core::tev_
     return true;
   }
 
-  pg::core::color_t pixel = pg::core::get_texture_color(tev, coord);
+  gpu_t::color_t pixel = gpu_t::get_texture_color(tev, coord);
 
   if (blended) {
     color.r = std::min(255, (pixel.r * color.r) / 2);
@@ -76,7 +78,8 @@ static bool get_color(uint32_t command, pg::core::color_t &color, pg::core::tev_
   return (color.r | color.g | color.b) > 0;
 }
 
-void pg::core::draw_rectangle() {
+
+void gpu_t::draw_rectangle() {
   tev_t tev;
   tev.palette_page_x = (fifo.buffer[2] >> 12) & 0x3f0;
   tev.palette_page_y = (fifo.buffer[2] >> 22) & 0x1ff;

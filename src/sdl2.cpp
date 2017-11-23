@@ -4,7 +4,7 @@
 static const int window_width = 640;
 static const int window_height = 480;
 
-psxact::sdl2::sdl2() {
+sdl2::sdl2() {
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
 
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
@@ -50,13 +50,13 @@ psxact::sdl2::sdl2() {
   }
 }
 
-psxact::sdl2::~sdl2() {
+sdl2::~sdl2() {
   SDL_DestroyWindow(window);
   SDL_DestroyRenderer(renderer);
   SDL_DestroyTexture(texture);
 }
 
-bool psxact::sdl2::render(uint16_t *src_pixels, int w, int h) {
+bool sdl2::render(uint16_t *src_pixels, int w, int h) {
   resize(w, h);
 
   void *dst_pixels;
@@ -84,7 +84,7 @@ bool psxact::sdl2::render(uint16_t *src_pixels, int w, int h) {
   return handle_events();
 }
 
-static void controller_button(psxact::controller_state &ctrl, uint8_t button, bool isPressed) {
+static void controller_button(controller_state_t &ctrl, uint8_t button, bool isPressed) {
   switch (button) {
   case SDL_CONTROLLER_BUTTON_DPAD_UP:
     ctrl.dpad_up = isPressed;
@@ -136,7 +136,7 @@ static void controller_button(psxact::controller_state &ctrl, uint8_t button, bo
   }
 }
 
-static void controller_axis(psxact::controller_state &ctrl, uint8_t axis, int value) {
+static void controller_axis(controller_state_t &ctrl, uint8_t axis, int value) {
   switch (axis) {
   case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
     ctrl.l2 = value > 16383;
@@ -148,7 +148,7 @@ static void controller_axis(psxact::controller_state &ctrl, uint8_t axis, int va
   }
 }
 
-bool psxact::sdl2::handle_events() {
+bool sdl2::handle_events() {
   SDL_Event event;
 
   bool alive = true;
@@ -180,7 +180,7 @@ bool psxact::sdl2::handle_events() {
   return alive;
 }
 
-void psxact::sdl2::resize(int w, int h) {
+void sdl2::resize(int w, int h) {
   if (texture_size_x == w && texture_size_y == h) {
     return;
   }

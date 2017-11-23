@@ -1,21 +1,21 @@
-#include "input_core.hpp"
+#include "input.hpp"
 #include "../utility.hpp"
 
-using namespace psxact;
-using namespace psxact::input;
 
-core::core() {
+input_t::input_t() {
   baud_factor = 1;
   baud_reload = 0x0088;
 
   reload_baud();
 }
 
+
 static uint32_t get_index(uint32_t address) {
   return address - 0x1f801040;
 }
 
-uint32_t core::io_read(bus_width_t width, uint32_t address) {
+
+uint32_t input_t::io_read(bus_width_t width, uint32_t address) {
   if (utility::log_input) {
     printf("input::io_read(%d, 0x%08x)\n", width, address);
   }
@@ -44,13 +44,15 @@ uint32_t core::io_read(bus_width_t width, uint32_t address) {
   return 0;
 }
 
+
 static int32_t get_baud_rate_factor(uint32_t data) {
   static const int lut[4] = {1, 1, 16, 64};
 
   return lut[data & 3];
 }
 
-void core::io_write(bus_width_t width, uint32_t address, uint32_t data) {
+
+void input_t::io_write(bus_width_t width, uint32_t address, uint32_t data) {
   if (utility::log_input) {
     printf("input::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
   }
@@ -78,10 +80,10 @@ void core::io_write(bus_width_t width, uint32_t address, uint32_t data) {
 
       if (data & (1 << 1)) {
         port.sequence = 0;
-        port.status = port_status::selected;
+        port.status = input_port_status_t::selected;
       }
       else {
-        port.status = port_status::none;
+        port.status = input_port_status_t::none;
       }
     }
     break;
@@ -92,14 +94,16 @@ void core::io_write(bus_width_t width, uint32_t address, uint32_t data) {
   }
 }
 
-void core::reload_baud() {
+
+void input_t::reload_baud() {
   baud_timer = baud_reload * baud_factor;
 }
 
-void core::tick() {
+
+void input_t::tick() {
   if (dsr_cycles && !--dsr_cycles && dsr) {
     irq = 1;
-    system->irq(7);
+    bus->irq(7);
   }
 
   baud_timer--;
@@ -125,19 +129,21 @@ void core::tick() {
   }
 }
 
-port *core::get_selected_port() {
-  if (ports[0].status == port_status::selected) {
+
+input_port_t *input_t::get_selected_port() {
+  if (ports[0].status == input_port_status_t::selected) {
     return &ports[0];
   }
 
-  if (ports[1].status == port_status::selected) {
+  if (ports[1].status == input_port_status_t::selected) {
     return &ports[1];
   }
 
   return nullptr;
 }
 
-bool core::send(uint8_t request, uint8_t *response) {
+
+bool input_t::send(uint8_t request, uint8_t *response) {
   auto port = get_selected_port();
   if (port == nullptr) {
     return false;
@@ -145,18 +151,18 @@ bool core::send(uint8_t request, uint8_t *response) {
 
   if (port->sequence == 0) {
     if (tx_data & 0x80) {
-      port->access = port_access::memory_card;
+      port->access = input_port_access_t::memory_card;
     }
     else {
-      port->access = port_access::controller;
+      port->access = input_port_access_t::controller;
     }
   }
 
   switch (port->access) {
-  case port_access::controller:
+  case input_port_access_t::controller:
     return send_controller(port, request, response);
 
-  case port_access::memory_card:
+  case input_port_access_t::memory_card:
     return send_memory_card(port, request, response);
 
   default:
@@ -164,20 +170,24 @@ bool core::send(uint8_t request, uint8_t *response) {
   }
 }
 
-bool core::send_controller(struct port *port, uint8_t request, uint8_t *response) {
+
+bool input_t::send_controller(struct input_port_t *port, uint8_t request, uint8_t *response) {
   return send_controller_digital(port, request, response);
 }
 
-bool core::send_memory_card(struct port *port, uint8_t request, uint8_t *response) {
+
+bool input_t::send_memory_card(struct input_port_t *port, uint8_t request, uint8_t *response) {
   return send_null(port, request, response);
 }
 
-bool core::send_null(struct port *port, uint8_t request, uint8_t *response) {
+
+bool input_t::send_null(struct input_port_t *port, uint8_t request, uint8_t *response) {
   *response = 0xff;
   return false;
 }
 
-bool core::send_controller_digital(struct port *port, uint8_t request, uint8_t *response) {
+
+bool input_t::send_controller_digital(struct input_port_t *port, uint8_t request, uint8_t *response) {
   auto sequence = port->sequence;
   port->sequence++;
 

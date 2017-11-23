@@ -1,5 +1,5 @@
-#ifndef __PSXACT_MEMORY_HPP__
-#define __PSXACT_MEMORY_HPP__
+#ifndef __psxact_memory_hpp__
+#define __psxact_memory_hpp__
 
 #include <cstdint>
 #include <cstring>
@@ -44,4 +44,4 @@ struct memory_t {
   }
 };
 
-#endif // __PSXACT_MEMORY_HPP__
+#endif // __psxact_memory_hpp__

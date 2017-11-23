@@ -10,19 +10,18 @@
  *   - Horizontal clock input
  */
 
-#include "timer_core.hpp"
+#include "counter.hpp"
 #include "../utility.hpp"
 
-using namespace psxact;
-using namespace psxact::timer;
 
-core::core() {
+counter_t::counter_t() {
   unit_init(0, 11, 7 * 4);
   unit_init(1, 11, 7 * 3413);
   unit_init(2,  1, 8);
 }
 
-uint32_t core::io_read(bus_width_t width, uint32_t address) {
+
+uint32_t counter_t::io_read(bus_width_t width, uint32_t address) {
   if (utility::log_timer) {
     printf("timer::io_read(%d, 0x%08x)\n", width, address);
   }
@@ -52,7 +51,8 @@ uint32_t core::io_read(bus_width_t width, uint32_t address) {
   return 0;
 }
 
-void core::io_write(bus_width_t width, uint32_t address, uint32_t data) {
+
+void counter_t::io_write(bus_width_t width, uint32_t address, uint32_t data) {
   if (utility::log_timer) {
     printf("timer::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
   }
@@ -80,11 +80,13 @@ void core::io_write(bus_width_t width, uint32_t address, uint32_t data) {
   }
 }
 
-uint16_t core::unit_get_compare(int n) {
+
+uint16_t counter_t::unit_get_compare(int n) {
   return units[n].compare.value;
 }
 
-uint16_t core::unit_get_control(int n) {
+
+uint16_t counter_t::unit_get_control(int n) {
   auto &unit = units[n];
 
   auto control =
@@ -106,9 +108,11 @@ uint16_t core::unit_get_control(int n) {
   return uint16_t(control);
 }
 
-uint16_t core::unit_get_counter(int n) {
+
+uint16_t counter_t::unit_get_counter(int n) {
   return units[n].counter;
 }
+
 
 static bool is_running(int synch_mode, bool b = 1) {
   switch (synch_mode) {
@@ -121,13 +125,15 @@ static bool is_running(int synch_mode, bool b = 1) {
   return 0;
 }
 
-void core::unit_init(int n, int single, int period) {
+
+void counter_t::unit_init(int n, int single, int period) {
   units[n].prescaler.single = single;
   units[n].prescaler.period = period;
   units[n].prescaler.cycles = period;
 }
 
-void core::unit_set_control(int n, uint16_t data) {
+
+void counter_t::unit_set_control(int n, uint16_t data) {
   auto &unit = units[n];
 
   unit.counter = 0;
@@ -159,15 +165,18 @@ void core::unit_set_control(int n, uint16_t data) {
   }
 }
 
-void core::unit_set_compare(int n, uint16_t data) {
+
+void counter_t::unit_set_compare(int n, uint16_t data) {
   units[n].compare.value = data;
 }
 
-void core::unit_set_counter(int n, uint16_t data) {
+
+void counter_t::unit_set_counter(int n, uint16_t data) {
   units[n].counter = data;
 }
 
-void core::unit_irq(int n) {
+
+void counter_t::unit_irq(int n) {
   auto &irq = units[n].irq;
 
   if (irq.enable) {
@@ -178,12 +187,13 @@ void core::unit_irq(int n) {
     }
     else {
       irq.bit = 0;
-      system->irq(4 + n);
+      bus->irq(4 + n);
     }
   }
 }
 
-void core::unit_tick(int n) {
+
+void counter_t::unit_tick(int n) {
   auto &timer = units[n];
 
   if (timer.running) {
@@ -211,7 +221,8 @@ void core::unit_tick(int n) {
   }
 }
 
-void core::unit_prescale(int n) {
+
+void counter_t::unit_prescale(int n) {
   auto &prescaler = units[n].prescaler;
 
   if (prescaler.enable == 0) {
@@ -227,13 +238,15 @@ void core::unit_prescale(int n) {
   }
 }
 
-void core::tick() {
+
+void counter_t::tick() {
   unit_prescale(0);
   unit_prescale(1);
   unit_prescale(2);
 }
 
-void core::hblank(bool active) {
+
+void counter_t::hblank(bool active) {
   in_hblank = active;
 
   auto &unit = units[0];
@@ -241,7 +254,8 @@ void core::hblank(bool active) {
   unit.running = is_running(unit.synch_mode, in_hblank);
 }
 
-void core::vblank(bool active) {
+
+void counter_t::vblank(bool active) {
   in_vblank = active;
 
   auto &unit = units[1];

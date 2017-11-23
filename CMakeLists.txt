@@ -14,9 +14,11 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SOURCE_FILES
-        src/cdrom/cdrom_core.cpp
-        src/cdrom/cdrom_core.hpp
-        src/cdrom/cdrom_core_io.cpp
+        src/cdrom/cdrom.cpp
+        src/cdrom/cdrom.hpp
+        src/cdrom/cdrom_io.cpp
+        src/counter/counter.cpp
+        src/counter/counter.hpp
         src/cpu/cpu_code.cpp
         src/cpu/cpu_cop0.cpp
         src/cpu/cpu_cop0.hpp
@@ -24,38 +26,36 @@ set(SOURCE_FILES
         src/cpu/cpu_cop2_io.cpp
         src/cpu/cpu_cop2.cpp
         src/cpu/cpu_cop2.hpp
-        src/cpu/cpu_core.cpp
-        src/cpu/cpu_core.hpp
+        src/cpu/cpu.cpp
+        src/cpu/cpu.hpp
         src/cpu/decoder.cpp
         src/cpu/disassembler.cpp
-        src/dma/dma_core.cpp
-        src/dma/dma_core.hpp
+        src/dma/dma.cpp
+        src/dma/dma.hpp
         src/gpu/gpu_gp0.cpp
         src/gpu/gpu_gp1.cpp
-        src/gpu/gpu_core.cpp
-        src/gpu/gpu_core.hpp
+        src/gpu/gpu.cpp
+        src/gpu/gpu.hpp
         src/gpu/gpu_draw.cpp
         src/gpu/gpu_line.cpp
         src/gpu/gpu_poly.cpp
         src/gpu/gpu_rect.cpp
-        src/input/input_core.cpp
-        src/input/input_core.hpp
-        src/mdec/mdec_core.cpp
-        src/mdec/mdec_core.hpp
+        src/input/input.cpp
+        src/input/input.hpp
+        src/mdec/mdec.cpp
+        src/mdec/mdec.hpp
         src/memory/vram.cpp
         src/memory/vram.hpp
-        src/spu/spu_core.cpp
-        src/spu/spu_core.hpp
-        src/timer/timer_core.cpp
-        src/timer/timer_core.hpp
+        src/spu/spu.cpp
+        src/spu/spu.hpp
         src/fifo.hpp
         src/limits.hpp
         src/memory.hpp
         src/psxact.cpp
         src/sdl2.cpp
         src/sdl2.hpp
-        src/system_core.cpp
-        src/system_core.hpp
+        src/console.cpp
+        src/console.hpp
         src/utility.hpp)
 
 add_executable(psxact ${SOURCE_FILES})

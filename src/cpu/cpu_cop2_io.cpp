@@ -2,28 +2,42 @@
 #include "../limits.hpp"
 #include "../utility.hpp"
 
-using namespace psxact::cpu::cop2;
 
-uint32_t core::read_matrix_vector_group(uint32_t n) {
+uint32_t cop2_core::read_matrix_vector_group(uint32_t n) {
   auto &matrix = ccr.matrix[n >> 3];
   auto &vector = ccr.vector[n >> 3];
 
   switch (n & 7) {
-  case 0: return uint16_t(matrix[0][0]) | (matrix[0][1] << 16);
-  case 1: return uint16_t(matrix[0][2]) | (matrix[1][0] << 16);
-  case 2: return uint16_t(matrix[1][1]) | (matrix[1][2] << 16);
-  case 3: return uint16_t(matrix[2][0]) | (matrix[2][1] << 16);
-  case 4: return uint32_t(matrix[2][2]);
-  case 5: return uint32_t(vector[0]);
-  case 6: return uint32_t(vector[1]);
-  case 7: return uint32_t(vector[2]);
+  case 0:
+    return uint16_t(matrix[0][0]) | (matrix[0][1] << 16);
 
-  default:
-    return 0;
+  case 1:
+    return uint16_t(matrix[0][2]) | (matrix[1][0] << 16);
+
+  case 2:
+    return uint16_t(matrix[1][1]) | (matrix[1][2] << 16);
+
+  case 3:
+    return uint16_t(matrix[2][0]) | (matrix[2][1] << 16);
+
+  case 4:
+    return uint32_t(matrix[2][2]);
+
+  case 5:
+    return uint32_t(vector[0]);
+
+  case 6:
+    return uint32_t(vector[1]);
+
+  case 7:
+    return uint32_t(vector[2]);
   }
+
+  return 0;
 }
 
-uint32_t core::read_ccr(uint32_t n) {
+
+uint32_t cop2_core::read_ccr(uint32_t n) {
   if (n <= 0x17) {
     return read_matrix_vector_group(n);
   }
@@ -58,7 +72,8 @@ uint32_t core::read_ccr(uint32_t n) {
   }
 }
 
-void core::write_matrix_vector_group(uint32_t n, uint32_t value) {
+
+void cop2_core::write_matrix_vector_group(uint32_t n, uint32_t value) {
   auto &matrix = ccr.matrix[n >> 3];
   auto &vector = ccr.vector[n >> 3];
 
@@ -101,7 +116,8 @@ void core::write_matrix_vector_group(uint32_t n, uint32_t value) {
   }
 }
 
-void core::write_ccr(uint32_t n, uint32_t value) {
+
+void cop2_core::write_ccr(uint32_t n, uint32_t value) {
   if (n <= 0x17) {
     return write_matrix_vector_group(n, value);
   }
@@ -143,7 +159,8 @@ void core::write_ccr(uint32_t n, uint32_t value) {
   }
 }
 
-uint32_t core::read_gpr(uint32_t n) {
+
+uint32_t cop2_core::read_gpr(uint32_t n) {
   switch (n) {
   case 0x00:
     return uint16_t(gpr.vector[0][0]) | (uint16_t(gpr.vector[0][1]) << 16);
@@ -246,7 +263,8 @@ uint32_t core::read_gpr(uint32_t n) {
   }
 }
 
-void core::write_gpr(uint32_t n, uint32_t value) {
+
+void cop2_core::write_gpr(uint32_t n, uint32_t value) {
   switch (n) {
   case 0x00:
     gpr.vector[0][0] = int16_t(value);

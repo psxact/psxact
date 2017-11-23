@@ -1,19 +1,20 @@
-#include "cpu_core.hpp"
+#include "cpu.hpp"
 #include "cpu_cop0.hpp"
 #include "cpu_cop2.hpp"
 #include "../utility.hpp"
 
-using namespace psxact::cpu;
 
 // --========--
 //   Decoding
 // --========--
 
+
 static inline uint32_t overflow(uint32_t x, uint32_t y, uint32_t z) {
   return (~(x ^ y) & (x ^ z) & 0x80000000);
 }
 
-uint32_t core::get_register(uint32_t index) {
+
+uint32_t cpu_t::get_register(uint32_t index) {
   if (is_load_delay_slot && load_index == index) {
     return load_value;
   }
@@ -22,21 +23,25 @@ uint32_t core::get_register(uint32_t index) {
   }
 }
 
-uint32_t core::get_register_forwarded(uint32_t index) {
+
+uint32_t cpu_t::get_register_forwarded(uint32_t index) {
   return regs.gp[index];
 }
 
-void core::set_rd(uint32_t value) {
+
+void cpu_t::set_rd(uint32_t value) {
   regs.gp[decode_rd()] = value;
   regs.gp[0] = 0;
 }
 
-void core::set_rt(uint32_t value) {
+
+void cpu_t::set_rt(uint32_t value) {
   regs.gp[decode_rt()] = value;
   regs.gp[0] = 0;
 }
 
-void core::set_rt_load(uint32_t value) {
+
+void cpu_t::set_rt_load(uint32_t value) {
   uint32_t t = decode_rt();
 
   if (is_load_delay_slot && load_index == t) {
@@ -51,97 +56,113 @@ void core::set_rt_load(uint32_t value) {
   regs.gp[0] = 0;
 }
 
-uint32_t core::get_rt() {
+
+uint32_t cpu_t::get_rt() {
   return get_register(decode_rt());
 }
 
-uint32_t core::get_rt_forwarded() {
+
+uint32_t cpu_t::get_rt_forwarded() {
   return get_register_forwarded(decode_rt());
 }
 
-uint32_t core::get_rs() {
+
+uint32_t cpu_t::get_rs() {
   return get_register(decode_rs());
 }
+
 
 // --============--
 //   Instructions
 // --============--
 
-void core::op_add() {
+
+void cpu_t::op_add() {
   uint32_t x = get_rs();
   uint32_t y = get_rt();
   uint32_t z = x + y;
 
   if (overflow(x, y, z)) {
-    enter_exception(cop0::exception_code_t::overflow);
+    enter_exception(cop0_exception_code::overflow);
   }
   else {
     set_rd(z);
   }
 }
 
-void core::op_addi() {
+
+void cpu_t::op_addi() {
   uint32_t x = get_rs();
   uint32_t y = decode_iconst();
   uint32_t z = x + y;
 
   if (overflow(x, y, z)) {
-    enter_exception(cop0::exception_code_t::overflow);
+    enter_exception(cop0_exception_code::overflow);
   }
   else {
     set_rt(z);
   }
 }
 
-void core::op_addiu() {
+
+void cpu_t::op_addiu() {
   set_rt(get_rs() + decode_iconst());
 }
 
-void core::op_addu() {
+
+void cpu_t::op_addu() {
   set_rd(get_rs() + get_rt());
 }
 
-void core::op_and() {
+
+void cpu_t::op_and() {
   set_rd(get_rs() & get_rt());
 }
 
-void core::op_andi() {
+
+void cpu_t::op_andi() {
   set_rt(get_rs() & decode_uconst());
 }
 
-void core::op_beq() {
+
+void cpu_t::op_beq() {
   if (get_rs() == get_rt()) {
     regs.next_pc = regs.pc + (decode_iconst() << 2);
     is_branch = true;
   }
 }
 
-void core::op_bgtz() {
+
+void cpu_t::op_bgtz() {
   if (int32_t(get_rs()) > 0) {
     regs.next_pc = regs.pc + (decode_iconst() << 2);
     is_branch = true;
   }
 }
 
-void core::op_blez() {
+
+void cpu_t::op_blez() {
   if (int32_t(get_rs()) <= 0) {
     regs.next_pc = regs.pc + (decode_iconst() << 2);
     is_branch = true;
   }
 }
 
-void core::op_bne() {
+
+void cpu_t::op_bne() {
   if (get_rs() != get_rt()) {
     regs.next_pc = regs.pc + (decode_iconst() << 2);
     is_branch = true;
   }
 }
 
-void core::op_break() {
-  enter_exception(cop0::exception_code_t::breakpoint);
+
+void cpu_t::op_break() {
+  enter_exception(cop0_exception_code::breakpoint);
 }
 
-void core::op_bxx() {
+
+void cpu_t::op_bxx() {
   // bgez rs,$nnnn
   // bgezal rs,$nnnn
   // bltz rs,$nnnn
@@ -160,7 +181,8 @@ void core::op_bxx() {
   }
 }
 
-void core::op_cop0() {
+
+void cpu_t::op_cop0() {
   if (code & (1 << 25)) {
     return cop0.run(code & 0x1ffffff);
   }
@@ -175,14 +197,16 @@ void core::op_cop0() {
   case 0x06: return cop0.write_ccr(rd, get_register(rt));
   }
 
-  printf("cpu_core::op_cop0(0x%08x)\n", code);
+  printf("cpu_cpu_t::op_cop0(0x%08x)\n", code);
 }
 
-void core::op_cop1() {
-  enter_exception(cop0::exception_code_t::cop_unusable);
+
+void cpu_t::op_cop1() {
+  enter_exception(cop0_exception_code::cop_unusable);
 }
 
-void core::op_cop2() {
+
+void cpu_t::op_cop2() {
   if (code & (1 << 25)) {
     return cop2.run(code & 0x1ffffff);
   }
@@ -197,14 +221,16 @@ void core::op_cop2() {
   case 0x06: return cop2.write_ccr(rd, get_register(rt));
   }
 
-  printf("cpu_core::op_cop2(0x%08x)\n", code);
+  printf("cpu_cpu_t::op_cop2(0x%08x)\n", code);
 }
 
-void core::op_cop3() {
-  enter_exception(cop0::exception_code_t::cop_unusable);
+
+void cpu_t::op_cop3() {
+  enter_exception(cop0_exception_code::cop_unusable);
 }
 
-void core::op_div() {
+
+void cpu_t::op_div() {
   int32_t dividend = int32_t(get_rs());
   int32_t divisor = int32_t(get_rt());
 
@@ -226,7 +252,8 @@ void core::op_div() {
   }
 }
 
-void core::op_divu() {
+
+void cpu_t::op_divu() {
   uint32_t dividend = get_rs();
   uint32_t divisor = get_rt();
 
@@ -240,18 +267,21 @@ void core::op_divu() {
   }
 }
 
-void core::op_j() {
+
+void cpu_t::op_j() {
   regs.next_pc = (regs.pc & 0xf0000000) | ((code << 2) & 0x0ffffffc);
   is_branch = true;
 }
 
-void core::op_jal() {
+
+void cpu_t::op_jal() {
   regs.gp[31] = regs.next_pc;
   regs.next_pc = (regs.pc & 0xf0000000) | ((code << 2) & 0x0ffffffc);
   is_branch = true;
 }
 
-void core::op_jalr() {
+
+void cpu_t::op_jalr() {
   uint32_t ra = regs.next_pc;
 
   regs.next_pc = get_rs();
@@ -260,94 +290,106 @@ void core::op_jalr() {
   is_branch = true;
 }
 
-void core::op_jr() {
+
+void cpu_t::op_jr() {
   regs.next_pc = get_rs();
   is_branch = true;
 }
 
-void core::op_lb() {
+
+void cpu_t::op_lb() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data(BUS_WIDTH_BYTE, address);
+  uint32_t data = read_data(bus_width_t::byte, address);
   data = utility::sclip<8>(data);
 
   set_rt_load(data);
 }
 
-void core::op_lbu() {
+
+void cpu_t::op_lbu() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data(BUS_WIDTH_BYTE, address);
+  uint32_t data = read_data(bus_width_t::byte, address);
 
   set_rt_load(data);
 }
 
-void core::op_lh() {
+
+void cpu_t::op_lh() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    enter_exception(cop0::exception_code_t::address_error_load);
+    enter_exception(cop0_exception_code::address_error_load);
   }
   else {
-    uint32_t data = read_data(BUS_WIDTH_HALF, address);
+    uint32_t data = read_data(bus_width_t::half, address);
     data = utility::sclip<16>(data);
 
     set_rt_load(data);
   }
 }
 
-void core::op_lhu() {
+
+void cpu_t::op_lhu() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    enter_exception(cop0::exception_code_t::address_error_load);
+    enter_exception(cop0_exception_code::address_error_load);
   }
   else {
-    uint32_t data = read_data(BUS_WIDTH_HALF, address);
+    uint32_t data = read_data(bus_width_t::half, address);
 
     set_rt_load(data);
   }
 }
 
-void core::op_lui() {
+
+void cpu_t::op_lui() {
   set_rt(decode_uconst() << 16);
 }
 
-void core::op_lw() {
+
+void cpu_t::op_lw() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    enter_exception(cop0::exception_code_t::address_error_load);
+    enter_exception(cop0_exception_code::address_error_load);
   }
   else {
-    uint32_t data = read_data(BUS_WIDTH_WORD, address);
+    uint32_t data = read_data(bus_width_t::word, address);
 
     set_rt_load(data);
   }
 }
 
-void core::op_lwc0() {
-  printf("cpu_core::op_lwc0(0x%08x)\n", code);
+
+void cpu_t::op_lwc0() {
+  printf("cpu_cpu_t::op_lwc0(0x%08x)\n", code);
 }
 
-void core::op_lwc1() {
-  printf("cpu_core::op_lwc1(0x%08x)\n", code);
+
+void cpu_t::op_lwc1() {
+  printf("cpu_cpu_t::op_lwc1(0x%08x)\n", code);
 }
 
-void core::op_lwc2() {
+
+void cpu_t::op_lwc2() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    enter_exception(cop0::exception_code_t::address_error_load);
+    enter_exception(cop0_exception_code::address_error_load);
   }
   else {
-    uint32_t data = read_data(BUS_WIDTH_WORD, address);
+    uint32_t data = read_data(bus_width_t::word, address);
 
     cop2.write_gpr(decode_rt(), data);
   }
 }
 
-void core::op_lwc3() {
-  printf("cpu_core::op_lwc3(0x%08x)\n", code);
+
+void cpu_t::op_lwc3() {
+  printf("cpu_cpu_t::op_lwc3(0x%08x)\n", code);
 }
 
-void core::op_lwl() {
+
+void cpu_t::op_lwl() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data(BUS_WIDTH_WORD, address & ~3);
+  uint32_t data = read_data(bus_width_t::word, address & ~3);
 
   switch (address & 3) {
   default: data = (data << 24) | (get_rt_forwarded() & 0x00ffffff); break;
@@ -359,9 +401,10 @@ void core::op_lwl() {
   set_rt_load(data);
 }
 
-void core::op_lwr() {
+
+void cpu_t::op_lwr() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data(BUS_WIDTH_WORD, address & ~3);
+  uint32_t data = read_data(bus_width_t::word, address & ~3);
 
   switch (address & 3) {
   default: data = (data >>  0) | (get_rt_forwarded() & 0x00000000); break;
@@ -373,23 +416,28 @@ void core::op_lwr() {
   set_rt_load(data);
 }
 
-void core::op_mfhi() {
+
+void cpu_t::op_mfhi() {
   set_rd(regs.hi);
 }
 
-void core::op_mflo() {
+
+void cpu_t::op_mflo() {
   set_rd(regs.lo);
 }
 
-void core::op_mthi() {
+
+void cpu_t::op_mthi() {
   regs.hi = get_rs();
 }
 
-void core::op_mtlo() {
+
+void cpu_t::op_mtlo() {
   regs.lo = get_rs();
 }
 
-void core::op_mult() {
+
+void cpu_t::op_mult() {
   int32_t rs = int32_t(get_rs());
   int32_t rt = int32_t(get_rt());
 
@@ -398,7 +446,8 @@ void core::op_mult() {
   regs.hi = uint32_t(result >> 32);
 }
 
-void core::op_multu() {
+
+void cpu_t::op_multu() {
   uint32_t s = get_rs();
   uint32_t t = get_rt();
 
@@ -407,133 +456,156 @@ void core::op_multu() {
   regs.hi = uint32_t(result >> 32);
 }
 
-void core::op_nor() {
+
+void cpu_t::op_nor() {
   set_rd(~(get_rs() | get_rt()));
 }
 
-void core::op_or() {
+
+void cpu_t::op_or() {
   set_rd(get_rs() | get_rt());
 }
 
-void core::op_ori() {
+
+void cpu_t::op_ori() {
   set_rt(get_rs() | decode_uconst());
 }
 
-void core::op_sb() {
+
+void cpu_t::op_sb() {
   uint32_t address = get_rs() + decode_iconst();
   uint32_t data = get_rt();
 
-  write_data(BUS_WIDTH_BYTE, address, data);
+  write_data(bus_width_t::byte, address, data);
 }
 
-void core::op_sh() {
+
+void cpu_t::op_sh() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    enter_exception(cop0::exception_code_t::address_error_store);
+    enter_exception(cop0_exception_code::address_error_store);
   }
   else {
     uint32_t data = get_rt();
 
-    write_data(BUS_WIDTH_HALF, address, data);
+    write_data(bus_width_t::half, address, data);
   }
 }
 
-void core::op_sll() {
+
+void cpu_t::op_sll() {
   set_rd(get_rt() << decode_sa());
 }
 
-void core::op_sllv() {
+
+void cpu_t::op_sllv() {
   set_rd(get_rt() << get_rs());
 }
 
-void core::op_slt() {
+
+void cpu_t::op_slt() {
   set_rd(int32_t(get_rs()) < int32_t(get_rt()) ? 1 : 0);
 }
 
-void core::op_slti() {
+
+void cpu_t::op_slti() {
   set_rt(int32_t(get_rs()) < int32_t(decode_iconst()) ? 1 : 0);
 }
 
-void core::op_sltiu() {
+
+void cpu_t::op_sltiu() {
   set_rt(get_rs() < decode_iconst() ? 1 : 0);
 }
 
-void core::op_sltu() {
+
+void cpu_t::op_sltu() {
   set_rd(get_rs() < get_rt() ? 1 : 0);
 }
 
-void core::op_sra() {
+
+void cpu_t::op_sra() {
   set_rd(int32_t(get_rt()) >> decode_sa());
 }
 
-void core::op_srav() {
+
+void cpu_t::op_srav() {
   set_rd(int32_t(get_rt()) >> get_rs());
 }
 
-void core::op_srl() {
+
+void cpu_t::op_srl() {
   set_rd(get_rt() >> decode_sa());
 }
 
-void core::op_srlv() {
+
+void cpu_t::op_srlv() {
   set_rd(get_rt() >> get_rs());
 }
 
-void core::op_sub() {
+
+void cpu_t::op_sub() {
   uint32_t x = get_rs();
   uint32_t y = get_rt();
   uint32_t z = x - y;
 
   if (overflow(x, ~y, z)) {
-    enter_exception(cop0::exception_code_t::overflow);
+    enter_exception(cop0_exception_code::overflow);
   }
   else {
     set_rd(z);
   }
 }
 
-void core::op_subu() {
+
+void cpu_t::op_subu() {
   set_rd(get_rs() - get_rt());
 }
 
-void core::op_sw() {
+
+void cpu_t::op_sw() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    enter_exception(cop0::exception_code_t::address_error_store);
+    enter_exception(cop0_exception_code::address_error_store);
   }
   else {
     uint32_t data = get_rt();
 
-    write_data(BUS_WIDTH_WORD, address, data);
+    write_data(bus_width_t::word, address, data);
   }
 }
 
-void core::op_swc0() {
-  printf("cpu_core::op_swc0(0x%08x)\n", code);
+
+void cpu_t::op_swc0() {
+  printf("cpu_cpu_t::op_swc0(0x%08x)\n", code);
 }
 
-void core::op_swc1() {
-  printf("cpu_core::op_swc1(0x%08x)\n", code);
+
+void cpu_t::op_swc1() {
+  printf("cpu_cpu_t::op_swc1(0x%08x)\n", code);
 }
 
-void core::op_swc2() {
+
+void cpu_t::op_swc2() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    enter_exception(cop0::exception_code_t::address_error_store);
+    enter_exception(cop0_exception_code::address_error_store);
   }
   else {
     uint32_t data = cop2.read_gpr(decode_rt());
 
-    write_data(BUS_WIDTH_WORD, address, data);
+    write_data(bus_width_t::word, address, data);
   }
 }
 
-void core::op_swc3() {
-  printf("cpu_core::op_swc3(0x%08x)\n", code);
+
+void cpu_t::op_swc3() {
+  printf("cpu_cpu_t::op_swc3(0x%08x)\n", code);
 }
 
-void core::op_swl() {
+
+void cpu_t::op_swl() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data(BUS_WIDTH_WORD, address & ~3);
+  uint32_t data = read_data(bus_width_t::word, address & ~3);
 
   switch (address & 3) {
   default: data = (data & 0xffffff00) | (get_rt() >> 24); break;
@@ -542,12 +614,13 @@ void core::op_swl() {
   case  3: data = (data & 0x00000000) | (get_rt() >>  0); break;
   }
 
-  write_data(BUS_WIDTH_WORD, address & ~3, data);
+  write_data(bus_width_t::word, address & ~3, data);
 }
 
-void core::op_swr() {
+
+void cpu_t::op_swr() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data(BUS_WIDTH_WORD, address & ~3);
+  uint32_t data = read_data(bus_width_t::word, address & ~3);
 
   switch (address & 3) {
   default: data = (data & 0x00000000) | (get_rt() <<  0); break;
@@ -556,21 +629,25 @@ void core::op_swr() {
   case  3: data = (data & 0x00ffffff) | (get_rt() << 24); break;
   }
 
-  write_data(BUS_WIDTH_WORD, address & ~3, data);
+  write_data(bus_width_t::word, address & ~3, data);
 }
 
-void core::op_syscall() {
-  enter_exception(cop0::exception_code_t::syscall);
+
+void cpu_t::op_syscall() {
+  enter_exception(cop0_exception_code::syscall);
 }
 
-void core::op_xor() {
+
+void cpu_t::op_xor() {
   set_rd(get_rs() ^ get_rt());
 }
 
-void core::op_xori() {
+
+void cpu_t::op_xori() {
   set_rt(get_rs() ^ decode_uconst());
 }
 
-void core::op_und() {
-  enter_exception(cop0::exception_code_t::reserved_instruction);
+
+void cpu_t::op_und() {
+  enter_exception(cop0_exception_code::reserved_instruction);
 }

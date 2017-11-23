@@ -1,5 +1,5 @@
-#ifndef __PSXACT_UTILITY_HPP__
-#define __PSXACT_UTILITY_HPP__
+#ifndef __psxact_utility_hpp__
+#define __psxact_utility_hpp__
 
 #include <cstdio>
 #include <cstdint>
@@ -69,4 +69,4 @@ namespace utility {
   }
 }
 
-#endif // __PSXACT_UTILITY_HPP__
+#endif // __psxact_utility_hpp__
