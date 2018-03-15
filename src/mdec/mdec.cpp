@@ -1,5 +1,5 @@
 #include <cstdio>
-#include "mdec.hpp"
+#include "mdec/mdec.hpp"
 
 
 static uint32_t read_data() {

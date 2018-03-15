@@ -1,6 +1,6 @@
 #include <cassert>
-#include "cdrom.hpp"
-#include "../utility.hpp"
+#include "cdrom/cdrom.hpp"
+#include "utility.hpp"
 
 
 static uint32_t get_port(uint32_t address) {

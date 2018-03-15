@@ -2,7 +2,7 @@
 #define __psxact_counter_hpp__
 
 
-#include "../console.hpp"
+#include "console.hpp"
 
 
 struct counter_unit_t {

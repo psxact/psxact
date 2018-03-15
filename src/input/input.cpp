@@ -1,5 +1,5 @@
-#include "input.hpp"
-#include "../utility.hpp"
+#include "input/input.hpp"
+#include "utility.hpp"
 
 
 input_t::input_t() {

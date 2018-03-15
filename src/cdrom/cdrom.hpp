@@ -1,11 +1,11 @@
 #ifndef __psxact_cdrom_core_hpp__
 #define __psxact_cdrom_core_hpp__
 
-#include <cstdint>
-#include <cstdio>
+#include <stdint.h>
+#include <stdio.h>
 #include <string>
-#include "../console.hpp"
-#include "../fifo.hpp"
+#include "console.hpp"
+#include "fifo.hpp"
 
 
 struct cdrom_sector_timecode_t {

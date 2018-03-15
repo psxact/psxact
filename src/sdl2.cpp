@@ -1,8 +1,10 @@
-#include "sdl2.hpp"
 #include <cstdio>
+#include "sdl2.hpp"
+
 
 static const int window_width = 640;
 static const int window_height = 480;
+
 
 sdl2::sdl2() {
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);

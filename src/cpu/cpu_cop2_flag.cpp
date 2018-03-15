@@ -1,5 +1,5 @@
-#include "cpu_cop2.hpp"
-#include "../limits.hpp"
+#include "cpu/cpu_cop2.hpp"
+#include "limits.hpp"
 
 
 void cop2_core::set_flag(int32_t flag) {

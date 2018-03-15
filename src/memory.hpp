@@ -1,8 +1,10 @@
 #ifndef __psxact_memory_hpp__
 #define __psxact_memory_hpp__
 
+
 #include <cstdint>
 #include <cstring>
+
 
 template<int bits>
 struct memory_t {
@@ -43,5 +45,6 @@ struct memory_t {
     w[(address & mask) / 4] = data;
   }
 };
+
 
 #endif // __psxact_memory_hpp__

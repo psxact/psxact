@@ -1,5 +1,5 @@
-#include "spu.hpp"
-#include "../utility.hpp"
+#include "spu/spu.hpp"
+#include "utility.hpp"
 
 
 uint32_t spu_t::io_read(bus_width_t width, uint32_t address) {

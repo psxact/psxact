@@ -1,5 +1,5 @@
-#include "gpu.hpp"
-#include "../utility.hpp"
+#include "gpu/gpu.hpp"
+#include "utility.hpp"
 
 
 void gpu_t::gp1(uint32_t data) {

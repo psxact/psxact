@@ -2,8 +2,8 @@
 #define __psxact_input_core_hpp__
 
 
-#include "../console.hpp"
-#include "../fifo.hpp"
+#include "console.hpp"
+#include "fifo.hpp"
 
 
 enum class input_port_status_t {

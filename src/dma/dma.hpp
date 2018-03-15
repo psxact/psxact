@@ -2,7 +2,7 @@
 #define __psxact_dma_core_hpp__
 
 
-#include "../console.hpp"
+#include "console.hpp"
 
 
 struct dma_t {

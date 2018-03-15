@@ -1,5 +1,5 @@
-#include "vram.hpp"
-#include "../utility.hpp"
+#include "memory/vram.hpp"
+#include "utility.hpp"
 
 
 static memory_t<20> buffer;

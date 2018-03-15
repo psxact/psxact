@@ -2,8 +2,8 @@
 #define __psxact_spu_core_hpp__
 
 
-#include "../console.hpp"
-#include "../memory.hpp"
+#include "console.hpp"
+#include "memory.hpp"
 
 
 struct spu_t {

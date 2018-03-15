@@ -3,9 +3,9 @@
 
 
 #include <cstdio>
-#include "../console.hpp"
-#include "cpu_cop0.hpp"
-#include "cpu_cop2.hpp"
+#include "console.hpp"
+#include "cpu/cpu_cop0.hpp"
+#include "cpu/cpu_cop2.hpp"
 
 
 struct cpu_t {

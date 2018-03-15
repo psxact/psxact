@@ -1,7 +1,7 @@
-#include "cpu.hpp"
-#include "cpu_cop0.hpp"
-#include "cpu_cop2.hpp"
-#include "../utility.hpp"
+#include "cpu/cpu.hpp"
+#include "cpu/cpu_cop0.hpp"
+#include "cpu/cpu_cop2.hpp"
+#include "utility.hpp"
 
 
 // --========--

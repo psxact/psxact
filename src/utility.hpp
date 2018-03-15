@@ -1,12 +1,15 @@
 #ifndef __psxact_utility_hpp__
 #define __psxact_utility_hpp__
 
+
 #include <cstdio>
 #include <cstdint>
 #include "memory.hpp"
 
+
 #define likely(n) __builtin_expect(!!(n), 1)
 #define unlikely(n) __builtin_expect(!!(n), 0)
+
 
 namespace utility {
   const bool log_cdrom = 0;
@@ -68,5 +71,6 @@ namespace utility {
     return count;
   }
 }
+
 
 #endif // __psxact_utility_hpp__

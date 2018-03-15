@@ -1,6 +1,6 @@
-#include "cpu_cop2.hpp"
-#include "../limits.hpp"
-#include "../utility.hpp"
+#include "cpu/cpu_cop2.hpp"
+#include "limits.hpp"
+#include "utility.hpp"
 
 
 uint32_t cop2_core::read_matrix_vector_group(uint32_t n) {

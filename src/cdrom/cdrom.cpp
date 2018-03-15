@@ -1,5 +1,5 @@
-#include "cdrom.hpp"
-#include "../utility.hpp"
+#include "cdrom/cdrom.hpp"
+#include "utility.hpp"
 
 
 cdrom_t::cdrom_t(const char *game_file_name)

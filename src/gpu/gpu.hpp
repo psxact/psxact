@@ -2,7 +2,7 @@
 #define __psxact_gpu_core_hpp__
 
 
-#include "../console.hpp"
+#include "console.hpp"
 
 
 struct gpu_t {

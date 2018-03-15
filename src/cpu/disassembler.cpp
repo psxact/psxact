@@ -1,5 +1,5 @@
 #include <string>
-#include "cpu.hpp"
+#include "cpu/cpu.hpp"
 
 
 #define get_iconst() decode_iconst()

@@ -2,7 +2,7 @@
 #define __psxact_mdec_core_hpp__
 
 
-#include "../console.hpp"
+#include "console.hpp"
 
 
 struct mdec_t {

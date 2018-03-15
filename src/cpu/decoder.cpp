@@ -1,5 +1,5 @@
-#include "cpu.hpp"
-#include "../utility.hpp"
+#include "cpu/cpu.hpp"
+#include "utility.hpp"
 
 
 uint32_t cpu_t::decode_iconst() {

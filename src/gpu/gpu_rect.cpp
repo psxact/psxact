@@ -1,6 +1,6 @@
 #include <algorithm>
-#include "gpu.hpp"
-#include "../memory/vram.hpp"
+#include "gpu/gpu.hpp"
+#include "memory/vram.hpp"
 
 
 // Rect Commands

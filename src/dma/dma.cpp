@@ -1,5 +1,5 @@
-#include "dma.hpp"
-#include "../utility.hpp"
+#include "dma/dma.hpp"
+#include "utility.hpp"
 
 
 static uint32_t get_channel_index(uint32_t address) {

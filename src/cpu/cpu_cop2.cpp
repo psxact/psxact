@@ -1,6 +1,6 @@
 #include <algorithm>
-#include "cpu_cop2.hpp"
-#include "../utility.hpp"
+#include "cpu/cpu_cop2.hpp"
+#include "utility.hpp"
 
 
 static const uint8_t unr_table[0x101] = {

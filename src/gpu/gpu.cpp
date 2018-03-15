@@ -1,8 +1,8 @@
 #include <cassert>
-#include "gpu.hpp"
-#include "../memory/vram.hpp"
-#include "../console.hpp"
-#include "../utility.hpp"
+#include "gpu/gpu.hpp"
+#include "memory/vram.hpp"
+#include "console.hpp"
+#include "utility.hpp"
 
 
 uint32_t gpu_t::data() {

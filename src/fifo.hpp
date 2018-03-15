@@ -1,6 +1,7 @@
 #ifndef __psxact_fifo_hpp__
 #define __psxact_fifo_hpp__
 
+
 template<typename T, int bits>
 class fifo_t {
 private:
@@ -47,5 +48,6 @@ public:
     return !is_full();
   }
 };
+
 
 #endif // __psxact_fifo_hpp__

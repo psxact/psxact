@@ -1,6 +1,6 @@
-#include "gpu.hpp"
-#include "../limits.hpp"
-#include "../memory/vram.hpp"
+#include "gpu/gpu.hpp"
+#include "limits.hpp"
+#include "memory/vram.hpp"
 
 
 static const int dither_lut[4][4] = {

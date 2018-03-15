@@ -10,8 +10,8 @@
  *   - Horizontal clock input
  */
 
-#include "counter.hpp"
-#include "../utility.hpp"
+#include "counter/counter.hpp"
+#include "utility.hpp"
 
 
 counter_t::counter_t() {

@@ -1,5 +1,5 @@
 #include <cstdio>
-#include "gpu.hpp"
+#include "gpu/gpu.hpp"
 
 
 void gpu_t::draw_line() {

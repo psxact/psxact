@@ -1,7 +1,7 @@
 #include <algorithm>
-#include "gpu.hpp"
-#include "../memory/vram.hpp"
-#include "../utility.hpp"
+#include "gpu/gpu.hpp"
+#include "memory/vram.hpp"
+#include "utility.hpp"
 
 
 struct triangle_t {

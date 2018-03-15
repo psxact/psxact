@@ -1,6 +1,6 @@
-#include "gpu.hpp"
-#include "../memory/vram.hpp"
-#include "../utility.hpp"
+#include "gpu/gpu.hpp"
+#include "memory/vram.hpp"
+#include "utility.hpp"
 
 
 static int command_size[256] = {
