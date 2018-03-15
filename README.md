@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/adam-becker/psxact.svg?branch=develop)](https://travis-ci.org/adam-becker/psxact)
+[![Build Status](https://travis-ci.org/psxact/psxact.svg?branch=develop)](https://travis-ci.org/psxact/psxact)
 [![Build status](https://ci.appveyor.com/api/projects/status/drk4b45g4pyij3ij?svg=true)](https://ci.appveyor.com/project/adam-becker/psxact)
 
 ![Logo](images/logo.png)
