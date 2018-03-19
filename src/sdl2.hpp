@@ -1,10 +1,13 @@
-#ifndef __psxact_sdl2_hpp__
-#define __psxact_sdl2_hpp__
+#ifndef __psxact_sdl2__
+#define __psxact_sdl2__
+
 
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 
+
 struct controller_state_t {
+
   bool circle;
   bool cross;
   bool square;
@@ -23,11 +26,13 @@ struct controller_state_t {
 
   bool select;
   bool start;
+
 };
 
 static controller_state_t ctrl;
 
 class sdl2 {
+
   SDL_Window *window;
   SDL_Renderer *renderer;
   SDL_Texture *texture;
@@ -37,6 +42,7 @@ class sdl2 {
   SDL_GameController *controller;
 
 public:
+
   sdl2();
 
   ~sdl2();
@@ -44,9 +50,12 @@ public:
   bool render(uint16_t *src_pixels, int w, int h);
 
 private:
+
   bool handle_events();
 
   void resize(int w, int h);
+
 };
 
-#endif // __psxact_sdl2_hpp__
+
+#endif // __psxact_sdl2__

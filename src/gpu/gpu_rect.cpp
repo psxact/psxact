@@ -12,7 +12,7 @@ static int32_t get_x_length(uint32_t *fifo) {
   switch ((fifo[0] >> 27) & 3) {
   case 0:
     return
-        (fifo[0] & (1 << 26))
+      (fifo[0] & (1 << 26))
         ? uint16_t(fifo[3])
         : uint16_t(fifo[2]);
 
@@ -35,7 +35,7 @@ static int32_t get_y_length(uint32_t *fifo) {
   switch ((fifo[0] >> 27) & 3) {
   case 0:
     return
-        (fifo[0] & (1 << 26))
+      (fifo[0] & (1 << 26))
         ? uint16_t(fifo[3] >> 16)
         : uint16_t(fifo[2] >> 16);
 

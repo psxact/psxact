@@ -14,17 +14,17 @@ struct triangle_t {
 
 
 static const int32_t point_factor_lut[4] = {
-    1, 2, 2, 3
+  1, 2, 2, 3
 };
 
 
 static const int32_t color_factor_lut[4] = {
-    0, 0, 2, 3
+  0, 0, 2, 3
 };
 
 
 static const int32_t coord_factor_lut[4] = {
-    0, 2, 0, 3
+  0, 2, 0, 3
 };
 
 
@@ -154,8 +154,8 @@ static bool is_clockwise(const gpu_t::point_t *p) {
 
 static int32_t edge_function(const gpu_t::point_t &a, const gpu_t::point_t &b, const gpu_t::point_t &c) {
   return
-      (a.x - b.x) * (c.y - b.y) -
-      (a.y - b.y) * (c.x - b.x);
+    ((a.x - b.x) * (c.y - b.y)) -
+    ((a.y - b.y) * (c.x - b.x));
 }
 
 
@@ -262,29 +262,29 @@ static void draw_triangle(gpu_t &state, uint32_t command, triangle_t &triangle) 
             gpu_t::color_t bg = gpu_t::uint16_to_color(vram::read(point.x, point.y));
 
             switch (triangle.tev.color_mix_mode) {
-            case 0:
-              color.r = (bg.r + color.r) / 2;
-              color.g = (bg.g + color.g) / 2;
-              color.b = (bg.b + color.b) / 2;
-              break;
+              case 0:
+                color.r = (bg.r + color.r) / 2;
+                color.g = (bg.g + color.g) / 2;
+                color.b = (bg.b + color.b) / 2;
+                break;
 
-            case 1:
-              color.r = std::min(255, bg.r + color.r);
-              color.g = std::min(255, bg.g + color.g);
-              color.b = std::min(255, bg.b + color.b);
-              break;
+              case 1:
+                color.r = std::min(255, bg.r + color.r);
+                color.g = std::min(255, bg.g + color.g);
+                color.b = std::min(255, bg.b + color.b);
+                break;
 
-            case 2:
-              color.r = std::max(0, bg.r - color.r);
-              color.g = std::max(0, bg.g - color.g);
-              color.b = std::max(0, bg.b - color.b);
-              break;
+              case 2:
+                color.r = std::max(0, bg.r - color.r);
+                color.g = std::max(0, bg.g - color.g);
+                color.b = std::max(0, bg.b - color.b);
+                break;
 
-            case 3:
-              color.r = std::min(255, bg.r + color.r / 4);
-              color.g = std::min(255, bg.g + color.g / 4);
-              color.b = std::min(255, bg.b + color.b / 4);
-              break;
+              case 3:
+                color.r = std::min(255, bg.r + color.r / 4);
+                color.g = std::min(255, bg.g + color.g / 4);
+                color.b = std::min(255, bg.b + color.b / 4);
+                break;
             }
           }
 
@@ -346,9 +346,10 @@ void gpu_t::draw_polygon() {
   triangle.tev = get_tev(*this, command);
 
   for (int32_t i = 0; i < num_polygons; i++) {
-    put_in_clockwise_order(&points[i],
-                           &colors[i],
-                           &coords[i], &triangle);
+    put_in_clockwise_order(
+      &points[i],
+      &colors[i],
+      &coords[i], &triangle);
 
     draw_triangle(*this, command, triangle);
   }

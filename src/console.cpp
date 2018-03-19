@@ -24,7 +24,7 @@ console_t::console_t(const char *bios_file_name, const char *game_file_name) {
   mdec = new mdec_t();
   spu = new spu_t();
 
-  utility::read_all_bytes(bios_file_name, bios);
+  bios.load_blob(bios_file_name);
 }
 
 
@@ -98,17 +98,17 @@ uint32_t console_t::read(bus_width_t width, uint32_t address) {
   }
 
   switch (address) {
-//case 0x1f801000: return 0x1f000000;
-//case 0x1f801004: return 0x1f802000;
-//case 0x1f801008: return 0x0013243f;
-//case 0x1f80100c: return 0x00003022;
-//case 0x1f801010: return 0x0013243f;
-  case 0x1f801014: return 0x200931e1;
-//case 0x1f801018: return;
-//case 0x1f80101c: return 0x00070777;
-//case 0x1f801020: return;
+//  case 0x1f801000: return 0x1f000000;
+//  case 0x1f801004: return 0x1f802000;
+//  case 0x1f801008: return 0x0013243f;
+//  case 0x1f80100c: return 0x00003022;
+//  case 0x1f801010: return 0x0013243f;
+    case 0x1f801014: return 0x200931e1;
+//  case 0x1f801018: return;
+//  case 0x1f80101c: return 0x00070777;
+//  case 0x1f801020: return;
 
-//case 0x1f801060: return 0x00000b88;
+//  case 0x1f801060: return 0x00000b88;
   }
 
   if (address == 0xfffe0130) {
@@ -246,18 +246,18 @@ void console_t::run_for_one_frame(int *x, int *y, int *w, int *h) {
   *y = (gpu->display_area_y);
 
   switch ((gpu->status >> 16) & 7) {
-  case 0: *w = 256; break;
-  case 1: *w = 368; break;
-  case 2: *w = 320; break;
-  case 3: *w = 368; break;
-  case 4: *w = 512; break;
-  case 5: *w = 368; break;
-  case 6: *w = 640; break;
-  case 7: *w = 368; break;
+    case 0: *w = 256; break;
+    case 1: *w = 368; break;
+    case 2: *w = 320; break;
+    case 3: *w = 368; break;
+    case 4: *w = 512; break;
+    case 5: *w = 368; break;
+    case 6: *w = 640; break;
+    case 7: *w = 368; break;
   }
 
   switch ((gpu->status >> 19) & 1) {
-  case 0: *h = 240; break;
-  case 1: *h = 480; break;
+    case 0: *h = 240; break;
+    case 1: *h = 480; break;
   }
 }

@@ -1,40 +1,50 @@
-#ifndef __psxact_cpu_cop2_hpp__
-#define __psxact_cpu_cop2_hpp__
+#ifndef __psxact_cpu_cop2__
+#define __psxact_cpu_cop2__
 
 
 #include <cstdint>
+#include "cpu/cpu_cop.hpp"
 
 
-struct cop2_core {
+struct cpu_cop2_t : public cpu_cop_t {
 
   enum class matrix {
+
     rot = 0,
     llm = 1,
     lcm = 2,
     nil = 3
+
   };
 
 
   enum class vector {
+
     tr = 0,
     bk = 1,
     fc = 2,
     zr = 3
+
   };
 
 
   union color_t {
+
     struct {
+
       uint8_t r;
       uint8_t g;
       uint8_t b;
       uint8_t c;
+
     };
 
     uint32_t value;
+
   };
 
   struct {
+
     int32_t matrix[4][3][3];
     int32_t vector[4][3];
     int32_t ofx;
@@ -45,9 +55,11 @@ struct cop2_core {
     int32_t zsf3;
     int32_t zsf4;
     uint32_t flag;
+
   } ccr;
 
   struct {
+
     int32_t vector[4][3];
     color_t rgbc;
     int32_t otz;
@@ -60,6 +72,7 @@ struct cop2_core {
     int32_t mac[4];
     int32_t lzcs;
     int32_t lzcr;
+
   } gpr;
 
   void run(uint32_t code);
@@ -143,6 +156,7 @@ struct cop2_core {
   void op_sqr(uint32_t code);
 
   enum {
+
     A1_MAX = 30,
     A2_MAX = 29,
     A3_MAX = 28,
@@ -162,6 +176,7 @@ struct cop2_core {
     G1 = 14,
     G2 = 13,
     H = 12
+
   };
 
   void set_flag(int32_t flag);
@@ -183,7 +198,8 @@ struct cop2_core {
   int32_t flag_g(int32_t n, int32_t value);
 
   int32_t flag_h(int64_t value);
+
 };
 
 
-#endif //__psxact_cpu_cop2_hpp__
+#endif //__psxact_cpu_cop2__

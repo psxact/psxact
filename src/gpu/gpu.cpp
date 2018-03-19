@@ -129,9 +129,9 @@ gpu_t::color_t gpu_t::uint16_to_color(uint16_t value) {
 
 uint16_t gpu_t::color_to_uint16(gpu_t::color_t color) {
   return
-      ((color.r >> 3) & 0x001f) |
-      ((color.g << 2) & 0x03e0) |
-      ((color.b << 7) & 0x7c00);
+    ((color.r >> 3) & 0x001f) |
+    ((color.g << 2) & 0x03e0) |
+    ((color.b << 7) & 0x7c00);
 }
 
 
@@ -172,7 +172,6 @@ gpu_t::color_t gpu_t::get_texture_color_15bpp(gpu_t::tev_t &tev, gpu_t::point_t 
 gpu_t::color_t gpu_t::get_texture_color(gpu_t::tev_t &tev, gpu_t::point_t &coord) {
   switch (tev.texture_colors) {
   default:
-
   case 0:
     return get_texture_color__4bpp(tev, coord);
 

@@ -2,19 +2,19 @@
 #include "limits.hpp"
 
 
-void cop2_core::set_flag(int32_t flag) {
+void cpu_cop2_t::set_flag(int32_t flag) {
   ccr.flag |= 1 << flag;
 }
 
 
 static inline int32_t get_lm(uint32_t code) {
   return (code & (1 << 10))
-         ? 0
-         : slimit<16>::min;
+    ? 0
+    : slimit<16>::min;
 }
 
 
-int64_t cop2_core::flag_a(int32_t n, int64_t value) {
+int64_t cpu_cop2_t::flag_a(int32_t n, int64_t value) {
   const int64_t max = slimit<44>::max;
   const int64_t min = slimit<44>::min;
 
@@ -29,7 +29,7 @@ int64_t cop2_core::flag_a(int32_t n, int64_t value) {
 }
 
 
-int32_t cop2_core::flag_b(int32_t n, uint32_t code, int32_t value) {
+int32_t cpu_cop2_t::flag_b(int32_t n, uint32_t code, int32_t value) {
   int32_t max = slimit<16>::max;
   int32_t min = get_lm(code);
 
@@ -47,7 +47,7 @@ int32_t cop2_core::flag_b(int32_t n, uint32_t code, int32_t value) {
 }
 
 
-int32_t cop2_core::flag_b(int32_t n, uint32_t code, int32_t value, int32_t shifted) {
+int32_t cpu_cop2_t::flag_b(int32_t n, uint32_t code, int32_t value, int32_t shifted) {
   const int32_t max = slimit<16>::max;
   const int32_t min = slimit<16>::min;
 
@@ -69,7 +69,7 @@ int32_t cop2_core::flag_b(int32_t n, uint32_t code, int32_t value, int32_t shift
 }
 
 
-int32_t cop2_core::flag_c(int32_t n, int32_t value) {
+int32_t cpu_cop2_t::flag_c(int32_t n, int32_t value) {
   const int32_t max = ulimit<8>::max;
   const int32_t min = ulimit<8>::min;
 
@@ -87,7 +87,7 @@ int32_t cop2_core::flag_c(int32_t n, int32_t value) {
 }
 
 
-int32_t cop2_core::flag_d(int32_t value) {
+int32_t cpu_cop2_t::flag_d(int32_t value) {
   const int32_t max = ulimit<16>::max;
   const int32_t min = ulimit<16>::min;
 
@@ -105,13 +105,13 @@ int32_t cop2_core::flag_d(int32_t value) {
 }
 
 
-int32_t cop2_core::flag_e() {
+int32_t cpu_cop2_t::flag_e() {
   set_flag(E);
   return 0x1ffff;
 }
 
 
-int64_t cop2_core::flag_f(int64_t value) {
+int64_t cpu_cop2_t::flag_f(int64_t value) {
   const int32_t max = slimit<32>::max;
   const int32_t min = slimit<32>::min;
 
@@ -127,7 +127,7 @@ int64_t cop2_core::flag_f(int64_t value) {
 }
 
 
-int32_t cop2_core::flag_g(int32_t n, int32_t value) {
+int32_t cpu_cop2_t::flag_g(int32_t n, int32_t value) {
   const int32_t max = slimit<11>::max;
   const int32_t min = slimit<11>::min;
 
@@ -145,7 +145,7 @@ int32_t cop2_core::flag_g(int32_t n, int32_t value) {
 }
 
 
-int32_t cop2_core::flag_h(int64_t value) {
+int32_t cpu_cop2_t::flag_h(int64_t value) {
   const int32_t max = ulimit<12>::max + 1; // TODO: why is this one different?
   const int32_t min = ulimit<12>::min;
 

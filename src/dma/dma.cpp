@@ -106,8 +106,8 @@ void dma_t::run_channel_2_data_read() {
 
   for (uint32_t a = 0; a < ba; a++) {
     for (uint32_t s = 0; s < bs; s++) {
-      uint32_t data = bus->read(bus_width_t::word, 0x1f801810);
-      bus->write(bus_width_t::word, address, data);
+      uint32_t data = console->read(bus_width_t::word, 0x1f801810);
+      console->write(bus_width_t::word, address, data);
       address += 4;
     }
   }
@@ -128,8 +128,8 @@ void dma_t::run_channel_2_data_write() {
 
   for (uint32_t a = 0; a < ba; a++) {
     for (uint32_t s = 0; s < bs; s++) {
-      uint32_t data = bus->read(bus_width_t::word, address);
-      bus->write(bus_width_t::word, 0x1f801810, data);
+      uint32_t data = console->read(bus_width_t::word, address);
+      console->write(bus_width_t::word, 0x1f801810, data);
       address += 4;
     }
   }
@@ -144,14 +144,14 @@ void dma_t::run_channel_2_list() {
   uint32_t address = channels[2].address & 0x1ffffc;
 
   while (1) {
-    uint32_t header = bus->read(bus_width_t::word, address);
+    uint32_t header = console->read(bus_width_t::word, address);
     uint32_t length = header >> 24;
 
     for (uint32_t i = 0; i < length; i++) {
       address = (address + 4) & 0x1ffffc;
 
-      uint32_t data = bus->read(bus_width_t::word, address);
-      bus->write(bus_width_t::word, 0x1f801810, data);
+      uint32_t data = console->read(bus_width_t::word, address);
+      console->write(bus_width_t::word, 0x1f801810, data);
     }
 
     if (header & 0x800000) {
@@ -174,8 +174,8 @@ void dma_t::run_channel_3() {
   counter = counter ? counter : 0x10000;
 
   for (uint32_t i = 0; i < counter; i++) {
-    uint32_t data = bus->read(bus_width_t::word, 0x1f801800);
-    bus->write(bus_width_t::word, address, data);
+    uint32_t data = console->read(bus_width_t::word, 0x1f801800);
+    console->write(bus_width_t::word, address, data);
 
     address += 4;
   }
@@ -193,8 +193,10 @@ void dma_t::run_channel_4_write() {
   counter = counter ? counter : 0x10000;
 
   for (uint32_t i = 0; i < counter; i++) {
-    uint32_t data = bus->read(bus_width_t::word, address);
-    bus->write(bus_width_t::word, 0, data);
+    uint32_t data = console->read(bus_width_t::word, address);
+    console->write(bus_width_t::word, 0, data);
+
+    address += 4;
   }
 
   channels[4].control &= ~0x01000000;
@@ -210,11 +212,11 @@ void dma_t::run_channel_6() {
   counter = counter ? counter : 0x10000;
 
   for (uint32_t i = 1; i < counter; i++) {
-    bus->write(bus_width_t::word, address, address - 4);
+    console->write(bus_width_t::word, address, address - 4);
     address -= 4;
   }
 
-  bus->write(bus_width_t::word, address, 0x00ffffff);
+  console->write(bus_width_t::word, address, 0x00ffffff);
 
   channels[6].control &= ~0x01000000;
 
@@ -295,7 +297,7 @@ void dma_t::update_irq_active_flag() {
 
   if (active) {
     if (!(dicr & 0x80000000)) {
-      bus->irq(3);
+      console->irq(3);
     }
 
     dicr |= 0x80000000;

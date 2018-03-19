@@ -1,10 +1,10 @@
-#ifndef __psxact_fifo_hpp__
-#define __psxact_fifo_hpp__
+#ifndef __psxact_fifo__
+#define __psxact_fifo__
 
 
 template<typename T, int bits>
 class fifo_t {
-private:
+
   static const int32_t mask     = (1 << (bits + 1)) - 1;
   static const int32_t mask_lsb = (1 << bits) - 1;
   static const int32_t mask_msb = (1 << bits);
@@ -15,6 +15,7 @@ private:
   uint32_t wr_ptr;
 
 public:
+
   void clear() {
     rd_ptr = 0;
     wr_ptr = 0;
@@ -47,7 +48,8 @@ public:
   bool has_room() const {
     return !is_full();
   }
+
 };
 
 
-#endif // __psxact_fifo_hpp__
+#endif // __psxact_fifo__

@@ -1,5 +1,5 @@
-#ifndef __psxact_input_core_hpp__
-#define __psxact_input_core_hpp__
+#ifndef __psxact_input__
+#define __psxact_input__
 
 
 #include "console.hpp"
@@ -7,26 +7,33 @@
 
 
 enum class input_port_status_t {
+
   none,
   selected
+
 };
 
 
 enum class input_port_access_t {
+
   controller = 0,
   memory_card = 1
+
 };
 
 
 struct input_port_t {
+
   input_port_access_t access;
   input_port_status_t status;
   int sequence;
   uint16_t data;
+
 };
 
 
-struct input_t {
+class input_t {
+
   int32_t baud_factor;
   int32_t baud_reload;
   int32_t baud_timer;
@@ -44,6 +51,8 @@ struct input_t {
   uint8_t rx_data;
 
   input_port_t ports[2];
+
+public:
 
   input_t();
 
@@ -67,7 +76,8 @@ private:
   bool send_controller(input_port_t *port, uint8_t request, uint8_t *response);
 
   bool send_controller_digital(input_port_t *port, uint8_t request, uint8_t *response);
+
 };
 
 
-#endif // __psxact_input_core_hpp__
+#endif // __psxact_input__

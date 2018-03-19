@@ -1,24 +1,30 @@
-#ifndef __psxact_cpu_core_hpp__
-#define __psxact_cpu_core_hpp__
+#ifndef __psxact_cpu__
+#define __psxact_cpu__
 
 
 #include <cstdio>
 #include "console.hpp"
+#include "cpu/cpu_cop.hpp"
 #include "cpu/cpu_cop0.hpp"
 #include "cpu/cpu_cop2.hpp"
 
 
 struct cpu_t {
-  cop0_core cop0;
-  cop2_core cop2;
+
+  cpu_cop_t *cop0;
+  cpu_cop_t *cop1;
+  cpu_cop_t *cop2;
+  cpu_cop_t *cop3;
 
   struct {
+
     uint32_t gp[32];
     uint32_t lo;
     uint32_t hi;
     uint32_t pc;
     uint32_t this_pc;
     uint32_t next_pc;
+
   } regs;
 
   uint32_t code;
@@ -50,7 +56,7 @@ struct cpu_t {
 
   void tick();
 
-  void enter_exception(cop0_exception_code code);
+  void enter_exception(cop0_exception_code_t code);
 
   void log_bios_calls();
 
@@ -98,6 +104,8 @@ struct cpu_t {
 
   void op_bxx();
 
+  void op_cop(cpu_cop_t *cop);
+
   void op_cop0();
 
   void op_cop1();
@@ -129,6 +137,8 @@ struct cpu_t {
   void op_lui();
 
   void op_lw();
+
+  void op_lwc(cpu_cop_t *cop);
 
   void op_lwc0();
 
@@ -190,6 +200,8 @@ struct cpu_t {
 
   void op_sw();
 
+  void op_swc(cpu_cop_t *cop);
+
   void op_swc0();
 
   void op_swc1();
@@ -209,6 +221,7 @@ struct cpu_t {
   void op_xori();
 
   // undefined instruction
+  
   void op_und();
 
   uint32_t decode_iconst();
@@ -241,4 +254,4 @@ struct cpu_t {
 };
 
 
-#endif // __PSXACT_CPU_CORE_HPP__
+#endif // __psxact_cpu__

@@ -1,5 +1,5 @@
-#ifndef __psxact_mdec_core_hpp__
-#define __psxact_mdec_core_hpp__
+#ifndef __psxact_mdec__
+#define __psxact_mdec__
 
 
 #include "console.hpp"
@@ -12,4 +12,4 @@ struct mdec_t {
 };
 
 
-#endif // __psxact_mdec_core_hpp__
+#endif // __psxact_mdec__

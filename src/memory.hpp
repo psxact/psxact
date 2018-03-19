@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <cstdio>
 
 
 template<int bits>
@@ -44,6 +45,20 @@ struct memory_t {
   void write_word(uint32_t address, uint32_t data) {
     w[(address & mask) / 4] = data;
   }
+
+  bool load_blob(const char *filename) {
+    if (FILE* file = fopen(filename, "rb+")) {
+      fread(b, sizeof(uint8_t), size, file);
+      fclose(file);
+      return true;
+    }
+    else {
+      printf("unable to load '%s'\n", filename);
+
+      return false;
+    }
+  }
+
 };
 
 

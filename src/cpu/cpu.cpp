@@ -1,5 +1,6 @@
 #include "cpu/cpu.hpp"
 #include "cpu/cpu_cop0.hpp"
+#include "cpu/cpu_cop2.hpp"
 #include "utility.hpp"
 
 
@@ -47,6 +48,9 @@ cpu_t::cpu_t() {
   regs.gp[0] = 0;
   regs.pc = 0xbfc00000;
   regs.next_pc = regs.pc + 4;
+
+  cop0 = new cpu_cop0_t();
+  cop2 = new cpu_cop2_t();
 }
 
 
@@ -59,11 +63,11 @@ void cpu_t::tick() {
   is_load_delay_slot = is_load;
   is_load = false;
 
-  bool iec = (cop0.regs[12] & 1) != 0;
-  bool irq = (cop0.regs[12] & cop0.regs[13] & 0xff00) != 0;
+  bool iec = (cop0->read_gpr(12) & 1) != 0;
+  bool irq = (cop0->read_gpr(12) & cop0->read_gpr(13) & 0xff00) != 0;
 
   if (iec && irq) {
-    enter_exception(cop0_exception_code::interrupt);
+    enter_exception(cop0_exception_code_t::interrupt);
   }
   else {
     uint32_t code = (this->code >> 26) & 63;
@@ -76,14 +80,16 @@ void cpu_t::tick() {
 
 
 static uint32_t segments[8] = {
-    0x7fffffff, // kuseg ($0000_0000 - $7fff_ffff)
-    0x7fffffff, //
-    0x7fffffff, //
-    0x7fffffff, //
-    0x1fffffff, // kseg0 ($8000_0000 - $9fff_ffff)
-    0x1fffffff, // kseg1 ($a000_0000 - $bfff_ffff)
-    0xffffffff, // kseg2 ($c000_0000 - $ffff_ffff)
-    0xffffffff  //
+
+  0x7fffffff, // kuseg ($0000_0000 - $7fff_ffff)
+  0x7fffffff, //
+  0x7fffffff, //
+  0x7fffffff, //
+  0x1fffffff, // kseg0 ($8000_0000 - $9fff_ffff)
+  0x1fffffff, // kseg1 ($a000_0000 - $bfff_ffff)
+  0xffffffff, // kseg2 ($c000_0000 - $ffff_ffff)
+  0xffffffff  //
+
 };
 
 
@@ -94,32 +100,55 @@ static inline uint32_t map_address(uint32_t address) {
 
 void cpu_t::log_bios_calls() {
   switch (regs.this_pc) {
-  case 0x00a0:
-    printf("bios::a(0x%02x)\n", regs.gp[9]);
-    break;
+    case 0x00a0:
+      printf("bios::a(0x%02x)\n", regs.gp[9]);
+      break;
 
-  case 0x00b0:
-    printf("bios::b(0x%02x)\n", regs.gp[9]);
-    break;
+    case 0x00b0:
+      printf("bios::b(0x%02x)\n", regs.gp[9]);
+      break;
 
-  case 0x00c0:
-    printf("bios::c(0x%02x)\n", regs.gp[9]);
-    break;
+    case 0x00c0:
+      printf("bios::c(0x%02x)\n", regs.gp[9]);
+      break;
   }
 }
 
 
-void cpu_t::enter_exception(cop0_exception_code code) {
-  uint32_t pc = cop0.enter_exception(code, regs.this_pc, is_branch_delay_slot);
+void cpu_t::enter_exception(cop0_exception_code_t code) {
+  uint32_t status = cop0->read_gpr(12);
+  status = (status & ~0x3f) | ((status << 2) & 0x3f);
 
-  regs.pc = pc;
-  regs.next_pc = pc + 4;
+  uint32_t cause = cop0->read_gpr(13);
+  cause = (cause & ~0x7f) | ((int(code) << 2) & 0x7f);
+
+  uint32_t epc;
+
+  if (is_branch_delay_slot) {
+    epc = regs.this_pc - 4;
+    cause |= 0x80000000;
+  }
+  else {
+    epc = regs.this_pc;
+    cause &= ~0x80000000;
+  }
+
+  cop0->write_gpr(12, status);
+  cop0->write_gpr(13, cause);
+  cop0->write_gpr(14, epc);
+
+  regs.pc = (status & (1 << 22))
+    ? 0xbfc00180
+    : 0x80000080
+    ;
+
+  regs.next_pc = regs.pc + 4;
 }
 
 
 void cpu_t::read_code() {
   if (regs.pc & 3) {
-    enter_exception(cop0_exception_code::address_error_load);
+    enter_exception(cop0_exception_code_t::address_error_load);
   }
 
   regs.this_pc = regs.pc;
@@ -128,29 +157,29 @@ void cpu_t::read_code() {
 
   // todo: read i-cache
 
-  code = bus->read(bus_width_t::word, map_address(regs.this_pc));
+  code = console->read(bus_width_t::word, map_address(regs.this_pc));
 }
 
 
 uint32_t cpu_t::read_data(bus_width_t width, uint32_t address) {
-  if (cop0.regs[12] & (1 << 16)) {
+  if (cop0->read_gpr(12) & (1 << 16)) {
     return 0; // isc=1
   }
 
   // todo: read d-cache?
 
-  return bus->read(width, map_address(address));
+  return console->read(width, map_address(address));
 }
 
 
 void cpu_t::write_data(bus_width_t width, uint32_t address, uint32_t data) {
-  if (cop0.regs[12] & (1 << 16)) {
+  if (cop0->read_gpr(12) & (1 << 16)) {
     return; // isc=1
   }
 
   // todo: write d-cache?
 
-  return bus->write(width, map_address(address), data);
+  return console->write(width, map_address(address), data);
 }
 
 
@@ -158,12 +187,12 @@ void cpu_t::update_irq(uint32_t stat, uint32_t mask) {
   i_stat = stat;
   i_mask = mask;
 
-  if (i_stat & i_mask) {
-    cop0.regs[13] |= (1 << 10);
-  }
-  else {
-    cop0.regs[13] &= ~(1 << 10);
-  }
+  int flag = (i_stat & i_mask)
+    ? cop0->read_gpr(13) |  (1 << 10)
+    : cop0->read_gpr(13) & ~(1 << 10)
+    ;
+
+  cop0->write_gpr(13, flag);
 }
 
 

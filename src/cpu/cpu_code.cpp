@@ -83,7 +83,7 @@ void cpu_t::op_add() {
   uint32_t z = x + y;
 
   if (overflow(x, y, z)) {
-    enter_exception(cop0_exception_code::overflow);
+    enter_exception(cop0_exception_code_t::overflow);
   }
   else {
     set_rd(z);
@@ -97,7 +97,7 @@ void cpu_t::op_addi() {
   uint32_t z = x + y;
 
   if (overflow(x, y, z)) {
-    enter_exception(cop0_exception_code::overflow);
+    enter_exception(cop0_exception_code_t::overflow);
   }
   else {
     set_rt(z);
@@ -158,7 +158,7 @@ void cpu_t::op_bne() {
 
 
 void cpu_t::op_break() {
-  enter_exception(cop0_exception_code::breakpoint);
+  enter_exception(cop0_exception_code_t::breakpoint);
 }
 
 
@@ -168,8 +168,9 @@ void cpu_t::op_bxx() {
   // bltz rs,$nnnn
   // bltzal rs,$nnnn
   bool condition = (code & (1 << 16))
-                   ? int32_t(get_rs()) >= 0
-                   : int32_t(get_rs()) < 0;
+    ? int32_t(get_rs()) >= 0
+    : int32_t(get_rs()) <  0
+    ;
 
   if ((code & 0x1e0000) == 0x100000) {
     regs.gp[31] = regs.next_pc;
@@ -182,51 +183,46 @@ void cpu_t::op_bxx() {
 }
 
 
-void cpu_t::op_cop0() {
+void cpu_t::op_cop(cpu_cop_t *cop) {
+  if (cop == nullptr) {
+    return enter_exception(cop0_exception_code_t::cop_unusable);
+  }
+
   if (code & (1 << 25)) {
-    return cop0.run(code & 0x1ffffff);
+    return cop->run(code & 0x1ffffff);
   }
 
   uint32_t rd = decode_rd();
   uint32_t rt = decode_rt();
 
   switch (decode_rs()) {
-  case 0x00: return set_rt(cop0.read_gpr(rd));
-  case 0x02: return set_rt(cop0.read_gpr(rd));
-  case 0x04: return cop0.write_gpr(rd, get_register(rt));
-  case 0x06: return cop0.write_ccr(rd, get_register(rt));
+    case 0x00: return set_rt(cop->read_gpr(rd));
+    case 0x02: return set_rt(cop->read_ccr(rd));
+    case 0x04: return cop->write_gpr(rd, get_register(rt));
+    case 0x06: return cop->write_ccr(rd, get_register(rt));
   }
 
-  printf("cpu_cpu_t::op_cop0(0x%08x)\n", code);
+  printf("cpu_t::op_cop0(0x%08x)\n", code);
+}
+
+
+void cpu_t::op_cop0() {
+  op_cop(cop0);
 }
 
 
 void cpu_t::op_cop1() {
-  enter_exception(cop0_exception_code::cop_unusable);
+  op_cop(cop1);
 }
 
 
 void cpu_t::op_cop2() {
-  if (code & (1 << 25)) {
-    return cop2.run(code & 0x1ffffff);
-  }
-
-  uint32_t rd = decode_rd();
-  uint32_t rt = decode_rt();
-
-  switch (decode_rs()) {
-  case 0x00: return set_rt(cop2.read_gpr(rd));
-  case 0x02: return set_rt(cop2.read_ccr(rd));
-  case 0x04: return cop2.write_gpr(rd, get_register(rt));
-  case 0x06: return cop2.write_ccr(rd, get_register(rt));
-  }
-
-  printf("cpu_cpu_t::op_cop2(0x%08x)\n", code);
+  op_cop(cop2);
 }
 
 
 void cpu_t::op_cop3() {
-  enter_exception(cop0_exception_code::cop_unusable);
+  op_cop(cop3);
 }
 
 
@@ -317,7 +313,7 @@ void cpu_t::op_lbu() {
 void cpu_t::op_lh() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    enter_exception(cop0_exception_code::address_error_load);
+    enter_exception(cop0_exception_code_t::address_error_load);
   }
   else {
     uint32_t data = read_data(bus_width_t::half, address);
@@ -331,7 +327,7 @@ void cpu_t::op_lh() {
 void cpu_t::op_lhu() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    enter_exception(cop0_exception_code::address_error_load);
+    enter_exception(cop0_exception_code_t::address_error_load);
   }
   else {
     uint32_t data = read_data(bus_width_t::half, address);
@@ -349,7 +345,7 @@ void cpu_t::op_lui() {
 void cpu_t::op_lw() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    enter_exception(cop0_exception_code::address_error_load);
+    enter_exception(cop0_exception_code_t::address_error_load);
   }
   else {
     uint32_t data = read_data(bus_width_t::word, address);
@@ -359,31 +355,37 @@ void cpu_t::op_lw() {
 }
 
 
+void cpu_t::op_lwc(cpu_cop_t *cop) {
+  if (cop == nullptr) {
+    return enter_exception(cop0_exception_code_t::cop_unusable);
+  }
+
+  uint32_t address = get_rs() + decode_iconst();
+  if (address & 3) {
+    return enter_exception(cop0_exception_code_t::address_error_load);
+  }
+
+  cop2->write_gpr(decode_rt(), read_data(bus_width_t::word, address));
+}
+
+
 void cpu_t::op_lwc0() {
-  printf("cpu_cpu_t::op_lwc0(0x%08x)\n", code);
+  op_lwc(cop0);
 }
 
 
 void cpu_t::op_lwc1() {
-  printf("cpu_cpu_t::op_lwc1(0x%08x)\n", code);
+  op_lwc(cop1);
 }
 
 
 void cpu_t::op_lwc2() {
-  uint32_t address = get_rs() + decode_iconst();
-  if (address & 3) {
-    enter_exception(cop0_exception_code::address_error_load);
-  }
-  else {
-    uint32_t data = read_data(bus_width_t::word, address);
-
-    cop2.write_gpr(decode_rt(), data);
-  }
+  op_lwc(cop2);
 }
 
 
 void cpu_t::op_lwc3() {
-  printf("cpu_cpu_t::op_lwc3(0x%08x)\n", code);
+  op_lwc(cop3);
 }
 
 
@@ -392,10 +394,10 @@ void cpu_t::op_lwl() {
   uint32_t data = read_data(bus_width_t::word, address & ~3);
 
   switch (address & 3) {
-  default: data = (data << 24) | (get_rt_forwarded() & 0x00ffffff); break;
-  case  1: data = (data << 16) | (get_rt_forwarded() & 0x0000ffff); break;
-  case  2: data = (data <<  8) | (get_rt_forwarded() & 0x000000ff); break;
-  case  3: data = (data <<  0) | (get_rt_forwarded() & 0x00000000); break;
+    default: data = (data << 24) | (get_rt_forwarded() & 0x00ffffff); break;
+    case  1: data = (data << 16) | (get_rt_forwarded() & 0x0000ffff); break;
+    case  2: data = (data <<  8) | (get_rt_forwarded() & 0x000000ff); break;
+    case  3: data = (data <<  0) | (get_rt_forwarded() & 0x00000000); break;
   }
 
   set_rt_load(data);
@@ -407,10 +409,10 @@ void cpu_t::op_lwr() {
   uint32_t data = read_data(bus_width_t::word, address & ~3);
 
   switch (address & 3) {
-  default: data = (data >>  0) | (get_rt_forwarded() & 0x00000000); break;
-  case  1: data = (data >>  8) | (get_rt_forwarded() & 0xff000000); break;
-  case  2: data = (data >> 16) | (get_rt_forwarded() & 0xffff0000); break;
-  case  3: data = (data >> 24) | (get_rt_forwarded() & 0xffffff00); break;
+    default: data = (data >>  0) | (get_rt_forwarded() & 0x00000000); break;
+    case  1: data = (data >>  8) | (get_rt_forwarded() & 0xff000000); break;
+    case  2: data = (data >> 16) | (get_rt_forwarded() & 0xffff0000); break;
+    case  3: data = (data >> 24) | (get_rt_forwarded() & 0xffffff00); break;
   }
 
   set_rt_load(data);
@@ -483,7 +485,7 @@ void cpu_t::op_sb() {
 void cpu_t::op_sh() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    enter_exception(cop0_exception_code::address_error_store);
+    enter_exception(cop0_exception_code_t::address_error_store);
   }
   else {
     uint32_t data = get_rt();
@@ -549,7 +551,7 @@ void cpu_t::op_sub() {
   uint32_t z = x - y;
 
   if (overflow(x, ~y, z)) {
-    enter_exception(cop0_exception_code::overflow);
+    enter_exception(cop0_exception_code_t::overflow);
   }
   else {
     set_rd(z);
@@ -565,41 +567,46 @@ void cpu_t::op_subu() {
 void cpu_t::op_sw() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    enter_exception(cop0_exception_code::address_error_store);
+    return enter_exception(cop0_exception_code_t::address_error_store);
   }
-  else {
-    uint32_t data = get_rt();
 
-    write_data(bus_width_t::word, address, data);
+  uint32_t data = get_rt();
+
+  write_data(bus_width_t::word, address, data);
+}
+
+
+void cpu_t::op_swc(cpu_cop_t *cop) {
+  if (cop == nullptr) {
+    return enter_exception(cop0_exception_code_t::cop_unusable);
   }
+
+  uint32_t address = get_rs() + decode_iconst();
+  if (address & 3) {
+    return enter_exception(cop0_exception_code_t::address_error_store);
+  }
+
+  write_data(bus_width_t::word, address, cop->read_gpr(decode_rt()));
 }
 
 
 void cpu_t::op_swc0() {
-  printf("cpu_cpu_t::op_swc0(0x%08x)\n", code);
+  op_swc(cop0);
 }
 
 
 void cpu_t::op_swc1() {
-  printf("cpu_cpu_t::op_swc1(0x%08x)\n", code);
+  op_swc(cop1);
 }
 
 
 void cpu_t::op_swc2() {
-  uint32_t address = get_rs() + decode_iconst();
-  if (address & 3) {
-    enter_exception(cop0_exception_code::address_error_store);
-  }
-  else {
-    uint32_t data = cop2.read_gpr(decode_rt());
-
-    write_data(bus_width_t::word, address, data);
-  }
+  op_swc(cop2);
 }
 
 
 void cpu_t::op_swc3() {
-  printf("cpu_cpu_t::op_swc3(0x%08x)\n", code);
+  op_swc(cop3);
 }
 
 
@@ -634,7 +641,7 @@ void cpu_t::op_swr() {
 
 
 void cpu_t::op_syscall() {
-  enter_exception(cop0_exception_code::syscall);
+  enter_exception(cop0_exception_code_t::syscall);
 }
 
 
@@ -649,5 +656,5 @@ void cpu_t::op_xori() {
 
 
 void cpu_t::op_und() {
-  enter_exception(cop0_exception_code::reserved_instruction);
+  enter_exception(cop0_exception_code_t::reserved_instruction);
 }

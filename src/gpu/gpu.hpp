@@ -1,11 +1,14 @@
-#ifndef __psxact_gpu_core_hpp__
-#define __psxact_gpu_core_hpp__
+#ifndef __psxact_gpu__
+#define __psxact_gpu__
 
 
 #include "console.hpp"
 
 
-struct gpu_t {
+class gpu_t {
+
+public:
+
   uint32_t data_latch = 0;
   uint32_t status = 0x14802000;
   uint32_t texture_window_mask_x;
@@ -28,39 +31,53 @@ struct gpu_t {
   bool textured_rectangle_y_flip;
 
   struct {
+
     uint32_t buffer[16];
     int32_t wr;
     int32_t rd;
+
   } fifo;
 
   struct {
+
     struct {
+
       int32_t x;
       int32_t y;
       int32_t w;
       int32_t h;
+
     } reg;
 
     struct {
+
       bool active;
       int32_t x;
       int32_t y;
+
     } run;
+
   } cpu_to_gpu_transfer;
 
   struct {
+
     struct {
+
       int32_t x;
       int32_t y;
       int32_t w;
       int32_t h;
+
     } reg;
 
     struct {
+
       bool active;
       int32_t x;
       int32_t y;
+
     } run;
+
   } gpu_to_cpu_transfer;
 
   uint32_t io_read(bus_width_t width, uint32_t address);
@@ -80,17 +97,22 @@ struct gpu_t {
   uint16_t vram_transfer();
 
   struct color_t {
+
     uint8_t r;
     uint8_t g;
     uint8_t b;
+
   };
 
   struct point_t {
+
     int32_t x;
     int32_t y;
+
   };
 
   struct tev_t {
+
     // from 'palette'
     int32_t palette_page_x;
     int32_t palette_page_y;
@@ -100,6 +122,7 @@ struct gpu_t {
     int32_t texture_page_x;
     int32_t texture_page_y;
     int32_t color_mix_mode;
+
   };
 
   void copy_vram_to_vram();
@@ -134,4 +157,4 @@ struct gpu_t {
 };
 
 
-#endif // __psxact_gpu_core_hpp__
+#endif // __psxact_gpu__

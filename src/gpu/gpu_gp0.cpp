@@ -98,76 +98,76 @@ void gpu_t::gp0(uint32_t data) {
     fifo.wr = 0;
 
     switch (command & 0xe0) {
-    case 0x20:
-      return draw_polygon();
+      case 0x20:
+        return draw_polygon();
 
-    case 0x40:
-      return draw_line();
+      case 0x40:
+        return draw_line();
 
-    case 0x60:
-      return draw_rectangle();
+      case 0x60:
+        return draw_rectangle();
 
-    case 0x80:
-      return copy_vram_to_vram();
+      case 0x80:
+        return copy_vram_to_vram();
 
-    case 0xa0:
-      return copy_wram_to_vram();
+      case 0xa0:
+        return copy_wram_to_vram();
 
-    case 0xc0:
-      return copy_vram_to_wram();
-    }
-
-    switch (command) {
-    case 0x00: // nop
-      break;
-
-    case 0x01: // clear texture cache
-      break;
-
-    case 0x02:
-      return fill_rectangle();
-
-    case 0xe1:
-      status &= ~0x87ff;
-      status |= (fifo.buffer[0] << 0) & 0x7ff;
-      status |= (fifo.buffer[0] << 4) & 0x8000;
-
-      textured_rectangle_x_flip = ((fifo.buffer[0] >> 12) & 1) != 0;
-      textured_rectangle_y_flip = ((fifo.buffer[0] >> 13) & 1) != 0;
-      break;
-
-    case 0xe2:
-      texture_window_mask_x = utility::uclip<5>(fifo.buffer[0] >> 0);
-      texture_window_mask_y = utility::uclip<5>(fifo.buffer[0] >> 5);
-      texture_window_offset_x = utility::uclip<5>(fifo.buffer[0] >> 10);
-      texture_window_offset_y = utility::uclip<5>(fifo.buffer[0] >> 15);
-      break;
-
-    case 0xe3:
-      drawing_area_x1 = (fifo.buffer[0] >> 0) & 0x3ff;
-      drawing_area_y1 = (fifo.buffer[0] >> 10) & 0x3ff;
-      break;
-
-    case 0xe4:
-      drawing_area_x2 = (fifo.buffer[0] >> 0) & 0x3ff;
-      drawing_area_y2 = (fifo.buffer[0] >> 10) & 0x3ff;
-      break;
-
-    case 0xe5:
-      x_offset = utility::sclip<11>(fifo.buffer[0] >> 0);
-      y_offset = utility::sclip<11>(fifo.buffer[0] >> 11);
-      break;
-
-    case 0xe6:
-      status &= ~0x1800;
-      status |= (fifo.buffer[0] << 11) & 0x1800;
-      break;
-
-    default:
-      if (command_size[command] == 1) {
-        printf("gpu::gp0(0x%08x)\n", fifo.buffer[0]);
+      case 0xc0:
+        return copy_vram_to_wram();
       }
-      break;
+
+      switch (command) {
+      case 0x00: // nop
+        break;
+
+      case 0x01: // clear texture cache
+        break;
+
+      case 0x02:
+        return fill_rectangle();
+
+      case 0xe1:
+        status &= ~0x87ff;
+        status |= (fifo.buffer[0] << 0) & 0x7ff;
+        status |= (fifo.buffer[0] << 4) & 0x8000;
+
+        textured_rectangle_x_flip = ((fifo.buffer[0] >> 12) & 1) != 0;
+        textured_rectangle_y_flip = ((fifo.buffer[0] >> 13) & 1) != 0;
+        break;
+
+      case 0xe2:
+        texture_window_mask_x = utility::uclip<5>(fifo.buffer[0] >> 0);
+        texture_window_mask_y = utility::uclip<5>(fifo.buffer[0] >> 5);
+        texture_window_offset_x = utility::uclip<5>(fifo.buffer[0] >> 10);
+        texture_window_offset_y = utility::uclip<5>(fifo.buffer[0] >> 15);
+        break;
+
+      case 0xe3:
+        drawing_area_x1 = (fifo.buffer[0] >> 0) & 0x3ff;
+        drawing_area_y1 = (fifo.buffer[0] >> 10) & 0x3ff;
+        break;
+
+      case 0xe4:
+        drawing_area_x2 = (fifo.buffer[0] >> 0) & 0x3ff;
+        drawing_area_y2 = (fifo.buffer[0] >> 10) & 0x3ff;
+        break;
+
+      case 0xe5:
+        x_offset = utility::sclip<11>(fifo.buffer[0] >> 0);
+        y_offset = utility::sclip<11>(fifo.buffer[0] >> 11);
+        break;
+
+      case 0xe6:
+        status &= ~0x1800;
+        status |= (fifo.buffer[0] << 11) & 0x1800;
+        break;
+
+      default:
+        if (command_size[command] == 1) {
+          printf("gpu::gp0(0x%08x)\n", fifo.buffer[0]);
+        }
+        break;
     }
   }
 }

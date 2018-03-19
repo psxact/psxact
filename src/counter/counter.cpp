@@ -187,7 +187,7 @@ void counter_t::unit_irq(int n) {
     }
     else {
       irq.bit = 0;
-      bus->irq(4 + n);
+      console->irq(4 + n);
     }
   }
 }

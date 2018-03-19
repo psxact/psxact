@@ -51,6 +51,8 @@ struct console_t {
   void run_for_one_frame(int *x, int *y, int *w, int *h);
 };
 
-extern console_t *bus;
+
+extern console_t *console;
+
 
 #endif // __PSXACT_BUS_HPP__

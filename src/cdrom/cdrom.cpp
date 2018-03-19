@@ -26,7 +26,7 @@ void cdrom_t::tick() {
   if (interrupt_request) {
     int32_t signal = interrupt_request & interrupt_enable;
     if (signal == interrupt_request) {
-      bus->irq(2);
+      console->irq(2);
     }
   }
 }

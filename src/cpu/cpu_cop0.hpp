@@ -1,11 +1,12 @@
-#ifndef __psxact_cpu_cop0_hpp__
-#define __psxact_cpu_cop0_hpp__
+#ifndef __psxact_cpu_cop0__
+#define __psxact_cpu_cop0__
 
 
 #include <cstdint>
+#include "cpu/cpu_cop.hpp"
 
 
-enum class cop0_exception_code {
+enum class cop0_exception_code_t {
   interrupt             = 0x0,
   tlb_modification      = 0x1,
   tlb_load              = 0x2,
@@ -22,8 +23,11 @@ enum class cop0_exception_code {
 };
 
 
-struct cop0_core {
+class cpu_cop0_t : public cpu_cop_t {
+
   uint32_t regs[16];
+
+public:
 
   void run(uint32_t n);
 
@@ -35,10 +39,11 @@ struct cop0_core {
 
   void write_gpr(uint32_t n, uint32_t value);
 
-  uint32_t enter_exception(cop0_exception_code code, uint32_t pc, bool is_branch_delay_slot);
+  uint32_t enter_exception(cop0_exception_code_t code, uint32_t pc, bool is_branch_delay_slot);
 
-  void leave_exception();
+  void rfe();
+
 };
 
 
-#endif //__psxact_cpu_cop0_hpp__
+#endif //__psxact_cpu_cop0__

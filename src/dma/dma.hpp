@@ -1,11 +1,12 @@
-#ifndef __psxact_dma_core_hpp__
-#define __psxact_dma_core_hpp__
+#ifndef __psxact_dma__
+#define __psxact_dma__
 
 
 #include "console.hpp"
 
 
-struct dma_t {
+class dma_t {
+
   uint32_t dpcr = 0x07654321;
   uint32_t dicr = 0x00000000;
 
@@ -14,6 +15,8 @@ struct dma_t {
     uint32_t counter;
     uint32_t control;
   } channels[7];
+
+public:
 
   uint32_t io_read(bus_width_t width, uint32_t address);
 
@@ -42,7 +45,8 @@ struct dma_t {
   void run_channel_6();
 
   void update_irq_active_flag();
+
 };
 
 
-#endif // __psxact_dma_core_hpp__
+#endif // __psxact_dma__
