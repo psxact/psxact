@@ -9,6 +9,7 @@
 #include "gpu/gpu.hpp"
 #include "input/input.hpp"
 #include "mdec/mdec.hpp"
+#include "memory/vram.hpp"
 #include "spu/spu.hpp"
 #include "limits.hpp"
 #include "utility.hpp"
@@ -29,7 +30,8 @@ console_t::console_t(const char *bios_file_name, const char *game_file_name) {
 
 
 void console_t::send(interrupt_type_t flag) {
-  cpu->set_istat(cpu->i_stat | int(flag));
+  int istat = cpu->get_istat() | int(flag);
+  cpu->set_istat(istat);
 }
 
 
@@ -223,7 +225,7 @@ void console_t::write(bus_width_t width, uint32_t address, uint32_t data) {
 }
 
 
-void console_t::run_for_one_frame(int *x, int *y, int *w, int *h) {
+void console_t::run_for_one_frame(uint16_t **vram, int *w, int *h) {
   const int ITERATIONS = 2;
 
   const int CPU_FREQ = 33868800;
@@ -241,9 +243,6 @@ void console_t::run_for_one_frame(int *x, int *y, int *w, int *h) {
 
   send(interrupt_type_t::VBLANK);
 
-  *x = (gpu->display_area_x);
-  *y = (gpu->display_area_y);
-
   switch ((gpu->status >> 16) & 7) {
     case 0: *w = 256; break;
     case 1: *w = 368; break;
@@ -259,4 +258,9 @@ void console_t::run_for_one_frame(int *x, int *y, int *w, int *h) {
     case 0: *h = 240; break;
     case 1: *h = 480; break;
   }
+
+  int x = (gpu->display_area_x);
+  int y = (gpu->display_area_y);
+
+  *vram = vram::get_pointer(x, y);
 }

@@ -95,7 +95,7 @@ static inline int32_t get_sf(uint32_t code) {
 }
 
 
-static inline cpu_cop2_t::matrix get_mx(uint32_t code) {
+cpu_cop2_t::matrix cpu_cop2_t::get_mx(uint32_t code) {
   return cpu_cop2_t::matrix((code >> 17) & 3);
 }
 
@@ -105,7 +105,7 @@ static inline int32_t get_v(uint32_t code) {
 }
 
 
-static inline cpu_cop2_t::vector get_cv(uint32_t code) {
+cpu_cop2_t::vector cpu_cop2_t::get_cv(uint32_t code) {
   return cpu_cop2_t::vector((code >> 13) & 3);
 }
 

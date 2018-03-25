@@ -16,7 +16,7 @@ struct cdrom_sector_timecode_t {
 };
 
 
-struct cdrom_t {
+class cdrom_t {
 
   interrupt_access_t *irq;
 
@@ -62,6 +62,8 @@ struct cdrom_t {
     bool double_speed;
     bool read_whole_sector;
   } mode;
+
+public:
 
   cdrom_t(interrupt_access_t *irq, const char *game_file_name);
 

@@ -7,6 +7,7 @@
 
 
 enum class cop0_exception_code_t {
+
   interrupt             = 0x0,
   tlb_modification      = 0x1,
   tlb_load              = 0x2,
@@ -20,6 +21,7 @@ enum class cop0_exception_code_t {
   reserved_instruction  = 0xa,
   cop_unusable          = 0xb,
   overflow              = 0xc
+
 };
 
 

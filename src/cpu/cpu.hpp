@@ -10,7 +10,7 @@
 #include "memory_access.hpp"
 
 
-struct cpu_t {
+class cpu_t {
 
   memory_access_t *memory;
 
@@ -40,14 +40,16 @@ struct cpu_t {
   uint32_t load_index;
   uint32_t load_value;
 
-  uint32_t i_stat;
-  uint32_t i_mask;
+  uint32_t istat;
+  uint32_t imask;
 
   typedef void (cpu_t:: *opcode)();
 
   static opcode op_table[64];
 
   static opcode op_table_special[64];
+
+public:
 
   cpu_t(memory_access_t *memory);
 
@@ -71,7 +73,11 @@ struct cpu_t {
 
   void write_data(bus_width_t width, uint32_t address, uint32_t data);
 
+  uint32_t get_imask();
+
   void set_imask(uint32_t value);
+
+  uint32_t get_istat();
 
   void set_istat(uint32_t value);
 

@@ -4,15 +4,6 @@
 #include "utility.hpp"
 
 
-struct triangle_t {
-  gpu_t::color_t colors[3];
-  gpu_t::point_t coords[3];
-  gpu_t::point_t points[3];
-
-  gpu_t::tev_t tev;
-};
-
-
 static const int32_t point_factor_lut[4] = {
   1, 2, 2, 3
 };
@@ -178,7 +169,7 @@ static gpu_t::point_t point_lerp(const gpu_t::point_t *t, int32_t w0, int32_t w1
 }
 
 
-static bool get_color(uint32_t command, triangle_t &triangle, int32_t w0, int32_t w1, int32_t w2, gpu_t::color_t &color) {
+bool gpu_t::get_color(uint32_t command, triangle_t &triangle, int32_t w0, int32_t w1, int32_t w2, gpu_t::color_t &color) {
   bool shaded = (command & (1 << 26)) == 0;
   bool blended = (command & (1 << 24)) != 0;
 
@@ -190,10 +181,10 @@ static bool get_color(uint32_t command, triangle_t &triangle, int32_t w0, int32_
   gpu_t::point_t coord = point_lerp(triangle.coords, w0, w1, w2);
 
   if (blended) {
-    color = gpu_t::get_texture_color(triangle.tev, coord);
+    color = get_texture_color(triangle.tev, coord);
   }
   else {
-    gpu_t::color_t color1 = gpu_t::get_texture_color(triangle.tev, coord);
+    gpu_t::color_t color1 = get_texture_color(triangle.tev, coord);
     gpu_t::color_t color2 = color_lerp(triangle.colors, w0, w1, w2);
 
     color.r = std::min(255, (color1.r * color2.r) / 128);
@@ -205,7 +196,7 @@ static bool get_color(uint32_t command, triangle_t &triangle, int32_t w0, int32_
 }
 
 
-static void draw_triangle(gpu_t &state, uint32_t command, triangle_t &triangle) {
+void gpu_t::draw_triangle(gpu_t &state, uint32_t command, triangle_t &triangle) {
   const gpu_t::point_t *v = triangle.points;
 
   gpu_t::point_t min;
@@ -259,7 +250,7 @@ static void draw_triangle(gpu_t &state, uint32_t command, triangle_t &triangle) 
 
         if (get_color(command, triangle, w0, w1, w2, color)) {
           if (command & (1 << 25)) {
-            gpu_t::color_t bg = gpu_t::uint16_to_color(vram::read(point.x, point.y));
+            gpu_t::color_t bg = uint16_to_color(vram::read(point.x, point.y));
 
             switch (triangle.tev.color_mix_mode) {
               case 0:
@@ -300,7 +291,7 @@ static void draw_triangle(gpu_t &state, uint32_t command, triangle_t &triangle) 
 }
 
 
-static void put_in_clockwise_order(gpu_t::point_t *points, gpu_t::color_t *colors, gpu_t::point_t *coords, triangle_t *triangle) {
+static void put_in_clockwise_order(gpu_t::point_t *points, gpu_t::color_t *colors, gpu_t::point_t *coords, gpu_t::triangle_t *triangle) {
   int32_t indices[3];
 
   if (is_clockwise(points)) {

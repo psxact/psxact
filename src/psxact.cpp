@@ -117,15 +117,14 @@ int main(int argc, char *argv[]) {
 
   sdl2 renderer;
 
-  int x = 0;
-  int y = 0;
-  int w = 0; // 640
-  int h = 0; // 480
+  uint16_t *vram;
+  int w;
+  int h;
 
   do {
-    console->run_for_one_frame(&x, &y, &w, &h);
+    console->run_for_one_frame(&vram, &w, &h);
   }
-  while (renderer.render(vram::get_pointer(x, y), w, h));
+  while (renderer.render(vram, w, h));
 
   return 0;
 }

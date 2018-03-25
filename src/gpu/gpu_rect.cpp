@@ -54,7 +54,7 @@ static int32_t get_y_length(uint32_t *fifo) {
 }
 
 
-static bool get_color(uint32_t command, gpu_t::color_t &color, gpu_t::tev_t &tev, gpu_t::point_t &coord) {
+bool gpu_t::get_color(uint32_t command, color_t &color, tev_t &tev, point_t &coord) {
   bool blended = (command & (1 << 24)) != 0;
   bool textured = (command & (1 << 26)) != 0;
 
@@ -62,7 +62,7 @@ static bool get_color(uint32_t command, gpu_t::color_t &color, gpu_t::tev_t &tev
     return true;
   }
 
-  gpu_t::color_t pixel = gpu_t::get_texture_color(tev, coord);
+  color_t pixel = get_texture_color(tev, coord);
 
   if (blended) {
     color.r = std::min(255, (pixel.r * color.r) / 2);

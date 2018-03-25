@@ -6,7 +6,7 @@
 #include "cpu/cpu_cop.hpp"
 
 
-struct cpu_cop2_t : public cpu_cop_t {
+class cpu_cop2_t : public cpu_cop_t {
 
   enum class matrix {
 
@@ -75,6 +75,8 @@ struct cpu_cop2_t : public cpu_cop_t {
 
   } gpr;
 
+public:
+
   void run(uint32_t code);
 
   uint32_t read_matrix_vector_group(uint32_t n);
@@ -90,6 +92,12 @@ struct cpu_cop2_t : public cpu_cop_t {
   void write_gpr(uint32_t n, uint32_t value);
 
   uint32_t divide();
+
+private:
+
+  matrix get_mx(uint32_t code);
+
+  vector get_cv(uint32_t code);
 
   // -============-
   //  Instructions

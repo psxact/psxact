@@ -143,17 +143,36 @@ public:
 
   // common functionality
 
-  static color_t uint16_to_color(uint16_t value);
+  color_t uint16_to_color(uint16_t value);
 
-  static uint16_t color_to_uint16(color_t color);
+  uint16_t color_to_uint16(color_t color);
 
-  static color_t get_texture_color__4bpp(tev_t &tev, point_t &coord);
+  color_t get_texture_color__4bpp(tev_t &tev, point_t &coord);
 
-  static color_t get_texture_color__8bpp(tev_t &tev, point_t &coord);
+  color_t get_texture_color__8bpp(tev_t &tev, point_t &coord);
 
-  static color_t get_texture_color_15bpp(tev_t &tev, point_t &coord);
+  color_t get_texture_color_15bpp(tev_t &tev, point_t &coord);
 
-  static color_t get_texture_color(tev_t &tev, point_t &coord);
+  color_t get_texture_color(tev_t &tev, point_t &coord);
+
+  // rectangle drawing
+
+  bool get_color(uint32_t command, color_t &color, tev_t &tev, point_t &coord);
+
+  // triangle drawing
+
+  struct triangle_t {
+    gpu_t::color_t colors[3];
+    gpu_t::point_t coords[3];
+    gpu_t::point_t points[3];
+
+    gpu_t::tev_t tev;
+  };
+
+  void draw_triangle(gpu_t &state, uint32_t command, triangle_t &triangle);
+
+  bool get_color(uint32_t command, triangle_t &triangle, int32_t w0, int32_t w1, int32_t w2, color_t &color);
+
 };
 
 
