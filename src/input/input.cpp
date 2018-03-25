@@ -2,7 +2,9 @@
 #include "utility.hpp"
 
 
-input_t::input_t() {
+input_t::input_t(interrupt_access_t *irq)
+  : irq(irq) {
+
   baud_factor = 1;
   baud_reload = 0x0088;
 
@@ -32,7 +34,7 @@ uint32_t input_t::io_read(bus_width_t width, uint32_t address) {
         (1           << 2) | // tx_ready_2
         (0           << 3) | // rx_parity_error
         (dsr         << 7) |
-        (irq         << 9) |
+        (interrupt   << 9) |
         (baud_timer  << 11)
       );
   }
@@ -71,7 +73,7 @@ void input_t::io_write(bus_width_t width, uint32_t address, uint32_t data) {
 
     case 0xa:
       if (data & (1 << 4)) {
-        irq = 0;
+        interrupt = 0;
       }
       else {
         tx_enable = ((data >> 0) & 1) != 0;
@@ -103,8 +105,8 @@ void input_t::reload_baud() {
 
 void input_t::tick() {
   if (dsr_cycles && !--dsr_cycles && dsr) {
-    irq = 1;
-    console->irq(7);
+    interrupt = 1;
+    irq->send(interrupt_type_t::INPUT);
   }
 
   baud_timer--;

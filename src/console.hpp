@@ -2,13 +2,9 @@
 #define __PSXACT_BUS_HPP__
 
 #include <cstdint>
+#include "interrupt_access.hpp"
 #include "memory.hpp"
-
-enum class bus_width_t {
-  byte,
-  half,
-  word
-};
+#include "memory_access.hpp"
 
 struct cdrom_t;
 
@@ -26,7 +22,10 @@ struct mdec_t;
 
 struct spu_t;
 
-struct console_t {
+struct console_t
+  : public memory_access_t
+  , public interrupt_access_t {
+
   memory_t<19> bios;
   memory_t<21> wram;
   memory_t<10> dmem;
@@ -42,7 +41,7 @@ struct console_t {
 
   console_t(const char *bios_file_name, const char *game_file_name);
 
-  void irq(int32_t interrupt);
+  void send(interrupt_type_t flag);
 
   uint32_t read(bus_width_t width, uint32_t address);
 
@@ -52,7 +51,4 @@ struct console_t {
 };
 
 
-extern console_t *console;
-
-
-#endif // __PSXACT_BUS_HPP__
+#endif // __psxact_console__

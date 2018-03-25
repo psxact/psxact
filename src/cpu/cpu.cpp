@@ -44,7 +44,9 @@ cpu_t::opcode cpu_t::op_table_special[64] = {
 };
 
 
-cpu_t::cpu_t() {
+cpu_t::cpu_t(memory_access_t *memory)
+  : memory(memory) {
+
   regs.gp[0] = 0;
   regs.pc = 0xbfc00000;
   regs.next_pc = regs.pc + 4;
@@ -157,7 +159,7 @@ void cpu_t::read_code() {
 
   // todo: read i-cache
 
-  code = console->read(bus_width_t::word, map_address(regs.this_pc));
+  code = memory->read(bus_width_t::word, map_address(regs.this_pc));
 }
 
 
@@ -168,7 +170,7 @@ uint32_t cpu_t::read_data(bus_width_t width, uint32_t address) {
 
   // todo: read d-cache?
 
-  return console->read(width, map_address(address));
+  return memory->read(width, map_address(address));
 }
 
 
@@ -179,7 +181,7 @@ void cpu_t::write_data(bus_width_t width, uint32_t address, uint32_t data) {
 
   // todo: write d-cache?
 
-  return console->write(width, map_address(address), data);
+  return memory->write(width, map_address(address), data);
 }
 
 

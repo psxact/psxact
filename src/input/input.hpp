@@ -4,6 +4,7 @@
 
 #include "console.hpp"
 #include "fifo.hpp"
+#include "interrupt_access.hpp"
 
 
 enum class input_port_status_t {
@@ -34,12 +35,14 @@ struct input_port_t {
 
 class input_t {
 
+  interrupt_access_t *irq;
+
   int32_t baud_factor;
   int32_t baud_reload;
   int32_t baud_timer;
   int32_t baud_elapses;
 
-  bool irq;
+  bool interrupt;
 
   bool dsr;
   int dsr_cycles;
@@ -54,7 +57,7 @@ class input_t {
 
 public:
 
-  input_t();
+  input_t(interrupt_access_t *irq);
 
   uint32_t io_read(bus_width_t width, uint32_t address);
 

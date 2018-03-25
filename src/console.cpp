@@ -15,12 +15,12 @@
 
 
 console_t::console_t(const char *bios_file_name, const char *game_file_name) {
-  cdrom = new cdrom_t(game_file_name);
-  counter = new counter_t();
-  cpu = new cpu_t();
-  dma = new dma_t();
+  cdrom = new cdrom_t(this, game_file_name);
+  counter = new counter_t(this);
+  cpu = new cpu_t(this);
+  dma = new dma_t(this, this);
   gpu = new gpu_t();
-  input = new input_t();
+  input = new input_t(this);
   mdec = new mdec_t();
   spu = new spu_t();
 
@@ -28,9 +28,8 @@ console_t::console_t(const char *bios_file_name, const char *game_file_name) {
 }
 
 
-void console_t::irq(int32_t interrupt) {
-  int32_t flag = 1 << interrupt;
-  cpu->set_istat(cpu->i_stat | flag);
+void console_t::send(interrupt_type_t flag) {
+  cpu->set_istat(cpu->i_stat | int(flag));
 }
 
 
@@ -240,7 +239,7 @@ void console_t::run_for_one_frame(int *x, int *y, int *w, int *h) {
     }
   }
 
-  irq(0);
+  send(interrupt_type_t::VBLANK);
 
   *x = (gpu->display_area_x);
   *y = (gpu->display_area_y);

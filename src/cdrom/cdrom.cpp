@@ -2,8 +2,10 @@
 #include "utility.hpp"
 
 
-cdrom_t::cdrom_t(const char *game_file_name)
-    : game_file_name(game_file_name) {
+cdrom_t::cdrom_t(interrupt_access_t *irq, const char *game_file_name)
+    : irq(irq)
+    , game_file_name(game_file_name) {
+
   game_file = fopen(game_file_name, "rb+");
 
   logic_transition(&cdrom_t::logic_idling, 1000);
@@ -26,7 +28,7 @@ void cdrom_t::tick() {
   if (interrupt_request) {
     int32_t signal = interrupt_request & interrupt_enable;
     if (signal == interrupt_request) {
-      console->irq(2);
+      irq->send(interrupt_type_t::CDROM);
     }
   }
 }

@@ -6,6 +6,7 @@
 #include <string>
 #include "console.hpp"
 #include "fifo.hpp"
+#include "interrupt_access.hpp"
 
 
 struct cdrom_sector_timecode_t {
@@ -16,6 +17,9 @@ struct cdrom_sector_timecode_t {
 
 
 struct cdrom_t {
+
+  interrupt_access_t *irq;
+
   int32_t index;
   int32_t interrupt_enable;
   int32_t interrupt_request;
@@ -59,7 +63,7 @@ struct cdrom_t {
     bool read_whole_sector;
   } mode;
 
-  cdrom_t(const char *game_file_name);
+  cdrom_t(interrupt_access_t *irq, const char *game_file_name);
 
   uint32_t io_read(bus_width_t width, uint32_t address);
 

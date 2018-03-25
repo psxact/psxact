@@ -2,10 +2,14 @@
 #define __psxact_dma__
 
 
-#include "console.hpp"
+#include "interrupt_access.hpp"
+#include "memory_access.hpp"
 
 
 class dma_t {
+
+  interrupt_access_t *irq;
+  memory_access_t *memory;
 
   uint32_t dpcr = 0x07654321;
   uint32_t dicr = 0x00000000;
@@ -17,6 +21,8 @@ class dma_t {
   } channels[7];
 
 public:
+
+  dma_t(interrupt_access_t *irq, memory_access_t *memory);
 
   uint32_t io_read(bus_width_t width, uint32_t address);
 
