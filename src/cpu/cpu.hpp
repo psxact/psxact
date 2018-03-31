@@ -43,11 +43,11 @@ class cpu_t {
   uint32_t istat;
   uint32_t imask;
 
-  typedef void (cpu_t:: *opcode)();
+  typedef void (cpu_t:: *opcode_t)();
 
-  static opcode op_table[64];
+  static opcode_t op_table[64];
 
-  static opcode op_table_special[64];
+  static opcode_t op_table_special[64];
 
 public:
 

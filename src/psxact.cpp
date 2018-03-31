@@ -1,7 +1,6 @@
 #include <cstdio>
 #include "console.hpp"
 #include "sdl2.hpp"
-#include "memory/vram.hpp"
 
 
 console_t *console;

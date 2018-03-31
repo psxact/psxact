@@ -9,7 +9,6 @@
 #include "gpu/gpu.hpp"
 #include "input/input.hpp"
 #include "mdec/mdec.hpp"
-#include "memory/vram.hpp"
 #include "spu/spu.hpp"
 #include "limits.hpp"
 #include "utility.hpp"
@@ -243,24 +242,13 @@ void console_t::run_for_one_frame(uint16_t **vram, int *w, int *h) {
 
   send(interrupt_type_t::VBLANK);
 
-  switch ((gpu->status >> 16) & 7) {
-    case 0: *w = 256; break;
-    case 1: *w = 368; break;
-    case 2: *w = 320; break;
-    case 3: *w = 368; break;
-    case 4: *w = 512; break;
-    case 5: *w = 368; break;
-    case 6: *w = 640; break;
-    case 7: *w = 368; break;
-  }
+  static const int w_lut[8] = { 256, 368, 320, 368, 512, 368, 640, 368 };
+  static const int h_lut[2] = { 240, 480 };
 
-  switch ((gpu->status >> 19) & 1) {
-    case 0: *h = 240; break;
-    case 1: *h = 480; break;
-  }
+  *w = w_lut[(gpu->status >> 16) & 7];
+  *h = h_lut[(gpu->status >> 19) & 1];
 
-  int x = (gpu->display_area_x);
-  int y = (gpu->display_area_y);
-
-  *vram = vram::get_pointer(x, y);
+  *vram = gpu->vram_data(
+    gpu->display_area_x,
+    gpu->display_area_y);
 }

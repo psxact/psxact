@@ -1,5 +1,4 @@
 #include "gpu/gpu.hpp"
-#include "memory/vram.hpp"
 #include "utility.hpp"
 
 
@@ -42,9 +41,11 @@ void gpu_t::fill_rectangle() {
 
   for (int y = 0; y < count.y; y++) {
     for (int x = 0; x < count.x; x++) {
-      vram::write(point.x + x,
-                  point.y + y,
-                  color);
+      vram_write(
+        point.x + x,
+        point.y + y,
+        color
+      );
     }
   }
 }

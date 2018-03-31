@@ -1,6 +1,5 @@
 #include <cassert>
 #include "gpu/gpu.hpp"
-#include "memory/vram.hpp"
 #include "console.hpp"
 #include "utility.hpp"
 
@@ -64,13 +63,33 @@ void gpu_t::io_write(bus_width_t width, uint32_t address, uint32_t data) {
 }
 
 
+uint16_t *gpu_t::vram_data(int x, int y) {
+  return (uint16_t *)vram.get_pointer(vram_address(x, y));
+}
+
+
+uint32_t gpu_t::vram_address(int x, int y) {
+  return ((y * 1024) + x) * sizeof(uint16_t);
+}
+
+
+uint16_t gpu_t::vram_read(int x, int y) {
+  return vram.read_half(vram_address(x, y));
+}
+
+
+void gpu_t::vram_write(int x, int y, uint16_t data) {
+  vram.write_half(vram_address(x, y), data);
+}
+
+
 uint16_t gpu_t::vram_transfer() {
   auto &transfer = gpu_to_cpu_transfer;
   if (!transfer.run.active) {
     return 0;
   }
 
-  uint16_t data = vram::read(
+  uint16_t data = vram_read(
       transfer.reg.x + transfer.run.x,
       transfer.reg.y + transfer.run.y);
 
@@ -96,7 +115,7 @@ void gpu_t::vram_transfer(uint16_t data) {
     return;
   }
 
-  vram::write(
+  vram_write(
       transfer.reg.x + transfer.run.x,
       transfer.reg.y + transfer.run.y, uint16_t(data));
 
@@ -136,34 +155,39 @@ uint16_t gpu_t::color_to_uint16(gpu_t::color_t color) {
 
 
 gpu_t::color_t gpu_t::get_texture_color__4bpp(gpu_t::tev_t &tev, gpu_t::point_t &coord) {
-  uint16_t texel = vram::read(tev.texture_page_x + coord.x / 4,
-                              tev.texture_page_y + coord.y);
+  uint16_t texel = vram_read(
+    tev.texture_page_x + coord.x / 4,
+    tev.texture_page_y + coord.y);
 
   texel = (texel >> ((coord.x & 3) * 4)) & 15;
 
-  uint16_t pixel = vram::read(tev.palette_page_x + texel,
-                              tev.palette_page_y);
+  uint16_t pixel = vram_read(
+    tev.palette_page_x + texel,
+    tev.palette_page_y);
 
   return uint16_to_color(pixel);
 }
 
 
 gpu_t::color_t gpu_t::get_texture_color__8bpp(gpu_t::tev_t &tev, gpu_t::point_t &coord) {
-  uint16_t texel = vram::read(tev.texture_page_x + coord.x / 2,
-                              tev.texture_page_y + coord.y);
+  uint16_t texel = vram_read(
+    tev.texture_page_x + coord.x / 2,
+    tev.texture_page_y + coord.y);
 
   texel = (texel >> ((coord.x & 1) * 8)) & 255;
 
-  uint16_t pixel = vram::read(tev.palette_page_x + texel,
-                              tev.palette_page_y);
+  uint16_t pixel = vram_read(
+    tev.palette_page_x + texel,
+    tev.palette_page_y);
 
   return uint16_to_color(pixel);
 }
 
 
 gpu_t::color_t gpu_t::get_texture_color_15bpp(gpu_t::tev_t &tev, gpu_t::point_t &coord) {
-  uint16_t pixel = vram::read(tev.texture_page_x + coord.x,
-                              tev.texture_page_y + coord.y);
+  uint16_t pixel = vram_read(
+    tev.texture_page_x + coord.x,
+    tev.texture_page_y + coord.y);
 
   return uint16_to_color(pixel);
 }

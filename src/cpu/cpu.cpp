@@ -4,7 +4,7 @@
 #include "utility.hpp"
 
 
-cpu_t::opcode cpu_t::op_table[64] = {
+cpu_t::opcode_t cpu_t::op_table[64] = {
   nullptr,         &cpu_t::op_bxx,   &cpu_t::op_j,    &cpu_t::op_jal,
   &cpu_t::op_beq,  &cpu_t::op_bne,   &cpu_t::op_blez, &cpu_t::op_bgtz,
   &cpu_t::op_addi, &cpu_t::op_addiu, &cpu_t::op_slti, &cpu_t::op_sltiu,
@@ -24,7 +24,7 @@ cpu_t::opcode cpu_t::op_table[64] = {
 };
 
 
-cpu_t::opcode cpu_t::op_table_special[64] = {
+cpu_t::opcode_t cpu_t::op_table_special[64] = {
   &cpu_t::op_sll,     &cpu_t::op_und,   &cpu_t::op_srl,  &cpu_t::op_sra,
   &cpu_t::op_sllv,    &cpu_t::op_und,   &cpu_t::op_srlv, &cpu_t::op_srav,
   &cpu_t::op_jr,      &cpu_t::op_jalr,  &cpu_t::op_und,  &cpu_t::op_und,

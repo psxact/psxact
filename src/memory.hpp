@@ -22,6 +22,10 @@ struct memory_t {
     memset(b, 0, size_t(size));
   }
 
+  void *get_pointer(uint32_t address) {
+    return &b[address];
+  }
+
   uint32_t read_byte(uint32_t address) {
     return b[(address & mask) / 1];
   }
