@@ -13,7 +13,7 @@ class spu_t {
 
   uint16_t registers[24][8];
 
-  memory_t<19> sound_ram;
+  memory_t< kib(512) > sound_ram;
 
   uint32_t sound_ram_address;
   uint16_t sound_ram_address_latch;

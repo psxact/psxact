@@ -26,9 +26,9 @@ class console_t
   : public memory_access_t
   , public interrupt_access_t {
 
-  memory_t<19> bios;
-  memory_t<21> wram;
-  memory_t<10> dmem;
+  memory_t< kib(512) > bios;
+  memory_t< mib(  2) > wram;
+  memory_t< kib(  1) > dmem;
 
   cdrom_t *cdrom;
   counter_t *counter;

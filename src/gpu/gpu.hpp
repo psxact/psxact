@@ -10,7 +10,7 @@ class gpu_t {
 
 public:
 
-  memory_t<20> vram;
+  memory_t< mib(1) > vram;
 
   uint32_t data_latch = 0;
   uint32_t status = 0x14802000;

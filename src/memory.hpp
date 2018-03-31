@@ -7,11 +7,16 @@
 #include <cstdio>
 
 
-template<int bits>
-struct memory_t {
-  static const int mask = (1 << bits) - 1;
-  static const int size = (1 << bits);
+constexpr uint32_t kib(uint32_t x) { return 1024 * x; }
+constexpr uint32_t mib(uint32_t x) { return 1024 * kib(x); }
+constexpr uint32_t gib(uint32_t x) { return 1024 * mib(x); }
 
+
+template<uint32_t size>
+struct memory_t {
+
+  static constexpr int mask = size - 1;
+  
   union {
     uint8_t  b[size];
     uint16_t h[size / 2];
