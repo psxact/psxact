@@ -10,13 +10,13 @@ static uint32_t get_port(uint32_t address) {
 
 uint8_t cdrom_t::io_read_port_0() {
   return uint8_t(
-      (index                     << 0) |
-//    (xa_adpcm.has_data()       << 2) |
-      (parameter_fifo.is_empty() << 3) |
-      (parameter_fifo.has_room() << 4) |
-      (response_fifo.has_data()  << 5) |
-      (data_fifo.has_data()      << 6) |
-      (busy                      << 7)
+    (index                     << 0) |
+//  (xa_adpcm.has_data()       << 2) |
+    (parameter_fifo.is_empty() << 3) |
+    (parameter_fifo.has_room() << 4) |
+    (response_fifo.has_data()  << 5) |
+    (data_fifo.has_data()      << 6) |
+    (busy                      << 7)
   );
 }
 
@@ -32,18 +32,12 @@ uint8_t cdrom_t::io_read_port_2() {
 
 
 uint8_t cdrom_t::io_read_port_3() {
-  switch (index) {
-  case 0:
-  case 2:
-    return uint8_t(0xe0 | interrupt_enable);
-
-  case 1:
-  case 3:
-    return uint8_t(0xe0 | interrupt_request);
-
-  default:
-    return 0;
+  switch (index & 1) {
+    case 0: return uint8_t(0xe0 | interrupt_enable);
+    case 1: return uint8_t(0xe0 | interrupt_request);
   }
+
+  return 0;
 }
 
 
@@ -79,14 +73,14 @@ uint32_t cdrom_t::io_read(bus_width_t width, uint32_t address) {
 
   assert(width == bus_width_t::byte);
 
-  uint32_t port = get_port(address);
-  uint32_t data = io_read_internal(port);
-
-  if (utility::log_cdrom) {
-    printf("cdrom_t::io_read_port_%d_%d() returned 0x%02x\n", port, index, data);
+  switch (get_port(address)) {
+    case 0: return io_read_port_0();
+    case 1: return io_read_port_1();
+    case 2: return io_read_port_2();
+    case 3: return io_read_port_3();
   }
 
-  return data;
+  return 0;
 }
 
 
@@ -169,52 +163,34 @@ void cdrom_t::io_write(bus_width_t width, uint32_t address, uint32_t data) {
   uint8_t clipped = uint8_t(data);
 
   switch (port) {
-  case 0:
-    return io_write_port_0_n(clipped);
-
-  case 1:
-    switch (index) {
     case 0:
-      return io_write_port_1_0(clipped);
+      return io_write_port_0_n(data);
 
     case 1:
-      return io_write_port_1_1(clipped);
+      switch (index) {
+        case 0: return io_write_port_1_0(data);
+        case 1: return io_write_port_1_1(data);
+        case 2: return io_write_port_1_2(data);
+        case 3: return io_write_port_1_3(data);
+      }
+      break;
 
     case 2:
-      return io_write_port_1_2(clipped);
+      switch (index) {
+        case 0: return io_write_port_2_0(data);
+        case 1: return io_write_port_2_1(data);
+        case 2: return io_write_port_2_2(data);
+        case 3: return io_write_port_2_3(data);
+      }
+      break;
 
     case 3:
-      return io_write_port_1_3(clipped);
+      switch (index) {
+        case 0: return io_write_port_3_0(data);
+        case 1: return io_write_port_3_1(data);
+        case 2: return io_write_port_3_2(data);
+        case 3: return io_write_port_3_3(data);
+      }
+      break;
     }
-
-  case 2:
-    switch (index) {
-    case 0:
-      return io_write_port_2_0(clipped);
-
-    case 1:
-      return io_write_port_2_1(clipped);
-
-    case 2:
-      return io_write_port_2_2(clipped);
-
-    case 3:
-      return io_write_port_2_3(clipped);
-    }
-
-  case 3:
-    switch (index) {
-    case 0:
-      return io_write_port_3_0(clipped);
-
-    case 1:
-      return io_write_port_3_1(clipped);
-
-    case 2:
-      return io_write_port_3_2(clipped);
-
-    case 3:
-      return io_write_port_3_3(clipped);
-    }
-  }
 }

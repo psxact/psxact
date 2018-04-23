@@ -45,29 +45,53 @@ int cdrom_t::get_cycles_per_sector() {
   }
 }
 
-void cdrom_t::read_sector() {
+int32_t cdrom_t::get_read_cursor() {
   constexpr int sectors_per_second = 75;
-  constexpr int sectors_per_minute = 60 * sectors_per_second;
+  constexpr int seconds_per_minute = 60;
+  constexpr int sectors_per_minute = seconds_per_minute * sectors_per_second;
   constexpr int bytes_per_sector = 2352;
   constexpr int lead_in_duration = 2 * sectors_per_second;
 
+  int cursor =
+    (read_timecode.minute * sectors_per_minute) +
+    (read_timecode.second * sectors_per_second) +
+    (read_timecode.sector);
+
+  return bytes_per_sector * (cursor - lead_in_duration);
+}
+
+void cdrom_t::read_sector() {
   if (utility::log_cdrom) {
-    printf("cdrom_t::read_sector(\"%02d:%02d:%02d\")\n",
-           read_timecode.minute,
-           read_timecode.second,
-           read_timecode.sector);
+    printf("[cdc] read_sector(\"%02d:%02d:%02d\")\n",
+      read_timecode.minute,
+      read_timecode.second,
+      read_timecode.sector
+    );
   }
 
-  cdrom_sector_timecode_t &tc = read_timecode;
-  int32_t cursor =
-      (tc.minute * sectors_per_minute) +
-      (tc.second * sectors_per_second) +
-      (tc.sector);
+  int32_t cursor = get_read_cursor();
 
-  int32_t target = bytes_per_sector * (cursor - lead_in_duration);
-
-  fseek(game_file, target, SEEK_SET);
+  fseek(game_file, cursor, SEEK_SET);
   fread(data_buffer, sizeof(uint8_t), 0x930, game_file);
+
+  auto minute = utility::bcd_to_dec(data_buffer[12]);
+  auto second = utility::bcd_to_dec(data_buffer[13]);
+  auto sector = utility::bcd_to_dec(data_buffer[14]);
+
+  if (
+    minute != read_timecode.minute ||
+    second != read_timecode.second ||
+    sector != read_timecode.sector) {
+    printf("[cdc] expecting \"%02d:%02d:%02d\", but got \"%02d:%02d:%02d\" at 0x%08x\n",
+      read_timecode.minute,
+      read_timecode.second,
+      read_timecode.sector,
+      minute,
+      second,
+      sector,
+      cursor
+    );
+  }
 }
 
 // -========-
@@ -156,7 +180,7 @@ void cdrom_t::command_set_seek_target(uint8_t minute, uint8_t second, uint8_t se
 
 void cdrom_t::command_test(uint8_t function) {
   if (utility::log_cdrom) {
-    printf("cdrom_t::command_test(0x%02x)\n", function);
+    printf("[cdc] command_test(0x%02x)\n", function);
   }
 
   switch (function) {
@@ -218,7 +242,7 @@ void cdrom_t::logic_executing_command() {
 #define get_param() logic.parameter_fifo.read()
 
   if (utility::log_cdrom) {
-    printf("cdrom_t::control::executing_command(0x%02x)\n", logic.command);
+    printf("[cdc] logic_executing_command(0x%02x)\n", logic.command);
   }
 
   switch (logic.command) {

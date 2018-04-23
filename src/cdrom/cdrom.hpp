@@ -10,9 +10,11 @@
 
 
 struct cdrom_sector_timecode_t {
+
   uint8_t minute;
   uint8_t second;
   uint8_t sector;
+
 };
 
 
@@ -111,9 +113,11 @@ public:
 
   void do_seek();
 
-  int get_cycles_per_sector();
+  int32_t get_cycles_per_sector();
 
   uint8_t get_status_byte();
+
+  int32_t get_read_cursor();
 
   void read_sector();
 
@@ -164,6 +168,7 @@ public:
   void drive_getting_id();
 
   void drive_reading();
+
 };
 
 
