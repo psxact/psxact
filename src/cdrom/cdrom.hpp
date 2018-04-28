@@ -70,7 +70,9 @@ public:
 
   cdrom_t(interrupt_access_t *irq, const char *game_file_name);
 
-  uint32_t io_read(memory_size_t width, uint32_t address);
+  uint32_t io_read_byte(uint32_t address);
+
+  uint32_t io_read_word(uint32_t address);
 
   uint8_t io_read_port_0();
 
@@ -80,9 +82,7 @@ public:
 
   uint8_t io_read_port_3();
 
-  uint8_t io_read_internal(uint32_t port);
-
-  void io_write(memory_size_t width, uint32_t address, uint32_t data);
+  void io_write_byte(uint32_t address, uint32_t data);
 
   void io_write_port_0_n(uint8_t data);
 

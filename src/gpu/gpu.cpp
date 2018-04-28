@@ -32,33 +32,20 @@ uint32_t gpu_t::stat() {
 }
 
 
-uint32_t gpu_t::io_read(memory_size_t size, uint32_t address) {
-  assert(size == memory_size_t::word);
-
-  if (utility::log_gpu) {
-    printf("gpu::core::io_read(%d, 0x%08x)\n", size, address);
-  }
-
+uint32_t gpu_t::io_read_word(uint32_t address) {
   switch (address) {
   case 0x1f801810:
     return data();
 
   case 0x1f801814:
     return stat();
-
-  default:
-    return 0;
   }
+
+  return 0;
 }
 
 
-void gpu_t::io_write(memory_size_t size, uint32_t address, uint32_t data) {
-  assert(size == memory_size_t::word);
-
-  if (utility::log_gpu) {
-    printf("gpu::core::io_write(%d, 0x%08x, 0x%08x)\n", size, address, data);
-  }
-
+void gpu_t::io_write_word(uint32_t address, uint32_t data) {
   switch (address) {
   case 0x1f801810:
     return gp0(data);
@@ -80,12 +67,12 @@ uint32_t gpu_t::vram_address(int x, int y) {
 
 
 uint16_t gpu_t::vram_read(int x, int y) {
-  return vram.read_half(vram_address(x, y));
+  return vram.io_read_half(vram_address(x, y));
 }
 
 
 void gpu_t::vram_write(int x, int y, uint16_t data) {
-  vram.write_half(vram_address(x, y), data);
+  vram.io_write_half(vram_address(x, y), data);
 }
 
 

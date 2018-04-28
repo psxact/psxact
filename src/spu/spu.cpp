@@ -8,7 +8,7 @@ spu_t::spu_t()
 }
 
 
-uint32_t spu_t::io_read(memory_size_t size, uint32_t address) {
+uint32_t spu_t::io_read_half(uint32_t address) {
   if (address >= 0x1f801c00 && address <= 0x1f801d7f) {
     auto n = (address >> 4) & 31;
     auto m = (address >> 1) & 7;
@@ -30,15 +30,11 @@ uint32_t spu_t::io_read(memory_size_t size, uint32_t address) {
     return control & 0x3f;
   }
 
-  if (utility::log_spu) {
-    printf("spu::io_read(%d, 0x%08x)\n", size, address);
-  }
-
-  return 0;
+  return memory_component_t::io_read_half(address);
 }
 
 
-void spu_t::io_write(memory_size_t size, uint32_t address, uint32_t data) {
+void spu_t::io_write_half(uint32_t address, uint32_t data) {
   if (address >= 0x1f801c00 && address <= 0x1f801d7f) {
     auto n = (address >> 4) & 31;
     auto m = (address >> 1) & 7;
@@ -54,7 +50,7 @@ void spu_t::io_write(memory_size_t size, uint32_t address, uint32_t data) {
     return;
 
   case 0x1f801da8:
-    sound_ram.write_half(sound_ram_address, data);
+    sound_ram.io_write_half(sound_ram_address, data);
     sound_ram_address = (sound_ram_address + 1) & 0x7ffff;
     return;
 
@@ -63,7 +59,5 @@ void spu_t::io_write(memory_size_t size, uint32_t address, uint32_t data) {
     return;
   }
 
-  if (utility::log_spu) {
-    printf("spu::io_write(%d, 0x%08x, 0x%08x)\n", size, address, data);
-  }
+  return memory_component_t::io_write_half(address, data);
 }

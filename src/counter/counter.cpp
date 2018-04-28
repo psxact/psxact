@@ -24,63 +24,65 @@ counter_t::counter_t(interrupt_access_t *irq)
 }
 
 
-uint32_t counter_t::io_read(memory_size_t size, uint32_t address) {
-  if (utility::log_timer) {
-    printf("timer::io_read(%d, 0x%08x)\n", size, address);
-  }
-
+uint32_t counter_t::io_read_half(uint32_t address) {
   switch (address & ~3) {
-  case 0x1f801100: return unit_get_counter(0);
-  case 0x1f801104: return unit_get_control(0);
-  case 0x1f801108: return unit_get_compare(0);
-  case 0x1f80110c: return 0;
+    case 0x1f801100: return unit_get_counter(0);
+    case 0x1f801104: return unit_get_control(0);
+    case 0x1f801108: return unit_get_compare(0);
+    case 0x1f80110c: return 0;
 
-  case 0x1f801110: return unit_get_counter(1);
-  case 0x1f801114: return unit_get_control(1);
-  case 0x1f801118: return unit_get_compare(1);
-  case 0x1f80111c: return 0;
+    case 0x1f801110: return unit_get_counter(1);
+    case 0x1f801114: return unit_get_control(1);
+    case 0x1f801118: return unit_get_compare(1);
+    case 0x1f80111c: return 0;
 
-  case 0x1f801120: return unit_get_counter(2);
-  case 0x1f801124: return unit_get_control(2);
-  case 0x1f801128: return unit_get_compare(2);
-  case 0x1f80112c: return 0;
+    case 0x1f801120: return unit_get_counter(2);
+    case 0x1f801124: return unit_get_control(2);
+    case 0x1f801128: return unit_get_compare(2);
+    case 0x1f80112c: return 0;
 
-  case 0x1f801130: return 0;
-  case 0x1f801134: return 0;
-  case 0x1f801138: return 0;
-  case 0x1f80113c: return 0;
+    case 0x1f801130: return 0;
+    case 0x1f801134: return 0;
+    case 0x1f801138: return 0;
+    case 0x1f80113c: return 0;
   }
 
   return 0;
 }
 
 
-void counter_t::io_write(memory_size_t size, uint32_t address, uint32_t data) {
-  if (utility::log_timer) {
-    printf("timer::io_write(%d, 0x%08x, 0x%08x)\n", size, address, data);
-  }
+uint32_t counter_t::io_read_word(uint32_t address) {
+  return io_read_half(address);
+}
 
+
+void counter_t::io_write_half(uint32_t address, uint32_t data) {
   switch (address & ~3) {
-  case 0x1f801100: return unit_set_counter(0, data);
-  case 0x1f801104: return unit_set_control(0, data);
-  case 0x1f801108: return unit_set_compare(0, data);
-  case 0x1f80110c: return;
+    case 0x1f801100: return unit_set_counter(0, data);
+    case 0x1f801104: return unit_set_control(0, data);
+    case 0x1f801108: return unit_set_compare(0, data);
+    case 0x1f80110c: return;
 
-  case 0x1f801110: return unit_set_counter(1, data);
-  case 0x1f801114: return unit_set_control(1, data);
-  case 0x1f801118: return unit_set_compare(1, data);
-  case 0x1f80111c: return;
+    case 0x1f801110: return unit_set_counter(1, data);
+    case 0x1f801114: return unit_set_control(1, data);
+    case 0x1f801118: return unit_set_compare(1, data);
+    case 0x1f80111c: return;
 
-  case 0x1f801120: return unit_set_counter(2, data);
-  case 0x1f801124: return unit_set_control(2, data);
-  case 0x1f801128: return unit_set_compare(2, data);
-  case 0x1f80112c: return;
+    case 0x1f801120: return unit_set_counter(2, data);
+    case 0x1f801124: return unit_set_control(2, data);
+    case 0x1f801128: return unit_set_compare(2, data);
+    case 0x1f80112c: return;
 
-  case 0x1f801130: return;
-  case 0x1f801134: return;
-  case 0x1f801138: return;
-  case 0x1f80113c: return;
+    case 0x1f801130: return;
+    case 0x1f801134: return;
+    case 0x1f801138: return;
+    case 0x1f80113c: return;
   }
+}
+
+
+void counter_t::io_write_word(uint32_t address, uint32_t data) {
+  io_write_half(address, data);
 }
 
 

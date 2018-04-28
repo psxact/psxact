@@ -70,9 +70,17 @@ public:
 
   void read_code();
 
-  uint32_t read_data(memory_size_t size, uint32_t address);
+  uint32_t read_data_byte(uint32_t address);
 
-  void write_data(memory_size_t size, uint32_t address, uint32_t data);
+  uint32_t read_data_half(uint32_t address);
+
+  uint32_t read_data_word(uint32_t address);
+
+  void write_data_byte(uint32_t address, uint32_t data);
+
+  void write_data_half(uint32_t address, uint32_t data);
+
+  void write_data_word(uint32_t address, uint32_t data);
 
   uint32_t get_imask();
 
@@ -82,9 +90,13 @@ public:
 
   void set_istat(uint32_t value);
 
-  uint32_t io_read(memory_size_t size, uint32_t address);
+  uint32_t io_read_half(uint32_t address);
 
-  void io_write(memory_size_t size, uint32_t address, uint32_t data);
+  uint32_t io_read_word(uint32_t address);
+
+  void io_write_half(uint32_t address, uint32_t data);
+
+  void io_write_word(uint32_t address, uint32_t data);
 
   // -============-
   //  Instructions

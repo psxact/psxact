@@ -41,28 +41,8 @@ uint8_t cdrom_t::io_read_port_3() {
 }
 
 
-uint8_t cdrom_t::io_read_internal(uint32_t port) {
-  switch (port) {
-  case 0:
-    return io_read_port_0();
-
-  case 1:
-    return io_read_port_1();
-
-  case 2:
-    return io_read_port_2();
-
-  case 3:
-    return io_read_port_3();
-
-  default:
-    return 0;
-  }
-}
-
-
-uint32_t cdrom_t::io_read(memory_size_t size, uint32_t address) {
-  if (size == memory_size_t::word && address == 0x1f801800) {
+uint32_t cdrom_t::io_read_word(uint32_t address) {
+  if (address == 0x1f801800) {
     uint8_t b0 = data_fifo.read();
     uint8_t b1 = data_fifo.read();
     uint8_t b2 = data_fifo.read();
@@ -70,9 +50,13 @@ uint32_t cdrom_t::io_read(memory_size_t size, uint32_t address) {
 
     return (b0 << 0) | (b1 << 8) | (b2 << 16) | (b3 << 24);
   }
+  else {
+    return memory_component_t::io_read_word(address);
+  }
+}
 
-  assert(size == memory_size_t::byte);
 
+uint32_t cdrom_t::io_read_byte(uint32_t address) {
   switch (get_port(address)) {
     case 0: return io_read_port_0();
     case 1: return io_read_port_1();
@@ -80,7 +64,7 @@ uint32_t cdrom_t::io_read(memory_size_t size, uint32_t address) {
     case 3: return io_read_port_3();
   }
 
-  return 0;
+  return memory_component_t::io_read_byte(address);
 }
 
 
@@ -151,9 +135,7 @@ void cdrom_t::io_write_port_3_2(uint8_t data) {}
 void cdrom_t::io_write_port_3_3(uint8_t data) {}
 
 
-void cdrom_t::io_write(memory_size_t size, uint32_t address, uint32_t data) {
-  assert(size == memory_size_t::byte);
-
+void cdrom_t::io_write_byte(uint32_t address, uint32_t data) {
   uint32_t port = get_port(address);
 
   if (utility::log_cdrom) {

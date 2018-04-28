@@ -3,7 +3,6 @@
 
 
 #include "console.hpp"
-#include "memory-size.hpp"
 #include "memory-component.hpp"
 
 

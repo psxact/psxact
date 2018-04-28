@@ -13,12 +13,12 @@
 namespace utility {
 
   const bool log_cdrom = 0;
-  const bool log_cpu   = 0;
-  const bool log_dma   = 0;
-  const bool log_gpu   = 0;
+  const bool log_cpu = 0;
+  const bool log_dma = 0;
+  const bool log_gpu = 0;
   const bool log_input = 0;
-  const bool log_spu   = 0;
-  const bool log_timer = 0;
+  const bool log_spu = 0;
+  const bool log_counter = 0;
 
   template<int bits>
   inline uint32_t sclip(uint32_t value) {

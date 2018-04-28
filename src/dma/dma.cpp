@@ -19,11 +19,7 @@ static uint32_t get_register_index(uint32_t address) {
 }
 
 
-uint32_t dma_t::io_read(memory_size_t width, uint32_t address) {
-  if (utility::log_dma) {
-    printf("dma::io_read(%d, 0x%08x)\n", width, address);
-  }
-
+uint32_t dma_t::io_read_word(uint32_t address) {
   uint32_t channel = get_channel_index(address);
   if (channel == 7) {
     switch (get_register_index(address)) {
@@ -45,11 +41,7 @@ uint32_t dma_t::io_read(memory_size_t width, uint32_t address) {
 }
 
 
-void dma_t::io_write(memory_size_t width, uint32_t address, uint32_t data) {
-  if (utility::log_dma) {
-    printf("dma::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
-  }
-
+void dma_t::io_write_word(uint32_t address, uint32_t data) {
   uint32_t channel = get_channel_index(address);
   if (channel == 7) {
     switch (get_register_index(address)) {
@@ -113,8 +105,8 @@ void dma_t::run_channel_2_data_read() {
 
   for (uint32_t a = 0; a < ba; a++) {
     for (uint32_t s = 0; s < bs; s++) {
-      uint32_t data = memory->read(memory_size_t::word, 0x1f801810);
-      memory->write(memory_size_t::word, address, data);
+      uint32_t data = memory->read_word(0x1f801810);
+      memory->write_word(address, data);
       address += 4;
     }
   }
@@ -127,7 +119,7 @@ void dma_t::run_channel_2_data_read() {
 
 void dma_t::run_channel_2_data_write() {
   uint32_t address = channels[2].address;
-  uint32_t bs = (channels[2].counter >> 0) & 0xffff;
+  uint32_t bs = (channels[2].counter >>  0) & 0xffff;
   uint32_t ba = (channels[2].counter >> 16) & 0xffff;
 
   bs = bs ? bs : 0x10000;
@@ -135,8 +127,8 @@ void dma_t::run_channel_2_data_write() {
 
   for (uint32_t a = 0; a < ba; a++) {
     for (uint32_t s = 0; s < bs; s++) {
-      uint32_t data = memory->read(memory_size_t::word, address);
-      memory->write(memory_size_t::word, 0x1f801810, data);
+      uint32_t data = memory->read_word(address);
+      memory->write_word(0x1f801810, data);
       address += 4;
     }
   }
@@ -151,14 +143,14 @@ void dma_t::run_channel_2_list() {
   uint32_t address = channels[2].address & 0x1ffffc;
 
   while (1) {
-    uint32_t header = memory->read(memory_size_t::word, address);
+    uint32_t header = memory->read_word(address);
     uint32_t length = header >> 24;
 
     for (uint32_t i = 0; i < length; i++) {
       address = (address + 4) & 0x1ffffc;
 
-      uint32_t data = memory->read(memory_size_t::word, address);
-      memory->write(memory_size_t::word, 0x1f801810, data);
+      uint32_t data = memory->read_word(address);
+      memory->write_word(0x1f801810, data);
     }
 
     if (header & 0x800000) {
@@ -181,8 +173,8 @@ void dma_t::run_channel_3() {
   counter = counter ? counter : 0x10000;
 
   for (uint32_t i = 0; i < counter; i++) {
-    uint32_t data = memory->read(memory_size_t::word, 0x1f801800);
-    memory->write(memory_size_t::word, address, data);
+    uint32_t data = memory->read_word(0x1f801800);
+    memory->write_word(address, data);
 
     address += 4;
   }
@@ -200,8 +192,8 @@ void dma_t::run_channel_4_write() {
   counter = counter ? counter : 0x10000;
 
   for (uint32_t i = 0; i < counter; i++) {
-    uint32_t data = memory->read(memory_size_t::word, address);
-    memory->write(memory_size_t::word, 0x1f801da8, data);
+    uint32_t data = memory->read_word(address);
+    memory->write_word(0x1f801da8, data);
 
     address += 4;
   }
@@ -219,11 +211,11 @@ void dma_t::run_channel_6() {
   counter = counter ? counter : 0x10000;
 
   for (uint32_t i = 1; i < counter; i++) {
-    memory->write(memory_size_t::word, address, address - 4);
+    memory->write_word(address, address - 4);
     address -= 4;
   }
 
-  memory->write(memory_size_t::word, address, 0x00ffffff);
+  memory->write_word(address, 0x00ffffff);
 
   channels[6].control &= ~0x01000000;
 

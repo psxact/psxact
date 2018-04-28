@@ -3,16 +3,23 @@
 
 
 #include <cstdint>
-#include "memory-size.hpp"
 
 
 class memory_access_t {
 
 public:
 
-  virtual uint32_t read(memory_size_t size, uint32_t address) = 0;
+  virtual uint32_t read_byte(uint32_t address) = 0;
 
-  virtual void write(memory_size_t size, uint32_t address, uint32_t data) = 0;
+  virtual uint32_t read_half(uint32_t address) = 0;
+
+  virtual uint32_t read_word(uint32_t address) = 0;
+
+  virtual void write_byte(uint32_t address, uint32_t data) = 0;
+
+  virtual void write_half(uint32_t address, uint32_t data) = 0;
+
+  virtual void write_word(uint32_t address, uint32_t data) = 0;
 
 };
 

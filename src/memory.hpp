@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <cstring>
 #include <cstdio>
-#include "memory-size.hpp"
 #include "memory-component.hpp"
 
 
@@ -35,44 +34,28 @@ struct memory_t : public memory_component_t {
     return &b[address];
   }
 
-  uint32_t read_byte(uint32_t address) {
+  uint32_t io_read_byte(uint32_t address) {
     return b[(address & mask) / 1];
   }
 
-  uint32_t read_half(uint32_t address) {
+  uint32_t io_read_half(uint32_t address) {
     return h[(address & mask) / 2];
   }
 
-  uint32_t read_word(uint32_t address) {
+  uint32_t io_read_word(uint32_t address) {
     return w[(address & mask) / 4];
   }
 
-  uint32_t io_read(memory_size_t width, uint32_t address) {
-    switch (width) {
-      case memory_size_t::byte: return read_byte(address);
-      case memory_size_t::half: return read_half(address);
-      case memory_size_t::word: return read_word(address);
-    }
-  }
-
-  void write_byte(uint32_t address, uint32_t data) {
+  void io_write_byte(uint32_t address, uint32_t data) {
     b[(address & mask) / 1] = uint8_t(data);
   }
 
-  void write_half(uint32_t address, uint32_t data) {
+  void io_write_half(uint32_t address, uint32_t data) {
     h[(address & mask) / 2] = uint16_t(data);
   }
 
-  void write_word(uint32_t address, uint32_t data) {
+  void io_write_word(uint32_t address, uint32_t data) {
     w[(address & mask) / 4] = data;
-  }
-
-  void io_write(memory_size_t width, uint32_t address, uint32_t data) {
-    switch (width) {
-      case memory_size_t::byte: return write_byte(address, data);
-      case memory_size_t::half: return write_half(address, data);
-      case memory_size_t::word: return write_word(address, data);
-    }
   }
 
   bool load_blob(const char *filename) {

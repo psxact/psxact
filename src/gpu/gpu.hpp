@@ -86,9 +86,9 @@ public:
 
   gpu_t();
 
-  uint32_t io_read(memory_size_t size, uint32_t address);
+  uint32_t io_read_word(uint32_t address);
 
-  void io_write(memory_size_t size, uint32_t address, uint32_t data);
+  void io_write_word(uint32_t address, uint32_t data);
 
   uint32_t data();
 

@@ -13,13 +13,39 @@ input_t::input_t(interrupt_access_t *irq)
 }
 
 
-uint32_t input_t::io_read(memory_size_t size, uint32_t address) {
-  if (utility::log_input) {
-    printf("[input] io_read(%d, 0x%08x)\n", size, address);
+uint32_t input_t::io_read_byte(uint32_t address) {
+  switch (address) {
+    case 0x1f801040:
+      if (rx_occurred) {
+        rx_occurred = 0;
+        return rx_data;
+      }
+      else {
+        return 0xff;
+      }
+      break;
   }
 
-  switch (address - 0x1f801040) {
-    case 0:
+  return memory_component_t::io_read_byte(address);
+}
+
+
+uint32_t input_t::io_read_half(uint32_t address) {
+  switch (address) {
+    case 0x1f801044:
+      return io_read_word(address);
+
+    case 0x1f80104a:
+      return control & 0xffff;
+  }
+
+  return memory_component_t::io_read_half(address);
+}
+
+
+uint32_t input_t::io_read_word(uint32_t address) {
+  switch (address) {
+    case 0x1f801040:
       if (rx_occurred) {
         rx_occurred = 0;
         return 0xffffff00 | rx_data;
@@ -27,8 +53,9 @@ uint32_t input_t::io_read(memory_size_t size, uint32_t address) {
       else {
         return 0xffffffff;
       }
+      break;
 
-    case 4:
+    case 0x1f801044:
       return (
         (1           << 0) | // tx_ready_1
         (rx_occurred << 1) |
@@ -40,7 +67,7 @@ uint32_t input_t::io_read(memory_size_t size, uint32_t address) {
       );
   }
 
-  return 0;
+  return memory_component_t::io_read_word(address);
 }
 
 
@@ -56,23 +83,28 @@ static int32_t get_baud_rate_factor(uint32_t data) {
 }
 
 
-void input_t::io_write(memory_size_t size, uint32_t address, uint32_t data) {
-  if (utility::log_input) {
-    printf("[input] io_write(%d, 0x%08x, 0x%08x)\n", size, address, data);
-  }
-
-  switch (address - 0x1f801040) {
-    case 0x0:
+void input_t::io_write_byte(uint32_t address, uint32_t data) {
+  switch (address) {
+    case 0x1f801040:
       tx_data = uint8_t(data);
       tx_occurring = tx_enable;
       baud_elapses = 0;
-      break;
+      return;
+  }
 
-    case 0x8:
+  return memory_component_t::io_write_byte(address, data);
+}
+
+
+void input_t::io_write_half(uint32_t address, uint32_t data) {
+  switch (address) {
+    case 0x1f801048:
       baud_factor = get_baud_rate_factor(data);
-      break;
+      return;
 
-    case 0xa:
+    case 0x1f80104a:
+      control = data & 0xffff;
+
       if (data & (1 << 4)) {
         interrupt = 0;
       }
@@ -90,12 +122,27 @@ void input_t::io_write(memory_size_t size, uint32_t address, uint32_t data) {
           port.status = input_port_status_t::none;
         }
       }
-      break;
+      return;
 
-    case 0xe:
+    case 0x1f80104e:
       baud_reload = data & 0xffff;
-      break;
+      return;
   }
+
+  return memory_component_t::io_write_half(address, data);
+}
+
+
+void input_t::io_write_word(uint32_t address, uint32_t data) {
+  switch (address) {
+    case 0x1f801040:
+      tx_data = uint8_t(data);
+      tx_occurring = tx_enable;
+      baud_elapses = 0;
+      return;
+  }
+
+  return memory_component_t::io_write_word(address, data);
 }
 
 
