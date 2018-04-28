@@ -2,9 +2,9 @@
 #define __PSXACT_BUS_HPP__
 
 #include <cstdint>
-#include "interrupt_access.hpp"
+#include "interrupt-access.hpp"
 #include "memory.hpp"
-#include "memory_access.hpp"
+#include "memory-access.hpp"
 
 class cdrom_t;
 

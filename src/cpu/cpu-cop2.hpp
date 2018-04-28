@@ -3,7 +3,7 @@
 
 
 #include <cstdint>
-#include "cpu/cpu_cop.hpp"
+#include "cpu/cpu-cop.hpp"
 
 
 class cpu_cop2_t : public cpu_cop_t {

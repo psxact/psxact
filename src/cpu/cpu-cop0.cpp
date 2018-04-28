@@ -1,4 +1,4 @@
-#include "cpu/cpu_cop0.hpp"
+#include "cpu/cpu-cop0.hpp"
 
 
 void cpu_cop0_t::run(uint32_t n) {

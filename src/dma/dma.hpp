@@ -2,8 +2,8 @@
 #define __psxact_dma__
 
 
-#include "interrupt_access.hpp"
-#include "memory_access.hpp"
+#include "interrupt-access.hpp"
+#include "memory-access.hpp"
 
 
 class dma_t {

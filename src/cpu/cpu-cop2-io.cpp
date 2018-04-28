@@ -1,4 +1,4 @@
-#include "cpu/cpu_cop2.hpp"
+#include "cpu/cpu-cop2.hpp"
 #include "limits.hpp"
 #include "utility.hpp"
 

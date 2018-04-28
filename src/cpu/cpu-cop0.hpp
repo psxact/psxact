@@ -3,7 +3,7 @@
 
 
 #include <cstdint>
-#include "cpu/cpu_cop.hpp"
+#include "cpu/cpu-cop.hpp"
 
 
 enum class cop0_exception_code_t {

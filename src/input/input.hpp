@@ -4,7 +4,7 @@
 
 #include "console.hpp"
 #include "fifo.hpp"
-#include "interrupt_access.hpp"
+#include "interrupt-access.hpp"
 
 
 enum class input_port_status_t {

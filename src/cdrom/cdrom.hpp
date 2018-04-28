@@ -6,7 +6,7 @@
 #include <string>
 #include "console.hpp"
 #include "fifo.hpp"
-#include "interrupt_access.hpp"
+#include "interrupt-access.hpp"
 
 
 struct cdrom_sector_timecode_t {

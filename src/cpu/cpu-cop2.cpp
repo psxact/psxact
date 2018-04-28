@@ -1,5 +1,5 @@
 #include <algorithm>
-#include "cpu/cpu_cop2.hpp"
+#include "cpu/cpu-cop2.hpp"
 #include "utility.hpp"
 
 

@@ -3,7 +3,7 @@
 
 
 #include "console.hpp"
-#include "interrupt_access.hpp"
+#include "interrupt-access.hpp"
 
 
 struct counter_unit_t {
