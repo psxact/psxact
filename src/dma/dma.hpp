@@ -4,9 +4,10 @@
 
 #include "interrupt-access.hpp"
 #include "memory-access.hpp"
+#include "memory-component.hpp"
 
 
-class dma_t {
+class dma_t : public memory_component_t {
 
   interrupt_access_t *irq;
   memory_access_t *memory;
@@ -24,9 +25,9 @@ public:
 
   dma_t(interrupt_access_t *irq, memory_access_t *memory);
 
-  uint32_t io_read(bus_width_t width, uint32_t address);
+  uint32_t io_read(memory_size_t size, uint32_t address);
 
-  void io_write(bus_width_t width, uint32_t address, uint32_t data);
+  void io_write(memory_size_t size, uint32_t address, uint32_t data);
 
   void main();
 

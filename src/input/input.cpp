@@ -3,7 +3,8 @@
 
 
 input_t::input_t(interrupt_access_t *irq)
-  : irq(irq) {
+  : memory_component_t("input")
+  , irq(irq) {
 
   baud_factor = 1;
   baud_reload = 0x0088;
@@ -12,9 +13,9 @@ input_t::input_t(interrupt_access_t *irq)
 }
 
 
-uint32_t input_t::io_read(bus_width_t width, uint32_t address) {
+uint32_t input_t::io_read(memory_size_t size, uint32_t address) {
   if (utility::log_input) {
-    printf("[input] io_read_word(0x%08x)\n", address);
+    printf("[input] io_read(%d, 0x%08x)\n", size, address);
   }
 
   switch (address - 0x1f801040) {
@@ -55,9 +56,9 @@ static int32_t get_baud_rate_factor(uint32_t data) {
 }
 
 
-void input_t::io_write(bus_width_t width, uint32_t address, uint32_t data) {
+void input_t::io_write(memory_size_t size, uint32_t address, uint32_t data) {
   if (utility::log_input) {
-    printf("input::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
+    printf("[input] io_write(%d, 0x%08x, 0x%08x)\n", size, address, data);
   }
 
   switch (address - 0x1f801040) {

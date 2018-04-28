@@ -7,6 +7,7 @@
 #include "console.hpp"
 #include "fifo.hpp"
 #include "interrupt-access.hpp"
+#include "memory-component.hpp"
 
 
 struct cdrom_sector_timecode_t {
@@ -18,7 +19,7 @@ struct cdrom_sector_timecode_t {
 };
 
 
-class cdrom_t {
+class cdrom_t : public memory_component_t {
 
   interrupt_access_t *irq;
 
@@ -69,7 +70,7 @@ public:
 
   cdrom_t(interrupt_access_t *irq, const char *game_file_name);
 
-  uint32_t io_read(bus_width_t width, uint32_t address);
+  uint32_t io_read(memory_size_t width, uint32_t address);
 
   uint8_t io_read_port_0();
 
@@ -81,7 +82,7 @@ public:
 
   uint8_t io_read_internal(uint32_t port);
 
-  void io_write(bus_width_t width, uint32_t address, uint32_t data);
+  void io_write(memory_size_t width, uint32_t address, uint32_t data);
 
   void io_write_port_0_n(uint8_t data);
 

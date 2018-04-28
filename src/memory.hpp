@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <cstring>
 #include <cstdio>
+#include "memory-size.hpp"
+#include "memory-component.hpp"
 
 
 constexpr uint32_t kib(uint32_t x) { return 1024 * x; }
@@ -13,7 +15,7 @@ constexpr uint32_t gib(uint32_t x) { return 1024 * mib(x); }
 
 
 template<uint32_t size>
-struct memory_t {
+struct memory_t : public memory_component_t {
 
   static constexpr int mask = size - 1;
   
@@ -23,7 +25,9 @@ struct memory_t {
     uint32_t w[size / 4];
   };
 
-  memory_t() {
+  memory_t(const char *name)
+    : memory_component_t(name) {
+
     memset(b, 0, size_t(size));
   }
 
@@ -43,6 +47,14 @@ struct memory_t {
     return w[(address & mask) / 4];
   }
 
+  uint32_t io_read(memory_size_t width, uint32_t address) {
+    switch (width) {
+      case memory_size_t::byte: return read_byte(address);
+      case memory_size_t::half: return read_half(address);
+      case memory_size_t::word: return read_word(address);
+    }
+  }
+
   void write_byte(uint32_t address, uint32_t data) {
     b[(address & mask) / 1] = uint8_t(data);
   }
@@ -53,6 +65,14 @@ struct memory_t {
 
   void write_word(uint32_t address, uint32_t data) {
     w[(address & mask) / 4] = data;
+  }
+
+  void io_write(memory_size_t width, uint32_t address, uint32_t data) {
+    switch (width) {
+      case memory_size_t::byte: return write_byte(address, data);
+      case memory_size_t::half: return write_half(address, data);
+      case memory_size_t::word: return write_word(address, data);
+    }
   }
 
   bool load_blob(const char *filename) {

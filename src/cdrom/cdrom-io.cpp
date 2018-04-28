@@ -61,8 +61,8 @@ uint8_t cdrom_t::io_read_internal(uint32_t port) {
 }
 
 
-uint32_t cdrom_t::io_read(bus_width_t width, uint32_t address) {
-  if (width == bus_width_t::word && address == 0x1f801800) {
+uint32_t cdrom_t::io_read(memory_size_t size, uint32_t address) {
+  if (size == memory_size_t::word && address == 0x1f801800) {
     uint8_t b0 = data_fifo.read();
     uint8_t b1 = data_fifo.read();
     uint8_t b2 = data_fifo.read();
@@ -71,7 +71,7 @@ uint32_t cdrom_t::io_read(bus_width_t width, uint32_t address) {
     return (b0 << 0) | (b1 << 8) | (b2 << 16) | (b3 << 24);
   }
 
-  assert(width == bus_width_t::byte);
+  assert(size == memory_size_t::byte);
 
   switch (get_port(address)) {
     case 0: return io_read_port_0();
@@ -151,8 +151,8 @@ void cdrom_t::io_write_port_3_2(uint8_t data) {}
 void cdrom_t::io_write_port_3_3(uint8_t data) {}
 
 
-void cdrom_t::io_write(bus_width_t width, uint32_t address, uint32_t data) {
-  assert(width == bus_width_t::byte);
+void cdrom_t::io_write(memory_size_t size, uint32_t address, uint32_t data) {
+  assert(size == memory_size_t::byte);
 
   uint32_t port = get_port(address);
 

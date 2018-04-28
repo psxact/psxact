@@ -45,7 +45,8 @@ cpu_t::opcode_t cpu_t::op_table_special[64] = {
 
 
 cpu_t::cpu_t(memory_access_t *memory)
-  : memory(memory) {
+  : memory_component_t("cpu")
+  , memory(memory) {
 
   regs.gp[0] = 0;
   regs.pc = 0xbfc00000;
@@ -159,29 +160,29 @@ void cpu_t::read_code() {
 
   // todo: read i-cache
 
-  code = memory->read(bus_width_t::word, map_address(regs.this_pc));
+  code = memory->read(memory_size_t::word, map_address(regs.this_pc));
 }
 
 
-uint32_t cpu_t::read_data(bus_width_t width, uint32_t address) {
+uint32_t cpu_t::read_data(memory_size_t size, uint32_t address) {
   if (cop0->read_gpr(12) & (1 << 16)) {
     return 0; // isc=1
   }
 
   // todo: read d-cache?
 
-  return memory->read(width, map_address(address));
+  return memory->read(size, map_address(address));
 }
 
 
-void cpu_t::write_data(bus_width_t width, uint32_t address, uint32_t data) {
+void cpu_t::write_data(memory_size_t size, uint32_t address, uint32_t data) {
   if (cop0->read_gpr(12) & (1 << 16)) {
     return; // isc=1
   }
 
   // todo: write d-cache?
 
-  return memory->write(width, map_address(address), data);
+  return memory->write(size, map_address(address), data);
 }
 
 
@@ -218,9 +219,9 @@ void cpu_t::set_istat(uint32_t value) {
 }
 
 
-uint32_t cpu_t::io_read(bus_width_t width, uint32_t address) {
+uint32_t cpu_t::io_read(memory_size_t size, uint32_t address) {
   if (utility::log_cpu) {
-    printf("cpu_cpu_t::io_read(%d, 0x%08x)\n", width, address);
+    printf("cpu_t::io_read(%d, 0x%08x)\n", size, address);
   }
 
   switch (address - 0x1f801070) {
@@ -236,9 +237,9 @@ uint32_t cpu_t::io_read(bus_width_t width, uint32_t address) {
 }
 
 
-void cpu_t::io_write(bus_width_t width, uint32_t address, uint32_t data) {
+void cpu_t::io_write(memory_size_t size, uint32_t address, uint32_t data) {
   if (utility::log_cpu) {
-    printf("cpu_cpu_t::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
+    printf("cpu_t::io_write(%d, 0x%08x, 0x%08x)\n", size, address, data);
   }
 
   switch (address - 0x1f801070) {

@@ -4,6 +4,7 @@
 
 #include "console.hpp"
 #include "interrupt-access.hpp"
+#include "memory-component.hpp"
 
 
 struct counter_unit_t {
@@ -47,7 +48,7 @@ struct counter_unit_t {
 };
 
 
-class counter_t {
+class counter_t : public memory_component_t {
 
   interrupt_access_t *irq;
 
@@ -60,9 +61,9 @@ public:
 
   counter_t(interrupt_access_t *irq);
 
-  uint32_t io_read(bus_width_t width, uint32_t address);
+  uint32_t io_read(memory_size_t size, uint32_t address);
 
-  void io_write(bus_width_t width, uint32_t address, uint32_t data);
+  void io_write(memory_size_t size, uint32_t address, uint32_t data);
 
   void tick();
 
@@ -71,6 +72,7 @@ public:
   void vblank(bool active);
 
 private:
+
   void unit_init(int n, int single, int period);
 
   void unit_irq(int n);

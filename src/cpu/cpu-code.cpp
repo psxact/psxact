@@ -295,7 +295,7 @@ void cpu_t::op_jr() {
 
 void cpu_t::op_lb() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data(bus_width_t::byte, address);
+  uint32_t data = read_data(memory_size_t::byte, address);
   data = utility::sclip<8>(data);
 
   set_rt_load(data);
@@ -304,7 +304,7 @@ void cpu_t::op_lb() {
 
 void cpu_t::op_lbu() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data(bus_width_t::byte, address);
+  uint32_t data = read_data(memory_size_t::byte, address);
 
   set_rt_load(data);
 }
@@ -313,27 +313,25 @@ void cpu_t::op_lbu() {
 void cpu_t::op_lh() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    enter_exception(cop0_exception_code_t::address_error_load);
+    return enter_exception(cop0_exception_code_t::address_error_load);
   }
-  else {
-    uint32_t data = read_data(bus_width_t::half, address);
-    data = utility::sclip<16>(data);
 
-    set_rt_load(data);
-  }
+  uint32_t data = read_data(memory_size_t::half, address);
+  data = utility::sclip<16>(data);
+
+  set_rt_load(data);
 }
 
 
 void cpu_t::op_lhu() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    enter_exception(cop0_exception_code_t::address_error_load);
+    return enter_exception(cop0_exception_code_t::address_error_load);
   }
-  else {
-    uint32_t data = read_data(bus_width_t::half, address);
 
-    set_rt_load(data);
-  }
+  uint32_t data = read_data(memory_size_t::half, address);
+
+  set_rt_load(data);
 }
 
 
@@ -345,13 +343,12 @@ void cpu_t::op_lui() {
 void cpu_t::op_lw() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    enter_exception(cop0_exception_code_t::address_error_load);
+    return enter_exception(cop0_exception_code_t::address_error_load);
   }
-  else {
-    uint32_t data = read_data(bus_width_t::word, address);
 
-    set_rt_load(data);
-  }
+  uint32_t data = read_data(memory_size_t::word, address);
+
+  set_rt_load(data);
 }
 
 
@@ -365,7 +362,7 @@ void cpu_t::op_lwc(cpu_cop_t *cop) {
     return enter_exception(cop0_exception_code_t::address_error_load);
   }
 
-  cop2->write_gpr(decode_rt(), read_data(bus_width_t::word, address));
+  cop->write_gpr(decode_rt(), read_data(memory_size_t::word, address));
 }
 
 
@@ -391,13 +388,13 @@ void cpu_t::op_lwc3() {
 
 void cpu_t::op_lwl() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data(bus_width_t::word, address & ~3);
+  uint32_t data = read_data(memory_size_t::word, address & ~3);
 
   switch (address & 3) {
-    default: data = (data << 24) | (get_rt_forwarded() & 0x00ffffff); break;
-    case  1: data = (data << 16) | (get_rt_forwarded() & 0x0000ffff); break;
-    case  2: data = (data <<  8) | (get_rt_forwarded() & 0x000000ff); break;
-    case  3: data = (data <<  0) | (get_rt_forwarded() & 0x00000000); break;
+    case 0: data = (data << 24) | (get_rt_forwarded() & 0x00ffffff); break;
+    case 1: data = (data << 16) | (get_rt_forwarded() & 0x0000ffff); break;
+    case 2: data = (data <<  8) | (get_rt_forwarded() & 0x000000ff); break;
+    case 3: data = (data <<  0) | (get_rt_forwarded() & 0x00000000); break;
   }
 
   set_rt_load(data);
@@ -406,13 +403,13 @@ void cpu_t::op_lwl() {
 
 void cpu_t::op_lwr() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data(bus_width_t::word, address & ~3);
+  uint32_t data = read_data(memory_size_t::word, address & ~3);
 
   switch (address & 3) {
-    default: data = (data >>  0) | (get_rt_forwarded() & 0x00000000); break;
-    case  1: data = (data >>  8) | (get_rt_forwarded() & 0xff000000); break;
-    case  2: data = (data >> 16) | (get_rt_forwarded() & 0xffff0000); break;
-    case  3: data = (data >> 24) | (get_rt_forwarded() & 0xffffff00); break;
+    case 0: data = (data >>  0) | (get_rt_forwarded() & 0x00000000); break;
+    case 1: data = (data >>  8) | (get_rt_forwarded() & 0xff000000); break;
+    case 2: data = (data >> 16) | (get_rt_forwarded() & 0xffff0000); break;
+    case 3: data = (data >> 24) | (get_rt_forwarded() & 0xffffff00); break;
   }
 
   set_rt_load(data);
@@ -478,20 +475,19 @@ void cpu_t::op_sb() {
   uint32_t address = get_rs() + decode_iconst();
   uint32_t data = get_rt();
 
-  write_data(bus_width_t::byte, address, data);
+  write_data(memory_size_t::byte, address, data);
 }
 
 
 void cpu_t::op_sh() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    enter_exception(cop0_exception_code_t::address_error_store);
+    return enter_exception(cop0_exception_code_t::address_error_store);
   }
-  else {
-    uint32_t data = get_rt();
 
-    write_data(bus_width_t::half, address, data);
-  }
+  uint32_t data = get_rt();
+
+  write_data(memory_size_t::half, address, data);
 }
 
 
@@ -572,7 +568,7 @@ void cpu_t::op_sw() {
 
   uint32_t data = get_rt();
 
-  write_data(bus_width_t::word, address, data);
+  write_data(memory_size_t::word, address, data);
 }
 
 
@@ -586,7 +582,7 @@ void cpu_t::op_swc(cpu_cop_t *cop) {
     return enter_exception(cop0_exception_code_t::address_error_store);
   }
 
-  write_data(bus_width_t::word, address, cop->read_gpr(decode_rt()));
+  write_data(memory_size_t::word, address, cop->read_gpr(decode_rt()));
 }
 
 
@@ -612,31 +608,31 @@ void cpu_t::op_swc3() {
 
 void cpu_t::op_swl() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data(bus_width_t::word, address & ~3);
+  uint32_t data = read_data(memory_size_t::word, address & ~3);
 
   switch (address & 3) {
-  default: data = (data & 0xffffff00) | (get_rt() >> 24); break;
-  case  1: data = (data & 0xffff0000) | (get_rt() >> 16); break;
-  case  2: data = (data & 0xff000000) | (get_rt() >>  8); break;
-  case  3: data = (data & 0x00000000) | (get_rt() >>  0); break;
+    case 0: data = (data & 0xffffff00) | (get_rt() >> 24); break;
+    case 1: data = (data & 0xffff0000) | (get_rt() >> 16); break;
+    case 2: data = (data & 0xff000000) | (get_rt() >>  8); break;
+    case 3: data = (data & 0x00000000) | (get_rt() >>  0); break;
   }
 
-  write_data(bus_width_t::word, address & ~3, data);
+  write_data(memory_size_t::word, address & ~3, data);
 }
 
 
 void cpu_t::op_swr() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data(bus_width_t::word, address & ~3);
+  uint32_t data = read_data(memory_size_t::word, address & ~3);
 
   switch (address & 3) {
-  default: data = (data & 0x00000000) | (get_rt() <<  0); break;
-  case  1: data = (data & 0x000000ff) | (get_rt() <<  8); break;
-  case  2: data = (data & 0x0000ffff) | (get_rt() << 16); break;
-  case  3: data = (data & 0x00ffffff) | (get_rt() << 24); break;
+    case 0: data = (data & 0x00000000) | (get_rt() <<  0); break;
+    case 1: data = (data & 0x000000ff) | (get_rt() <<  8); break;
+    case 2: data = (data & 0x0000ffff) | (get_rt() << 16); break;
+    case 3: data = (data & 0x00ffffff) | (get_rt() << 24); break;
   }
 
-  write_data(bus_width_t::word, address & ~3, data);
+  write_data(memory_size_t::word, address & ~3, data);
 }
 
 

@@ -3,15 +3,16 @@
 
 
 #include "console.hpp"
+#include "memory-size.hpp"
+#include "memory-component.hpp"
 
 
-class mdec_t {
+class mdec_t : public memory_component_t {
 
 public:
 
-  uint32_t io_read(bus_width_t width, uint32_t address);
+  mdec_t();
 
-  void io_write(bus_width_t width, uint32_t address, uint32_t data);
 };
 
 

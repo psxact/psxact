@@ -2,7 +2,13 @@
 #include "utility.hpp"
 
 
-uint32_t spu_t::io_read(bus_width_t width, uint32_t address) {
+spu_t::spu_t()
+  : memory_component_t("spu")
+  , sound_ram("sound-ram") {
+}
+
+
+uint32_t spu_t::io_read(memory_size_t size, uint32_t address) {
   if (address >= 0x1f801c00 && address <= 0x1f801d7f) {
     auto n = (address >> 4) & 31;
     auto m = (address >> 1) & 7;
@@ -25,14 +31,14 @@ uint32_t spu_t::io_read(bus_width_t width, uint32_t address) {
   }
 
   if (utility::log_spu) {
-    printf("spu::io_read(%d, 0x%08x)\n", width, address);
+    printf("spu::io_read(%d, 0x%08x)\n", size, address);
   }
 
   return 0;
 }
 
 
-void spu_t::io_write(bus_width_t width, uint32_t address, uint32_t data) {
+void spu_t::io_write(memory_size_t size, uint32_t address, uint32_t data) {
   if (address >= 0x1f801c00 && address <= 0x1f801d7f) {
     auto n = (address >> 4) & 31;
     auto m = (address >> 1) & 7;
@@ -58,6 +64,6 @@ void spu_t::io_write(bus_width_t width, uint32_t address, uint32_t data) {
   }
 
   if (utility::log_spu) {
-    printf("spu::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
+    printf("spu::io_write(%d, 0x%08x, 0x%08x)\n", size, address, data);
   }
 }

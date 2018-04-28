@@ -4,9 +4,10 @@
 
 #include "console.hpp"
 #include "memory.hpp"
+#include "memory-component.hpp"
 
 
-class gpu_t {
+class gpu_t : public memory_component_t {
 
 public:
 
@@ -83,9 +84,11 @@ public:
 
   } gpu_to_cpu_transfer;
 
-  uint32_t io_read(bus_width_t width, uint32_t address);
+  gpu_t();
 
-  void io_write(bus_width_t width, uint32_t address, uint32_t data);
+  uint32_t io_read(memory_size_t size, uint32_t address);
+
+  void io_write(memory_size_t size, uint32_t address, uint32_t data);
 
   uint32_t data();
 

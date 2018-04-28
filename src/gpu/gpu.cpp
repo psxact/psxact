@@ -4,6 +4,12 @@
 #include "utility.hpp"
 
 
+gpu_t::gpu_t()
+  : memory_component_t("gpu")
+  , vram("vram") {
+}
+
+
 uint32_t gpu_t::data() {
   if (gpu_to_cpu_transfer.run.active) {
     uint16_t lower = vram_transfer();
@@ -26,11 +32,11 @@ uint32_t gpu_t::stat() {
 }
 
 
-uint32_t gpu_t::io_read(bus_width_t width, uint32_t address) {
-  assert(width == bus_width_t::word);
+uint32_t gpu_t::io_read(memory_size_t size, uint32_t address) {
+  assert(size == memory_size_t::word);
 
   if (utility::log_gpu) {
-    printf("gpu::core::io_read(%d, 0x%08x)\n", width, address);
+    printf("gpu::core::io_read(%d, 0x%08x)\n", size, address);
   }
 
   switch (address) {
@@ -46,11 +52,11 @@ uint32_t gpu_t::io_read(bus_width_t width, uint32_t address) {
 }
 
 
-void gpu_t::io_write(bus_width_t width, uint32_t address, uint32_t data) {
-  assert(width == bus_width_t::word);
+void gpu_t::io_write(memory_size_t size, uint32_t address, uint32_t data) {
+  assert(size == memory_size_t::word);
 
   if (utility::log_gpu) {
-    printf("gpu::core::io_write(%d, 0x%08x, 0x%08x)\n", width, address, data);
+    printf("gpu::core::io_write(%d, 0x%08x, 0x%08x)\n", size, address, data);
   }
 
   switch (address) {

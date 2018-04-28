@@ -6,6 +6,9 @@
 #include "counter/counter.hpp"
 #include "cpu/cpu.hpp"
 #include "dma/dma.hpp"
+#include "expansion/exp1.hpp"
+#include "expansion/exp2.hpp"
+#include "expansion/exp3.hpp"
 #include "gpu/gpu.hpp"
 #include "input/input.hpp"
 #include "mdec/mdec.hpp"
@@ -14,11 +17,18 @@
 #include "utility.hpp"
 
 
-console_t::console_t(const char *bios_file_name, const char *game_file_name) {
+console_t::console_t(const char *bios_file_name, const char *game_file_name)
+  : bios("bios")
+  , dmem("dmem")
+  , wram("wram") {
+
   cdrom = new cdrom_t(this, game_file_name);
   counter = new counter_t(this);
   cpu = new cpu_t(this);
   dma = new dma_t(this, this);
+  exp1 = new exp1_t();
+  exp2 = new exp2_t();
+  exp3 = new exp3_t();
   gpu = new gpu_t();
   input = new input_t(this);
   mdec = new mdec_t();
@@ -34,67 +44,35 @@ void console_t::send(interrupt_type_t flag) {
 }
 
 
-uint32_t console_t::read(bus_width_t width, uint32_t address) {
-  if (limits::between<0x00000000, 0x007fffff>(address)) {
-    switch (width) {
-    case bus_width_t::byte: return wram.read_byte(address);
-    case bus_width_t::half: return wram.read_half(address);
-    case bus_width_t::word: return wram.read_word(address);
-    }
-  }
+memory_component_t *console_t::decode(uint32_t address) {
+#define between(min, max) \
+  limits::between<(min), (max)>(address)
 
-  if (limits::between<0x1fc00000, 0x1fc7ffff>(address)) {
-    switch (width) {
-    case bus_width_t::byte: return bios.read_byte(address);
-    case bus_width_t::half: return bios.read_half(address);
-    case bus_width_t::word: return bios.read_word(address);
-    }
-  }
+  if (between(0x00000000, 0x007fffff)) { return &wram; }
+  if (between(0x1fc00000, 0x1fc7ffff)) { return &bios; }
+  if (between(0x1f800000, 0x1f8003ff)) { return &dmem; }
+  if (between(0x1f801040, 0x1f80104f)) { return input; }
+  if (between(0x1f801070, 0x1f801077)) { return cpu; }
+  if (between(0x1f801080, 0x1f8010ff)) { return dma; }
+  if (between(0x1f801100, 0x1f80113f)) { return counter; }
+  if (between(0x1f801800, 0x1f801803)) { return cdrom; }
+  if (between(0x1f801810, 0x1f801817)) { return gpu; }
+  if (between(0x1f801820, 0x1f801827)) { return mdec; }
+  if (between(0x1f801c00, 0x1f801fff)) { return spu; }
+  if (between(0x1f000000, 0x1f7fffff)) { return exp1; }
+  if (between(0x1f802000, 0x1f802fff)) { return exp2; }
+  if (between(0x1fa00000, 0x1fbfffff)) { return exp3; }
 
-  if (limits::between<0x1f800000, 0x1f8003ff>(address)) {
-    switch (width) {
-    case bus_width_t::byte: return dmem.read_byte(address);
-    case bus_width_t::half: return dmem.read_half(address);
-    case bus_width_t::word: return dmem.read_word(address);
-    }
-  }
+#undef between
 
-  if (limits::between<0x1f801040, 0x1f80104f>(address)) {
-    return input->io_read(width, address);
-  }
+  return nullptr;
+}
 
-  if (limits::between<0x1f801070, 0x1f801077>(address)) {
-    return cpu->io_read(width, address);
-  }
 
-  if (limits::between<0x1f801080, 0x1f8010ff>(address)) {
-    return dma->io_read(width, address);
-  }
-
-  if (limits::between<0x1f801100, 0x1f80113f>(address)) {
-    return counter->io_read(width, address);
-  }
-
-  if (limits::between<0x1f801800, 0x1f801803>(address)) {
-    return cdrom->io_read(width, address);
-  }
-
-  if (limits::between<0x1f801810, 0x1f801817>(address)) {
-    return gpu->io_read(width, address);
-  }
-
-  if (limits::between<0x1f801820, 0x1f801827>(address)) {
-    return mdec->io_read(width, address);
-  }
-
-  if (limits::between<0x1f801c00, 0x1f801fff>(address)) {
-    return spu->io_read(width, address);
-  }
-
-  if (limits::between<0x1f000000, 0x1f7fffff>(address) || // expansion region 1
-      limits::between<0x1f802000, 0x1f802fff>(address) || // expansion region 2
-      limits::between<0x1fa00000, 0x1fbfffff>(address)) { // expansion region 3
-    return 0;
+uint32_t console_t::read(memory_size_t size, uint32_t address) {
+  auto component = decode(address);
+  if (component != nullptr) {
+    return component->io_read(size, address);
   }
 
   switch (address) {
@@ -115,70 +93,15 @@ uint32_t console_t::read(bus_width_t width, uint32_t address) {
     return 0;
   }
 
-  printf("system.read(%d, 0x%08x)\n", width, address);
+  printf("system.read(%d, 0x%08x)\n", size, address);
   throw std::exception();
 }
 
 
-void console_t::write(bus_width_t width, uint32_t address, uint32_t data) {
-  if (limits::between<0x00000000, 0x007fffff>(address)) {
-    switch (width) {
-    case bus_width_t::byte: return wram.write_byte(address, data);
-    case bus_width_t::half: return wram.write_half(address, data);
-    case bus_width_t::word: return wram.write_word(address, data);
-    }
-  }
-
-  if (limits::between<0x1fc00000, 0x1fc7ffff>(address)) {
-    printf("bios write: $%08x <- $%08x\n", address, data);
-    return;
-  }
-
-  if (limits::between<0x1f800000, 0x1f8003ff>(address)) {
-    switch (width) {
-    case bus_width_t::byte: return dmem.write_byte(address, data);
-    case bus_width_t::half: return dmem.write_half(address, data);
-    case bus_width_t::word: return dmem.write_word(address, data);
-    }
-  }
-
-  if (limits::between<0x1f801040, 0x1f80104f>(address)) {
-    return input->io_write(width, address, data);
-  }
-
-  if (limits::between<0x1f801070, 0x1f801077>(address)) {
-    return cpu->io_write(width, address, data);
-  }
-
-  if (limits::between<0x1f801080, 0x1f8010ff>(address)) {
-    return dma->io_write(width, address, data);
-  }
-
-  if (limits::between<0x1f801100, 0x1f80113f>(address)) {
-    return counter->io_write(width, address, data);
-  }
-
-  if (limits::between<0x1f801800, 0x1f801803>(address)) {
-    // return load_executable();
-    return cdrom->io_write(width, address, data);
-  }
-
-  if (limits::between<0x1f801810, 0x1f801817>(address)) {
-    return gpu->io_write(width, address, data);
-  }
-
-  if (limits::between<0x1f801820, 0x1f801827>(address)) {
-    return mdec->io_write(width, address, data);
-  }
-
-  if (limits::between<0x1f801c00, 0x1f801fff>(address)) {
-    return spu->io_write(width, address, data);
-  }
-
-  if (limits::between<0x1f000000, 0x1f7fffff>(address) || // expansion region 1
-      limits::between<0x1f802000, 0x1f802fff>(address) || // expansion region 2
-      limits::between<0x1fa00000, 0x1fbfffff>(address)) { // expansion region 3
-    return;
+void console_t::write(memory_size_t size, uint32_t address, uint32_t data) {
+  auto component = decode(address);
+  if (component != nullptr) {
+    return component->io_write(size, address, data);
   }
 
   switch (address) {
@@ -219,7 +142,7 @@ void console_t::write(bus_width_t width, uint32_t address, uint32_t data) {
     return;
   }
 
-  printf("system.write(%d, 0x%08x, 0x%08x)\n", width, address, data);
+  printf("system.write(%d, 0x%08x, 0x%08x)\n", size, address, data);
   throw std::exception();
 }
 

@@ -8,9 +8,10 @@
 #include "cpu/cpu-cop2.hpp"
 #include "console.hpp"
 #include "memory-access.hpp"
+#include "memory-component.hpp"
 
 
-class cpu_t {
+class cpu_t : public memory_component_t {
 
   memory_access_t *memory;
 
@@ -69,9 +70,9 @@ public:
 
   void read_code();
 
-  uint32_t read_data(bus_width_t width, uint32_t address);
+  uint32_t read_data(memory_size_t size, uint32_t address);
 
-  void write_data(bus_width_t width, uint32_t address, uint32_t data);
+  void write_data(memory_size_t size, uint32_t address, uint32_t data);
 
   uint32_t get_imask();
 
@@ -81,9 +82,9 @@ public:
 
   void set_istat(uint32_t value);
 
-  uint32_t io_read(bus_width_t width, uint32_t address);
+  uint32_t io_read(memory_size_t size, uint32_t address);
 
-  void io_write(bus_width_t width, uint32_t address, uint32_t data);
+  void io_write(memory_size_t size, uint32_t address, uint32_t data);
 
   // -============-
   //  Instructions

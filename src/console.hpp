@@ -5,6 +5,7 @@
 #include "interrupt-access.hpp"
 #include "memory.hpp"
 #include "memory-access.hpp"
+#include "memory-size.hpp"
 
 class cdrom_t;
 
@@ -13,6 +14,12 @@ class counter_t;
 class cpu_t;
 
 class dma_t;
+
+class exp1_t;
+
+class exp2_t;
+
+class exp3_t;
 
 class gpu_t;
 
@@ -34,6 +41,9 @@ class console_t
   counter_t *counter;
   cpu_t *cpu;
   dma_t *dma;
+  exp1_t *exp1;
+  exp2_t *exp2;
+  exp3_t *exp3;
   gpu_t *gpu;
   input_t *input;
   mdec_t *mdec;
@@ -45,11 +55,16 @@ public:
 
   void send(interrupt_type_t flag);
 
-  uint32_t read(bus_width_t width, uint32_t address);
+  uint32_t read(memory_size_t size, uint32_t address);
 
-  void write(bus_width_t width, uint32_t address, uint32_t data);
+  void write(memory_size_t size, uint32_t address, uint32_t data);
 
   void run_for_one_frame(uint16_t **vram, int *w, int *h);
+
+private:
+
+  memory_component_t *decode(uint32_t address);
+
 };
 
 

@@ -4,9 +4,10 @@
 
 #include "console.hpp"
 #include "memory.hpp"
+#include "memory-component.hpp"
 
 
-class spu_t {
+class spu_t : public memory_component_t {
 
   uint16_t control;
   uint16_t status;
@@ -21,9 +22,11 @@ class spu_t {
 
 public:
 
-  uint32_t io_read(bus_width_t width, uint32_t address);
+  spu_t();
 
-  void io_write(bus_width_t width, uint32_t address, uint32_t data);
+  uint32_t io_read(memory_size_t size, uint32_t address);
+
+  void io_write(memory_size_t size, uint32_t address, uint32_t data);
 
 };
 

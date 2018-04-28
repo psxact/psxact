@@ -3,7 +3,8 @@
 
 
 cdrom_t::cdrom_t(interrupt_access_t *irq, const char *game_file_name)
-    : irq(irq)
+    : memory_component_t("cdc")
+    , irq(irq)
     , game_file_name(game_file_name) {
 
   game_file = fopen(game_file_name, "rb+");

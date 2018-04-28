@@ -5,6 +5,7 @@
 #include "console.hpp"
 #include "fifo.hpp"
 #include "interrupt-access.hpp"
+#include "memory-component.hpp"
 
 
 enum class input_port_status_t {
@@ -33,7 +34,7 @@ struct input_port_t {
 };
 
 
-class input_t {
+class input_t : public memory_component_t {
 
   interrupt_access_t *irq;
 
@@ -59,9 +60,9 @@ public:
 
   input_t(interrupt_access_t *irq);
 
-  uint32_t io_read(bus_width_t width, uint32_t address);
+  uint32_t io_read(memory_size_t size, uint32_t address);
 
-  void io_write(bus_width_t width, uint32_t address, uint32_t data);
+  void io_write(memory_size_t size, uint32_t address, uint32_t data);
 
   void tick();
 
