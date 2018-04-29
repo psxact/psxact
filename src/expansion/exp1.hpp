@@ -9,9 +9,9 @@ class exp1_t : public memory_component_t {
 
 public:
 
-  exp1_t()
-    : memory_component_t("exp1") {
-  }
+  exp1_t();
+
+  uint32_t io_read_byte(uint32_t address);
 
 };
 

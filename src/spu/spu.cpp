@@ -31,6 +31,12 @@ uint32_t spu_t::io_read_half(uint32_t address) {
     case 0x1f801d8a:
       return utility::uclip<8>(key_on >> 16);
 
+    case 0x1f801d8c:
+      return utility::uclip<16>(key_off);
+
+    case 0x1f801d8e:
+      return utility::uclip<8>(key_off >> 16);
+
     case 0x1f801d90:
       return utility::uclip<16>(pitch_modulation_on);
 
