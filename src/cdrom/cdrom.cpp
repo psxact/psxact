@@ -210,8 +210,8 @@ void cdrom_t::logic_transition(stage_t stage, int timer) {
 }
 
 void cdrom_t::logic_idling() {
-  if (command_is_new) {
-    command_is_new = 0;
+  if (command_unprocessed) {
+    command_unprocessed = 0;
 
     if (parameter_fifo.is_empty()) {
       logic_transition(&cdrom_t::logic_transferring_command, 1000);
@@ -240,7 +240,8 @@ void cdrom_t::logic_transferring_command() {
 }
 
 void cdrom_t::logic_executing_command() {
-#define get_param() logic.parameter_fifo.read()
+#define get_param() \
+  logic.parameter_fifo.read()
 
   if (utility::log_cdrom) {
     printf("[cdc] logic_executing_command(0x%02x)\n", logic.command);

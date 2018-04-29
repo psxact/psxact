@@ -3,11 +3,6 @@
 #include "utility.hpp"
 
 
-static uint32_t get_port(uint32_t address) {
-  return address - 0x1f801800;
-}
-
-
 uint8_t cdrom_t::io_read_port_0() {
   return uint8_t(
     (index                     << 0) |
@@ -41,30 +36,29 @@ uint8_t cdrom_t::io_read_port_3() {
 }
 
 
-uint32_t cdrom_t::io_read_word(uint32_t address) {
-  if (address == 0x1f801800) {
-    uint8_t b0 = data_fifo.read();
-    uint8_t b1 = data_fifo.read();
-    uint8_t b2 = data_fifo.read();
-    uint8_t b3 = data_fifo.read();
-
-    return (b0 << 0) | (b1 << 8) | (b2 << 16) | (b3 << 24);
-  }
-  else {
-    return memory_component_t::io_read_word(address);
-  }
-}
-
-
 uint32_t cdrom_t::io_read_byte(uint32_t address) {
-  switch (get_port(address)) {
-    case 0: return io_read_port_0();
-    case 1: return io_read_port_1();
-    case 2: return io_read_port_2();
-    case 3: return io_read_port_3();
+  switch (address) {
+    case 0x1f801800: return io_read_port_0();
+    case 0x1f801801: return io_read_port_1();
+    case 0x1f801802: return io_read_port_2();
+    case 0x1f801803: return io_read_port_3();
   }
 
   return memory_component_t::io_read_byte(address);
+}
+
+
+uint32_t cdrom_t::io_read_word(uint32_t address) {
+  if (address == 0x1f801800) {
+    uint8_t b0 = io_read_port_2();
+    uint8_t b1 = io_read_port_2();
+    uint8_t b2 = io_read_port_2();
+    uint8_t b3 = io_read_port_2();
+
+    return (b0 << 0) | (b1 << 8) | (b2 << 16) | (b3 << 24);
+  }
+
+  return memory_component_t::io_read_word(address);
 }
 
 
@@ -75,7 +69,7 @@ void cdrom_t::io_write_port_0_n(uint8_t data) {
 
 void cdrom_t::io_write_port_1_0(uint8_t data) {
   command = data;
-  command_is_new = 1;
+  command_unprocessed = 1;
 }
 
 
@@ -136,19 +130,15 @@ void cdrom_t::io_write_port_3_3(uint8_t data) {}
 
 
 void cdrom_t::io_write_byte(uint32_t address, uint32_t data) {
-  uint32_t port = get_port(address);
-
   if (utility::log_cdrom) {
-    printf("cdrom_t::io_write_port_%d_%d(0x%02x)\n", port, index, data);
+    printf("[cdc] io_write_byte(0x%08x, 0x%08x)\n", address, data);
   }
 
-  uint8_t clipped = uint8_t(data);
-
-  switch (port) {
-    case 0:
+  switch (address) {
+    case 0x1f801800:
       return io_write_port_0_n(data);
 
-    case 1:
+    case 0x1f801801:
       switch (index) {
         case 0: return io_write_port_1_0(data);
         case 1: return io_write_port_1_1(data);
@@ -157,7 +147,7 @@ void cdrom_t::io_write_byte(uint32_t address, uint32_t data) {
       }
       break;
 
-    case 2:
+    case 0x1f801802:
       switch (index) {
         case 0: return io_write_port_2_0(data);
         case 1: return io_write_port_2_1(data);
@@ -166,7 +156,7 @@ void cdrom_t::io_write_byte(uint32_t address, uint32_t data) {
       }
       break;
 
-    case 3:
+    case 0x1f801803:
       switch (index) {
         case 0: return io_write_port_3_0(data);
         case 1: return io_write_port_3_1(data);
@@ -174,5 +164,7 @@ void cdrom_t::io_write_byte(uint32_t address, uint32_t data) {
         case 3: return io_write_port_3_3(data);
       }
       break;
-    }
+  }
+
+  return memory_component_t::io_write_byte(address, data);
 }

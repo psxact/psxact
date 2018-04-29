@@ -11,11 +11,9 @@
 
 
 struct cdrom_sector_timecode_t {
-
   uint8_t minute;
   uint8_t second;
   uint8_t sector;
-
 };
 
 
@@ -37,7 +35,7 @@ class cdrom_t : public memory_component_t {
   uint8_t data_buffer[4096];
 
   uint8_t command;
-  bool command_is_new;
+  bool command_unprocessed;
   bool busy;
 
   std::string game_file_name;
@@ -169,7 +167,6 @@ public:
   void drive_getting_id();
 
   void drive_reading();
-
 };
 
 
