@@ -1,7 +1,8 @@
+#include "console.hpp"
+
 #include <cassert>
 #include <cstring>
 #include <exception>
-#include "console.hpp"
 #include "cdrom/cdrom.hpp"
 #include "counter/counter.hpp"
 #include "cpu/cpu.hpp"

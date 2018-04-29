@@ -1,5 +1,6 @@
-#include <cassert>
 #include "gpu/gpu.hpp"
+
+#include <cassert>
 #include "console.hpp"
 #include "utility.hpp"
 

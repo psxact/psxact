@@ -1,5 +1,6 @@
-#include <algorithm>
 #include "gpu/gpu.hpp"
+
+#include <algorithm>
 #include "utility.hpp"
 
 

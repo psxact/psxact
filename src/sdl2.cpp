@@ -1,5 +1,6 @@
-#include <cstdio>
 #include "sdl2.hpp"
+
+#include <cstdio>
 
 
 static const int window_width = 640;

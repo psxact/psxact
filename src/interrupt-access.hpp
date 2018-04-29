@@ -3,7 +3,6 @@
 
 
 enum class interrupt_type_t {
-
   VBLANK = 0x001,
   GPU    = 0x002,
   CDROM  = 0x004,
@@ -15,7 +14,6 @@ enum class interrupt_type_t {
   SIO    = 0x100,
   SPU    = 0x200,
   PIO    = 0x400,
-
 };
 
 
