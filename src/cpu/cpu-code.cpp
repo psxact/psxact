@@ -184,10 +184,13 @@ void cpu_t::op_bxx() {
 }
 
 
-void cpu_t::op_cop(cpu_cop_t *cop) {
-  if (cop == nullptr) {
+void cpu_t::op_cop(int n) {
+  if (get_cop_usable(n) == false) {
+    printf("[cpu] op_cop(%d) = 0x%08x\n", n, code);
     return enter_exception(cop0_exception_code_t::cop_unusable);
   }
+
+  auto cop = get_cop(n);
 
   if (code & (1 << 25)) {
     return cop->run(code & 0x1ffffff);
@@ -203,27 +206,27 @@ void cpu_t::op_cop(cpu_cop_t *cop) {
     case 0x06: return cop->write_ccr(rd, get_register(rt));
   }
 
-  printf("cpu_t::op_cop0(0x%08x)\n", code);
+  printf("[cpu] op_cop%d(0x%08x)\n", n, code);
 }
 
 
 void cpu_t::op_cop0() {
-  op_cop(cop0);
+  op_cop(0);
 }
 
 
 void cpu_t::op_cop1() {
-  op_cop(cop1);
+  op_cop(1);
 }
 
 
 void cpu_t::op_cop2() {
-  op_cop(cop2);
+  op_cop(2);
 }
 
 
 void cpu_t::op_cop3() {
-  op_cop(cop3);
+  op_cop(3);
 }
 
 
@@ -355,8 +358,9 @@ void cpu_t::op_lw() {
 }
 
 
-void cpu_t::op_lwc(cpu_cop_t *cop) {
-  if (cop == nullptr) {
+void cpu_t::op_lwc(int n) {
+  if (get_cop_usable(n) == false) {
+    printf("[cpu] op_lwc(%d)\n", n);
     return enter_exception(cop0_exception_code_t::cop_unusable);
   }
 
@@ -365,27 +369,27 @@ void cpu_t::op_lwc(cpu_cop_t *cop) {
     return enter_exception(cop0_exception_code_t::address_error_load);
   }
 
-  cop->write_gpr(decode_rt(), read_data_word(address));
+  get_cop(n)->write_gpr(decode_rt(), read_data_word(address));
 }
 
 
 void cpu_t::op_lwc0() {
-  op_lwc(cop0);
+  op_lwc(0);
 }
 
 
 void cpu_t::op_lwc1() {
-  op_lwc(cop1);
+  op_lwc(1);
 }
 
 
 void cpu_t::op_lwc2() {
-  op_lwc(cop2);
+  op_lwc(2);
 }
 
 
 void cpu_t::op_lwc3() {
-  op_lwc(cop3);
+  op_lwc(3);
 }
 
 
@@ -575,8 +579,9 @@ void cpu_t::op_sw() {
 }
 
 
-void cpu_t::op_swc(cpu_cop_t *cop) {
-  if (cop == nullptr) {
+void cpu_t::op_swc(int n) {
+  if (get_cop_usable(n) == false) {
+    printf("[cpu] op_swc(%d)\n", n);
     return enter_exception(cop0_exception_code_t::cop_unusable);
   }
 
@@ -585,27 +590,27 @@ void cpu_t::op_swc(cpu_cop_t *cop) {
     return enter_exception(cop0_exception_code_t::address_error_store);
   }
 
-  write_data_word(address, cop->read_gpr(decode_rt()));
+  write_data_word(address, get_cop(n)->read_gpr(decode_rt()));
 }
 
 
 void cpu_t::op_swc0() {
-  op_swc(cop0);
+  op_swc(0);
 }
 
 
 void cpu_t::op_swc1() {
-  op_swc(cop1);
+  op_swc(1);
 }
 
 
 void cpu_t::op_swc2() {
-  op_swc(cop2);
+  op_swc(2);
 }
 
 
 void cpu_t::op_swc3() {
-  op_swc(cop3);
+  op_swc(3);
 }
 
 

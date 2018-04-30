@@ -53,8 +53,30 @@ cpu_t::cpu_t(memory_access_t *memory)
   regs.pc = 0xbfc00000;
   regs.next_pc = regs.pc + 4;
 
-  cop0 = new cpu_cop0_t();
-  cop2 = new cpu_cop2_t();
+  cop[0] = new cpu_cop0_t();
+  cop[2] = new cpu_cop2_t();
+
+  cop[0]->write_gpr(12, 0x00000000);
+}
+
+
+cpu_cop_t *cpu_t::get_cop(int n) {
+  return cop[n];
+}
+
+
+bool cpu_t::get_cop_usable(int n) {
+  if (get_cop(n) == nullptr) {
+    return false;
+  }
+
+  auto stat = get_cop(0)->read_gpr(12);
+  auto mask = (1 << (28 + n));
+
+  return (n == 0 && (stat & 0x10000000) == 0)
+    ? (stat & 0x02) == 0
+    : (stat & mask) != 0
+    ;
 }
 
 
@@ -67,8 +89,8 @@ void cpu_t::tick() {
   is_load_delay_slot = is_load;
   is_load = false;
 
-  bool iec = (cop0->read_gpr(12) & 1) != 0;
-  bool irq = (cop0->read_gpr(12) & cop0->read_gpr(13) & 0xff00) != 0;
+  bool iec = (get_cop(0)->read_gpr(12) & 1) != 0;
+  bool irq = (get_cop(0)->read_gpr(12) & get_cop(0)->read_gpr(13) & 0xff00) != 0;
 
   if (iec && irq) {
     enter_exception(cop0_exception_code_t::interrupt);
@@ -84,7 +106,6 @@ void cpu_t::tick() {
 
 
 static uint32_t segments[8] = {
-
   0x7fffffff, // kuseg ($0000_0000 - $7fff_ffff)
   0x7fffffff, //
   0x7fffffff, //
@@ -93,7 +114,6 @@ static uint32_t segments[8] = {
   0x1fffffff, // kseg1 ($a000_0000 - $bfff_ffff)
   0xffffffff, // kseg2 ($c000_0000 - $ffff_ffff)
   0xffffffff  //
-
 };
 
 
@@ -120,10 +140,12 @@ void cpu_t::log_bios_calls() {
 
 
 void cpu_t::enter_exception(cop0_exception_code_t code) {
-  uint32_t status = cop0->read_gpr(12);
+  printf("[cpu] enter_exception(%d)\n", code);
+
+  uint32_t status = get_cop(0)->read_gpr(12);
   status = (status & ~0x3f) | ((status << 2) & 0x3f);
 
-  uint32_t cause = cop0->read_gpr(13);
+  uint32_t cause = get_cop(0)->read_gpr(13);
   cause = (cause & ~0x7f) | ((int(code) << 2) & 0x7f);
 
   uint32_t epc;
@@ -137,9 +159,9 @@ void cpu_t::enter_exception(cop0_exception_code_t code) {
     cause &= ~0x80000000;
   }
 
-  cop0->write_gpr(12, status);
-  cop0->write_gpr(13, cause);
-  cop0->write_gpr(14, epc);
+  get_cop(0)->write_gpr(12, status);
+  get_cop(0)->write_gpr(13, cause);
+  get_cop(0)->write_gpr(14, epc);
 
   regs.pc = (status & (1 << 22))
     ? 0xbfc00180
@@ -166,7 +188,7 @@ void cpu_t::read_code() {
 
 
 uint32_t cpu_t::read_data_byte(uint32_t address) {
-  if (cop0->read_gpr(12) & (1 << 16)) {
+  if (get_cop(0)->read_gpr(12) & (1 << 16)) {
     return 0; // isc=1
   }
 
@@ -176,7 +198,7 @@ uint32_t cpu_t::read_data_byte(uint32_t address) {
 
 
 uint32_t cpu_t::read_data_half(uint32_t address) {
-  if (cop0->read_gpr(12) & (1 << 16)) {
+  if (get_cop(0)->read_gpr(12) & (1 << 16)) {
     return 0; // isc=1
   }
 
@@ -186,7 +208,7 @@ uint32_t cpu_t::read_data_half(uint32_t address) {
 
 
 uint32_t cpu_t::read_data_word(uint32_t address) {
-  if (cop0->read_gpr(12) & (1 << 16)) {
+  if (get_cop(0)->read_gpr(12) & (1 << 16)) {
     return 0; // isc=1
   }
 
@@ -196,7 +218,7 @@ uint32_t cpu_t::read_data_word(uint32_t address) {
 
 
 void cpu_t::write_data_byte(uint32_t address, uint32_t data) {
-  if (cop0->read_gpr(12) & (1 << 16)) {
+  if (get_cop(0)->read_gpr(12) & (1 << 16)) {
     return; // isc=1
   }
 
@@ -206,7 +228,7 @@ void cpu_t::write_data_byte(uint32_t address, uint32_t data) {
 
 
 void cpu_t::write_data_half(uint32_t address, uint32_t data) {
-  if (cop0->read_gpr(12) & (1 << 16)) {
+  if (get_cop(0)->read_gpr(12) & (1 << 16)) {
     return; // isc=1
   }
 
@@ -216,7 +238,7 @@ void cpu_t::write_data_half(uint32_t address, uint32_t data) {
 
 
 void cpu_t::write_data_word(uint32_t address, uint32_t data) {
-  if (cop0->read_gpr(12) & (1 << 16)) {
+  if (get_cop(0)->read_gpr(12) & (1 << 16)) {
     return; // isc=1
   }
 
@@ -230,11 +252,11 @@ void cpu_t::update_irq(uint32_t stat, uint32_t mask) {
   imask = mask;
 
   int flag = (istat & imask)
-    ? cop0->read_gpr(13) |  (1 << 10)
-    : cop0->read_gpr(13) & ~(1 << 10)
+    ? get_cop(0)->read_gpr(13) |  (1 << 10)
+    : get_cop(0)->read_gpr(13) & ~(1 << 10)
     ;
 
-  cop0->write_gpr(13, flag);
+  get_cop(0)->write_gpr(13, flag);
 }
 
 

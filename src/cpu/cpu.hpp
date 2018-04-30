@@ -15,10 +15,7 @@ class cpu_t : public memory_component_t {
 
   memory_access_t *memory;
 
-  cpu_cop_t *cop0;
-  cpu_cop_t *cop1;
-  cpu_cop_t *cop2;
-  cpu_cop_t *cop3;
+  cpu_cop_t *cop[4];
 
   struct {
 
@@ -53,6 +50,10 @@ class cpu_t : public memory_component_t {
 public:
 
   cpu_t(memory_access_t *memory);
+
+  cpu_cop_t *get_cop(int n);
+
+  bool get_cop_usable(int n);
 
   void disassemble(FILE *file);
 
@@ -126,7 +127,7 @@ public:
 
   void op_bxx();
 
-  void op_cop(cpu_cop_t *cop);
+  void op_cop(int n);
 
   void op_cop0();
 
@@ -160,7 +161,7 @@ public:
 
   void op_lw();
 
-  void op_lwc(cpu_cop_t *cop);
+  void op_lwc(int n);
 
   void op_lwc0();
 
@@ -222,7 +223,7 @@ public:
 
   void op_sw();
 
-  void op_swc(cpu_cop_t *cop);
+  void op_swc(int n);
 
   void op_swc0();
 
@@ -243,7 +244,7 @@ public:
   void op_xori();
 
   // undefined instruction
-  
+
   void op_und();
 
   uint32_t decode_iconst();
