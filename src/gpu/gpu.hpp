@@ -7,6 +7,12 @@
 #include "memory-component.hpp"
 
 
+#define GPU_GP0  0x1f801810
+#define GPU_GP1  0x1f801814
+#define GPU_READ 0x1f801810
+#define GPU_STAT 0x1f801814
+
+
 class gpu_t : public memory_component_t {
 
 public:
@@ -106,9 +112,9 @@ public:
 
   void vram_write(int x, int y, uint16_t data);
 
-  void vram_transfer(uint16_t data);
+  uint16_t vram_transfer_read();
 
-  uint16_t vram_transfer();
+  void vram_transfer_write(uint16_t data);
 
   struct color_t {
 

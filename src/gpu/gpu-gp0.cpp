@@ -86,8 +86,8 @@ void gpu_t::gp0(uint32_t data) {
     uint16_t lower = uint16_t(data >> 0);
     uint16_t upper = uint16_t(data >> 16);
 
-    vram_transfer(lower);
-    vram_transfer(upper);
+    vram_transfer_write(lower);
+    vram_transfer_write(upper);
     return;
   }
 

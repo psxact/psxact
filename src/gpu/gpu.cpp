@@ -13,8 +13,8 @@ gpu_t::gpu_t()
 
 uint32_t gpu_t::data() {
   if (gpu_to_cpu_transfer.run.active) {
-    uint16_t lower = vram_transfer();
-    uint16_t upper = vram_transfer();
+    uint16_t lower = vram_transfer_read();
+    uint16_t upper = vram_transfer_read();
 
     return (upper << 16) | lower;
   }
@@ -35,11 +35,11 @@ uint32_t gpu_t::stat() {
 
 uint32_t gpu_t::io_read_word(uint32_t address) {
   switch (address) {
-  case 0x1f801810:
-    return data();
+    case GPU_READ:
+      return data();
 
-  case 0x1f801814:
-    return stat();
+    case GPU_STAT:
+      return stat();
   }
 
   return 0;
@@ -48,81 +48,11 @@ uint32_t gpu_t::io_read_word(uint32_t address) {
 
 void gpu_t::io_write_word(uint32_t address, uint32_t data) {
   switch (address) {
-  case 0x1f801810:
-    return gp0(data);
+    case GPU_GP0:
+      return gp0(data);
 
-  case 0x1f801814:
-    return gp1(data);
-  }
-}
-
-
-uint16_t *gpu_t::vram_data(int x, int y) {
-  return (uint16_t *)vram.get_pointer(vram_address(x, y));
-}
-
-
-uint32_t gpu_t::vram_address(int x, int y) {
-  return ((y * 1024) + x) * sizeof(uint16_t);
-}
-
-
-uint16_t gpu_t::vram_read(int x, int y) {
-  return vram.io_read_half(vram_address(x, y));
-}
-
-
-void gpu_t::vram_write(int x, int y, uint16_t data) {
-  vram.io_write_half(vram_address(x, y), data);
-}
-
-
-uint16_t gpu_t::vram_transfer() {
-  auto &transfer = gpu_to_cpu_transfer;
-  if (!transfer.run.active) {
-    return 0;
-  }
-
-  uint16_t data = vram_read(
-      transfer.reg.x + transfer.run.x,
-      transfer.reg.y + transfer.run.y);
-
-  transfer.run.x++;
-
-  if (transfer.run.x == transfer.reg.w) {
-    transfer.run.x = 0;
-    transfer.run.y++;
-
-    if (transfer.run.y == transfer.reg.h) {
-      transfer.run.y = 0;
-      transfer.run.active = false;
-    }
-  }
-
-  return data;
-}
-
-
-void gpu_t::vram_transfer(uint16_t data) {
-  auto &transfer = cpu_to_gpu_transfer;
-  if (!transfer.run.active) {
-    return;
-  }
-
-  vram_write(
-      transfer.reg.x + transfer.run.x,
-      transfer.reg.y + transfer.run.y, uint16_t(data));
-
-  transfer.run.x++;
-
-  if (transfer.run.x == transfer.reg.w) {
-    transfer.run.x = 0;
-    transfer.run.y++;
-
-    if (transfer.run.y == transfer.reg.h) {
-      transfer.run.y = 0;
-      transfer.run.active = false;
-    }
+    case GPU_GP1:
+      return gp1(data);
   }
 }
 
