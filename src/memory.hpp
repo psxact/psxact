@@ -17,7 +17,7 @@ template<uint32_t size>
 struct memory_t : public memory_component_t {
 
   static constexpr int mask = size - 1;
-  
+
   union {
     uint8_t  b[size];
     uint16_t h[size / 2];
@@ -70,7 +70,6 @@ struct memory_t : public memory_component_t {
       return false;
     }
   }
-
 };
 
 

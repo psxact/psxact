@@ -7,9 +7,7 @@
 
 template<typename T>
 struct define {
-
   typedef T type;
-
 };
 
 
@@ -31,7 +29,6 @@ struct int_type : choice<int32_t, int64_t, (bits < 31)> {};
 
 template<int bits, typename T = typename int_type<bits>::type>
 class slimit {
-
   static const T val = (1LL << (bits - 1));
 
 public:
@@ -44,13 +41,11 @@ public:
     if (value > max) return max;
     return value;
   }
-
 };
 
 
 template<int bits, typename T = typename int_type<bits>::type>
 struct ulimit {
-
   static const T min = 0LL;
   static const T max = (1LL << bits) - 1LL;
 
@@ -59,17 +54,14 @@ struct ulimit {
     if (value > max) return max;
     return value;
   }
-
 };
 
 
 namespace limits {
-
   template<uint32_t min, uint32_t max>
   bool between(uint32_t value) {
     return (value & ~(min ^ max)) == min;
   }
-
 }
 
 

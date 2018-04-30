@@ -7,19 +7,19 @@
 
 
 enum class cop0_exception_code_t {
-  interrupt             = 0x0,
-  tlb_modification      = 0x1,
-  tlb_load              = 0x2,
-  tlb_store             = 0x3,
-  address_error_load    = 0x4,
-  address_error_store   = 0x5,
-  instruction_bus_error = 0x6,
-  data_bus_error        = 0x7,
-  syscall               = 0x8,
-  breakpoint            = 0x9,
-  reserved_instruction  = 0xa,
-  cop_unusable          = 0xb,
-  overflow              = 0xc
+  interrupt,
+  tlb_modification,
+  tlb_load,
+  tlb_store,
+  address_error_load,
+  address_error_store,
+  instruction_bus_error,
+  data_bus_error,
+  syscall,
+  breakpoint,
+  reserved_instruction,
+  cop_unusable,
+  overflow
 };
 
 
@@ -42,7 +42,6 @@ public:
   uint32_t enter_exception(cop0_exception_code_t code, uint32_t pc, bool is_branch_delay_slot);
 
   void rfe();
-
 };
 
 

@@ -84,11 +84,10 @@ void cpu_t::op_add() {
   uint32_t z = x + y;
 
   if (overflow(x, y, z)) {
-    enter_exception(cop0_exception_code_t::overflow);
+    return enter_exception(cop0_exception_code_t::overflow);
   }
-  else {
-    set_rd(z);
-  }
+
+  set_rd(z);
 }
 
 
@@ -98,11 +97,10 @@ void cpu_t::op_addi() {
   uint32_t z = x + y;
 
   if (overflow(x, y, z)) {
-    enter_exception(cop0_exception_code_t::overflow);
+    return enter_exception(cop0_exception_code_t::overflow);
   }
-  else {
-    set_rt(z);
-  }
+
+  set_rt(z);
 }
 
 
@@ -186,7 +184,6 @@ void cpu_t::op_bxx() {
 
 void cpu_t::op_cop(int n) {
   if (get_cop_usable(n) == false) {
-    printf("[cpu] op_cop(%d) = 0x%08x\n", n, code);
     return enter_exception(cop0_exception_code_t::cop_unusable);
   }
 
@@ -360,7 +357,6 @@ void cpu_t::op_lw() {
 
 void cpu_t::op_lwc(int n) {
   if (get_cop_usable(n) == false) {
-    printf("[cpu] op_lwc(%d)\n", n);
     return enter_exception(cop0_exception_code_t::cop_unusable);
   }
 
@@ -492,9 +488,7 @@ void cpu_t::op_sh() {
     return enter_exception(cop0_exception_code_t::address_error_store);
   }
 
-  uint32_t data = get_rt();
-
-  write_data_half(address, data);
+  write_data_half(address, get_rt());
 }
 
 
@@ -554,11 +548,10 @@ void cpu_t::op_sub() {
   uint32_t z = x - y;
 
   if (overflow(x, ~y, z)) {
-    enter_exception(cop0_exception_code_t::overflow);
+    return enter_exception(cop0_exception_code_t::overflow);
   }
-  else {
-    set_rd(z);
-  }
+
+  set_rd(z);
 }
 
 
@@ -581,7 +574,6 @@ void cpu_t::op_sw() {
 
 void cpu_t::op_swc(int n) {
   if (get_cop_usable(n) == false) {
-    printf("[cpu] op_swc(%d)\n", n);
     return enter_exception(cop0_exception_code_t::cop_unusable);
   }
 

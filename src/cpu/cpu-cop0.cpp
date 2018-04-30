@@ -2,12 +2,8 @@
 
 
 void cpu_cop0_t::run(uint32_t n) {
-  switch (n) {
-    case 0x10:
-      return rfe();
-
-    default:
-      return;
+  if (n == 0x10) {
+    return rfe();
   }
 }
 
@@ -32,8 +28,8 @@ void cpu_cop0_t::write_gpr(uint32_t n, uint32_t value) {
 
 
 void cpu_cop0_t::rfe() {
-  uint32_t sr = regs[12];
+  uint32_t sr = read_gpr(12);
   sr = (sr & ~0xf) | ((sr >> 2) & 0xf);
 
-  regs[12] = sr;
+  write_gpr(12, sr);
 }
