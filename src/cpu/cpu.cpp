@@ -47,7 +47,8 @@ cpu_t::opcode_t cpu_t::op_table_special[64] = {
 
 cpu_t::cpu_t(memory_access_t *memory)
   : memory_component_t("cpu")
-  , memory(memory) {
+  , memory(memory)
+  , bios_call_decoder(memory) {
 
   regs.gp[0] = 0;
   regs.pc = 0xbfc00000;
@@ -124,24 +125,19 @@ static inline uint32_t map_address(uint32_t address) {
 
 void cpu_t::log_bios_calls() {
   switch (regs.this_pc) {
-    case 0x00a0:
-      printf("bios::a(0x%02x)\n", regs.gp[9]);
-      break;
+    case 0xa0:
+      return bios_call_decoder.decode_a(regs.gp[31], regs.gp[9], &regs.gp[4]);
 
-    case 0x00b0:
-      printf("bios::b(0x%02x)\n", regs.gp[9]);
-      break;
+    case 0xb0:
+      return bios_call_decoder.decode_b(regs.gp[31], regs.gp[9], &regs.gp[4]);
 
-    case 0x00c0:
-      printf("bios::c(0x%02x)\n", regs.gp[9]);
-      break;
+    case 0xc0:
+      return bios_call_decoder.decode_c(regs.gp[31], regs.gp[9], &regs.gp[4]);
   }
 }
 
 
 void cpu_t::enter_exception(cop0_exception_code_t code) {
-  printf("[cpu] enter_exception(%d)\n", code);
-
   uint32_t status = get_cop(0)->read_gpr(12);
   status = (status & ~0x3f) | ((status << 2) & 0x3f);
 
@@ -176,6 +172,8 @@ void cpu_t::read_code() {
   if (regs.pc & 3) {
     enter_exception(cop0_exception_code_t::address_error_load);
   }
+
+  log_bios_calls();
 
   regs.this_pc = regs.pc;
   regs.pc = regs.next_pc;

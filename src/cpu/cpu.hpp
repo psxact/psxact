@@ -3,6 +3,7 @@
 
 
 #include <cstdio>
+#include "cpu/bios-call-decoder.hpp"
 #include "cpu/cpu-cop.hpp"
 #include "cpu/cpu-cop0.hpp"
 #include "cpu/cpu-cop2.hpp"
@@ -12,6 +13,8 @@
 
 
 class cpu_t : public memory_component_t {
+
+  bios_call_decoder_t bios_call_decoder;
 
   memory_access_t *memory;
 

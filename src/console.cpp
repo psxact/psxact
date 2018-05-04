@@ -170,7 +170,7 @@ void console_t::write_memory_control(int size, uint32_t address, uint32_t data) 
 
 void console_t::write_byte(uint32_t address, uint32_t data) {
   auto component = decode(address);
-  
+
   return (component != nullptr)
     ? component->io_write_byte(address, data)
     : write_memory_control(1, address, data)
@@ -180,7 +180,7 @@ void console_t::write_byte(uint32_t address, uint32_t data) {
 
 void console_t::write_half(uint32_t address, uint32_t data) {
   auto component = decode(address);
-  
+
   return (component != nullptr)
     ? component->io_write_half(address, data)
     : write_memory_control(2, address, data)
@@ -190,7 +190,7 @@ void console_t::write_half(uint32_t address, uint32_t data) {
 
 void console_t::write_word(uint32_t address, uint32_t data) {
   auto component = decode(address);
-  
+
   return (component != nullptr)
     ? component->io_write_word(address, data)
     : write_memory_control(4, address, data)
