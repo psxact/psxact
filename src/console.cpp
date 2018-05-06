@@ -85,7 +85,7 @@ uint32_t console_t::read_memory_control(int size, uint32_t address) {
     case 0x1f801060: return 0x00000b88;
   }
 
-  if (address == 0xfffe0130) {
+  if (address == 0x3ffe0130) {
     return 0;
   }
 
@@ -139,7 +139,7 @@ void console_t::write_memory_control(int size, uint32_t address, uint32_t data) 
     case 0x1f801060: assert(data == 0x00000b88); return;
   }
 
-  if (address == 0xfffe0130) {
+  if (address == 0x3ffe0130) {
     // system.write(2, 0xfffe0130, 0x00000804)
     // system.write(2, 0xfffe0130, 0x00000800)
     // system.write(2, 0xfffe0130, 0x0001e988)

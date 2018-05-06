@@ -37,6 +37,8 @@ class cdrom_t : public memory_component_t {
   uint8_t command;
   bool command_unprocessed;
   bool busy;
+  bool is_seeking;
+  bool is_reading;
 
   std::string game_file_name;
   FILE *game_file;

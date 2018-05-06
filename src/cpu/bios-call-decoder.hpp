@@ -12,8 +12,7 @@ private:
 
   memory_access_t *memory;
 
-  FILE *call_log;
-  FILE *stdout_log;
+  FILE *log;
 
 public:
 
@@ -28,6 +27,8 @@ public:
 private:
 
   std::string decode_string(uint32_t arg);
+
+  std::string decode_string(uint32_t arg, uint32_t size);
 
   std::string decode_timecode(uint32_t arg);
 };

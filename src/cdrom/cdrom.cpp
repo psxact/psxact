@@ -36,14 +36,24 @@ void cdrom_t::tick() {
 }
 
 uint8_t cdrom_t::get_status_byte() {
+  uint8_t result = 0x02;
+
+  if (is_seeking) {
+    result |= 0x40;
+  }
+
+  if (is_reading) {
+    result |= 0x20;
+  }
+
   return 0x02;
 }
 
 int cdrom_t::get_cycles_per_sector() {
   if (mode.double_speed) {
-    return 33868800 / 150;
+    return (33868800 * 2) / 150;
   } else {
-    return 33868800 / 75;
+    return (33868800 * 2) / 75;
   }
 }
 
@@ -70,6 +80,8 @@ void cdrom_t::read_sector() {
       read_timecode.sector
     );
   }
+
+  is_reading = 1;
 
   int32_t cursor = get_read_cursor();
 
@@ -132,7 +144,9 @@ void cdrom_t::command_pause() {
   logic.response_fifo.write(get_status_byte());
   logic.interrupt_request = 3;
 
-  drive_transition(&cdrom_t::drive_int2, 1000);
+  is_reading = 0;
+
+  drive_transition(&cdrom_t::drive_int2, 1);
 }
 
 void cdrom_t::command_read_n() {
@@ -305,6 +319,7 @@ void cdrom_t::logic_executing_command() {
     break;
 
   default:
+    printf("[cdc] unknown command `0x%02x'.", command);
     return;
   }
 
