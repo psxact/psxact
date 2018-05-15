@@ -1,6 +1,6 @@
 #include "spu/spu.hpp"
 
-#include <cassert>
+#include <assert.h>
 #include "utility.hpp"
 
 

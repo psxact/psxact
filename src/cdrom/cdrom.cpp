@@ -73,13 +73,11 @@ int32_t cdrom_t::get_read_cursor() {
 }
 
 void cdrom_t::read_sector() {
-  if (utility::log_cdrom) {
-    printf("[cdc] read_sector(\"%02d:%02d:%02d\")\n",
-      read_timecode.minute,
-      read_timecode.second,
-      read_timecode.sector
-    );
-  }
+  log_cdrom("read_sector(\"%02d:%02d:%02d\")",
+    read_timecode.minute,
+    read_timecode.second,
+    read_timecode.sector
+  );
 
   is_reading = 1;
 
@@ -96,7 +94,7 @@ void cdrom_t::read_sector() {
     minute != read_timecode.minute ||
     second != read_timecode.second ||
     sector != read_timecode.sector) {
-    printf("[cdc] expecting \"%02d:%02d:%02d\", but got \"%02d:%02d:%02d\" at 0x%08x\n",
+    log_cdrom("expecting \"%02d:%02d:%02d\", but got \"%02d:%02d:%02d\" at 0x%08x",
       read_timecode.minute,
       read_timecode.second,
       read_timecode.sector,
@@ -195,9 +193,7 @@ void cdrom_t::command_set_seek_target(uint8_t minute, uint8_t second, uint8_t se
 }
 
 void cdrom_t::command_test(uint8_t function) {
-  if (utility::log_cdrom) {
-    printf("[cdc] command_test(0x%02x)\n", function);
-  }
+  log_cdrom("command_test(0x%02x)", function);
 
   switch (function) {
   case 0x20:
@@ -258,9 +254,7 @@ void cdrom_t::logic_executing_command() {
 #define get_param() \
   logic.parameter_fifo.read()
 
-  if (utility::log_cdrom) {
-    printf("[cdc] logic_executing_command(0x%02x)\n", logic.command);
-  }
+  log_cdrom("logic_executing_command(0x%02x)", logic.command);
 
   switch (logic.command) {
   case 0x01:
@@ -319,7 +313,7 @@ void cdrom_t::logic_executing_command() {
     break;
 
   default:
-    printf("[cdc] unknown command `0x%02x'.", command);
+    log_cdrom("unknown command `0x%02x'", command);
     return;
   }
 

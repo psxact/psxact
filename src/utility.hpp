@@ -10,16 +10,35 @@
 #define unlikely(n) __builtin_expect(!!(n), 0)
 
 
+#define expand(...) , ## __VA_ARGS__
+
+
+#define logger(n, s, ...) \
+  printf("[" n "] " s "\n" expand(__VA_ARGS__))
+
+#define log_cpu(s, ...) \
+  logger("cpu", s, __VA_ARGS__)
+
+#define log_dma(s, ...) \
+  logger("dma", s, __VA_ARGS__)
+
+#define log_gpu(s, ...) \
+  logger("gpu", s, __VA_ARGS__)
+
+#define log_spu(s, ...) \
+  logger("spu", s, __VA_ARGS__)
+
+#define log_cdrom(s, ...) \
+  logger("cdrom", s, __VA_ARGS__)
+
+#define log_input(s, ...) \
+  logger("input", s, __VA_ARGS__)
+
+#define log_timer(s, ...) \
+  logger("timer", s, __VA_ARGS__)
+
+
 namespace utility {
-
-  const bool log_cdrom = 0;
-  const bool log_cpu = 0;
-  const bool log_dma = 0;
-  const bool log_gpu = 0;
-  const bool log_input = 0;
-  const bool log_spu = 0;
-  const bool log_counter = 0;
-
   template<int bits>
   inline uint32_t sclip(uint32_t value) {
     const int mask = (1 << bits) - 1;
@@ -58,7 +77,6 @@ namespace utility {
 
     return count;
   }
-
 }
 
 

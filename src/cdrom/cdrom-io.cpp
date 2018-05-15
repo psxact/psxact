@@ -131,9 +131,7 @@ void cdrom_t::io_write_port_3_3(uint8_t data) {}
 
 
 void cdrom_t::io_write_byte(uint32_t address, uint32_t data) {
-  if (utility::log_cdrom) {
-    printf("[cdc] io_write_byte(0x%08x, 0x%08x)\n", address, data);
-  }
+  log_cdrom("io_write_byte(0x%08x, 0x%08x)", address, data);
 
   switch (address) {
     case 0x1f801800:

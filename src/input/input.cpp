@@ -175,9 +175,7 @@ void input_t::tick() {
         dsr = send(tx_data, &rx_data);
         dsr_cycles = 100; // delay 100 cycles before issuing an interrupt, per the documentation.
 
-        if (utility::log_input) {
-          printf("[input] transfer(0x%02x) = 0x%02x\n", tx_data, rx_data);
-        }
+        log_input("transfer(0x%02x) = 0x%02x", tx_data, rx_data);
       }
     }
   }

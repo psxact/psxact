@@ -173,7 +173,7 @@ void cpu_t::read_code() {
     enter_exception(cop0_exception_code_t::address_error_load);
   }
 
-  log_bios_calls();
+  // log_bios_calls();
 
   regs.this_pc = regs.pc;
   regs.pc = regs.next_pc;
