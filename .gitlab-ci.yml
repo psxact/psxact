@@ -1,0 +1,16 @@
+stages:
+  - build
+
+build_linux:
+  stage: build
+  image: debian:stretch
+  script:
+    - ./build.sh
+    - ./package.sh
+  artifacts:
+    paths:
+      - '*.tar.bz2'
+    expire_in: 1 week
+  tags:
+    - docker
+
