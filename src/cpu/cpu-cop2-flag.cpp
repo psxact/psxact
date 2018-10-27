@@ -3,6 +3,8 @@
 #include "limits.hpp"
 
 
+using namespace psx;
+
 void cpu_cop2_t::set_flag(int32_t flag) {
   ccr.flag |= 1 << flag;
 }

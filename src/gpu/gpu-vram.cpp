@@ -1,6 +1,8 @@
 #include "gpu/gpu.hpp"
 
 
+using namespace psx;
+
 uint16_t *gpu_t::vram_data(int x, int y) {
   return (uint16_t *)vram.get_pointer(vram_address(x, y));
 }

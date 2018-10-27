@@ -4,7 +4,7 @@
 #include <cstring>
 #include <exception>
 #include "cdrom/cdrom.hpp"
-#include "counter/counter.hpp"
+#include "timer/timer.hpp"
 #include "cpu/cpu.hpp"
 #include "dma/dma.hpp"
 #include "expansion/exp1.hpp"
@@ -18,13 +18,15 @@
 #include "utility.hpp"
 
 
+using namespace psx;
+
 console_t::console_t(const char *bios_file_name, const char *game_file_name)
   : bios("bios")
   , dmem("dmem")
   , wram("wram") {
 
   cdrom = new cdrom_t(this, game_file_name);
-  counter = new counter_t(this);
+  timer = new timer_unit_t(this);
   cpu = new cpu_t(this);
   dma = new dma_t(this, this);
   exp1 = new exp1_t();
@@ -55,7 +57,7 @@ memory_component_t *console_t::decode(uint32_t address) {
   if (between(0x1f801040, 0x1f80104f)) { return input; }
   if (between(0x1f801070, 0x1f801077)) { return cpu; }
   if (between(0x1f801080, 0x1f8010ff)) { return dma; }
-  if (between(0x1f801100, 0x1f80113f)) { return counter; }
+  if (between(0x1f801100, 0x1f80113f)) { return timer; }
   if (between(0x1f801800, 0x1f801803)) { return cdrom; }
   if (between(0x1f801810, 0x1f801817)) { return gpu; }
   if (between(0x1f801820, 0x1f801827)) { return mdec; }
@@ -208,7 +210,7 @@ void console_t::run_for_one_frame(uint16_t **vram, int *w, int *h) {
     cpu->tick();
 
     for (int j = 0; j < ITERATIONS; j++) {
-      counter->tick();
+      timer->tick();
       cdrom->tick();
       input->tick();
     }

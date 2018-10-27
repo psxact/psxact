@@ -3,6 +3,8 @@
 #include "utility.hpp"
 
 
+using namespace psx;
+
 bios_call_decoder_t::bios_call_decoder_t(memory_access_t *memory)
   : memory(memory) {
 

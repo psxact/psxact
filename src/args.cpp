@@ -6,6 +6,8 @@
 #include <unistd.h>
 
 
+using namespace psx;
+
 static const option options[] = {
   { "bios", required_argument, 0, 'b' },
   { "game", required_argument, 0, 'g' },

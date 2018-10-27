@@ -3,6 +3,8 @@
 #include "utility.hpp"
 
 
+using namespace psx;
+
 uint32_t cpu_t::decode_iconst() {
   return utility::sclip<16>(code);
 }

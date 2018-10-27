@@ -7,7 +7,9 @@
 #include "memory-component.hpp"
 
 
-struct counter_unit_t {
+namespace psx {
+
+struct timer_t {
   uint16_t counter;
   bool running;
 
@@ -36,8 +38,8 @@ struct counter_unit_t {
     bool bit;
   } irq;
 
-  int synch_enable;
-  int synch_mode;
+  int sync_enable;
+  int sync_mode;
 
   struct {
     bool enable;
@@ -48,18 +50,18 @@ struct counter_unit_t {
 };
 
 
-class counter_t : public memory_component_t {
+class timer_unit_t : public memory_component_t {
 
   interrupt_access_t *irq;
 
   bool in_hblank;
   bool in_vblank;
 
-  counter_unit_t units[3];
+  timer_t units[3];
 
 public:
 
-  counter_t(interrupt_access_t *irq);
+  timer_unit_t(interrupt_access_t *irq);
 
   uint32_t io_read_half(uint32_t address);
 
@@ -98,5 +100,6 @@ private:
   void unit_set_counter(int n, uint16_t data);
 };
 
+}
 
 #endif // __psxact_counter__

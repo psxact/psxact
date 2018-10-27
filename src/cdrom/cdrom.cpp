@@ -3,6 +3,8 @@
 #include "utility.hpp"
 
 
+using namespace psx;
+
 cdrom_t::cdrom_t(interrupt_access_t *irq, const char *game_file_name)
     : memory_component_t("cdc")
     , irq(irq)

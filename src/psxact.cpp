@@ -4,6 +4,8 @@
 #include "sdl2.hpp"
 
 
+using namespace psx;
+
 int main(int argc, char *argv[]) {
   args_t ctx(argc, argv);
 

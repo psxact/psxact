@@ -1,6 +1,8 @@
 #include "expansion/exp1.hpp"
 
 
+using namespace psx;
+
 exp1_t::exp1_t()
   : memory_component_t("exp1") {
 }

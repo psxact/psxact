@@ -2,6 +2,8 @@
 #define __psxact_interrupt_access__
 
 
+namespace psx {
+
 enum class interrupt_type_t {
   VBLANK = 0x001,
   GPU    = 0x002,
@@ -25,5 +27,6 @@ public:
 
 };
 
+}
 
 #endif // __psxact_interrupt_access__

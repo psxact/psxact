@@ -5,6 +5,8 @@
 #include "utility.hpp"
 
 
+using namespace psx;
+
 cpu_t::opcode_t cpu_t::op_table[64] = {
   nullptr,         &cpu_t::op_bxx,   &cpu_t::op_j,    &cpu_t::op_jal,
   &cpu_t::op_beq,  &cpu_t::op_bne,   &cpu_t::op_blez, &cpu_t::op_bgtz,

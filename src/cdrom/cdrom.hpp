@@ -1,6 +1,7 @@
 #ifndef __psxact_cdrom__
 #define __psxact_cdrom__
 
+
 #include <stdint.h>
 #include <stdio.h>
 #include <string>
@@ -9,6 +10,8 @@
 #include "interrupt-access.hpp"
 #include "memory-component.hpp"
 
+
+namespace psx {
 
 struct cdrom_sector_timecode_t {
   uint8_t minute;
@@ -171,5 +174,6 @@ public:
   void drive_reading();
 };
 
+}
 
 #endif // __psxact_cdrom__

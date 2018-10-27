@@ -7,6 +7,8 @@
 #include "memory-component.hpp"
 
 
+namespace psx {
+
 class spu_t : public memory_component_t {
 
   uint16_t control;
@@ -54,5 +56,6 @@ public:
 
 };
 
+}
 
 #endif // __psxact_spu__

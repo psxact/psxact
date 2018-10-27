@@ -1,14 +1,18 @@
 #ifndef __psxact_console__
 #define __psxact_console__
 
+
 #include <cstdint>
 #include "interrupt-access.hpp"
 #include "memory.hpp"
 #include "memory-access.hpp"
 
+
+namespace psx {
+
 class cdrom_t;
 
-class counter_t;
+class timer_unit_t;
 
 class cpu_t;
 
@@ -37,7 +41,7 @@ class console_t
   memory_t< kib(  1) > dmem;
 
   cdrom_t *cdrom;
-  counter_t *counter;
+  timer_unit_t *timer;
   cpu_t *cpu;
   dma_t *dma;
   exp1_t *exp1;
@@ -78,5 +82,6 @@ private:
 
 };
 
+}
 
 #endif // __psxact_console__

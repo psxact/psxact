@@ -3,6 +3,8 @@
 #include "utility.hpp"
 
 
+using namespace psx;
+
 void gpu_t::gp1(uint32_t data) {
   switch ((data >> 24) & 0x3f) {
     case 0x00:

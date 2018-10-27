@@ -6,6 +6,8 @@
 #include "memory-component.hpp"
 
 
+namespace psx {
+
 class mdec_t : public memory_component_t {
 
 public:
@@ -14,5 +16,6 @@ public:
 
 };
 
+}
 
 #endif // __psxact_mdec__

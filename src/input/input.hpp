@@ -8,6 +8,8 @@
 #include "memory-component.hpp"
 
 
+namespace psx {
+
 enum class input_port_status_t {
 
   none,
@@ -93,5 +95,6 @@ private:
 
 };
 
+}
 
 #endif // __psxact_input__

@@ -7,6 +7,8 @@
 #include "memory-access.hpp"
 
 
+namespace psx {
+
 class bios_call_decoder_t {
 private:
 
@@ -33,5 +35,6 @@ private:
   std::string decode_timecode(uint32_t arg);
 };
 
+}
 
 #endif // __psxact_bios_call_decoder__

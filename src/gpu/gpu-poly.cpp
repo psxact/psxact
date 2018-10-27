@@ -4,6 +4,8 @@
 #include "utility.hpp"
 
 
+using namespace psx;
+
 static const int32_t point_factor_lut[4] = {
   1, 2, 2, 3
 };

@@ -5,6 +5,8 @@
 #include <cstdint>
 
 
+namespace psx {
+
 class memory_access_t {
 public:
 
@@ -21,5 +23,6 @@ public:
   virtual void write_word(uint32_t address, uint32_t data) = 0;
 };
 
+}
 
 #endif // __psxact_memory_access__

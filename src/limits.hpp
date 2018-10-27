@@ -5,6 +5,8 @@
 #include <cstdint>
 
 
+namespace psx {
+
 template<typename T>
 struct define {
   typedef T type;
@@ -64,5 +66,6 @@ namespace limits {
   }
 }
 
+}
 
 #endif // __psxact_limits__

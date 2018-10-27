@@ -3,6 +3,8 @@
 #include "limits.hpp"
 
 
+using namespace psx;
+
 static const int dither_lut[4][4] = {
   { -4,  0, -3,  1 },
   {  2, -2,  3, -1 },

@@ -1,6 +1,8 @@
 #include "expansion/exp2.hpp"
 
 
+using namespace psx;
+
 exp2_t::exp2_t()
   : memory_component_t("exp2") {
 }

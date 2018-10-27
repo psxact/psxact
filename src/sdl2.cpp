@@ -3,6 +3,8 @@
 #include <cstdio>
 
 
+using namespace psx;
+
 static const int window_width = 640;
 static const int window_height = 480;
 

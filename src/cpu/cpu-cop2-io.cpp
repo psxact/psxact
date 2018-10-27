@@ -4,6 +4,8 @@
 #include "utility.hpp"
 
 
+using namespace psx;
+
 uint32_t cpu_cop2_t::read_matrix_vector_group(uint32_t n) {
   auto &matrix = ccr.matrix[n >> 3];
   auto &vector = ccr.vector[n >> 3];

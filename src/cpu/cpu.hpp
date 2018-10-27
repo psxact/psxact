@@ -12,6 +12,8 @@
 #include "memory-component.hpp"
 
 
+namespace psx {
+
 class cpu_t : public memory_component_t {
 
   bios_call_decoder_t bios_call_decoder;
@@ -279,5 +281,6 @@ public:
   uint32_t get_rs();
 };
 
+}
 
 #endif // __psxact_cpu__

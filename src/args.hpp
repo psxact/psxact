@@ -2,6 +2,8 @@
 #define __psxact_args__
 
 
+namespace psx {
+
 struct args_t {
   const char *bios_file_name;
   const char *game_file_name;
@@ -9,5 +11,6 @@ struct args_t {
   args_t(int argc, char **argv);
 };
 
+}
 
 #endif // __psxact_args__

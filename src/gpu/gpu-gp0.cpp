@@ -3,6 +3,8 @@
 #include "utility.hpp"
 
 
+using namespace psx;
+
 static int command_size[256] = {
   1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $00
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // $10

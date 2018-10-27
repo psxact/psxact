@@ -5,6 +5,8 @@
 #include <cstdint>
 
 
+namespace psx {
+
 class memory_component_t {
 
   const char *name;
@@ -31,5 +33,6 @@ public:
 
 };
 
+}
 
 #endif // __psxact_memory_component__

@@ -8,6 +8,8 @@
 #include "memory-component.hpp"
 
 
+namespace psx {
+
 constexpr uint32_t kib(uint32_t x) { return 1024 * x; }
 constexpr uint32_t mib(uint32_t x) { return 1024 * kib(x); }
 constexpr uint32_t gib(uint32_t x) { return 1024 * mib(x); }
@@ -72,5 +74,6 @@ struct memory_t : public memory_component_t {
   }
 };
 
+}
 
 #endif // __psxact_memory_hpp__

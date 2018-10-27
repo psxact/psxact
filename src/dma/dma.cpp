@@ -3,6 +3,8 @@
 #include "utility.hpp"
 
 
+using namespace psx;
+
 dma_t::dma_t(interrupt_access_t *irq, memory_access_t *memory)
   : memory_component_t("dma")
   , irq(irq)

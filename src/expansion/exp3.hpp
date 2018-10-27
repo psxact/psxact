@@ -5,6 +5,8 @@
 #include "memory-component.hpp"
 
 
+namespace psx {
+
 class exp3_t : public memory_component_t {
 
 public:
@@ -15,5 +17,6 @@ public:
 
 };
 
+}
 
 #endif // __psxact_exp3__

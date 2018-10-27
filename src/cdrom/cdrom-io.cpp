@@ -4,6 +4,8 @@
 #include "utility.hpp"
 
 
+using namespace psx;
+
 uint8_t cdrom_t::io_read_port_0() {
   return uint8_t(
     (index                     << 0) |

@@ -5,6 +5,8 @@
 #include "utility.hpp"
 
 
+using namespace psx;
+
 gpu_t::gpu_t()
   : memory_component_t("gpu")
   , vram("vram") {
@@ -70,7 +72,7 @@ gpu_t::color_t gpu_t::uint16_to_color(uint16_t value) {
 }
 
 
-uint16_t gpu_t::color_to_uint16(gpu_t::color_t color) {
+uint16_t gpu_t::color_to_uint16(gpu_t::color_t &color) {
   return
     ((color.r >> 3) & 0x001f) |
     ((color.g << 2) & 0x03e0) |

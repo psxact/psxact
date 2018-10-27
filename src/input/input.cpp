@@ -3,6 +3,8 @@
 #include "utility.hpp"
 
 
+using namespace psx;
+
 input_t::input_t(interrupt_access_t *irq)
   : memory_component_t("input")
   , irq(irq) {

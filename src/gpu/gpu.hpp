@@ -7,6 +7,8 @@
 #include "memory-component.hpp"
 
 
+namespace psx {
+
 #define GPU_GP0  0x1f801810
 #define GPU_GP1  0x1f801814
 #define GPU_READ 0x1f801810
@@ -165,7 +167,7 @@ public:
 
   color_t uint16_to_color(uint16_t value);
 
-  uint16_t color_to_uint16(color_t color);
+  uint16_t color_to_uint16(color_t &color);
 
   color_t get_texture_color__4bpp(tev_t &tev, point_t &coord);
 
@@ -195,5 +197,6 @@ public:
 
 };
 
+}
 
 #endif // __psxact_gpu__

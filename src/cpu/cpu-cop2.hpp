@@ -6,6 +6,8 @@
 #include "cpu/cpu-cop.hpp"
 
 
+namespace psx {
+
 class cpu_cop2_t : public cpu_cop_t {
 
   enum class matrix {
@@ -194,5 +196,6 @@ private:
   int32_t flag_h(int64_t value);
 };
 
+}
 
 #endif //__psxact_cpu_cop2__

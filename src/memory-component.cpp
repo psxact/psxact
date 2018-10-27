@@ -3,6 +3,8 @@
 #include <cstdio>
 
 
+using namespace psx;
+
 memory_component_t::memory_component_t(const char *name)
   : name(name) {
 }

@@ -3,6 +3,8 @@
 #include <algorithm>
 
 
+using namespace psx;
+
 // Rect Commands
 //
 // 25    | Semi Transparency (0=Off, 1=On)

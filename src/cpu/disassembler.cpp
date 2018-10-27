@@ -3,6 +3,8 @@
 #include <string>
 
 
+using namespace psx;
+
 #define get_iconst() decode_iconst()
 #define get_uconst() decode_uconst()
 #define get_rd() register_names[decode_rd()]

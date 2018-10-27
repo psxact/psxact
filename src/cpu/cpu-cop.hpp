@@ -5,6 +5,8 @@
 #include <cstdint>
 
 
+namespace psx {
+
 class cpu_cop_t {
 
 public:
@@ -21,5 +23,6 @@ public:
 
 };
 
+}
 
 #endif // __psxact_cpu_cop__

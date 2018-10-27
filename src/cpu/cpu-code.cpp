@@ -5,6 +5,8 @@
 #include "utility.hpp"
 
 
+using namespace psx;
+
 // --========--
 //   Decoding
 // --========--

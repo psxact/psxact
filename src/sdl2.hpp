@@ -6,6 +6,8 @@
 #include <SDL.h>
 
 
+namespace psx {
+
 struct controller_state_t {
 
   bool circle;
@@ -57,5 +59,6 @@ private:
 
 };
 
+}
 
 #endif // __psxact_sdl2__

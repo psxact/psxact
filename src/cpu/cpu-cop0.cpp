@@ -1,6 +1,8 @@
 #include "cpu/cpu-cop0.hpp"
 
 
+using namespace psx;
+
 void cpu_cop0_t::run(uint32_t n) {
   if (n == 0x10) {
     return rfe();

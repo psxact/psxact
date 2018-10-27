@@ -2,6 +2,8 @@
 #define __psxact_fifo__
 
 
+namespace psx {
+
 template<typename T, int bits>
 class fifo_t {
 
@@ -51,5 +53,6 @@ public:
 
 };
 
+}
 
 #endif // __psxact_fifo__

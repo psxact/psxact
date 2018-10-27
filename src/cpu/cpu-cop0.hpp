@@ -6,6 +6,8 @@
 #include "cpu/cpu-cop.hpp"
 
 
+namespace psx {
+
 enum class cop0_exception_code_t {
   interrupt,
   tlb_modification,
@@ -44,5 +46,6 @@ public:
   void rfe();
 };
 
+}
 
 #endif //__psxact_cpu_cop0__

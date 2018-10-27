@@ -7,6 +7,8 @@
 #include "memory-component.hpp"
 
 
+namespace psx {
+
 class dma_t : public memory_component_t {
 
   interrupt_access_t *irq;
@@ -55,5 +57,6 @@ public:
 
 };
 
+}
 
 #endif // __psxact_dma__

@@ -4,6 +4,8 @@
 #include "utility.hpp"
 
 
+using namespace psx;
+
 spu_t::spu_t()
   : memory_component_t("spu")
   , sound_ram("sound-ram") {

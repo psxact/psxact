@@ -6,8 +6,8 @@ project(psxact)
 set(SDL2_PATH "" CACHE INTERNAL "Fill in path to the SDL2 (Win32)")
 
 set(CMAKE_MODULE_PATH
-        ${CMAKE_CURRENT_SOURCE_DIR}/modules
-        ${CMAKE_MODULE_PATH})
+  ${CMAKE_CURRENT_SOURCE_DIR}/modules
+  ${CMAKE_MODULE_PATH})
 
 find_package(SDL2 REQUIRED)
 
@@ -19,14 +19,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include_directories(
-        ${SDL2_INCLUDE_DIR}
-        "src")
+  ${SDL2_INCLUDE_DIR}
+  "src")
 
 # Building
 
 file(GLOB_RECURSE SOURCE_FILES
-        "src/*.cpp"
-        "src/*.hpp")
+  "src/*.cpp"
+  "src/*.hpp")
 
 add_executable(psxact ${SOURCE_FILES})
 
