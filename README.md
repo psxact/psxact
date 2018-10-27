@@ -1,6 +1,3 @@
-[![Build Status](https://travis-ci.org/psxact/psxact.svg?branch=develop)](https://travis-ci.org/psxact/psxact)
-[![Build status](https://ci.appveyor.com/api/projects/status/drk4b45g4pyij3ij?svg=true)](https://ci.appveyor.com/project/adam-becker/psxact)
-
 ![Logo](images/logo.png)
 
 This project aims to emulate the PlayStation&trade; 1 console in an accurate
