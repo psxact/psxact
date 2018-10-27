@@ -13,8 +13,6 @@ struct timer_t {
   uint16_t counter;
   bool running;
 
-  // compare
-
   struct {
     bool reached;
     bool irq_enable;
@@ -22,14 +20,10 @@ struct timer_t {
     uint16_t value;
   } compare;
 
-  // maximum
-
   struct {
     bool reached;
     bool irq_enable;
   } maximum;
-
-  // irq
 
   struct {
     bool repeat;
@@ -57,7 +51,7 @@ class timer_unit_t : public memory_component_t {
   bool in_hblank;
   bool in_vblank;
 
-  timer_t units[3];
+  timer_t timers[3];
 
 public:
 

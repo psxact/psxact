@@ -28,29 +28,19 @@ timer_unit_t::timer_unit_t(interrupt_access_t *irq)
 
 
 uint32_t timer_unit_t::io_read_half(uint32_t address) {
-  switch (address & ~3) {
-    case 0x1f801100: return unit_get_counter(0);
-    case 0x1f801104: return unit_get_control(0);
-    case 0x1f801108: return unit_get_compare(0);
-    case 0x1f80110c: return 0;
+  auto m = (address >> 2) & 3;
+  auto n = (address >> 4) & 3;
 
-    case 0x1f801110: return unit_get_counter(1);
-    case 0x1f801114: return unit_get_control(1);
-    case 0x1f801118: return unit_get_compare(1);
-    case 0x1f80111c: return 0;
-
-    case 0x1f801120: return unit_get_counter(2);
-    case 0x1f801124: return unit_get_control(2);
-    case 0x1f801128: return unit_get_compare(2);
-    case 0x1f80112c: return 0;
-
-    case 0x1f801130: return 0;
-    case 0x1f801134: return 0;
-    case 0x1f801138: return 0;
-    case 0x1f80113c: return 0;
+  if (n == 3) {
+    return 0;
   }
 
-  return 0;
+  switch (m) {
+    case  0: return unit_get_counter(n);
+    case  1: return unit_get_control(n);
+    case  2: return unit_get_compare(n);
+    default: return 0;
+  }
 }
 
 
@@ -60,26 +50,18 @@ uint32_t timer_unit_t::io_read_word(uint32_t address) {
 
 
 void timer_unit_t::io_write_half(uint32_t address, uint32_t data) {
-  switch (address & ~3) {
-    case 0x1f801100: return unit_set_counter(0, data);
-    case 0x1f801104: return unit_set_control(0, data);
-    case 0x1f801108: return unit_set_compare(0, data);
-    case 0x1f80110c: return;
+  auto m = (address >> 2) & 3;
+  auto n = (address >> 4) & 3;
 
-    case 0x1f801110: return unit_set_counter(1, data);
-    case 0x1f801114: return unit_set_control(1, data);
-    case 0x1f801118: return unit_set_compare(1, data);
-    case 0x1f80111c: return;
+  if (n == 3) {
+    return;
+  }
 
-    case 0x1f801120: return unit_set_counter(2, data);
-    case 0x1f801124: return unit_set_control(2, data);
-    case 0x1f801128: return unit_set_compare(2, data);
-    case 0x1f80112c: return;
-
-    case 0x1f801130: return;
-    case 0x1f801134: return;
-    case 0x1f801138: return;
-    case 0x1f80113c: return;
+  switch (m) {
+    case  0: return unit_set_counter(n, data);
+    case  1: return unit_set_control(n, data);
+    case  2: return unit_set_compare(n, data);
+    default: return;
   }
 }
 
@@ -90,40 +72,40 @@ void timer_unit_t::io_write_word(uint32_t address, uint32_t data) {
 
 
 uint16_t timer_unit_t::unit_get_compare(int n) {
-  return units[n].compare.value;
+  return timers[n].compare.value;
 }
 
 
 uint16_t timer_unit_t::unit_get_control(int n) {
-  auto &unit = units[n];
+  auto &timer = timers[n];
 
   auto control =
-    (unit.sync_enable << 0) |
-    (unit.sync_mode << 1) |
-    (unit.compare.reset_counter << 3) |
-    (unit.compare.irq_enable << 4) |
-    (unit.maximum.irq_enable << 5) |
-    (unit.irq.repeat << 6) |
-    (unit.irq.toggle << 7) |
-    (unit.prescaler.enable << 8) |
-    (unit.irq.bit << 10) |
-    (unit.compare.reached << 11) |
-    (unit.maximum.reached << 12);
+    (timer.sync_enable << 0) |
+    (timer.sync_mode << 1) |
+    (timer.compare.reset_counter << 3) |
+    (timer.compare.irq_enable << 4) |
+    (timer.maximum.irq_enable << 5) |
+    (timer.irq.repeat << 6) |
+    (timer.irq.toggle << 7) |
+    (timer.prescaler.enable << 8) |
+    (timer.irq.bit << 10) |
+    (timer.compare.reached << 11) |
+    (timer.maximum.reached << 12);
 
-  unit.compare.reached = 0;
-  unit.maximum.reached = 0;
+  timer.compare.reached = 0;
+  timer.maximum.reached = 0;
 
   return uint16_t(control);
 }
 
 
 uint16_t timer_unit_t::unit_get_counter(int n) {
-  return units[n].counter;
+  return timers[n].counter;
 }
 
 
-static bool is_running(int synch_mode, bool b = 1) {
-  switch (synch_mode) {
+static bool is_running(int sync_mode, bool b = 1) {
+  switch (sync_mode) {
     case 0: return b == 0;
     case 1: return 1 == 1;
     case 2: return b == 1;
@@ -135,58 +117,60 @@ static bool is_running(int synch_mode, bool b = 1) {
 
 
 void timer_unit_t::unit_init(int n, int single, int period) {
-  units[n].prescaler.single = single;
-  units[n].prescaler.period = period;
-  units[n].prescaler.cycles = period;
+  auto &prescaler = timers[n].prescaler;
+
+  prescaler.single = single;
+  prescaler.period = period;
+  prescaler.cycles = period;
 }
 
 
 void timer_unit_t::unit_set_control(int n, uint16_t data) {
-  auto &unit = units[n];
+  auto &timer = timers[n];
 
-  unit.counter = 0;
-  unit.irq.enable = 1;
-  unit.irq.bit = 1;
+  timer.counter = 0;
+  timer.irq.enable = 1;
+  timer.irq.bit = 1;
 
-  unit.sync_enable = (data >> 0) & 1;
-  unit.sync_mode = (data >> 1) & 3;
-  unit.compare.reset_counter = (data >> 3) & 1;
-  unit.compare.irq_enable = (data >> 4) & 1;
-  unit.maximum.irq_enable = (data >> 5) & 1;
-  unit.irq.repeat = (data >> 6) & 1;
-  unit.irq.toggle = (data >> 7) & 1;
-  unit.prescaler.enable = n == 2
+  timer.sync_enable = (data >> 0) & 1;
+  timer.sync_mode = (data >> 1) & 3;
+  timer.compare.reset_counter = (data >> 3) & 1;
+  timer.compare.irq_enable = (data >> 4) & 1;
+  timer.maximum.irq_enable = (data >> 5) & 1;
+  timer.irq.repeat = (data >> 6) & 1;
+  timer.irq.toggle = (data >> 7) & 1;
+  timer.prescaler.enable = n == 2
     ? (data >> 9) & 1
     : (data >> 8) & 1
     ;
 
-  if (unit.sync_enable == 0) {
-    unit.running = 1;
+  if (timer.sync_enable == 0) {
+    timer.running = 1;
   }
   else if (n == 0) {
-    unit.running = is_running(unit.sync_mode, in_hblank);
+    timer.running = is_running(timer.sync_mode, in_hblank);
   }
   else if (n == 1) {
-    unit.running = is_running(unit.sync_mode, in_vblank);
+    timer.running = is_running(timer.sync_mode, in_vblank);
   }
   else if (n == 2) {
-    unit.running = is_running(unit.sync_mode);
+    timer.running = is_running(timer.sync_mode);
   }
 }
 
 
 void timer_unit_t::unit_set_compare(int n, uint16_t data) {
-  units[n].compare.value = data;
+  timers[n].compare.value = data;
 }
 
 
 void timer_unit_t::unit_set_counter(int n, uint16_t data) {
-  units[n].counter = data;
+  timers[n].counter = data;
 }
 
 
 void timer_unit_t::unit_irq(int n) {
-  auto &interrupt = units[n].irq;
+  auto &interrupt = timers[n].irq;
 
   if (interrupt.enable) {
     interrupt.enable = interrupt.repeat;
@@ -207,7 +191,7 @@ void timer_unit_t::unit_irq(int n) {
 
 
 void timer_unit_t::unit_tick(int n) {
-  auto &timer = units[n];
+  auto &timer = timers[n];
 
   if (timer.running) {
     timer.counter++;
@@ -236,7 +220,7 @@ void timer_unit_t::unit_tick(int n) {
 
 
 void timer_unit_t::unit_prescale(int n) {
-  auto &prescaler = units[n].prescaler;
+  auto &prescaler = timers[n].prescaler;
 
   if (prescaler.enable == 0) {
     unit_tick(n);
@@ -262,16 +246,16 @@ void timer_unit_t::tick() {
 void timer_unit_t::hblank(bool active) {
   in_hblank = active;
 
-  auto &unit = units[0];
+  auto &timer = timers[0];
 
-  unit.running = is_running(unit.sync_mode, in_hblank);
+  timer.running = is_running(timer.sync_mode, in_hblank);
 }
 
 
 void timer_unit_t::vblank(bool active) {
   in_vblank = active;
 
-  auto &unit = units[1];
+  auto &timer = timers[1];
 
-  unit.running = is_running(unit.sync_mode, in_vblank);
+  timer.running = is_running(timer.sync_mode, in_vblank);
 }
