@@ -89,8 +89,8 @@ void cpu_cop2_t::run(uint32_t code) {
 // -=======-
 
 
-typedef int32_t matrix_t[3][3];
-typedef int32_t vector_t[3];
+typedef int32_t matrix_data_t[3][3];
+typedef int32_t vector_data_t[3];
 
 
 static inline int32_t get_sf(uint32_t code) {
@@ -98,8 +98,8 @@ static inline int32_t get_sf(uint32_t code) {
 }
 
 
-cpu_cop2_t::matrix cpu_cop2_t::get_mx(uint32_t code) {
-  return cpu_cop2_t::matrix((code >> 17) & 3);
+cpu_cop2_t::matrix_t cpu_cop2_t::get_mx(uint32_t code) {
+  return cpu_cop2_t::matrix_t((code >> 17) & 3);
 }
 
 
@@ -108,8 +108,8 @@ static inline int32_t get_v(uint32_t code) {
 }
 
 
-cpu_cop2_t::vector cpu_cop2_t::get_cv(uint32_t code) {
-  return cpu_cop2_t::vector((code >> 13) & 3);
+cpu_cop2_t::vector_t cpu_cop2_t::get_cv(uint32_t code) {
+  return cpu_cop2_t::vector_t((code >> 13) & 3);
 }
 
 
@@ -132,9 +132,9 @@ void cpu_cop2_t::mac_to_rgb() {
 
 
 void cpu_cop2_t::depth_cue(uint32_t code, int32_t r, int32_t g, int32_t b) {
-  int64_t rfc = int64_t(ccr.vector[int(vector::fc)][0]) << 12;
-  int64_t gfc = int64_t(ccr.vector[int(vector::fc)][1]) << 12;
-  int64_t bfc = int64_t(ccr.vector[int(vector::fc)][2]) << 12;
+  int64_t rfc = int64_t(ccr.vector[int(vector_t::fc)][0]) << 12;
+  int64_t gfc = int64_t(ccr.vector[int(vector_t::fc)][1]) << 12;
+  int64_t bfc = int64_t(ccr.vector[int(vector_t::fc)][2]) << 12;
 
   int32_t shift = get_sf(code);
 
@@ -173,12 +173,12 @@ void cpu_cop2_t::transform_xy(int64_t div) {
 }
 
 
-int64_t cpu_cop2_t::transform(uint32_t code, matrix mx, vector cv, int32_t v) {
+int64_t cpu_cop2_t::transform(uint32_t code, matrix_t mx, vector_t cv, int32_t v) {
   int64_t mac = 0;
 
-  matrix_t &matrix = ccr.matrix[int(mx)];
-  vector_t &offset = ccr.vector[int(cv)];
-  vector_t &vector = gpr.vector[v];
+  matrix_data_t &matrix = ccr.matrix[int(mx)];
+  vector_data_t &offset = ccr.vector[int(cv)];
+  vector_data_t &vector = gpr.vector[v];
 
   int32_t shift = get_sf(code);
 
@@ -195,12 +195,12 @@ int64_t cpu_cop2_t::transform(uint32_t code, matrix mx, vector cv, int32_t v) {
 }
 
 
-int64_t cpu_cop2_t::transform_buggy(uint32_t code, matrix mx, vector cv, int32_t v) {
+int64_t cpu_cop2_t::transform_buggy(uint32_t code, matrix_t mx, vector_t cv, int32_t v) {
   int64_t mac = 0;
 
-  matrix_t &matrix = ccr.matrix[int(mx)];
-  vector_t &offset = ccr.vector[int(cv)];
-  vector_t &vector = gpr.vector[v];
+  matrix_data_t &matrix = ccr.matrix[int(mx)];
+  vector_data_t &offset = ccr.vector[int(cv)];
+  vector_data_t &vector = gpr.vector[v];
 
   int32_t shift = get_sf(code);
 
@@ -209,7 +209,7 @@ int64_t cpu_cop2_t::transform_buggy(uint32_t code, matrix mx, vector cv, int32_t
 
     int64_t mac = int64_t(offset[i]) << 12;
 
-    if (mx == matrix::nil) {
+    if (mx == matrix_t::nil) {
       if (i == 0) {
         mulr[0] = -((gpr.rgbc.r << 4) * vector[0]);
         mulr[1] = (gpr.rgbc.r << 4) * vector[1];
@@ -218,8 +218,8 @@ int64_t cpu_cop2_t::transform_buggy(uint32_t code, matrix mx, vector cv, int32_t
       else {
         int32_t cr =
           i == 1
-            ? ccr.matrix[int(matrix::rot)][0][2]
-            : ccr.matrix[int(matrix::rot)][1][1]
+            ? ccr.matrix[int(matrix_t::rot)][0][2]
+            : ccr.matrix[int(matrix_t::rot)][1][1]
             ;
 
         mulr[0] = cr * vector[0];
@@ -235,7 +235,7 @@ int64_t cpu_cop2_t::transform_buggy(uint32_t code, matrix mx, vector cv, int32_t
 
     mac = flag_a(i, mac + mulr[0]);
 
-    if (cv == vector::fc) {
+    if (cv == vector_t::fc) {
       flag_b(i, 0, int32_t(mac >> shift));
       mac = 0;
     }
@@ -250,7 +250,7 @@ int64_t cpu_cop2_t::transform_buggy(uint32_t code, matrix mx, vector cv, int32_t
 }
 
 
-int64_t cpu_cop2_t::transform_pt(uint32_t code, matrix mx, vector cv, int32_t v) {
+int64_t cpu_cop2_t::transform_pt(uint32_t code, matrix_t mx, vector_t cv, int32_t v) {
   int32_t z = int32_t(transform(code, mx, cv, v) >> 12);
 
   gpr.vector[3][0] = flag_b(0, code, gpr.mac[1]);
@@ -288,7 +288,7 @@ void cpu_cop2_t::op_avsz4(uint32_t code) {
 
 
 void cpu_cop2_t::op_cc(uint32_t code) {
-  transform(code, matrix::lcm, vector::bk, 3);
+  transform(code, matrix_t::lcm, vector_t::bk, 3);
   mac_to_ir(code);
 
   int32_t shift = get_sf(code);
@@ -303,7 +303,7 @@ void cpu_cop2_t::op_cc(uint32_t code) {
 
 
 void cpu_cop2_t::op_cdp(uint32_t code) {
-  transform(code, matrix::lcm, vector::bk, 3);
+  transform(code, matrix_t::lcm, vector_t::bk, 3);
   mac_to_ir(code);
 
   int32_t r = (gpr.rgbc.r << 4) * gpr.vector[3][0];
@@ -372,7 +372,7 @@ void cpu_cop2_t::op_gpl(uint32_t code) {
 
 
 void cpu_cop2_t::op_intpl(uint32_t code) {
-  auto fc = ccr.vector[int(vector::fc)];
+  auto fc = ccr.vector[int(vector_t::fc)];
 
   int64_t rfc = int64_t(fc[0]) << 12;
   int64_t gfc = int64_t(fc[1]) << 12;
@@ -399,8 +399,8 @@ void cpu_cop2_t::op_intpl(uint32_t code) {
 
 
 void cpu_cop2_t::op_mvmva(uint32_t code) {
-  matrix mx = get_mx(code);
-  vector cv = get_cv(code);
+  matrix_t mx = get_mx(code);
+  vector_t cv = get_cv(code);
   int32_t v = get_v(code);
 
   transform_buggy(code, mx, cv, v);
@@ -410,7 +410,7 @@ void cpu_cop2_t::op_mvmva(uint32_t code) {
 
 
 void cpu_cop2_t::op_nccs(uint32_t code) {
-  transform(code, matrix::llm, vector::zr, 0);
+  transform(code, matrix_t::llm, vector_t::zr, 0);
   mac_to_ir(code);
 
   op_cc(code);
@@ -419,7 +419,7 @@ void cpu_cop2_t::op_nccs(uint32_t code) {
 
 void cpu_cop2_t::op_ncct(uint32_t code) {
   for (int32_t i = 0; i < 3; i++) {
-    transform(code, matrix::llm, vector::zr, i);
+    transform(code, matrix_t::llm, vector_t::zr, i);
     mac_to_ir(code);
 
     op_cc(code);
@@ -428,10 +428,10 @@ void cpu_cop2_t::op_ncct(uint32_t code) {
 
 
 void cpu_cop2_t::op_ncds(uint32_t code) {
-  transform(code, matrix::llm, vector::zr, 0);
+  transform(code, matrix_t::llm, vector_t::zr, 0);
   mac_to_ir(code);
 
-  transform(code, matrix::lcm, vector::bk, 3);
+  transform(code, matrix_t::lcm, vector_t::bk, 3);
   mac_to_ir(code);
 
   int32_t r = (gpr.rgbc.r << 4) * gpr.vector[3][0];
@@ -444,10 +444,10 @@ void cpu_cop2_t::op_ncds(uint32_t code) {
 
 void cpu_cop2_t::op_ncdt(uint32_t code) {
   for (int32_t i = 0; i < 3; i++) {
-    transform(code, matrix::llm, vector::zr, i);
+    transform(code, matrix_t::llm, vector_t::zr, i);
     mac_to_ir(code);
 
-    transform(code, matrix::lcm, vector::bk, 3);
+    transform(code, matrix_t::lcm, vector_t::bk, 3);
     mac_to_ir(code);
 
     int32_t r = (gpr.rgbc.r << 4) * gpr.vector[3][0];
@@ -470,10 +470,10 @@ void cpu_cop2_t::op_nclip(uint32_t code) {
 
 
 void cpu_cop2_t::op_ncs(uint32_t code) {
-  transform(code, matrix::llm, vector::zr, 0);
+  transform(code, matrix_t::llm, vector_t::zr, 0);
   mac_to_ir(code);
 
-  transform(code, matrix::lcm, vector::bk, 3);
+  transform(code, matrix_t::lcm, vector_t::bk, 3);
   mac_to_ir(code);
   mac_to_rgb();
 }
@@ -481,10 +481,10 @@ void cpu_cop2_t::op_ncs(uint32_t code) {
 
 void cpu_cop2_t::op_nct(uint32_t code) {
   for (int32_t i = 0; i < 3; i++) {
-    transform(code, matrix::llm, vector::zr, i);
+    transform(code, matrix_t::llm, vector_t::zr, i);
     mac_to_ir(code);
 
-    transform(code, matrix::lcm, vector::bk, 3);
+    transform(code, matrix_t::lcm, vector_t::bk, 3);
     mac_to_ir(code);
     mac_to_rgb();
   }
@@ -492,7 +492,7 @@ void cpu_cop2_t::op_nct(uint32_t code) {
 
 
 void cpu_cop2_t::op_op(uint32_t code) {
-  matrix_t &matrix = ccr.matrix[int(matrix::rot)];
+  matrix_data_t &matrix = ccr.matrix[int(matrix_t::rot)];
 
   int32_t shift = get_sf(code);
 
@@ -505,7 +505,7 @@ void cpu_cop2_t::op_op(uint32_t code) {
 
 
 void cpu_cop2_t::op_rtps(uint32_t code) {
-  int64_t div = transform_pt(code, matrix::rot, vector::tr, 0);
+  int64_t div = transform_pt(code, matrix_t::rot, vector_t::tr, 0);
 
   transform_xy(div);
   transform_dq(div);
@@ -516,7 +516,7 @@ void cpu_cop2_t::op_rtpt(uint32_t code) {
   int64_t div = 0;
 
   for (int i = 0; i < 3; i++) {
-    div = transform_pt(code, matrix::rot, vector::tr, i);
+    div = transform_pt(code, matrix_t::rot, vector_t::tr, i);
     transform_xy(div);
   }
 

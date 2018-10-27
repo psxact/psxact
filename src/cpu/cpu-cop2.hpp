@@ -10,7 +10,7 @@ namespace psx {
 
 class cpu_cop2_t : public cpu_cop_t {
 
-  enum class matrix {
+  enum class matrix_t {
     rot = 0,
     llm = 1,
     lcm = 2,
@@ -18,7 +18,7 @@ class cpu_cop2_t : public cpu_cop_t {
   };
 
 
-  enum class vector {
+  enum class vector_t {
     tr = 0,
     bk = 1,
     fc = 2,
@@ -85,9 +85,9 @@ public:
 
 private:
 
-  matrix get_mx(uint32_t code);
+  matrix_t get_mx(uint32_t code);
 
-  vector get_cv(uint32_t code);
+  vector_t get_cv(uint32_t code);
 
   // -============-
   //  Instructions
@@ -103,11 +103,11 @@ private:
 
   void transform_xy(int64_t div);
 
-  int64_t transform(uint32_t code, matrix mx, vector cv, int32_t v);
+  int64_t transform(uint32_t code, matrix_t mx, vector_t cv, int32_t v);
 
-  int64_t transform_buggy(uint32_t code, matrix mx, vector cv, int32_t v);
+  int64_t transform_buggy(uint32_t code, matrix_t mx, vector_t cv, int32_t v);
 
-  int64_t transform_pt(uint32_t code, matrix mx, vector cv, int32_t v);
+  int64_t transform_pt(uint32_t code, matrix_t mx, vector_t cv, int32_t v);
 
   void op_avsz3(uint32_t code);
 
