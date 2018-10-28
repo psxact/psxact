@@ -10,27 +10,43 @@
 
 namespace psx {
 
-class cdrom_t;
+namespace cdrom {
+  class core_t;
+}
 
-class timer_unit_t;
+namespace timer {
+  class core_t;
+}
 
-class cpu_t;
+namespace cpu {
+  class core_t;
+}
 
-class dma_t;
+namespace dma {
+  class core_t;
+}
 
-class exp1_t;
+namespace exp {
+  class expansion1_t;
+  class expansion2_t;
+  class expansion3_t;
+}
 
-class exp2_t;
+namespace gpu {
+  class core_t;
+}
 
-class exp3_t;
+namespace input {
+  class core_t;
+}
 
-class gpu_t;
+namespace mdec {
+  class core_t;
+}
 
-class input_t;
-
-class mdec_t;
-
-class spu_t;
+namespace spu {
+  class core_t;
+}
 
 class console_t
   : public memory_access_t
@@ -40,17 +56,17 @@ class console_t
   memory_t< mib(  2) > wram;
   memory_t< kib(  1) > dmem;
 
-  cdrom_t *cdrom;
-  timer_unit_t *timer;
-  cpu_t *cpu;
-  dma_t *dma;
-  exp1_t *exp1;
-  exp2_t *exp2;
-  exp3_t *exp3;
-  gpu_t *gpu;
-  input_t *input;
-  mdec_t *mdec;
-  spu_t *spu;
+  cdrom::core_t *cdrom;
+  timer::core_t *timer;
+  cpu::core_t *cpu;
+  dma::core_t *dma;
+  exp::expansion1_t *exp1;
+  exp::expansion2_t *exp2;
+  exp::expansion3_t *exp3;
+  gpu::core_t *gpu;
+  input::core_t *input;
+  mdec::core_t *mdec;
+  spu::core_t *spu;
 
 public:
 

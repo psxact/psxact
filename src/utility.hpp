@@ -58,9 +58,7 @@ inline uint8_t bcd_to_dec(uint8_t value) {
 
 template<int bits>
 inline int clz(uint32_t value) {
-  enum {
-    mask = 1 << (bits - 1)
-  };
+  const int mask = 1 << (bits - 1);
 
   uint32_t count = 0;
 

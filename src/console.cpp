@@ -3,17 +3,17 @@
 #include <cassert>
 #include <cstring>
 #include <exception>
-#include "cdrom/cdrom.hpp"
-#include "timer/timer.hpp"
-#include "cpu/cpu.hpp"
-#include "dma/dma.hpp"
-#include "expansion/exp1.hpp"
-#include "expansion/exp2.hpp"
-#include "expansion/exp3.hpp"
-#include "gpu/gpu.hpp"
-#include "input/input.hpp"
-#include "mdec/mdec.hpp"
-#include "spu/spu.hpp"
+#include "cdrom/core.hpp"
+#include "timer/core.hpp"
+#include "cpu/core.hpp"
+#include "dma/core.hpp"
+#include "exp/expansion1.hpp"
+#include "exp/expansion2.hpp"
+#include "exp/expansion3.hpp"
+#include "gpu/core.hpp"
+#include "input/core.hpp"
+#include "mdec/core.hpp"
+#include "spu/core.hpp"
 #include "limits.hpp"
 #include "utility.hpp"
 
@@ -25,17 +25,17 @@ console_t::console_t(const char *bios_file_name, const char *game_file_name)
   , dmem("dmem")
   , wram("wram") {
 
-  cdrom = new cdrom_t(this, game_file_name);
-  timer = new timer_unit_t(this);
-  cpu = new cpu_t(this);
-  dma = new dma_t(this, this);
-  exp1 = new exp1_t();
-  exp2 = new exp2_t();
-  exp3 = new exp3_t();
-  gpu = new gpu_t();
-  input = new input_t(this);
-  mdec = new mdec_t();
-  spu = new spu_t();
+  cdrom = new cdrom::core_t(this, game_file_name);
+  timer = new timer::core_t(this);
+  cpu = new cpu::core_t(this);
+  dma = new dma::core_t(this, this);
+  exp1 = new exp::expansion1_t();
+  exp2 = new exp::expansion2_t();
+  exp3 = new exp::expansion3_t();
+  gpu = new gpu::core_t();
+  input = new input::core_t(this);
+  mdec = new mdec::core_t();
+  spu = new spu::core_t();
 
   bios.load_blob(bios_file_name);
 }

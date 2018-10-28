@@ -1,9 +1,9 @@
-#include "cpu/cpu.hpp"
+#include "cpu/core.hpp"
 
 #include <string>
 
 
-using namespace psx;
+using namespace psx::cpu;
 
 #define get_iconst() decode_iconst()
 #define get_uconst() decode_uconst()
@@ -29,7 +29,7 @@ static const char *register_names[32] = {
 };
 
 
-void cpu_t::disassemble_special(FILE *file) {
+void core_t::disassemble_special(FILE *file) {
   switch (code & 0x3f) {
   case 0x00: fprintf(file, "sll       %s, %s, #%d\n", get_rd(), get_rt(), get_sa()); break;
 
@@ -74,7 +74,7 @@ void cpu_t::disassemble_special(FILE *file) {
 }
 
 
-void cpu_t::disassemble_reg_imm(FILE *file) {
+void core_t::disassemble_reg_imm(FILE *file) {
   uint32_t pc = regs.this_pc;
 
   switch (decode_rt()) {
@@ -91,7 +91,7 @@ void cpu_t::disassemble_reg_imm(FILE *file) {
 }
 
 
-void cpu_t::disassemble(FILE *file) {
+void core_t::disassemble(FILE *file) {
   uint32_t pc = regs.this_pc;
 
   fprintf(file, "%08X: ", pc);
