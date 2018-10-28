@@ -38,7 +38,7 @@ void decoder_t::decode_a(uint32_t pc, uint32_t function, uint32_t *args) {
 
     case 0x18: {
       std::string a = decode_string(args[0]);
-      std::string b = decode_string(args[2]);
+      std::string b = decode_string(args[1]);
       fprintf(log, "strncmp(\"%s\", \"%s\", %d)\n",
         a.c_str(),
         b.c_str(),
