@@ -1,5 +1,7 @@
-#ifndef __psxact_cpu_cop0__
-#define __psxact_cpu_cop0__
+// Copyright 2018 psxact
+
+#ifndef CPU_COP0_SYS_HPP_
+#define CPU_COP0_SYS_HPP_
 
 
 #include <cstdint>
@@ -28,11 +30,9 @@ enum class exception_t {
 
 
 class sys_t : public cop_t {
-
   uint32_t regs[16];
 
-public:
-
+ public:
   void run(uint32_t n);
 
   uint32_t read_ccr(uint32_t n);
@@ -48,8 +48,8 @@ public:
   void rfe();
 };
 
-}
-}
-}
+}  // namespace cop0
+}  // namespace cpu
+}  // namespace psx
 
-#endif //__psxact_cpu_cop0__
+#endif  // CPU_COP0_SYS_HPP_

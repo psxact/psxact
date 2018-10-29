@@ -1,9 +1,11 @@
+// Copyright 2018 psxact
+
 #include "gpu/core.hpp"
 
 #include "limits.hpp"
 
 
-using namespace psx::gpu;
+using psx::gpu::core_t;
 
 static const int dither_lut[4][4] = {
   { -4,  0, -3,  1 },

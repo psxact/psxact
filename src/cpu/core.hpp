@@ -1,5 +1,7 @@
-#ifndef __psxact_cpu__
-#define __psxact_cpu__
+// Copyright 2018 psxact
+
+#ifndef CPU_CORE_HPP_
+#define CPU_CORE_HPP_
 
 
 #include <cstdio>
@@ -16,7 +18,6 @@ namespace psx {
 namespace cpu {
 
 class core_t : public memory_component_t {
-
   bios::decoder_t bios_call;
 
   memory_access_t *memory;
@@ -24,14 +25,12 @@ class core_t : public memory_component_t {
   cop_t *cop[4];
 
   struct {
-
     uint32_t gp[32];
     uint32_t lo;
     uint32_t hi;
     uint32_t pc;
     uint32_t this_pc;
     uint32_t next_pc;
-
   } regs;
 
   uint32_t code;
@@ -53,9 +52,8 @@ class core_t : public memory_component_t {
 
   static opcode_t op_table_special[64];
 
-public:
-
-  core_t(memory_access_t *memory);
+ public:
+  explicit core_t(memory_access_t *memory);
 
   cop_t *get_cop(int n);
 
@@ -282,7 +280,7 @@ public:
   uint32_t get_rs();
 };
 
-}
-}
+}  // namespace cpu
+}  // namespace psx
 
-#endif // __psxact_cpu__
+#endif  // CPU_CORE_HPP_

@@ -1,5 +1,7 @@
-#ifndef __psxact_bios_call_decoder__
-#define __psxact_bios_call_decoder__
+// Copyright 2018 psxact
+
+#ifndef CPU_BIOS_DECODER_HPP_
+#define CPU_BIOS_DECODER_HPP_
 
 
 #include <cstdio>
@@ -12,15 +14,13 @@ namespace cpu {
 namespace bios {
 
 class decoder_t {
-private:
-
+ private:
   memory_access_t *memory;
 
   FILE *log;
 
-public:
-
-  decoder_t(memory_access_t *memory);
+ public:
+  explicit decoder_t(memory_access_t *memory);
 
   void decode_a(uint32_t pc, uint32_t function, uint32_t *args);
 
@@ -28,8 +28,7 @@ public:
 
   void decode_c(uint32_t pc, uint32_t function, uint32_t *args);
 
-private:
-
+ private:
   std::string decode_string(uint32_t arg);
 
   std::string decode_string(uint32_t arg, uint32_t size);
@@ -37,8 +36,8 @@ private:
   std::string decode_timecode(uint32_t arg);
 };
 
-}
-}
-}
+}  // namespace bios
+}  // namespace cpu
+}  // namespace psx
 
-#endif // __psxact_bios_call_decoder__
+#endif  // CPU_BIOS_DECODER_HPP_

@@ -1,3 +1,5 @@
+// Copyright 2018 psxact
+
 #include "cpu/core.hpp"
 
 #include "cpu/cop0/sys.hpp"
@@ -5,7 +7,8 @@
 #include "utility.hpp"
 
 
-using namespace psx::cpu;
+using psx::cpu::core_t;
+using psx::cpu::cop_t;
 
 core_t::opcode_t core_t::op_table[64] = {
   nullptr,          &core_t::op_bxx,   &core_t::op_j,    &core_t::op_jal,
@@ -49,9 +52,8 @@ core_t::opcode_t core_t::op_table_special[64] = {
 
 core_t::core_t(memory_access_t *memory)
   : memory_component_t("cpu")
-  , memory(memory)
-  , bios_call(memory) {
-
+  , bios_call(memory)
+  , memory(memory) {
   regs.gp[0] = 0;
   regs.pc = 0xbfc00000;
   regs.next_pc = regs.pc + 4;
@@ -78,8 +80,7 @@ bool core_t::get_cop_usable(int n) {
 
   return (n == 0 && (stat & 0x10000000) == 0)
     ? (stat & 0x02) == 0
-    : (stat & mask) != 0
-    ;
+    : (stat & mask) != 0;
 }
 
 
@@ -97,8 +98,7 @@ void core_t::tick() {
 
   if (iec && irq) {
     enter_exception(cop0::exception_t::interrupt);
-  }
-  else {
+  } else {
     uint32_t code = (this->code >> 26) & 63;
     if (code)
       (*this.*op_table[code])();
@@ -109,14 +109,14 @@ void core_t::tick() {
 
 
 static uint32_t segments[8] = {
-  0x7fffffff, // kuseg ($0000_0000 - $7fff_ffff)
-  0x7fffffff, //
-  0x7fffffff, //
-  0x7fffffff, //
-  0x1fffffff, // kseg0 ($8000_0000 - $9fff_ffff)
-  0x1fffffff, // kseg1 ($a000_0000 - $bfff_ffff)
-  0xffffffff, // kseg2 ($c000_0000 - $ffff_ffff)
-  0xffffffff  //
+  0x7fffffff,  // kuseg ($0000_0000 - $7fff_ffff)
+  0x7fffffff,  //
+  0x7fffffff,  //
+  0x7fffffff,  //
+  0x1fffffff,  // kseg0 ($8000_0000 - $9fff_ffff)
+  0x1fffffff,  // kseg1 ($a000_0000 - $bfff_ffff)
+  0xffffffff,  // kseg2 ($c000_0000 - $ffff_ffff)
+  0xffffffff   //
 };
 
 
@@ -144,15 +144,14 @@ void core_t::enter_exception(cop0::exception_t code) {
   status = (status & ~0x3f) | ((status << 2) & 0x3f);
 
   uint32_t cause = get_cop(0)->read_gpr(13);
-  cause = (cause & ~0x7f) | ((int(code) << 2) & 0x7f);
+  cause = (cause & ~0x7f) | ((static_cast<int>(code) << 2) & 0x7f);
 
   uint32_t epc;
 
   if (is_branch_delay_slot) {
     epc = regs.this_pc - 4;
     cause |= 0x80000000;
-  }
-  else {
+  } else {
     epc = regs.this_pc;
     cause &= ~0x80000000;
   }
@@ -163,8 +162,7 @@ void core_t::enter_exception(cop0::exception_t code) {
 
   regs.pc = (status & (1 << 22))
     ? 0xbfc00180
-    : 0x80000080
-    ;
+    : 0x80000080;
 
   regs.next_pc = regs.pc + 4;
 }
@@ -172,7 +170,7 @@ void core_t::enter_exception(cop0::exception_t code) {
 
 void core_t::read_code() {
   if (regs.pc & 3) {
-    enter_exception(cop0::exception_t::address_error_load);
+    return enter_exception(cop0::exception_t::address_error_load);
   }
 
   // log_bios_calls();
@@ -181,7 +179,7 @@ void core_t::read_code() {
   regs.pc = regs.next_pc;
   regs.next_pc += 4;
 
-  // todo: read i-cache
+  // TODO(Adam): read i-cache
 
   code = memory->read_word(map_address(regs.this_pc));
 }
@@ -189,60 +187,60 @@ void core_t::read_code() {
 
 uint32_t core_t::read_data_byte(uint32_t address) {
   if (get_cop(0)->read_gpr(12) & (1 << 16)) {
-    return 0; // isc=1
+    return 0;  // isc=1
   }
 
-  // TODO: read cache?
+  // TODO(Adam): read cache?
   return memory->read_byte(map_address(address));
 }
 
 
 uint32_t core_t::read_data_half(uint32_t address) {
   if (get_cop(0)->read_gpr(12) & (1 << 16)) {
-    return 0; // isc=1
+    return 0;  // isc=1
   }
 
-  // TODO: read cache?
+  // TODO(Adam): read cache?
   return memory->read_half(map_address(address));
 }
 
 
 uint32_t core_t::read_data_word(uint32_t address) {
   if (get_cop(0)->read_gpr(12) & (1 << 16)) {
-    return 0; // isc=1
+    return 0;  // isc=1
   }
 
-  // TODO: read cache?
+  // TODO(Adam): read cache?
   return memory->read_word(map_address(address));
 }
 
 
 void core_t::write_data_byte(uint32_t address, uint32_t data) {
   if (get_cop(0)->read_gpr(12) & (1 << 16)) {
-    return; // isc=1
+    return;  // isc=1
   }
 
-  // TODO: write cache?
+  // TODO(Adam): write cache?
   return memory->write_byte(map_address(address), data);
 }
 
 
 void core_t::write_data_half(uint32_t address, uint32_t data) {
   if (get_cop(0)->read_gpr(12) & (1 << 16)) {
-    return; // isc=1
+    return;  // isc=1
   }
 
-  // TODO: write cache?
+  // TODO(Adam): write cache?
   return memory->write_half(map_address(address), data);
 }
 
 
 void core_t::write_data_word(uint32_t address, uint32_t data) {
   if (get_cop(0)->read_gpr(12) & (1 << 16)) {
-    return; // isc=1
+    return;  // isc=1
   }
 
-  // TODO: write cache?
+  // TODO(Adam): write cache?
   return memory->write_word(map_address(address), data);
 }
 
@@ -253,8 +251,7 @@ void core_t::update_irq(uint32_t stat, uint32_t mask) {
 
   int flag = (istat & imask)
     ? get_cop(0)->read_gpr(13) |  (1 << 10)
-    : get_cop(0)->read_gpr(13) & ~(1 << 10)
-    ;
+    : get_cop(0)->read_gpr(13) & ~(1 << 10);
 
   get_cop(0)->write_gpr(13, flag);
 }
@@ -282,11 +279,11 @@ void core_t::set_istat(uint32_t value) {
 
 uint32_t core_t::io_read_half(uint32_t address) {
   switch (address) {
-  case 0x1f801070:
-    return get_istat();
+    case 0x1f801070:
+      return get_istat();
 
-  case 0x1f801074:
-    return get_imask();
+    case 0x1f801074:
+      return get_imask();
   }
 
   return 0;
@@ -300,11 +297,11 @@ uint32_t core_t::io_read_word(uint32_t address) {
 
 void core_t::io_write_half(uint32_t address, uint32_t data) {
   switch (address) {
-  case 0x1f801070:
-    return set_istat(data & istat);
+    case 0x1f801070:
+      return set_istat(data & istat);
 
-  case 0x1f801074:
-    return set_imask(data & 0x7ff);
+    case 0x1f801074:
+      return set_imask(data & 0x7ff);
   }
 }
 
@@ -327,8 +324,7 @@ static inline uint32_t overflow(uint32_t x, uint32_t y, uint32_t z) {
 uint32_t core_t::get_register(uint32_t index) {
   if (is_load_delay_slot && load_index == index) {
     return load_value;
-  }
-  else {
+  } else {
     return regs.gp[index];
   }
 }
@@ -477,8 +473,7 @@ void core_t::op_bxx() {
   // bltzal rs,$nnnn
   bool condition = (code & (1 << 16))
     ? int32_t(get_rs()) >= 0
-    : int32_t(get_rs()) <  0
-    ;
+    : int32_t(get_rs()) <  0;
 
   if ((code & 0x1e0000) == 0x100000) {
     regs.gp[31] = regs.next_pc;
@@ -543,16 +538,13 @@ void core_t::op_div() {
   if (dividend == int32_t(0x80000000) && divisor == int32_t(0xffffffff)) {
     regs.lo = 0x80000000;
     regs.hi = 0;
-  }
-  else if (dividend >= 0 && divisor == 0) {
+  } else if (dividend >= 0 && divisor == 0) {
     regs.lo = uint32_t(0xffffffff);
     regs.hi = uint32_t(dividend);
-  }
-  else if (dividend <= 0 && divisor == 0) {
+  } else if (dividend <= 0 && divisor == 0) {
     regs.lo = uint32_t(0x00000001);
     regs.hi = uint32_t(dividend);
-  }
-  else {
+  } else {
     regs.lo = uint32_t(dividend / divisor);
     regs.hi = uint32_t(dividend % divisor);
   }
@@ -566,8 +558,7 @@ void core_t::op_divu() {
   if (divisor) {
     regs.lo = dividend / divisor;
     regs.hi = dividend % divisor;
-  }
-  else {
+  } else {
     regs.lo = 0xffffffff;
     regs.hi = dividend;
   }

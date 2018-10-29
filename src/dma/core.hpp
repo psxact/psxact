@@ -1,5 +1,7 @@
-#ifndef __psxact_dma__
-#define __psxact_dma__
+// Copyright 2018 psxact
+
+#ifndef DMA_CORE_HPP_
+#define DMA_CORE_HPP_
 
 
 #include "interrupt-access.hpp"
@@ -11,7 +13,6 @@ namespace psx {
 namespace dma {
 
 class core_t : public memory_component_t {
-
   interrupt_access_t *irq;
   memory_access_t *memory;
 
@@ -24,8 +25,7 @@ class core_t : public memory_component_t {
     uint32_t control;
   } channels[7];
 
-public:
-
+ public:
   core_t(interrupt_access_t *irq, memory_access_t *memory);
 
   uint32_t io_read_word(uint32_t address);
@@ -55,10 +55,9 @@ public:
   void run_channel_6();
 
   void update_irq_active_flag();
-
 };
 
-}
-}
+}  // namespace dma
+}  // namespace psx
 
-#endif // __psxact_dma__
+#endif  // DMA_CORE_HPP_

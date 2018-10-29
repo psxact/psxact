@@ -1,10 +1,12 @@
+// Copyright 2018 psxact
+
 #include "spu/core.hpp"
 
 #include <assert.h>
 #include "utility.hpp"
 
 
-using namespace psx::spu;
+using psx::spu::core_t;
 
 core_t::core_t()
   : memory_component_t("spu")

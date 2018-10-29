@@ -1,9 +1,11 @@
+// Copyright 2018 psxact
+
 #include "sdl2.hpp"
 
 #include <cstdio>
 
 
-using namespace psx;
+namespace psx {
 
 static const int window_width = 640;
 static const int window_height = 480;
@@ -70,8 +72,8 @@ bool sdl2::render(uint16_t *src_pixels, int w, int h) {
 
   SDL_LockTexture(texture, nullptr, &dst_pixels, &dst_pitch);
 
-  uint16_t *dst = (uint16_t *)dst_pixels;
-  uint16_t *src = (uint16_t *)src_pixels;
+  uint16_t *dst = reinterpret_cast<uint16_t *>(dst_pixels);
+  uint16_t *src = reinterpret_cast<uint16_t *>(src_pixels);
 
   for (int py = 0; py < h; py++) {
     for (int px = 0; px < w; px++) {
@@ -89,66 +91,66 @@ bool sdl2::render(uint16_t *src_pixels, int w, int h) {
   return handle_events();
 }
 
-static void controller_button(controller_state_t &ctrl, uint8_t button, bool isPressed) {
+static void controller_button(controller_state_t *ctrl, uint8_t button, bool isPressed) {
   switch (button) {
     case SDL_CONTROLLER_BUTTON_DPAD_UP:
-      ctrl.dpad_up = isPressed;
+      ctrl->dpad_up = isPressed;
       break;
 
     case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-      ctrl.dpad_down = isPressed;
+      ctrl->dpad_down = isPressed;
       break;
 
     case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-      ctrl.dpad_left = isPressed;
+      ctrl->dpad_left = isPressed;
       break;
 
     case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-      ctrl.dpad_right = isPressed;
+      ctrl->dpad_right = isPressed;
       break;
 
     case SDL_CONTROLLER_BUTTON_A:
-      ctrl.cross = isPressed;
+      ctrl->cross = isPressed;
       break;
 
     case SDL_CONTROLLER_BUTTON_B:
-      ctrl.circle = isPressed;
+      ctrl->circle = isPressed;
       break;
 
     case SDL_CONTROLLER_BUTTON_X:
-      ctrl.square = isPressed;
+      ctrl->square = isPressed;
       break;
 
     case SDL_CONTROLLER_BUTTON_Y:
-      ctrl.triangle = isPressed;
+      ctrl->triangle = isPressed;
       break;
 
     case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
-      ctrl.l1 = isPressed;
+      ctrl->l1 = isPressed;
       break;
 
     case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
-      ctrl.r1 = isPressed;
+      ctrl->r1 = isPressed;
       break;
 
     case SDL_CONTROLLER_BUTTON_BACK:
-      ctrl.select = isPressed;
+      ctrl->select = isPressed;
       break;
 
     case SDL_CONTROLLER_BUTTON_START:
-      ctrl.start = isPressed;
+      ctrl->start = isPressed;
       break;
   }
 }
 
-static void controller_axis(controller_state_t &ctrl, uint8_t axis, int value) {
+static void controller_axis(controller_state_t *ctrl, uint8_t axis, int value) {
   switch (axis) {
     case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
-      ctrl.l2 = value > 16383;
+      ctrl->l2 = value > 16383;
       break;
 
     case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
-      ctrl.r2 = value > 16383;
+      ctrl->r2 = value > 16383;
       break;
   }
 }
@@ -169,15 +171,15 @@ bool sdl2::handle_events() {
         break;
 
       case SDL_CONTROLLERBUTTONDOWN:
-        controller_button(ctrl, event.cbutton.button, 0);
+        controller_button(&ctrl, event.cbutton.button, 0);
         break;
 
       case SDL_CONTROLLERBUTTONUP:
-        controller_button(ctrl, event.cbutton.button, 1);
+        controller_button(&ctrl, event.cbutton.button, 1);
         break;
 
       case SDL_CONTROLLERAXISMOTION:
-        controller_axis(ctrl, event.caxis.axis, event.caxis.value);
+        controller_axis(&ctrl, event.caxis.axis, event.caxis.value);
         break;
     }
   }
@@ -202,3 +204,5 @@ void sdl2::resize(int w, int h) {
     w,
     h);
 }
+
+}  // namespace psx

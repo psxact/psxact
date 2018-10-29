@@ -1,9 +1,11 @@
+// Copyright 2018 psxact
+
 #include "memory-component.hpp"
 
 #include <cstdio>
 
 
-using namespace psx;
+namespace psx {
 
 memory_component_t::memory_component_t(const char *name)
   : name(name) {
@@ -41,3 +43,5 @@ void memory_component_t::io_write_half(uint32_t address, uint32_t data) {
 void memory_component_t::io_write_word(uint32_t address, uint32_t data) {
   printf("[%s] io_write_word(0x%08x, 0x%08x)\n", name, address, data);
 }
+
+}  // namespace psx

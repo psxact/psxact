@@ -1,7 +1,9 @@
+// Copyright 2018 psxact
+
 #include "exp/expansion1.hpp"
 
 
-using namespace psx::exp;
+using psx::exp::expansion1_t;
 
 expansion1_t::expansion1_t()
   : memory_component_t("exp1") {

@@ -1,9 +1,11 @@
+// Copyright 2018 psxact
+
 #include "dma/core.hpp"
 
 #include "utility.hpp"
 
 
-using namespace psx::dma;
+using psx::dma::core_t;
 
 core_t::core_t(interrupt_access_t *irq, memory_access_t *memory)
   : memory_component_t("dma")
@@ -31,8 +33,7 @@ uint32_t core_t::io_read_word(uint32_t address) {
       case 2: return 0x7ffac68b;
       case 3: return 0x00fffff7;
     }
-  }
-  else {
+  } else {
     switch (get_register_index(address)) {
       case 0: return channels[channel].address;
       case 1: return channels[channel].counter;
@@ -60,8 +61,7 @@ void core_t::io_write_word(uint32_t address, uint32_t data) {
       case 2: break;
       case 3: break;
     }
-  }
-  else {
+  } else {
     switch (get_register_index(address)) {
       case 0: channels[channel].address = data & 0x00ffffff; break;
       case 1: channels[channel].counter = data & 0xffffffff; break;
@@ -303,8 +303,7 @@ void core_t::update_irq_active_flag() {
     }
 
     dicr |= 0x80000000;
-  }
-  else {
+  } else {
     dicr &= ~0x80000000;
   }
 }

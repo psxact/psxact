@@ -1,3 +1,5 @@
+// Copyright 2018 psxact
+
 #include "console.hpp"
 
 #include <cassert>
@@ -18,13 +20,12 @@
 #include "utility.hpp"
 
 
-using namespace psx;
+namespace psx {
 
 console_t::console_t(const char *bios_file_name, const char *game_file_name)
   : bios("bios")
-  , dmem("dmem")
-  , wram("wram") {
-
+  , wram("wram")
+  , dmem("dmem") {
   cdrom = new cdrom::core_t(this, game_file_name);
   timer = new timer::core_t(this);
   cpu = new cpu::core_t(this);
@@ -42,7 +43,7 @@ console_t::console_t(const char *bios_file_name, const char *game_file_name)
 
 
 void console_t::send(interrupt_type_t flag) {
-  int istat = cpu->get_istat() | int(flag);
+  int istat = cpu->get_istat() | static_cast<int>(flag);
   cpu->set_istat(istat);
 }
 
@@ -101,8 +102,7 @@ uint32_t console_t::read_byte(uint32_t address) {
 
   return component != nullptr
     ? component->io_read_byte(address)
-    : read_memory_control(1, address)
-    ;
+    : read_memory_control(1, address);
 }
 
 
@@ -111,8 +111,7 @@ uint32_t console_t::read_half(uint32_t address) {
 
   return component != nullptr
     ? component->io_read_half(address)
-    : read_memory_control(2, address)
-    ;
+    : read_memory_control(2, address);
 }
 
 
@@ -121,24 +120,51 @@ uint32_t console_t::read_word(uint32_t address) {
 
   return component != nullptr
     ? component->io_read_word(address)
-    : read_memory_control(4, address)
-    ;
+    : read_memory_control(4, address);
 }
 
 
 void console_t::write_memory_control(int size, uint32_t address, uint32_t data) {
   switch (address) {
-    case 0x1f801000: assert(data == 0x1f000000); return;
-    case 0x1f801004: assert(data == 0x1f802000); return;
-    case 0x1f801008: assert(data == 0x0013243f); return;
-    case 0x1f80100c: assert(data == 0x00003022); return;
-    case 0x1f801010: assert(data == 0x0013243f); return;
-    case 0x1f801014: assert(data == 0x200931e1); return;
-    case 0x1f801018: assert(data == 0x00020843 || data == 0x00020943); return;
-    case 0x1f80101c: assert(data == 0x00070777); return;
-    case 0x1f801020: assert(data == 0x00031125 || data == 0x0000132c || data == 0x00001323 || data == 0x00001325); return;
+    case 0x1f801000:
+      assert(data == 0x1f000000);
+      return;
 
-    case 0x1f801060: assert(data == 0x00000b88); return;
+    case 0x1f801004:
+      assert(data == 0x1f802000);
+      return;
+
+    case 0x1f801008:
+      assert(data == 0x0013243f);
+      return;
+
+    case 0x1f80100c:
+      assert(data == 0x00003022);
+      return;
+
+    case 0x1f801010:
+      assert(data == 0x0013243f);
+      return;
+
+    case 0x1f801014:
+      assert(data == 0x200931e1);
+      return;
+
+    case 0x1f801018:
+      assert(data == 0x00020843 || data == 0x00020943);
+      return;
+
+    case 0x1f80101c:
+      assert(data == 0x00070777);
+      return;
+
+    case 0x1f801020:
+      assert(data == 0x00031125 || data == 0x0000132c || data == 0x00001323 || data == 0x00001325);
+      return;
+
+    case 0x1f801060:
+      assert(data == 0x00000b88);
+      return;
   }
 
   if (address == 0xfffe0130) {
@@ -175,8 +201,7 @@ void console_t::write_byte(uint32_t address, uint32_t data) {
 
   return (component != nullptr)
     ? component->io_write_byte(address, data)
-    : write_memory_control(1, address, data)
-    ;
+    : write_memory_control(1, address, data);
 }
 
 
@@ -185,8 +210,7 @@ void console_t::write_half(uint32_t address, uint32_t data) {
 
   return (component != nullptr)
     ? component->io_write_half(address, data)
-    : write_memory_control(2, address, data)
-    ;
+    : write_memory_control(2, address, data);
 }
 
 
@@ -195,8 +219,7 @@ void console_t::write_word(uint32_t address, uint32_t data) {
 
   return (component != nullptr)
     ? component->io_write_word(address, data)
-    : write_memory_control(4, address, data)
-    ;
+    : write_memory_control(4, address, data);
 }
 
 
@@ -228,3 +251,5 @@ void console_t::run_for_one_frame(uint16_t **vram, int *w, int *h) {
     gpu->display_area_x,
     gpu->display_area_y);
 }
+
+}  // namespace psx

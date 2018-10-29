@@ -1,9 +1,11 @@
+// Copyright 2018 psxact
+
 #include "cpu/core.hpp"
 
 #include <string>
 
 
-using namespace psx::cpu;
+using psx::cpu::core_t;
 
 #define get_iconst() decode_iconst()
 #define get_uconst() decode_uconst()

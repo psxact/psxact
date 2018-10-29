@@ -1,10 +1,11 @@
+// Copyright 2018 psxact
+
 #include "cpu/cop2/gte.hpp"
 
 #include "limits.hpp"
 
 
-using namespace psx;
-using namespace psx::cpu::cop2;
+using psx::cpu::cop2::gte_t;
 
 void gte_t::set_flag(int32_t flag) {
   ccr.flag |= 1 << flag;
@@ -14,8 +15,7 @@ void gte_t::set_flag(int32_t flag) {
 static inline int32_t get_lm(uint32_t code) {
   return (code & (1 << 10))
     ? 0
-    : slimit<16>::min
-    ;
+    : psx::slimit<16>::min;
 }
 
 
@@ -25,8 +25,7 @@ int64_t gte_t::flag_a(int32_t n, int64_t value) {
 
   if (value > max) {
     set_flag(A1_MAX - n);
-  }
-  else if (value < min) {
+  } else if (value < min) {
     set_flag(A1_MIN - n);
   }
 
@@ -151,7 +150,7 @@ int32_t gte_t::flag_g(int32_t n, int32_t value) {
 
 
 int32_t gte_t::flag_h(int64_t value) {
-  const int32_t max = ulimit<12>::max + 1; // TODO: why is this one different?
+  const int32_t max = ulimit<12>::max + 1;  // TODO(Adam): why is this one different?
   const int32_t min = ulimit<12>::min;
 
   if (value < min) {

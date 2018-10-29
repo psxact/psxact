@@ -1,5 +1,7 @@
-#ifndef __psxact_exp3__
-#define __psxact_exp3__
+// Copyright 2018 psxact
+
+#ifndef EXP_EXPANSION3_HPP_
+#define EXP_EXPANSION3_HPP_
 
 
 #include "memory-component.hpp"
@@ -9,14 +11,11 @@ namespace psx {
 namespace exp {
 
 class expansion3_t : public memory_component_t {
-
-public:
-
+ public:
   expansion3_t();
-
 };
 
-}
-}
+}  // namespace exp
+}  // namespace psx
 
-#endif // __psxact_exp3__
+#endif  // EXP_EXPANSION3_HPP_

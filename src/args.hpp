@@ -1,5 +1,7 @@
-#ifndef __psxact_args__
-#define __psxact_args__
+// Copyright 2018 psxact
+
+#ifndef ARGS_HPP_
+#define ARGS_HPP_
 
 
 namespace psx {
@@ -13,4 +15,4 @@ struct args_t {
 
 }
 
-#endif // __psxact_args__
+#endif  // ARGS_HPP_

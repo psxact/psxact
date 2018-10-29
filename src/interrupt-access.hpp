@@ -1,5 +1,7 @@
-#ifndef __psxact_interrupt_access__
-#define __psxact_interrupt_access__
+// Copyright 2018 psxact
+
+#ifndef INTERRUPT_ACCESS_HPP_
+#define INTERRUPT_ACCESS_HPP_
 
 
 namespace psx {
@@ -20,13 +22,10 @@ enum class interrupt_type_t {
 
 
 class interrupt_access_t {
-
-public:
-
+ public:
   virtual void send(interrupt_type_t flag) = 0;
-
 };
 
-}
+}  // namespace psx
 
-#endif // __psxact_interrupt_access__
+#endif  // INTERRUPT_ACCESS_HPP_

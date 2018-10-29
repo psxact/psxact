@@ -1,5 +1,7 @@
-#ifndef __psxact_cdrom__
-#define __psxact_cdrom__
+// Copyright 2018 psxact
+
+#ifndef CDROM_CORE_HPP_
+#define CDROM_CORE_HPP_
 
 
 #include <stdint.h>
@@ -22,7 +24,6 @@ struct sector_timecode_t {
 
 
 class core_t : public memory_component_t {
-
   interrupt_access_t *irq;
 
   int32_t index;
@@ -70,8 +71,7 @@ class core_t : public memory_component_t {
     bool read_whole_sector;
   } mode;
 
-public:
-
+ public:
   core_t(interrupt_access_t *irq, const char *game_file_name);
 
   uint32_t io_read_byte(uint32_t address);
@@ -175,7 +175,7 @@ public:
   void drive_reading();
 };
 
-}
-}
+}  // namespace cdrom
+}  // namespace psx
 
-#endif // __psxact_cdrom__
+#endif  // CDROM_CORE_HPP_

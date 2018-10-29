@@ -1,5 +1,7 @@
-#ifndef __psxact_memory_hpp__
-#define __psxact_memory_hpp__
+// Copyright 2018 psxact
+
+#ifndef MEMORY_HPP_
+#define MEMORY_HPP_
 
 
 #include <cstdint>
@@ -17,7 +19,6 @@ constexpr uint32_t gib(uint32_t x) { return 1024 * mib(x); }
 
 template<uint32_t size>
 struct memory_t : public memory_component_t {
-
   static constexpr int mask = size - 1;
 
   union {
@@ -26,7 +27,7 @@ struct memory_t : public memory_component_t {
     uint32_t w[size / 4];
   };
 
-  memory_t(const char *name)
+  explicit memory_t(const char *name)
     : memory_component_t(name) {
 
     memset(b, 0, size_t(size));
@@ -65,8 +66,7 @@ struct memory_t : public memory_component_t {
       fread(b, sizeof(uint8_t), size, file);
       fclose(file);
       return true;
-    }
-    else {
+    } else {
       printf("unable to load '%s'\n", filename);
 
       return false;
@@ -74,6 +74,6 @@ struct memory_t : public memory_component_t {
   }
 };
 
-}
+}  // namespace psx
 
-#endif // __psxact_memory_hpp__
+#endif  // MEMORY_HPP_

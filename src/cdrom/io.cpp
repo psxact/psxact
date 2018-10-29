@@ -1,10 +1,12 @@
+// Copyright 2018 psxact
+
 #include "cdrom/core.hpp"
 
 #include <cassert>
 #include "utility.hpp"
 
 
-using namespace psx::cdrom;
+using psx::cdrom::core_t;
 
 uint8_t core_t::io_read_port_0() {
   return uint8_t(
@@ -14,8 +16,7 @@ uint8_t core_t::io_read_port_0() {
     (parameter_fifo.has_room() << 4) |
     (response_fifo.has_data()  << 5) |
     (data_fifo.has_data()      << 6) |
-    (busy                      << 7)
-  );
+    (busy                      << 7));
 }
 
 
@@ -76,13 +77,13 @@ void core_t::io_write_port_1_0(uint8_t data) {
 }
 
 
-void core_t::io_write_port_1_1(uint8_t data) {}
+void core_t::io_write_port_1_1(uint8_t) {}
 
 
-void core_t::io_write_port_1_2(uint8_t data) {}
+void core_t::io_write_port_1_2(uint8_t) {}
 
 
-void core_t::io_write_port_1_3(uint8_t data) {}
+void core_t::io_write_port_1_3(uint8_t) {}
 
 
 void core_t::io_write_port_2_0(uint8_t data) {
@@ -96,10 +97,10 @@ void core_t::io_write_port_2_1(uint8_t data) {
 }
 
 
-void core_t::io_write_port_2_2(uint8_t data) {}
+void core_t::io_write_port_2_2(uint8_t) {}
 
 
-void core_t::io_write_port_2_3(uint8_t data) {}
+void core_t::io_write_port_2_3(uint8_t) {}
 
 
 void core_t::io_write_port_3_0(uint8_t data) {
@@ -126,10 +127,10 @@ void core_t::io_write_port_3_1(uint8_t data) {
 }
 
 
-void core_t::io_write_port_3_2(uint8_t data) {}
+void core_t::io_write_port_3_2(uint8_t) {}
 
 
-void core_t::io_write_port_3_3(uint8_t data) {}
+void core_t::io_write_port_3_3(uint8_t) {}
 
 
 void core_t::io_write_byte(uint32_t address, uint32_t data) {

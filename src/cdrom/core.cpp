@@ -1,15 +1,16 @@
+// Copyright 2018 psxact
+
 #include "cdrom/core.hpp"
 
 #include "utility.hpp"
 
 
-using namespace psx::cdrom;
+using psx::cdrom::core_t;
 
 core_t::core_t(interrupt_access_t *irq, const char *game_file_name)
     : memory_component_t("cdc")
     , irq(irq)
     , game_file_name(game_file_name) {
-
   game_file = fopen(game_file_name, "rb+");
 
   logic_transition(&core_t::logic_idling, 1000);
@@ -32,6 +33,7 @@ void core_t::tick() {
   if (interrupt_request) {
     int32_t signal = interrupt_request & interrupt_enable;
     if (signal == interrupt_request) {
+      printf("[cdrom] delivering interrupt: %d\n", interrupt_request);
       irq->send(interrupt_type_t::CDROM);
     }
   }
@@ -78,8 +80,7 @@ void core_t::read_sector() {
   log_cdrom("read_sector(\"%02d:%02d:%02d\")",
     read_timecode.minute,
     read_timecode.second,
-    read_timecode.sector
-  );
+    read_timecode.sector);
 
   is_reading = 1;
 
@@ -103,8 +104,7 @@ void core_t::read_sector() {
       minute,
       second,
       sector,
-      cursor
-    );
+      cursor);
   }
 }
 

@@ -1,5 +1,7 @@
-#ifndef __psxact_counter__
-#define __psxact_counter__
+// Copyright 2018 psxact
+
+#ifndef TIMER_CORE_HPP_
+#define TIMER_CORE_HPP_
 
 
 #include "console.hpp"
@@ -46,7 +48,6 @@ struct timer_t {
 
 
 class core_t : public memory_component_t {
-
   interrupt_access_t *irq;
 
   bool in_hblank;
@@ -54,9 +55,8 @@ class core_t : public memory_component_t {
 
   timer_t timers[3];
 
-public:
-
-  core_t(interrupt_access_t *irq);
+ public:
+  explicit core_t(interrupt_access_t *irq);
 
   uint32_t io_read_half(uint32_t address);
 
@@ -72,8 +72,7 @@ public:
 
   void vblank(bool active);
 
-private:
-
+ private:
   void unit_init(int n, int single, int period);
 
   void unit_irq(int n);
@@ -95,7 +94,7 @@ private:
   void unit_set_counter(int n, uint16_t data);
 };
 
-}
-}
+}  // namespace timer
+}  // namespace psx
 
-#endif // __psxact_counter__
+#endif  // TIMER_CORE_HPP_

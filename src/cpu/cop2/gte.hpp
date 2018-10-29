@@ -1,7 +1,10 @@
-#ifndef __psxact_cpu_cop2__
-#define __psxact_cpu_cop2__
+// Copyright 2018 psxact
+
+#ifndef CPU_COP2_GTE_HPP_
+#define CPU_COP2_GTE_HPP_
 
 
+#include <algorithm>
 #include <cstdint>
 #include "cpu/cop.hpp"
 
@@ -11,7 +14,6 @@ namespace cpu {
 namespace cop2 {
 
 class gte_t : public cop_t {
-
   enum class matrix_t {
     rot = 0,
     llm = 1,
@@ -56,7 +58,7 @@ class gte_t : public cop_t {
     int32_t vector[4][3];
     color_t rgbc;
     int32_t otz;
-    int32_t ir0; //[4];
+    int32_t ir0;
     int32_t sx[3];
     int32_t sy[3];
     int32_t sz[4];
@@ -67,8 +69,7 @@ class gte_t : public cop_t {
     int32_t lzcr;
   } gpr;
 
-public:
-
+ public:
   void run(uint32_t code);
 
   uint32_t read_matrix_vector_group(uint32_t n);
@@ -85,8 +86,7 @@ public:
 
   uint32_t divide();
 
-private:
-
+ private:
   matrix_t get_mx(uint32_t code);
 
   vector_t get_cv(uint32_t code);
@@ -111,9 +111,9 @@ private:
 
   int64_t transform_pt(uint32_t code, matrix_t mx, vector_t cv, int32_t v);
 
-  void op_avsz3(uint32_t code);
+  void op_avsz3();
 
-  void op_avsz4(uint32_t code);
+  void op_avsz4();
 
   void op_cc(uint32_t code);
 
@@ -141,7 +141,7 @@ private:
 
   void op_ncdt(uint32_t code);
 
-  void op_nclip(uint32_t code);
+  void op_nclip();
 
   void op_ncs(uint32_t code);
 
@@ -198,8 +198,8 @@ private:
   int32_t flag_h(int64_t value);
 };
 
-}
-}
-}
+}  // namespace cop2
+}  // namespace cpu
+}  // namespace psx
 
-#endif //__psxact_cpu_cop2__
+#endif  // CPU_COP2_GTE_HPP_

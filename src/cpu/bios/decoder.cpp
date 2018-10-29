@@ -1,14 +1,39 @@
+// Copyright 2018 psxact
+
 #include "cpu/bios/decoder.hpp"
 
+#include <string>
 #include "utility.hpp"
 
 
-using namespace psx::cpu::bios;
+using psx::cpu::bios::decoder_t;
 
 decoder_t::decoder_t(memory_access_t *memory)
   : memory(memory) {
-
   log = fopen("bios_call.log", "w");
+}
+
+
+static std::string char_to_string(char c) {
+  switch (c) {
+  case '\0':
+    return "\\0";
+
+  case '\\':
+    return "\\\\";
+
+  case '\n':
+    return "\\n";
+
+  case '\r':
+    return "\\r";
+
+  case '\t':
+    return "\\t";
+
+  default:
+    return std::string(1, c);
+  }
 }
 
 
@@ -31,8 +56,7 @@ void decoder_t::decode_a(uint32_t pc, uint32_t function, uint32_t *args) {
       std::string b = decode_string(args[1]);
       fprintf(log, "strcmp(\"%s\", \"%s\")\n",
         a.c_str(),
-        b.c_str()
-      );
+        b.c_str());
       break;
     }
 
@@ -42,8 +66,7 @@ void decoder_t::decode_a(uint32_t pc, uint32_t function, uint32_t *args) {
       fprintf(log, "strncmp(\"%s\", \"%s\", %d)\n",
         a.c_str(),
         b.c_str(),
-        args[2]
-      );
+        args[2]);
       break;
     }
 
@@ -78,7 +101,7 @@ void decoder_t::decode_a(uint32_t pc, uint32_t function, uint32_t *args) {
       break;
 
     case 0x3c:
-      fprintf(log, "putc(\'%c\')\n", args[0]);
+      fprintf(log, "putc(\'%s\')\n", char_to_string(args[0]).c_str());
       break;
 
     case 0x3e: {
@@ -156,7 +179,7 @@ void decoder_t::decode_a(uint32_t pc, uint32_t function, uint32_t *args) {
       break;
 
     default:
-      printf("bios::a(0x%02x)\n", function);
+      fprintf(log, "bios::a(0x%02x)\n", function);
       break;
   }
 }
@@ -228,8 +251,7 @@ void decoder_t::decode_b(uint32_t pc, uint32_t function, uint32_t *args) {
       if (args[0] == 1) {
         std::string str = decode_string(args[1], args[2]);
         fprintf(log, "printf(\"%s\")\n", str.c_str());
-      }
-      else {
+      } else {
         fprintf(log, "FileWrite(%d, 0x%08x, %d)\n", args[0], args[1], args[2]);
       }
       break;
@@ -239,7 +261,7 @@ void decoder_t::decode_b(uint32_t pc, uint32_t function, uint32_t *args) {
       break;
 
     case 0x3d:
-      fprintf(log, "putc(\'%c\')\n", args[0]);
+      fprintf(log, "putc(\'%s\')\n", char_to_string(args[0]).c_str());
       break;
 
     case 0x3f: {
@@ -285,7 +307,7 @@ void decoder_t::decode_b(uint32_t pc, uint32_t function, uint32_t *args) {
       break;
 
     default:
-      printf("bios::b(0x%02x)\n", function);
+      fprintf(log, "bios::b(0x%02x)\n", function);
       break;
   }
 }
@@ -336,31 +358,8 @@ void decoder_t::decode_c(uint32_t pc, uint32_t function, uint32_t *args) {
       break;
 
     default:
-      printf("bios::c(0x%02x)\n", function);
+      fprintf(log, "bios::c(0x%02x)\n", function);
       break;
-  }
-}
-
-
-static std::string char_to_string(char c) {
-  switch (c) {
-  case '\0':
-    return "\\0";
-
-  case '\\':
-    return "\\\\";
-
-  case '\n':
-    return "\\n";
-
-  case '\r':
-    return "\\r";
-
-  case '\t':
-    return "\\t";
-
-  default:
-    return std::string(1, c);
   }
 }
 
@@ -370,12 +369,13 @@ std::string decoder_t::decode_string(uint32_t arg) {
   char curr;
 
   do {
-    curr = (char) memory->read_byte(arg & 0x1fffffff);
+    curr = static_cast<char>(memory->read_byte(arg & 0x1fffffff));
     arg++;
 
-    result += char_to_string(curr);
-  }
-  while (curr);
+    if (curr) {
+      result += char_to_string(curr);
+    }
+  } while (curr);
 
   return result;
 }
@@ -386,7 +386,7 @@ std::string decoder_t::decode_string(uint32_t arg, uint32_t size) {
   char curr;
 
   for (uint32_t i = 0; i < size; i++) {
-    curr = (char) memory->read_byte(arg & 0x1fffffff);
+    curr = static_cast<char>(memory->read_byte(arg & 0x1fffffff));
     arg++;
 
     result += char_to_string(curr);
@@ -402,11 +402,10 @@ std::string decoder_t::decode_timecode(uint32_t arg) {
   uint32_t f = memory->read_byte((arg + 2) & 0x1fffffff);
 
   char result[8];
-  sprintf(result, "%02d:%02d:%02d",
+  snprintf(result, sizeof(result), "%02d:%02d:%02d",
     utility::bcd_to_dec(m),
     utility::bcd_to_dec(s),
-    utility::bcd_to_dec(f)
-  );
+    utility::bcd_to_dec(f));
 
   return std::string(result);
 }

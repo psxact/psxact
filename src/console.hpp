@@ -1,5 +1,7 @@
-#ifndef __psxact_console__
-#define __psxact_console__
+// Copyright 2018 psxact
+
+#ifndef CONSOLE_HPP_
+#define CONSOLE_HPP_
 
 
 #include <cstdint>
@@ -11,50 +13,49 @@
 namespace psx {
 
 namespace cdrom {
-  class core_t;
+class core_t;
 }
 
 namespace timer {
-  class core_t;
+class core_t;
 }
 
 namespace cpu {
-  class core_t;
+class core_t;
 }
 
 namespace dma {
-  class core_t;
+class core_t;
 }
 
 namespace exp {
-  class expansion1_t;
-  class expansion2_t;
-  class expansion3_t;
+class expansion1_t;
+class expansion2_t;
+class expansion3_t;
 }
 
 namespace gpu {
-  class core_t;
+class core_t;
 }
 
 namespace input {
-  class core_t;
+class core_t;
 }
 
 namespace mdec {
-  class core_t;
+class core_t;
 }
 
 namespace spu {
-  class core_t;
+class core_t;
 }
 
 class console_t
   : public memory_access_t
   , public interrupt_access_t {
-
   memory_t< kib(512) > bios;
-  memory_t< mib(  2) > wram;
-  memory_t< kib(  1) > dmem;
+  memory_t< mib(2) > wram;
+  memory_t< kib(1) > dmem;
 
   cdrom::core_t *cdrom;
   timer::core_t *timer;
@@ -68,8 +69,7 @@ class console_t
   mdec::core_t *mdec;
   spu::core_t *spu;
 
-public:
-
+ public:
   console_t(const char *bios_file_name, const char *game_file_name);
 
   void send(interrupt_type_t flag);
@@ -88,16 +88,14 @@ public:
 
   void run_for_one_frame(uint16_t **vram, int *w, int *h);
 
-private:
-
+ private:
   memory_component_t *decode(uint32_t address);
 
   uint32_t read_memory_control(int size, uint32_t address);
 
   void write_memory_control(int size, uint32_t address, uint32_t data);
-
 };
 
-}
+}  // namespace psx
 
-#endif // __psxact_console__
+#endif  // CONSOLE_HPP_

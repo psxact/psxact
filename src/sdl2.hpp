@@ -1,5 +1,7 @@
-#ifndef __psxact_sdl2__
-#define __psxact_sdl2__
+// Copyright 2018 psxact
+
+#ifndef SDL2_HPP_
+#define SDL2_HPP_
 
 
 #define SDL_MAIN_HANDLED
@@ -9,7 +11,6 @@
 namespace psx {
 
 struct controller_state_t {
-
   bool circle;
   bool cross;
   bool square;
@@ -28,13 +29,11 @@ struct controller_state_t {
 
   bool select;
   bool start;
-
 };
 
 static controller_state_t ctrl;
 
 class sdl2 {
-
   SDL_Window *window;
   SDL_Renderer *renderer;
   SDL_Texture *texture;
@@ -43,22 +42,19 @@ class sdl2 {
 
   SDL_GameController *controller;
 
-public:
-
+ public:
   sdl2();
 
   ~sdl2();
 
   bool render(uint16_t *src_pixels, int w, int h);
 
-private:
-
+ private:
   bool handle_events();
 
   void resize(int w, int h);
-
 };
 
-}
+}  // namespace psx
 
-#endif // __psxact_sdl2__
+#endif  // SDL2_HPP_

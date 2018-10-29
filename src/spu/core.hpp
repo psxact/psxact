@@ -1,5 +1,7 @@
-#ifndef __psxact_spu__
-#define __psxact_spu__
+// Copyright 2018 psxact
+
+#ifndef SPU_CORE_HPP_
+#define SPU_CORE_HPP_
 
 
 #include "console.hpp"
@@ -11,7 +13,6 @@ namespace psx {
 namespace spu {
 
 class core_t : public memory_component_t {
-
   uint16_t control;
   uint16_t status;
 
@@ -45,19 +46,16 @@ class core_t : public memory_component_t {
     int16_t registers[32];
   } reverb;
 
-public:
-
+ public:
   core_t();
 
   uint32_t io_read_half(uint32_t address);
 
   void io_write_half(uint32_t address, uint32_t data);
-
   void io_write_word(uint32_t address, uint32_t data);
-
 };
 
-}
-}
+}  // namespace spu
+}  // namespace psx
 
-#endif // __psxact_spu__
+#endif  // SPU_CORE_HPP_

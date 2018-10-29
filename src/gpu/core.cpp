@@ -1,3 +1,5 @@
+// Copyright 2018 psxact
+
 #include "gpu/core.hpp"
 
 #include <cassert>
@@ -5,7 +7,7 @@
 #include "utility.hpp"
 
 
-using namespace psx::gpu;
+using psx::gpu::core_t;
 
 core_t::core_t()
   : memory_component_t("gpu")
@@ -72,7 +74,7 @@ core_t::color_t core_t::uint16_to_color(uint16_t value) {
 }
 
 
-uint16_t core_t::color_to_uint16(color_t &color) {
+uint16_t core_t::color_to_uint16(const color_t &color) {
   return
     ((color.r >> 3) & 0x001f) |
     ((color.g << 2) & 0x03e0) |
@@ -80,7 +82,7 @@ uint16_t core_t::color_to_uint16(color_t &color) {
 }
 
 
-core_t::color_t core_t::get_texture_color__4bpp(tev_t &tev, point_t &coord) {
+core_t::color_t core_t::get_texture_color__4bpp(const tev_t &tev, const point_t &coord) {
   uint16_t texel = vram_read(
     tev.texture_page_x + coord.x / 4,
     tev.texture_page_y + coord.y);
@@ -95,7 +97,7 @@ core_t::color_t core_t::get_texture_color__4bpp(tev_t &tev, point_t &coord) {
 }
 
 
-core_t::color_t core_t::get_texture_color__8bpp(tev_t &tev, point_t &coord) {
+core_t::color_t core_t::get_texture_color__8bpp(const tev_t &tev, const point_t &coord) {
   uint16_t texel = vram_read(
     tev.texture_page_x + coord.x / 2,
     tev.texture_page_y + coord.y);
@@ -110,7 +112,7 @@ core_t::color_t core_t::get_texture_color__8bpp(tev_t &tev, point_t &coord) {
 }
 
 
-core_t::color_t core_t::get_texture_color_15bpp(tev_t &tev, point_t &coord) {
+core_t::color_t core_t::get_texture_color_15bpp(const tev_t &tev, const point_t &coord) {
   uint16_t pixel = vram_read(
     tev.texture_page_x + coord.x,
     tev.texture_page_y + coord.y);
@@ -119,7 +121,7 @@ core_t::color_t core_t::get_texture_color_15bpp(tev_t &tev, point_t &coord) {
 }
 
 
-core_t::color_t core_t::get_texture_color(tev_t &tev, point_t &coord) {
+core_t::color_t core_t::get_texture_color(const tev_t &tev, const point_t &coord) {
   switch (tev.texture_colors) {
   default:
   case 0:

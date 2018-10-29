@@ -1,23 +1,23 @@
-#ifndef __psxact_fifo__
-#define __psxact_fifo__
+// Copyright 2018 psxact
+
+#ifndef FIFO_HPP_
+#define FIFO_HPP_
 
 
 namespace psx {
 
 template<typename T, int bits>
 class fifo_t {
-
   static const int32_t mask     = (1 << (bits + 1)) - 1;
   static const int32_t mask_lsb = (1 << bits) - 1;
   static const int32_t mask_msb = (1 << bits);
-  static const int32_t size     = (1 << bits);
+  static const int32_t kSize    = (1 << bits);
 
-  T buffer[size];
+  T buffer[kSize];
   uint32_t rd_ptr;
   uint32_t wr_ptr;
 
-public:
-
+ public:
   void clear() {
     rd_ptr = 0;
     wr_ptr = 0;
@@ -50,9 +50,8 @@ public:
   bool has_room() const {
     return !is_full();
   }
-
 };
 
-}
+}  // namespace psx
 
-#endif // __psxact_fifo__
+#endif  // FIFO_HPP_

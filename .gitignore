@@ -1,6 +1,12 @@
+# Paths
+
 bin/
 build/
 cmake-build-*/
 .idea/
 .vs/
 .vscode/
+
+# Files
+
+*.log

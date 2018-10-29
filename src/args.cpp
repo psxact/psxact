@@ -1,18 +1,20 @@
+// Copyright 2018 psxact
+
 #include "args.hpp"
 
-#include <cstdio>
-#include <cstdlib>
 #include <getopt.h>
 #include <unistd.h>
+#include <cstdio>
+#include <cstdlib>
 
 
-using namespace psx;
+namespace psx {
 
 static const option options[] = {
-  { "bios", required_argument, 0, 'b' },
-  { "game", required_argument, 0, 'g' },
-  { "log" , required_argument, 0, 'l' },
-  { 0 }
+  { name: "bios", has_arg: required_argument, flag: 0, val: 'b' },
+  { name: "game", has_arg: required_argument, flag: 0, val: 'g' },
+  { name: "log" , has_arg: required_argument, flag: 0, val: 'l' },
+  { 0, 0, 0, 0 }
 };
 
 
@@ -52,3 +54,5 @@ args_t::args_t(int argc, char **argv) {
     }
   }
 }
+
+}  // namespace psx

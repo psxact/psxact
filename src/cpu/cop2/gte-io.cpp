@@ -1,10 +1,12 @@
+// Copyright 2018 psxact
+
 #include "cpu/cop2/gte.hpp"
 
 #include "limits.hpp"
 #include "utility.hpp"
 
 
-using namespace psx::cpu::cop2;
+using psx::cpu::cop2::gte_t;
 
 uint32_t gte_t::read_matrix_vector_group(uint32_t n) {
   auto &matrix = ccr.matrix[n >> 3];
@@ -221,8 +223,7 @@ uint32_t gte_t::read_gpr(uint32_t n) {
       return uint32_t(
           (ulimit<5>::clamp(gpr.vector[3][0] >> 7) << 0) |
           (ulimit<5>::clamp(gpr.vector[3][1] >> 7) << 5) |
-          (ulimit<5>::clamp(gpr.vector[3][2] >> 7) << 10)
-      );
+          (ulimit<5>::clamp(gpr.vector[3][2] >> 7) << 10));
 
     case 0x1e:
       return uint32_t(gpr.lzcs);

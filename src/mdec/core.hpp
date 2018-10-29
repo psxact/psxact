@@ -1,5 +1,7 @@
-#ifndef __psxact_mdec__
-#define __psxact_mdec__
+// Copyright 2018 psxact
+
+#ifndef MDEC_CORE_HPP_
+#define MDEC_CORE_HPP_
 
 
 #include "console.hpp"
@@ -10,14 +12,11 @@ namespace psx {
 namespace mdec {
 
 class core_t : public memory_component_t {
-
-public:
-
+ public:
   core_t();
-
 };
 
-}
-}
+}  // namespace mdec
+}  // namespace psx
 
-#endif // __psxact_mdec__
+#endif  // MDEC_CORE_HPP_

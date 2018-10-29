@@ -1,5 +1,7 @@
-#ifndef __psxact_limits__
-#define __psxact_limits__
+// Copyright 2018 psxact
+
+#ifndef LIMITS_HPP_
+#define LIMITS_HPP_
 
 
 #include <cstdint>
@@ -32,9 +34,7 @@ struct int_type : choice<int32_t, int64_t, (bits < 31)> {};
 template<int bits, typename T = typename int_type<bits>::type>
 class slimit {
   static const T val = (1LL << (bits - 1));
-
-public:
-
+ public:
   static const T min = 0LL - val;
   static const T max = val - 1LL;
 
@@ -47,7 +47,8 @@ public:
 
 
 template<int bits, typename T = typename int_type<bits>::type>
-struct ulimit {
+class ulimit {
+ public:
   static const T min = 0LL;
   static const T max = (1LL << bits) - 1LL;
 
@@ -66,6 +67,6 @@ namespace limits {
   }
 }
 
-}
+}  // namespace psx
 
-#endif // __psxact_limits__
+#endif  // LIMITS_HPP_

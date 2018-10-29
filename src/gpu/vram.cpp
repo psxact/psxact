@@ -1,10 +1,12 @@
+// Copyright 2018 psxact
+
 #include "gpu/core.hpp"
 
 
-using namespace psx::gpu;
+using psx::gpu::core_t;
 
 uint16_t *core_t::vram_data(int x, int y) {
-  return (uint16_t *)vram.get_pointer(vram_address(x, y));
+  return reinterpret_cast<uint16_t *>(vram.get_pointer(vram_address(x, y)));
 }
 
 

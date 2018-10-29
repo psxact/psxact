@@ -1,5 +1,7 @@
-#ifndef __psxact_gpu__
-#define __psxact_gpu__
+// Copyright 2018 psxact
+
+#ifndef GPU_CORE_HPP_
+#define GPU_CORE_HPP_
 
 
 #include "console.hpp"
@@ -17,9 +19,7 @@ namespace gpu {
 
 
 class core_t : public memory_component_t {
-
-public:
-
+ public:
   memory_t< mib(1) > vram;
 
   uint32_t data_latch = 0;
@@ -44,53 +44,39 @@ public:
   bool textured_rectangle_y_flip;
 
   struct {
-
     uint32_t buffer[16];
     int32_t wr;
     int32_t rd;
-
   } fifo;
 
   struct {
-
     struct {
-
       int32_t x;
       int32_t y;
       int32_t w;
       int32_t h;
-
     } reg;
 
     struct {
-
       bool active;
       int32_t x;
       int32_t y;
-
     } run;
-
   } cpu_to_gpu_transfer;
 
   struct {
-
     struct {
-
       int32_t x;
       int32_t y;
       int32_t w;
       int32_t h;
-
     } reg;
 
     struct {
-
       bool active;
       int32_t x;
       int32_t y;
-
     } run;
-
   } gpu_to_cpu_transfer;
 
   core_t();
@@ -120,22 +106,17 @@ public:
   void vram_transfer_write(uint16_t data);
 
   struct color_t {
-
     uint8_t r;
     uint8_t g;
     uint8_t b;
-
   };
 
   struct point_t {
-
     int32_t x;
     int32_t y;
-
   };
 
   struct tev_t {
-
     // from 'palette'
     int32_t palette_page_x;
     int32_t palette_page_y;
@@ -145,7 +126,6 @@ public:
     int32_t texture_page_x;
     int32_t texture_page_y;
     int32_t color_mix_mode;
-
   };
 
   void copy_vram_to_vram();
@@ -168,19 +148,19 @@ public:
 
   color_t uint16_to_color(uint16_t value);
 
-  uint16_t color_to_uint16(color_t &color);
+  uint16_t color_to_uint16(const color_t &color);
 
-  color_t get_texture_color__4bpp(tev_t &tev, point_t &coord);
+  color_t get_texture_color__4bpp(const tev_t &tev, const point_t &coord);
 
-  color_t get_texture_color__8bpp(tev_t &tev, point_t &coord);
+  color_t get_texture_color__8bpp(const tev_t &tev, const point_t &coord);
 
-  color_t get_texture_color_15bpp(tev_t &tev, point_t &coord);
+  color_t get_texture_color_15bpp(const tev_t &tev, const point_t &coord);
 
-  color_t get_texture_color(tev_t &tev, point_t &coord);
+  color_t get_texture_color(const tev_t &tev, const point_t &coord);
 
   // rectangle drawing
 
-  bool get_color(uint32_t command, color_t &color, tev_t &tev, point_t &coord);
+  bool get_color(uint32_t command, color_t &color, const tev_t &tev, const point_t &coord);
 
   // triangle drawing
 
@@ -192,13 +172,13 @@ public:
     core_t::tev_t tev;
   };
 
-  void draw_triangle(core_t &core, uint32_t command, triangle_t &triangle);
+  void draw_triangle(core_t &core, uint32_t command, const triangle_t &triangle);
 
-  bool get_color(uint32_t command, triangle_t &triangle, int32_t w0, int32_t w1, int32_t w2, color_t &color);
-
+  bool get_color(uint32_t command, const triangle_t &triangle,
+    int32_t w0, int32_t w1, int32_t w2, color_t &color);
 };
 
-}
-}
+}  // namespace gpu
+}  // namespace psx
 
-#endif // __psxact_gpu__
+#endif  // GPU_CORE_HPP_

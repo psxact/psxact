@@ -1,9 +1,11 @@
+// Copyright 2018 psxact
+
 #include "cpu/core.hpp"
 
 #include "utility.hpp"
 
 
-using namespace psx::cpu;
+using psx::cpu::core_t;
 
 uint32_t core_t::decode_iconst() {
   return utility::sclip<16>(code);

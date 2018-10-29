@@ -1,3 +1,5 @@
+// Copyright 2018 psxact
+
 /**
  * Unimplemented
  *
@@ -15,12 +17,11 @@
 #include "utility.hpp"
 
 
-using namespace psx::timer;
+using psx::timer::core_t;
 
 core_t::core_t(interrupt_access_t *irq)
   : memory_component_t("counter")
   , irq(irq) {
-
   unit_init(0, 11, 7 * 4);
   unit_init(1, 11, 7 * 3413);
   unit_init(2,  1, 8);
@@ -141,19 +142,15 @@ void core_t::unit_set_control(int n, uint16_t data) {
   timer.irq.toggle = (data >> 7) & 1;
   timer.prescaler.enable = n == 2
     ? (data >> 9) & 1
-    : (data >> 8) & 1
-    ;
+    : (data >> 8) & 1;
 
   if (timer.sync_enable == 0) {
     timer.running = 1;
-  }
-  else if (n == 0) {
+  } else if (n == 0) {
     timer.running = is_running(timer.sync_mode, in_hblank);
-  }
-  else if (n == 1) {
+  } else if (n == 1) {
     timer.running = is_running(timer.sync_mode, in_vblank);
-  }
-  else if (n == 2) {
+  } else if (n == 2) {
     timer.running = is_running(timer.sync_mode);
   }
 }
@@ -176,8 +173,7 @@ void core_t::unit_irq(int n) {
     interrupt.enable = interrupt.repeat;
     interrupt.bit = interrupt.toggle
       ? 1 - interrupt.bit
-      : 0
-      ;
+      : 0;
 
     if (interrupt.bit == 0) {
       switch (n) {
@@ -224,8 +220,7 @@ void core_t::unit_prescale(int n) {
 
   if (prescaler.enable == 0) {
     unit_tick(n);
-  }
-  else {
+  } else {
     prescaler.cycles -= prescaler.single;
 
     while (prescaler.cycles <= 0) {

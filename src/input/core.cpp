@@ -1,14 +1,16 @@
+// Copyright 2018 psxact
+
 #include "input/core.hpp"
 
 #include "utility.hpp"
 
 
-using namespace psx::input;
+using psx::input::core_t;
+using psx::input::input_port_t;
 
 core_t::core_t(interrupt_access_t *irq)
   : memory_component_t("input")
   , irq(irq) {
-
   baud_factor = 1;
   baud_reload = 0x0088;
 
@@ -22,8 +24,7 @@ uint32_t core_t::io_read_byte(uint32_t address) {
       if (rx_occurred) {
         rx_occurred = 0;
         return rx_data;
-      }
-      else {
+      } else {
         return 0xff;
       }
       break;
@@ -52,22 +53,20 @@ uint32_t core_t::io_read_word(uint32_t address) {
       if (rx_occurred) {
         rx_occurred = 0;
         return 0xffffff00 | rx_data;
-      }
-      else {
+      } else {
         return 0xffffffff;
       }
       break;
 
     case 0x1f801044:
       return (
-        (1           << 0) | // tx_ready_1
+        (1           << 0) |  // tx_ready_1
         (rx_occurred << 1) |
-        (1           << 2) | // tx_ready_2
-        (0           << 3) | // rx_parity_error
+        (1           << 2) |  // tx_ready_2
+        (0           << 3) |  // rx_parity_error
         (dsr         << 7) |
         (interrupt   << 9) |
-        (baud_timer  << 11)
-      );
+        (baud_timer  << 11));
   }
 
   return memory_component_t::io_read_word(address);
@@ -110,8 +109,7 @@ void core_t::io_write_half(uint32_t address, uint32_t data) {
 
       if (data & (1 << 4)) {
         interrupt = 0;
-      }
-      else {
+      } else {
         tx_enable = ((data >> 0) & 1) != 0;
         rx_enable = ((data >> 2) & 1) != 0;
 
@@ -120,8 +118,7 @@ void core_t::io_write_half(uint32_t address, uint32_t data) {
         if (data & (1 << 1)) {
           port.sequence = 0;
           port.status = input_port_status_t::selected;
-        }
-        else {
+        } else {
           port.status = input_port_status_t::none;
         }
       }
@@ -175,7 +172,7 @@ void core_t::tick() {
         rx_occurred = 1;
 
         dsr = send(tx_data, &rx_data);
-        dsr_cycles = 100; // delay 100 cycles before issuing an interrupt, per the documentation.
+        dsr_cycles = 100;  // delay 100 cycles before issuing an interrupt, per the documentation.
 
         log_input("transfer(0x%02x) = 0x%02x", tx_data, rx_data);
       }
@@ -206,8 +203,7 @@ bool core_t::send(uint8_t request, uint8_t *response) {
   if (port->sequence == 0) {
     if (tx_data & 0x80) {
       port->access = input_port_access_t::memory_card;
-    }
-    else {
+    } else {
       port->access = input_port_access_t::controller;
     }
   }
@@ -235,7 +231,7 @@ bool core_t::send_memory_card(struct input_port_t *port, uint8_t request, uint8_
 }
 
 
-bool core_t::send_null(struct input_port_t *port, uint8_t request, uint8_t *response) {
+bool core_t::send_null(struct input_port_t *, uint8_t, uint8_t *response) {
   *response = 0xff;
   return false;
 }

@@ -1,10 +1,12 @@
+// Copyright 2018 psxact
+
 #include "gpu/core.hpp"
 
 #include <algorithm>
 #include "utility.hpp"
 
 
-using namespace psx::gpu;
+using psx::gpu::core_t;
 
 static const int32_t point_factor_lut[4] = {
   1, 2, 2, 3
@@ -44,7 +46,7 @@ static int32_t get_coord_factor(uint32_t command) {
 }
 
 
-static core_t::color_t decode_color(core_t &core, int32_t n) {
+static core_t::color_t decode_color(const core_t &core, int32_t n) {
   uint32_t value = core.fifo.buffer[n];
 
   core_t::color_t result;
@@ -57,7 +59,7 @@ static core_t::color_t decode_color(core_t &core, int32_t n) {
 }
 
 
-static core_t::point_t decode_point(core_t &core, int32_t n) {
+static core_t::point_t decode_point(const core_t &core, int32_t n) {
   uint32_t value = core.fifo.buffer[n];
 
   core_t::point_t result;
@@ -69,7 +71,7 @@ static core_t::point_t decode_point(core_t &core, int32_t n) {
 }
 
 
-static core_t::point_t decode_coord(core_t &core, int32_t n) {
+static core_t::point_t decode_coord(const core_t &core, int32_t n) {
   uint32_t value = core.fifo.buffer[n];
 
   core_t::point_t result;
@@ -81,7 +83,7 @@ static core_t::point_t decode_coord(core_t &core, int32_t n) {
 }
 
 
-static void get_colors(core_t &core, uint32_t command, core_t::color_t *colors, int32_t n) {
+static void get_colors(const core_t &core, uint32_t command, core_t::color_t *colors, int32_t n) {
   int32_t factor = get_color_factor(command);
 
   for (int32_t i = 0; i < n; i++) {
@@ -90,7 +92,7 @@ static void get_colors(core_t &core, uint32_t command, core_t::color_t *colors, 
 }
 
 
-static void get_points(core_t &core, uint32_t command, core_t::point_t *points, int32_t n) {
+static void get_points(const core_t &core, uint32_t command, core_t::point_t *points, int32_t n) {
   int32_t factor = get_point_factor(command);
 
   for (int32_t i = 0; i < n; i++) {
@@ -99,7 +101,7 @@ static void get_points(core_t &core, uint32_t command, core_t::point_t *points, 
 }
 
 
-static void get_coords(core_t &core, uint32_t command, core_t::point_t *coords, int32_t n) {
+static void get_coords(const core_t &core, uint32_t command, core_t::point_t *coords, int32_t n) {
   int32_t factor = get_coord_factor(command);
 
   for (int32_t i = 0; i < n; i++) {
@@ -108,7 +110,7 @@ static void get_coords(core_t &core, uint32_t command, core_t::point_t *coords, 
 }
 
 
-static core_t::tev_t get_tev(core_t &core, uint32_t command) {
+static core_t::tev_t get_tev(const core_t &core, uint32_t command) {
   int32_t factor = get_coord_factor(command);
 
   uint32_t palette = core.fifo.buffer[0 * factor + 2] >> 16;
@@ -126,8 +128,7 @@ static core_t::tev_t get_tev(core_t &core, uint32_t command) {
 
   if (command & (1 << 26)) {
     result.color_mix_mode = (texpage >> 5) & 3;
-  }
-  else {
+  } else {
     result.color_mix_mode = (core.status >> 5) & 3;
   }
 
@@ -171,7 +172,9 @@ static core_t::point_t point_lerp(const core_t::point_t *t, int32_t w0, int32_t 
 }
 
 
-bool core_t::get_color(uint32_t command, triangle_t &triangle, int32_t w0, int32_t w1, int32_t w2, core_t::color_t &color) {
+bool core_t::get_color(
+  uint32_t command, const triangle_t &triangle,
+  int32_t w0, int32_t w1, int32_t w2, core_t::color_t &color) {
   bool shaded = (command & (1 << 26)) == 0;
   bool blended = (command & (1 << 24)) != 0;
 
@@ -184,8 +187,7 @@ bool core_t::get_color(uint32_t command, triangle_t &triangle, int32_t w0, int32
 
   if (blended) {
     color = get_texture_color(triangle.tev, coord);
-  }
-  else {
+  } else {
     color_t color1 = get_texture_color(triangle.tev, coord);
     color_t color2 = color_lerp(triangle.colors, w0, w1, w2);
 
@@ -198,7 +200,7 @@ bool core_t::get_color(uint32_t command, triangle_t &triangle, int32_t w0, int32
 }
 
 
-void core_t::draw_triangle(core_t &state, uint32_t command, triangle_t &triangle) {
+void core_t::draw_triangle(core_t &state, uint32_t command, const triangle_t &triangle) {
   const point_t *v = triangle.points;
 
   point_t min;
@@ -293,15 +295,16 @@ void core_t::draw_triangle(core_t &state, uint32_t command, triangle_t &triangle
 }
 
 
-static void put_in_clockwise_order(core_t::point_t *points, core_t::color_t *colors, core_t::point_t *coords, core_t::triangle_t *triangle) {
+static void put_in_clockwise_order(
+  core_t::point_t *points, core_t::color_t *colors,
+  core_t::point_t *coords, core_t::triangle_t *triangle) {
   int32_t indices[3];
 
   if (is_clockwise(points)) {
     indices[0] = 0;
     indices[1] = 1;
     indices[2] = 2;
-  }
-  else {
+  } else {
     indices[0] = 0;
     indices[1] = 2;
     indices[2] = 1;
