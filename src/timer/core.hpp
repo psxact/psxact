@@ -35,8 +35,10 @@ struct timer_t {
     bool bit;
   } irq;
 
-  int sync_enable;
-  int sync_mode;
+  struct {
+    int enable;
+    int mode;
+  } sync;
 
   struct {
     bool enable;

@@ -174,33 +174,33 @@ static core_t::point_t point_lerp(const core_t::point_t *t, int32_t w0, int32_t 
 
 bool core_t::get_color(
   uint32_t command, const triangle_t &triangle,
-  int32_t w0, int32_t w1, int32_t w2, core_t::color_t &color) {
+  int32_t w0, int32_t w1, int32_t w2, core_t::color_t *color) {
   bool shaded = (command & (1 << 26)) == 0;
   bool blended = (command & (1 << 24)) != 0;
 
   if (shaded) {
-    color = color_lerp(triangle.colors, w0, w1, w2);
+    *color = color_lerp(triangle.colors, w0, w1, w2);
     return true;
   }
 
   point_t coord = point_lerp(triangle.coords, w0, w1, w2);
 
   if (blended) {
-    color = get_texture_color(triangle.tev, coord);
+    *color = get_texture_color(triangle.tev, coord);
   } else {
     color_t color1 = get_texture_color(triangle.tev, coord);
     color_t color2 = color_lerp(triangle.colors, w0, w1, w2);
 
-    color.r = std::min(255, (color1.r * color2.r) / 128);
-    color.g = std::min(255, (color1.g * color2.g) / 128);
-    color.b = std::min(255, (color1.b * color2.b) / 128);
+    color->r = std::min(255, (color1.r * color2.r) / 128);
+    color->g = std::min(255, (color1.g * color2.g) / 128);
+    color->b = std::min(255, (color1.b * color2.b) / 128);
   }
 
-  return (color.r | color.g | color.b) > 0;
+  return (color->r | color->g | color->b) > 0;
 }
 
 
-void core_t::draw_triangle(core_t &state, uint32_t command, const triangle_t &triangle) {
+void core_t::draw_triangle(uint32_t command, const triangle_t &triangle) {
   const point_t *v = triangle.points;
 
   point_t min;
@@ -211,10 +211,10 @@ void core_t::draw_triangle(core_t &state, uint32_t command, const triangle_t &tr
   max.x = std::max(v[0].x, std::max(v[1].x, v[2].x));
   max.y = std::max(v[0].y, std::max(v[1].y, v[2].y));
 
-  min.x = std::max(min.x, state.drawing_area_x1);
-  min.y = std::max(min.y, state.drawing_area_y1);
-  max.x = std::min(max.x, state.drawing_area_x2);
-  max.y = std::min(max.y, state.drawing_area_y2);
+  min.x = std::max(min.x, drawing_area_x1);
+  min.y = std::max(min.y, drawing_area_y1);
+  max.x = std::min(max.x, drawing_area_x2);
+  max.y = std::min(max.y, drawing_area_y2);
 
   int32_t dx[3];
   dx[0] = v[2].y - v[1].y;
@@ -252,7 +252,7 @@ void core_t::draw_triangle(core_t &state, uint32_t command, const triangle_t &tr
       if (w0 > c[0] && w1 > c[1] && w2 > c[2]) {
         color_t color;
 
-        if (get_color(command, triangle, w0, w1, w2, color)) {
+        if (get_color(command, triangle, w0, w1, w2, &color)) {
           if (command & (1 << 25)) {
             color_t bg = uint16_to_color(vram_read(point.x, point.y));
 
@@ -283,7 +283,7 @@ void core_t::draw_triangle(core_t &state, uint32_t command, const triangle_t &tr
             }
           }
 
-          state.draw_point(point, color);
+          draw_point(point, color);
         }
       }
 
@@ -347,6 +347,6 @@ void core_t::draw_polygon() {
       &colors[i],
       &coords[i], &triangle);
 
-    draw_triangle(*this, command, triangle);
+    draw_triangle(command, triangle);
   }
 }

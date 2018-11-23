@@ -12,10 +12,10 @@
 namespace psx {
 namespace gpu {
 
-#define GPU_GP0  0x1f801810
-#define GPU_GP1  0x1f801814
-#define GPU_READ 0x1f801810
-#define GPU_STAT 0x1f801814
+constexpr int GPU_GP0 = 0x1f801810;
+constexpr int GPU_GP1 = 0x1f801814;
+constexpr int GPU_READ = 0x1f801810;
+constexpr int GPU_STAT = 0x1f801814;
 
 
 class core_t : public memory_component_t {
@@ -160,7 +160,7 @@ class core_t : public memory_component_t {
 
   // rectangle drawing
 
-  bool get_color(uint32_t command, color_t &color, const tev_t &tev, const point_t &coord);
+  bool get_color(uint32_t command, color_t *color, const tev_t &tev, const point_t &coord);
 
   // triangle drawing
 
@@ -172,10 +172,10 @@ class core_t : public memory_component_t {
     core_t::tev_t tev;
   };
 
-  void draw_triangle(core_t &core, uint32_t command, const triangle_t &triangle);
+  void draw_triangle(uint32_t command, const triangle_t &triangle);
 
   bool get_color(uint32_t command, const triangle_t &triangle,
-    int32_t w0, int32_t w1, int32_t w2, color_t &color);
+    int32_t w0, int32_t w1, int32_t w2, color_t *color);
 };
 
 }  // namespace gpu

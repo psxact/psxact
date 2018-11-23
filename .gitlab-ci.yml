@@ -13,4 +13,3 @@ build_linux:
     expire_in: 1 week
   tags:
     - docker
-

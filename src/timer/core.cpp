@@ -81,8 +81,8 @@ uint16_t core_t::unit_get_control(int n) {
   auto &timer = timers[n];
 
   auto control =
-    (timer.sync_enable << 0) |
-    (timer.sync_mode << 1) |
+    (timer.sync.enable << 0) |
+    (timer.sync.mode << 1) |
     (timer.compare.reset_counter << 3) |
     (timer.compare.irq_enable << 4) |
     (timer.maximum.irq_enable << 5) |
@@ -133,8 +133,8 @@ void core_t::unit_set_control(int n, uint16_t data) {
   timer.irq.enable = 1;
   timer.irq.bit = 1;
 
-  timer.sync_enable = (data >> 0) & 1;
-  timer.sync_mode = (data >> 1) & 3;
+  timer.sync.enable = (data >> 0) & 1;
+  timer.sync.mode = (data >> 1) & 3;
   timer.compare.reset_counter = (data >> 3) & 1;
   timer.compare.irq_enable = (data >> 4) & 1;
   timer.maximum.irq_enable = (data >> 5) & 1;
@@ -144,14 +144,14 @@ void core_t::unit_set_control(int n, uint16_t data) {
     ? (data >> 9) & 1
     : (data >> 8) & 1;
 
-  if (timer.sync_enable == 0) {
+  if (timer.sync.enable == 0) {
     timer.running = 1;
   } else if (n == 0) {
-    timer.running = is_running(timer.sync_mode, in_hblank);
+    timer.running = is_running(timer.sync.mode, in_hblank);
   } else if (n == 1) {
-    timer.running = is_running(timer.sync_mode, in_vblank);
+    timer.running = is_running(timer.sync.mode, in_vblank);
   } else if (n == 2) {
-    timer.running = is_running(timer.sync_mode);
+    timer.running = is_running(timer.sync.mode);
   }
 }
 
@@ -243,7 +243,7 @@ void core_t::hblank(bool active) {
 
   auto &timer = timers[0];
 
-  timer.running = is_running(timer.sync_mode, in_hblank);
+  timer.running = is_running(timer.sync.mode, in_hblank);
 }
 
 
@@ -252,5 +252,5 @@ void core_t::vblank(bool active) {
 
   auto &timer = timers[1];
 
-  timer.running = is_running(timer.sync_mode, in_vblank);
+  timer.running = is_running(timer.sync.mode, in_vblank);
 }

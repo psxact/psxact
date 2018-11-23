@@ -12,4 +12,3 @@ archive=psxact_$version-$CI_COMMIT_SHA.tar.bz2
 tar -cvjSf $archive psxact
 
 rm psxact
-

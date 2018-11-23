@@ -13,6 +13,6 @@ struct args_t {
   args_t(int argc, char **argv);
 };
 
-}
+}  // namespace psx
 
 #endif  // ARGS_HPP_

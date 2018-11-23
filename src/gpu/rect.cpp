@@ -58,7 +58,7 @@ static int32_t get_y_length(uint32_t *fifo) {
 }
 
 
-bool core_t::get_color(uint32_t command, color_t &color, const tev_t &tev, const point_t &coord) {
+bool core_t::get_color(uint32_t command, color_t *color, const tev_t &tev, const point_t &coord) {
   bool blended = (command & (1 << 24)) != 0;
   bool textured = (command & (1 << 26)) != 0;
 
@@ -69,16 +69,16 @@ bool core_t::get_color(uint32_t command, color_t &color, const tev_t &tev, const
   color_t pixel = get_texture_color(tev, coord);
 
   if (blended) {
-    color.r = std::min(255, (pixel.r * color.r) / 2);
-    color.g = std::min(255, (pixel.g * color.g) / 2);
-    color.b = std::min(255, (pixel.b * color.b) / 2);
+    color->r = std::min(255, (pixel.r * color->r) / 2);
+    color->g = std::min(255, (pixel.g * color->g) / 2);
+    color->b = std::min(255, (pixel.b * color->b) / 2);
   } else {
-    color.r = pixel.r;
-    color.g = pixel.g;
-    color.b = pixel.b;
+    color->r = pixel.r;
+    color->g = pixel.g;
+    color->b = pixel.b;
   }
 
-  return (color.r | color.g | color.b) > 0;
+  return (color->r | color->g | color->b) > 0;
 }
 
 
@@ -111,7 +111,7 @@ void core_t::draw_rectangle() {
       coord.x = tex_coord.x + x;
       coord.y = tex_coord.y + y;
 
-      if (get_color(fifo.buffer[0], color, tev, coord)) {
+      if (get_color(fifo.buffer[0], &color, tev, coord)) {
         point_t point;
         point.x = xofs + x;
         point.y = yofs + y;
