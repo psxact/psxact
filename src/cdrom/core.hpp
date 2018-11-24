@@ -3,7 +3,6 @@
 #ifndef CDROM_CORE_HPP_
 #define CDROM_CORE_HPP_
 
-
 #include <stdint.h>
 #include <stdio.h>
 #include <string>
@@ -11,7 +10,6 @@
 #include "fifo.hpp"
 #include "interrupt-access.hpp"
 #include "memory-component.hpp"
-
 
 namespace psx {
 namespace cdrom {
@@ -21,7 +19,6 @@ struct sector_timecode_t {
   uint8_t second;
   uint8_t sector;
 };
-
 
 class core_t : public memory_component_t {
   interrupt_access_t *irq;

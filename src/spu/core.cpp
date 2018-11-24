@@ -5,14 +5,12 @@
 #include <assert.h>
 #include "utility.hpp"
 
-
 using psx::spu::core_t;
 
 core_t::core_t()
   : memory_component_t("spu")
   , sound_ram("sound-ram") {
 }
-
 
 uint32_t core_t::io_read_half(uint32_t address) {
   if (address >= 0x1f801c00 && address <= 0x1f801d7f) {
@@ -92,7 +90,6 @@ uint32_t core_t::io_read_half(uint32_t address) {
 
   return memory_component_t::io_read_half(address);
 }
-
 
 void core_t::io_write_half(uint32_t address, uint32_t data) {
   if (address >= 0x1f801c00 && address <= 0x1f801d7f) {
@@ -221,7 +218,6 @@ void core_t::io_write_half(uint32_t address, uint32_t data) {
 
   return memory_component_t::io_write_half(address, data);
 }
-
 
 void core_t::io_write_word(uint32_t address, uint32_t data) {
   switch (address) {

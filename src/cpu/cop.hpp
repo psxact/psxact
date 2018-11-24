@@ -3,9 +3,7 @@
 #ifndef CPU_COP_HPP_
 #define CPU_COP_HPP_
 
-
 #include <cstdint>
-
 
 namespace psx {
 namespace cpu {

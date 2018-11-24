@@ -3,11 +3,9 @@
 #ifndef CPU_COP2_GTE_HPP_
 #define CPU_COP2_GTE_HPP_
 
-
 #include <algorithm>
 #include <cstdint>
 #include "cpu/cop.hpp"
-
 
 namespace psx {
 namespace cpu {
@@ -21,14 +19,12 @@ class gte_t : public cop_t {
     nil = 3
   };
 
-
   enum class vector_t {
     tr = 0,
     bk = 1,
     fc = 2,
     zr = 3
   };
-
 
   union color_t {
     struct {

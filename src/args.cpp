@@ -7,7 +7,6 @@
 #include <cstdio>
 #include <cstdlib>
 
-
 namespace psx {
 
 static const option options[] = {
@@ -17,7 +16,6 @@ static const option options[] = {
   { 0, 0, 0, 0 }
 };
 
-
 static void show_usage() {
   printf("Usage:\n");
   printf("$ psxact [-b|--bios <file>]\n");
@@ -25,12 +23,10 @@ static void show_usage() {
   printf("         [-l|--log  <counter|cpu|dma|gpu|input|mdec|spu>]\n");
 }
 
-
 static void fail() {
   show_usage();
   exit(1);
 }
-
 
 args_t::args_t(int argc, char **argv) {
   if (argc == 1) {

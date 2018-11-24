@@ -16,7 +16,6 @@
 
 #include "utility.hpp"
 
-
 using psx::timer::core_t;
 
 core_t::core_t(interrupt_access_t *irq)
@@ -26,7 +25,6 @@ core_t::core_t(interrupt_access_t *irq)
   unit_init(1, 11, 7 * 3413);
   unit_init(2,  1, 8);
 }
-
 
 uint32_t core_t::io_read_half(uint32_t address) {
   auto m = (address >> 2) & 3;
@@ -44,11 +42,9 @@ uint32_t core_t::io_read_half(uint32_t address) {
   }
 }
 
-
 uint32_t core_t::io_read_word(uint32_t address) {
   return io_read_half(address);
 }
-
 
 void core_t::io_write_half(uint32_t address, uint32_t data) {
   auto m = (address >> 2) & 3;
@@ -66,16 +62,13 @@ void core_t::io_write_half(uint32_t address, uint32_t data) {
   }
 }
 
-
 void core_t::io_write_word(uint32_t address, uint32_t data) {
   io_write_half(address, data);
 }
 
-
 uint16_t core_t::unit_get_compare(int n) {
   return timers[n].compare.value;
 }
-
 
 uint16_t core_t::unit_get_control(int n) {
   auto &timer = timers[n];
@@ -99,11 +92,9 @@ uint16_t core_t::unit_get_control(int n) {
   return uint16_t(control);
 }
 
-
 uint16_t core_t::unit_get_counter(int n) {
   return timers[n].counter;
 }
-
 
 static bool is_running(int sync_mode, bool b = 1) {
   switch (sync_mode) {
@@ -116,7 +107,6 @@ static bool is_running(int sync_mode, bool b = 1) {
   return 0;
 }
 
-
 void core_t::unit_init(int n, int single, int period) {
   auto &prescaler = timers[n].prescaler;
 
@@ -124,7 +114,6 @@ void core_t::unit_init(int n, int single, int period) {
   prescaler.period = period;
   prescaler.cycles = period;
 }
-
 
 void core_t::unit_set_control(int n, uint16_t data) {
   auto &timer = timers[n];
@@ -155,16 +144,13 @@ void core_t::unit_set_control(int n, uint16_t data) {
   }
 }
 
-
 void core_t::unit_set_compare(int n, uint16_t data) {
   timers[n].compare.value = data;
 }
 
-
 void core_t::unit_set_counter(int n, uint16_t data) {
   timers[n].counter = data;
 }
-
 
 void core_t::unit_irq(int n) {
   auto &interrupt = timers[n].irq;
@@ -184,7 +170,6 @@ void core_t::unit_irq(int n) {
     }
   }
 }
-
 
 void core_t::unit_tick(int n) {
   auto &timer = timers[n];
@@ -214,7 +199,6 @@ void core_t::unit_tick(int n) {
   }
 }
 
-
 void core_t::unit_prescale(int n) {
   auto &prescaler = timers[n].prescaler;
 
@@ -230,13 +214,11 @@ void core_t::unit_prescale(int n) {
   }
 }
 
-
 void core_t::tick() {
   unit_prescale(0);
   unit_prescale(1);
   unit_prescale(2);
 }
-
 
 void core_t::hblank(bool active) {
   in_hblank = active;
@@ -245,7 +227,6 @@ void core_t::hblank(bool active) {
 
   timer.running = is_running(timer.sync.mode, in_hblank);
 }
-
 
 void core_t::vblank(bool active) {
   in_vblank = active;

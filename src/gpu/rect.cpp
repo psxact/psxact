@@ -4,13 +4,11 @@
 
 #include <algorithm>
 
-
 using psx::gpu::core_t;
 
 // Rect Commands
 //
 // 25    | Semi Transparency (0=Off, 1=On)
-
 
 static int32_t get_x_length(uint32_t *fifo) {
   switch ((fifo[0] >> 27) & 3) {
@@ -34,7 +32,6 @@ static int32_t get_x_length(uint32_t *fifo) {
   }
 }
 
-
 static int32_t get_y_length(uint32_t *fifo) {
   switch ((fifo[0] >> 27) & 3) {
   case 0:
@@ -56,7 +53,6 @@ static int32_t get_y_length(uint32_t *fifo) {
     return 0;
   }
 }
-
 
 bool core_t::get_color(uint32_t command, color_t *color, const tev_t &tev, const point_t &coord) {
   bool blended = (command & (1 << 24)) != 0;
@@ -80,7 +76,6 @@ bool core_t::get_color(uint32_t command, color_t *color, const tev_t &tev, const
 
   return (color->r | color->g | color->b) > 0;
 }
-
 
 void core_t::draw_rectangle() {
   tev_t tev;

@@ -3,11 +3,9 @@
 #ifndef CPU_BIOS_DECODER_HPP_
 #define CPU_BIOS_DECODER_HPP_
 
-
 #include <cstdio>
 #include <string>
 #include "memory-access.hpp"
-
 
 namespace psx {
 namespace cpu {

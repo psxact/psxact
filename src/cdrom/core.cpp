@@ -4,7 +4,6 @@
 
 #include "utility.hpp"
 
-
 using psx::cdrom::core_t;
 
 core_t::core_t(interrupt_access_t *irq, const char *game_file_name)

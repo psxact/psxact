@@ -3,7 +3,6 @@
 #ifndef CPU_CORE_HPP_
 #define CPU_CORE_HPP_
 
-
 #include <cstdio>
 #include "cpu/bios/decoder.hpp"
 #include "cpu/cop.hpp"
@@ -12,7 +11,6 @@
 #include "console.hpp"
 #include "memory-access.hpp"
 #include "memory-component.hpp"
-
 
 namespace psx {
 namespace cpu {

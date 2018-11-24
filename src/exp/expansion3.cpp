@@ -2,7 +2,6 @@
 
 #include "exp/expansion3.hpp"
 
-
 using psx::exp::expansion3_t;
 
 expansion3_t::expansion3_t()

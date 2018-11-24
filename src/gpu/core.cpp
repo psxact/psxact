@@ -6,14 +6,12 @@
 #include "console.hpp"
 #include "utility.hpp"
 
-
 using psx::gpu::core_t;
 
 core_t::core_t()
   : memory_component_t("gpu")
   , vram("vram") {
 }
-
 
 uint32_t core_t::data() {
   if (gpu_to_cpu_transfer.run.active) {
@@ -26,7 +24,6 @@ uint32_t core_t::data() {
   return data_latch;
 }
 
-
 uint32_t core_t::stat() {
   //  19    Vertical Resolution         (0=240, 1=480, when Bit22=1)  ;GP1(08h).2
   //  26    Ready to receive Cmd Word   (0=No, 1=Ready)  ;GP0(...) ;via GP0
@@ -35,7 +32,6 @@ uint32_t core_t::stat() {
 
   return (status & ~0x00080000) | 0x1c002000;
 }
-
 
 uint32_t core_t::io_read_word(uint32_t address) {
   switch (address) {
@@ -49,7 +45,6 @@ uint32_t core_t::io_read_word(uint32_t address) {
   return 0;
 }
 
-
 void core_t::io_write_word(uint32_t address, uint32_t data) {
   switch (address) {
     case GPU_GP0:
@@ -60,9 +55,7 @@ void core_t::io_write_word(uint32_t address, uint32_t data) {
   }
 }
 
-
 // common functionality
-
 
 core_t::color_t core_t::uint16_to_color(uint16_t value) {
   color_t color;
@@ -73,14 +66,12 @@ core_t::color_t core_t::uint16_to_color(uint16_t value) {
   return color;
 }
 
-
 uint16_t core_t::color_to_uint16(const color_t &color) {
   return
     ((color.r >> 3) & 0x001f) |
     ((color.g << 2) & 0x03e0) |
     ((color.b << 7) & 0x7c00);
 }
-
 
 core_t::color_t core_t::get_texture_color__4bpp(const tev_t &tev, const point_t &coord) {
   uint16_t texel = vram_read(
@@ -96,7 +87,6 @@ core_t::color_t core_t::get_texture_color__4bpp(const tev_t &tev, const point_t 
   return uint16_to_color(pixel);
 }
 
-
 core_t::color_t core_t::get_texture_color__8bpp(const tev_t &tev, const point_t &coord) {
   uint16_t texel = vram_read(
     tev.texture_page_x + coord.x / 2,
@@ -111,7 +101,6 @@ core_t::color_t core_t::get_texture_color__8bpp(const tev_t &tev, const point_t 
   return uint16_to_color(pixel);
 }
 
-
 core_t::color_t core_t::get_texture_color_15bpp(const tev_t &tev, const point_t &coord) {
   uint16_t pixel = vram_read(
     tev.texture_page_x + coord.x,
@@ -119,7 +108,6 @@ core_t::color_t core_t::get_texture_color_15bpp(const tev_t &tev, const point_t 
 
   return uint16_to_color(pixel);
 }
-
 
 core_t::color_t core_t::get_texture_color(const tev_t &tev, const point_t &coord) {
   switch (tev.texture_colors) {

@@ -2,28 +2,23 @@
 
 #include "gpu/core.hpp"
 
-
 using psx::gpu::core_t;
 
 uint16_t *core_t::vram_data(int x, int y) {
   return reinterpret_cast<uint16_t *>(vram.get_pointer(vram_address(x, y)));
 }
 
-
 uint32_t core_t::vram_address(int x, int y) {
   return ((y * 1024) + x) * sizeof(uint16_t);
 }
-
 
 uint16_t core_t::vram_read(int x, int y) {
   return vram.io_read_half(vram_address(x, y));
 }
 
-
 void core_t::vram_write(int x, int y, uint16_t data) {
   vram.io_write_half(vram_address(x, y), data);
 }
-
 
 uint16_t core_t::vram_transfer_read() {
   auto &transfer = gpu_to_cpu_transfer;
@@ -49,7 +44,6 @@ uint16_t core_t::vram_transfer_read() {
 
   return data;
 }
-
 
 void core_t::vram_transfer_write(uint16_t data) {
   auto &transfer = cpu_to_gpu_transfer;

@@ -4,7 +4,6 @@
 
 #include <cstdio>
 
-
 using psx::mdec::core_t;
 
 core_t::core_t()

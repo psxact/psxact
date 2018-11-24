@@ -5,14 +5,12 @@
 #include <string>
 #include "utility.hpp"
 
-
 using psx::cpu::bios::decoder_t;
 
 decoder_t::decoder_t(memory_access_t *memory)
   : memory(memory) {
   log = fopen("bios_call.log", "w");
 }
-
 
 static std::string char_to_string(char c) {
   switch (c) {
@@ -35,7 +33,6 @@ static std::string char_to_string(char c) {
     return std::string(1, c);
   }
 }
-
 
 void decoder_t::decode_a(uint32_t pc, uint32_t function, uint32_t *args) {
   fprintf(log, "[%08x] ", pc);
@@ -184,7 +181,6 @@ void decoder_t::decode_a(uint32_t pc, uint32_t function, uint32_t *args) {
   }
 }
 
-
 void decoder_t::decode_b(uint32_t pc, uint32_t function, uint32_t *args) {
   fprintf(log, "[%08x] ", pc);
 
@@ -312,7 +308,6 @@ void decoder_t::decode_b(uint32_t pc, uint32_t function, uint32_t *args) {
   }
 }
 
-
 void decoder_t::decode_c(uint32_t pc, uint32_t function, uint32_t *args) {
   fprintf(log, "[%08x] ", pc);
 
@@ -363,7 +358,6 @@ void decoder_t::decode_c(uint32_t pc, uint32_t function, uint32_t *args) {
   }
 }
 
-
 std::string decoder_t::decode_string(uint32_t arg) {
   std::string result;
   char curr;
@@ -380,7 +374,6 @@ std::string decoder_t::decode_string(uint32_t arg) {
   return result;
 }
 
-
 std::string decoder_t::decode_string(uint32_t arg, uint32_t size) {
   std::string result;
   char curr;
@@ -394,7 +387,6 @@ std::string decoder_t::decode_string(uint32_t arg, uint32_t size) {
 
   return result;
 }
-
 
 std::string decoder_t::decode_timecode(uint32_t arg) {
   uint32_t m = memory->read_byte((arg + 0) & 0x1fffffff);

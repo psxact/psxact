@@ -3,12 +3,10 @@
 #ifndef CONSOLE_HPP_
 #define CONSOLE_HPP_
 
-
 #include <cstdint>
 #include "interrupt-access.hpp"
 #include "memory.hpp"
 #include "memory-access.hpp"
-
 
 namespace psx {
 

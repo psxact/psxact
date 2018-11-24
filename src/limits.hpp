@@ -3,9 +3,7 @@
 #ifndef LIMITS_HPP_
 #define LIMITS_HPP_
 
-
 #include <cstdint>
-
 
 namespace psx {
 
@@ -14,22 +12,17 @@ struct define {
   typedef T type;
 };
 
-
 template<typename T, typename F, bool n>
 struct choice {};
-
 
 template<typename T, typename F>
 struct choice<T, F, 1> : define<T> {};
 
-
 template<typename T, typename F>
 struct choice<T, F, 0> : define<F> {};
 
-
 template<int bits>
 struct int_type : choice<int32_t, int64_t, (bits < 31)> {};
-
 
 template<int bits, typename T = typename int_type<bits>::type>
 class slimit {
@@ -45,7 +38,6 @@ class slimit {
   }
 };
 
-
 template<int bits, typename T = typename int_type<bits>::type>
 class ulimit {
  public:
@@ -58,7 +50,6 @@ class ulimit {
     return value;
   }
 };
-
 
 namespace limits {
   template<uint32_t min, uint32_t max>

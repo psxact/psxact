@@ -4,7 +4,6 @@
 
 #include <string>
 
-
 using psx::cpu::core_t;
 
 #define get_iconst() decode_iconst()
@@ -13,7 +12,6 @@ using psx::cpu::core_t;
 #define get_rs() register_names[decode_rs()]
 #define get_rt() register_names[decode_rt()]
 #define get_sa() decode_sa()
-
 
 static const char *register_names[32] = {
   "r0",
@@ -29,7 +27,6 @@ static const char *register_names[32] = {
   "fp",
   "ra"
 };
-
 
 void core_t::disassemble_special(FILE *file) {
   switch (code & 0x3f) {
@@ -75,7 +72,6 @@ void core_t::disassemble_special(FILE *file) {
   }
 }
 
-
 void core_t::disassemble_reg_imm(FILE *file) {
   uint32_t pc = regs.this_pc;
 
@@ -91,7 +87,6 @@ void core_t::disassemble_reg_imm(FILE *file) {
     break;
   }
 }
-
 
 void core_t::disassemble(FILE *file) {
   uint32_t pc = regs.this_pc;

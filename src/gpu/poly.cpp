@@ -5,23 +5,19 @@
 #include <algorithm>
 #include "utility.hpp"
 
-
 using psx::gpu::core_t;
 
 static const int32_t point_factor_lut[4] = {
   1, 2, 2, 3
 };
 
-
 static const int32_t color_factor_lut[4] = {
   0, 0, 2, 3
 };
 
-
 static const int32_t coord_factor_lut[4] = {
   0, 2, 0, 3
 };
-
 
 static int32_t get_factor(const int32_t (&lut)[4], uint32_t command) {
   int32_t bit1 = (command >> 28) & 1;
@@ -30,21 +26,17 @@ static int32_t get_factor(const int32_t (&lut)[4], uint32_t command) {
   return lut[(bit1 << 1) | bit0];
 }
 
-
 static int32_t get_color_factor(uint32_t command) {
   return get_factor(color_factor_lut, command);
 }
-
 
 static int32_t get_point_factor(uint32_t command) {
   return get_factor(point_factor_lut, command);
 }
 
-
 static int32_t get_coord_factor(uint32_t command) {
   return get_factor(coord_factor_lut, command);
 }
-
 
 static core_t::color_t decode_color(const core_t &core, int32_t n) {
   uint32_t value = core.fifo.buffer[n];
@@ -58,7 +50,6 @@ static core_t::color_t decode_color(const core_t &core, int32_t n) {
   return result;
 }
 
-
 static core_t::point_t decode_point(const core_t &core, int32_t n) {
   uint32_t value = core.fifo.buffer[n];
 
@@ -69,7 +60,6 @@ static core_t::point_t decode_point(const core_t &core, int32_t n) {
 
   return result;
 }
-
 
 static core_t::point_t decode_coord(const core_t &core, int32_t n) {
   uint32_t value = core.fifo.buffer[n];
@@ -82,7 +72,6 @@ static core_t::point_t decode_coord(const core_t &core, int32_t n) {
   return result;
 }
 
-
 static void get_colors(const core_t &core, uint32_t command, core_t::color_t *colors, int32_t n) {
   int32_t factor = get_color_factor(command);
 
@@ -90,7 +79,6 @@ static void get_colors(const core_t &core, uint32_t command, core_t::color_t *co
     colors[i] = decode_color(core, i * factor + 0);
   }
 }
-
 
 static void get_points(const core_t &core, uint32_t command, core_t::point_t *points, int32_t n) {
   int32_t factor = get_point_factor(command);
@@ -100,7 +88,6 @@ static void get_points(const core_t &core, uint32_t command, core_t::point_t *po
   }
 }
 
-
 static void get_coords(const core_t &core, uint32_t command, core_t::point_t *coords, int32_t n) {
   int32_t factor = get_coord_factor(command);
 
@@ -108,7 +95,6 @@ static void get_coords(const core_t &core, uint32_t command, core_t::point_t *co
     coords[i] = decode_coord(core, i * factor + 2);
   }
 }
-
 
 static core_t::tev_t get_tev(const core_t &core, uint32_t command) {
   int32_t factor = get_coord_factor(command);
@@ -135,7 +121,6 @@ static core_t::tev_t get_tev(const core_t &core, uint32_t command) {
   return result;
 }
 
-
 static bool is_clockwise(const core_t::point_t *p) {
   int32_t sum =
       (p[1].x - p[0].x) * (p[1].y + p[0].y) +
@@ -145,13 +130,11 @@ static bool is_clockwise(const core_t::point_t *p) {
   return sum >= 0;
 }
 
-
 static int32_t edge_function(const core_t::point_t &a, const core_t::point_t &b, const core_t::point_t &c) {
   return
     ((a.x - b.x) * (c.y - b.y)) -
     ((a.y - b.y) * (c.x - b.x));
 }
-
 
 static core_t::color_t color_lerp(const core_t::color_t *c, int32_t w0, int32_t w1, int32_t w2) {
   core_t::color_t color;
@@ -162,7 +145,6 @@ static core_t::color_t color_lerp(const core_t::color_t *c, int32_t w0, int32_t 
   return color;
 }
 
-
 static core_t::point_t point_lerp(const core_t::point_t *t, int32_t w0, int32_t w1, int32_t w2) {
   core_t::point_t point;
   point.x = ((w0 * t[0].x) + (w1 * t[1].x) + (w2 * t[2].x)) / (w0 + w1 + w2);
@@ -170,7 +152,6 @@ static core_t::point_t point_lerp(const core_t::point_t *t, int32_t w0, int32_t 
 
   return point;
 }
-
 
 bool core_t::get_color(
   uint32_t command, const triangle_t &triangle,
@@ -198,7 +179,6 @@ bool core_t::get_color(
 
   return (color->r | color->g | color->b) > 0;
 }
-
 
 void core_t::draw_triangle(uint32_t command, const triangle_t &triangle) {
   const point_t *v = triangle.points;
@@ -294,7 +274,6 @@ void core_t::draw_triangle(uint32_t command, const triangle_t &triangle) {
   }
 }
 
-
 static void put_in_clockwise_order(
   core_t::point_t *points, core_t::color_t *colors,
   core_t::point_t *coords, core_t::triangle_t *triangle) {
@@ -322,7 +301,6 @@ static void put_in_clockwise_order(
   triangle->points[1] = points[indices[1]];
   triangle->points[2] = points[indices[2]];
 }
-
 
 void core_t::draw_polygon() {
   color_t colors[4];

@@ -3,9 +3,7 @@
 #ifndef EXP_EXPANSION2_HPP_
 #define EXP_EXPANSION2_HPP_
 
-
 #include "memory-component.hpp"
-
 
 namespace psx {
 namespace exp {

@@ -3,12 +3,10 @@
 #ifndef INPUT_CORE_HPP_
 #define INPUT_CORE_HPP_
 
-
 #include "console.hpp"
 #include "fifo.hpp"
 #include "interrupt-access.hpp"
 #include "memory-component.hpp"
-
 
 namespace psx {
 namespace input {
@@ -18,12 +16,10 @@ enum class input_port_status_t {
   selected
 };
 
-
 enum class input_port_access_t {
   controller = 0,
   memory_card = 1
 };
-
 
 struct input_port_t {
   input_port_access_t access;
@@ -31,7 +27,6 @@ struct input_port_t {
   int sequence;
   uint16_t data;
 };
-
 
 class core_t : public memory_component_t {
   interrupt_access_t *irq;

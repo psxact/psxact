@@ -3,10 +3,8 @@
 #ifndef UTILITY_HPP_
 #define UTILITY_HPP_
 
-
 #include <cstdint>
 #include <cstdio>
-
 
 #if defined (__clang__) || defined (__GNUC__)
   #define likely(n) __builtin_expect(!!(n), 1)
@@ -15,7 +13,6 @@
   #define likely(n)
   #define unlikely(n)
 #endif
-
 
 #if defined (DEBUG)
   #define logger(n, s, ...) printf("[" n "] " s "\n", ## __VA_ARGS__)
@@ -31,7 +28,6 @@
 #define log_input(s, ...) logger("input", s, __VA_ARGS__)
 #define log_timer(s, ...) logger("timer", s, __VA_ARGS__)
 
-
 namespace psx {
 namespace utility {
 
@@ -43,7 +39,6 @@ inline uint32_t sclip(uint32_t value) {
   return ((value & mask) ^ sign) - sign;
 }
 
-
 template<int bits>
 inline uint32_t uclip(uint32_t value) {
   const int mask = (1 << bits) - 1;
@@ -51,16 +46,13 @@ inline uint32_t uclip(uint32_t value) {
   return value & mask;
 }
 
-
 inline uint8_t dec_to_bcd(uint8_t value) {
   return uint8_t(((value / 10) * 16) + (value % 10));
 }
 
-
 inline uint8_t bcd_to_dec(uint8_t value) {
   return uint8_t(((value / 16) * 10) + (value % 16));
 }
-
 
 template<int bits>
 inline int clz(uint32_t value) {

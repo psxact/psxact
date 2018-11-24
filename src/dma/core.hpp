@@ -3,11 +3,9 @@
 #ifndef DMA_CORE_HPP_
 #define DMA_CORE_HPP_
 
-
 #include "interrupt-access.hpp"
 #include "memory-access.hpp"
 #include "memory-component.hpp"
-
 
 namespace psx {
 namespace dma {

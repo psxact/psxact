@@ -4,12 +4,16 @@ set -e
 
 # Get packages from apt
 
-apt-get update > /dev/null
-apt-get install -y build-essential cmake git libsdl2-dev > /dev/null
+packages='build-essential cmake git libsdl2-dev'
+
+apt -yqq update
+apt -yqq install $packages
 
 # Build
 
 mkdir -p bin
 pushd bin
 
-cmake .. && make
+cmake .. -DCMAKE_BUILD_TYPE=Release && make
+
+popd

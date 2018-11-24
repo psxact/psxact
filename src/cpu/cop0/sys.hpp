@@ -3,10 +3,8 @@
 #ifndef CPU_COP0_SYS_HPP_
 #define CPU_COP0_SYS_HPP_
 
-
 #include <cstdint>
 #include "cpu/cop.hpp"
-
 
 namespace psx {
 namespace cpu {
@@ -27,7 +25,6 @@ enum class exception_t {
   cop_unusable,
   overflow
 };
-
 
 class sys_t : public cop_t {
   uint32_t regs[16];

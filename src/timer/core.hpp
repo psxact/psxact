@@ -3,11 +3,9 @@
 #ifndef TIMER_CORE_HPP_
 #define TIMER_CORE_HPP_
 
-
 #include "console.hpp"
 #include "interrupt-access.hpp"
 #include "memory-component.hpp"
-
 
 namespace psx {
 namespace timer {
@@ -47,7 +45,6 @@ struct timer_t {
     int period;
   } prescaler;
 };
-
 
 class core_t : public memory_component_t {
   interrupt_access_t *irq;

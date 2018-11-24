@@ -4,7 +4,6 @@
 
 #include "limits.hpp"
 
-
 using psx::gpu::core_t;
 
 static const int dither_lut[4][4] = {
@@ -13,7 +12,6 @@ static const int dither_lut[4][4] = {
   { -3,  1, -4,  0 },
   {  3, -1,  2, -2 }
 };
-
 
 void core_t::draw_point(point_t point, color_t color) {
   if (point.x < drawing_area_x1 ||

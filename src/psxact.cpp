@@ -5,7 +5,6 @@
 #include "console.hpp"
 #include "sdl2.hpp"
 
-
 int main(int argc, char *argv[]) {
   psx::args_t ctx(argc, argv);
 

@@ -4,7 +4,6 @@
 
 #include "utility.hpp"
 
-
 using psx::dma::core_t;
 
 core_t::core_t(interrupt_access_t *irq, memory_access_t *memory)
@@ -13,16 +12,13 @@ core_t::core_t(interrupt_access_t *irq, memory_access_t *memory)
   , memory(memory) {
 }
 
-
 static uint32_t get_channel_index(uint32_t address) {
   return (address >> 4) & 7;
 }
 
-
 static uint32_t get_register_index(uint32_t address) {
   return (address >> 2) & 3;
 }
-
 
 uint32_t core_t::io_read_word(uint32_t address) {
   uint32_t channel = get_channel_index(address);
@@ -43,7 +39,6 @@ uint32_t core_t::io_read_word(uint32_t address) {
 
   return 0;
 }
-
 
 void core_t::io_write_word(uint32_t address, uint32_t data) {
   uint32_t channel = get_channel_index(address);
@@ -72,7 +67,6 @@ void core_t::io_write_word(uint32_t address, uint32_t data) {
   main();
 }
 
-
 void core_t::main() {
   if (dpcr & 0x08000000) { run_channel(6); }
   if (dpcr & 0x00800000) { run_channel(5); }
@@ -83,20 +77,17 @@ void core_t::main() {
   if (dpcr & 0x00000008) { run_channel(0); }
 }
 
-
 void core_t::run_channel_0() {
   channels[0].control &= ~0x01000000;
 
   irq_channel(0);
 }
 
-
 void core_t::run_channel_1() {
   channels[1].control &= ~0x01000000;
 
   irq_channel(1);
 }
-
 
 void core_t::run_channel_2_data_read() {
   uint32_t address = channels[2].address;
@@ -119,7 +110,6 @@ void core_t::run_channel_2_data_read() {
   irq_channel(2);
 }
 
-
 void core_t::run_channel_2_data_write() {
   uint32_t address = channels[2].address;
   uint32_t bs = (channels[2].counter >>  0) & 0xffff;
@@ -140,7 +130,6 @@ void core_t::run_channel_2_data_write() {
 
   irq_channel(2);
 }
-
 
 void core_t::run_channel_2_list() {
   uint32_t address = channels[2].address & 0x1ffffc;
@@ -168,7 +157,6 @@ void core_t::run_channel_2_list() {
   irq_channel(2);
 }
 
-
 void core_t::run_channel_3() {
   uint32_t address = channels[3].address;
   uint32_t counter = channels[3].counter & 0xffff;
@@ -186,7 +174,6 @@ void core_t::run_channel_3() {
 
   irq_channel(3);
 }
-
 
 void core_t::run_channel_4_write() {
   uint32_t address = channels[4].address;
@@ -206,7 +193,6 @@ void core_t::run_channel_4_write() {
   irq_channel(4);
 }
 
-
 void core_t::run_channel_6() {
   uint32_t address = channels[6].address;
   uint32_t counter = channels[6].counter & 0xffff;
@@ -224,7 +210,6 @@ void core_t::run_channel_6() {
 
   irq_channel(6);
 }
-
 
 void core_t::run_channel(int32_t n) {
   if (n == 0) {
@@ -278,7 +263,6 @@ void core_t::run_channel(int32_t n) {
   printf("[DMA] Unhandled DMA %d control value: 0x%08x\n", n, channels[n].control);
 }
 
-
 void core_t::irq_channel(int32_t n) {
   uint32_t flag = 1 << (n + 24);
   uint32_t mask = 1 << (n + 16);
@@ -289,7 +273,6 @@ void core_t::irq_channel(int32_t n) {
 
   update_irq_active_flag();
 }
-
 
 void core_t::update_irq_active_flag() {
   bool forced = ((dicr >> 15) & 1) != 0;

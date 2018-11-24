@@ -4,7 +4,6 @@
 
 #include "utility.hpp"
 
-
 using psx::gpu::core_t;
 
 void core_t::gp1(uint32_t data) {

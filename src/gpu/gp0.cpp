@@ -4,7 +4,6 @@
 
 #include "utility.hpp"
 
-
 using psx::gpu::core_t;
 
 static int command_size[256] = {
@@ -28,7 +27,6 @@ static int command_size[256] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // $e0
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // $f0
 };
-
 
 void core_t::fill_rectangle() {
   uint16_t color =
@@ -54,9 +52,7 @@ void core_t::fill_rectangle() {
   }
 }
 
-
 void core_t::copy_vram_to_vram() {}
-
 
 void core_t::copy_wram_to_vram() {
   auto &transfer = cpu_to_gpu_transfer;
@@ -70,7 +66,6 @@ void core_t::copy_wram_to_vram() {
   transfer.run.active = true;
 }
 
-
 void core_t::copy_vram_to_wram() {
   auto &transfer = gpu_to_cpu_transfer;
   transfer.reg.x = fifo.buffer[1] & 0xffff;
@@ -82,7 +77,6 @@ void core_t::copy_vram_to_wram() {
   transfer.run.y = 0;
   transfer.run.active = true;
 }
-
 
 void core_t::gp0(uint32_t data) {
   if (cpu_to_gpu_transfer.run.active) {

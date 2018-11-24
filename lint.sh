@@ -9,10 +9,6 @@ function lint() {
     "$1"
 }
 
-for file in `find src -name '*.hpp'`; do
-  lint $file
-done
-
-for file in `find src -name '*.cpp'`; do
+for file in `find src -name '*.[ch]pp'`; do
   lint $file
 done

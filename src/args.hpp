@@ -3,7 +3,6 @@
 #ifndef ARGS_HPP_
 #define ARGS_HPP_
 
-
 namespace psx {
 
 struct args_t {

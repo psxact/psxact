@@ -4,11 +4,11 @@ set -e
 
 cp bin/psxact .
 
-commit_date=`git show -s --format=%cI $CI_COMMIT_SHA`
+COMMIT_DATE=`git show -s --format=%cI $CI_COMMIT_SHA`
 
-version=`date --date="$commit_date" +"%Y.%m.%d"`
-archive=psxact_$version-$CI_COMMIT_SHA.tar.bz2
+VERSION=`date --date="$COMMIT_DATE" +"%Y.%m.%d"`
+ARCHIVE=psxact_$VERSION-$CI_COMMIT_SHA.tar.bz2
 
-tar -cvjSf $archive psxact
+tar -cvjSf $ARCHIVE psxact
 
 rm psxact

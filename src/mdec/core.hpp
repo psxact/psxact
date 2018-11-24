@@ -3,10 +3,8 @@
 #ifndef MDEC_CORE_HPP_
 #define MDEC_CORE_HPP_
 
-
 #include "console.hpp"
 #include "memory-component.hpp"
-
 
 namespace psx {
 namespace mdec {

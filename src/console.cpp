@@ -19,7 +19,6 @@
 #include "limits.hpp"
 #include "utility.hpp"
 
-
 namespace psx {
 
 console_t::console_t(const char *bios_file_name, const char *game_file_name)
@@ -41,12 +40,10 @@ console_t::console_t(const char *bios_file_name, const char *game_file_name)
   bios.load_blob(bios_file_name);
 }
 
-
 void console_t::send(interrupt_type_t flag) {
   int istat = cpu->get_istat() | static_cast<int>(flag);
   cpu->set_istat(istat);
 }
-
 
 memory_component_t *console_t::decode(uint32_t address) {
 #define between(min, max) \
@@ -72,7 +69,6 @@ memory_component_t *console_t::decode(uint32_t address) {
   return nullptr;
 }
 
-
 uint32_t console_t::read_memory_control(int size, uint32_t address) {
   switch (address) {
     case 0x1f801000: return 0x1f000000;
@@ -96,7 +92,6 @@ uint32_t console_t::read_memory_control(int size, uint32_t address) {
   throw std::exception();
 }
 
-
 uint32_t console_t::read_byte(uint32_t address) {
   auto component = decode(address);
 
@@ -104,7 +99,6 @@ uint32_t console_t::read_byte(uint32_t address) {
     ? component->io_read_byte(address)
     : read_memory_control(1, address);
 }
-
 
 uint32_t console_t::read_half(uint32_t address) {
   auto component = decode(address);
@@ -114,7 +108,6 @@ uint32_t console_t::read_half(uint32_t address) {
     : read_memory_control(2, address);
 }
 
-
 uint32_t console_t::read_word(uint32_t address) {
   auto component = decode(address);
 
@@ -123,48 +116,37 @@ uint32_t console_t::read_word(uint32_t address) {
     : read_memory_control(4, address);
 }
 
-
 void console_t::write_memory_control(int size, uint32_t address, uint32_t data) {
   switch (address) {
     case 0x1f801000:
-      assert(data == 0x1f000000);
-      return;
+      return assert(data == 0x1f000000);
 
     case 0x1f801004:
-      assert(data == 0x1f802000);
-      return;
+      return assert(data == 0x1f802000);
 
     case 0x1f801008:
-      assert(data == 0x0013243f);
-      return;
+      return assert(data == 0x0013243f);
 
     case 0x1f80100c:
-      assert(data == 0x00003022);
-      return;
+      return assert(data == 0x00003022);
 
     case 0x1f801010:
-      assert(data == 0x0013243f);
-      return;
+      return assert(data == 0x0013243f);
 
     case 0x1f801014:
-      assert(data == 0x200931e1);
-      return;
+      return assert(data == 0x200931e1);
 
     case 0x1f801018:
-      assert(data == 0x00020843 || data == 0x00020943);
-      return;
+      return assert(data == 0x00020843 || data == 0x00020943);
 
     case 0x1f80101c:
-      assert(data == 0x00070777);
-      return;
+      return assert(data == 0x00070777);
 
     case 0x1f801020:
-      assert(data == 0x00031125 || data == 0x0000132c || data == 0x00001323 || data == 0x00001325);
-      return;
+      return assert(data == 0x00031125 || data == 0x0000132c || data == 0x00001323 || data == 0x00001325);
 
     case 0x1f801060:
-      assert(data == 0x00000b88);
-      return;
+      return assert(data == 0x00000b88);
   }
 
   if (address == 0xfffe0130) {
@@ -195,7 +177,6 @@ void console_t::write_memory_control(int size, uint32_t address, uint32_t data) 
   throw std::exception();
 }
 
-
 void console_t::write_byte(uint32_t address, uint32_t data) {
   auto component = decode(address);
 
@@ -203,7 +184,6 @@ void console_t::write_byte(uint32_t address, uint32_t data) {
     ? component->io_write_byte(address, data)
     : write_memory_control(1, address, data);
 }
-
 
 void console_t::write_half(uint32_t address, uint32_t data) {
   auto component = decode(address);
@@ -213,7 +193,6 @@ void console_t::write_half(uint32_t address, uint32_t data) {
     : write_memory_control(2, address, data);
 }
 
-
 void console_t::write_word(uint32_t address, uint32_t data) {
   auto component = decode(address);
 
@@ -222,12 +201,11 @@ void console_t::write_word(uint32_t address, uint32_t data) {
     : write_memory_control(4, address, data);
 }
 
-
 void console_t::run_for_one_frame(uint16_t **vram, int *w, int *h) {
-  const int ITERATIONS = 2;
+  constexpr int ITERATIONS = 2;
 
-  const int CPU_FREQ = 33868800;
-  const int CYCLES_PER_FRAME = CPU_FREQ / 60 / ITERATIONS;
+  constexpr int CPU_FREQ = 33868800;
+  constexpr int CYCLES_PER_FRAME = CPU_FREQ / 60 / ITERATIONS;
 
   for (int i = 0; i < CYCLES_PER_FRAME; i++) {
     cpu->tick();

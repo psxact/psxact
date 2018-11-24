@@ -3,9 +3,7 @@
 #ifndef MEMORY_ACCESS_HPP_
 #define MEMORY_ACCESS_HPP_
 
-
 #include <cstdint>
-
 
 namespace psx {
 

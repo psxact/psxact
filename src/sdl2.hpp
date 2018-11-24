@@ -3,10 +3,8 @@
 #ifndef SDL2_HPP_
 #define SDL2_HPP_
 
-
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
-
 
 namespace psx {
 

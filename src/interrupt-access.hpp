@@ -3,7 +3,6 @@
 #ifndef INTERRUPT_ACCESS_HPP_
 #define INTERRUPT_ACCESS_HPP_
 
-
 namespace psx {
 
 enum class interrupt_type_t {
@@ -19,7 +18,6 @@ enum class interrupt_type_t {
   SPU    = 0x200,
   PIO    = 0x400,
 };
-
 
 class interrupt_access_t {
  public:

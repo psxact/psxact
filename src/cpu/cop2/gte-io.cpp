@@ -5,7 +5,6 @@
 #include "limits.hpp"
 #include "utility.hpp"
 
-
 using psx::cpu::cop2::gte_t;
 
 uint32_t gte_t::read_matrix_vector_group(uint32_t n) {
@@ -26,7 +25,6 @@ uint32_t gte_t::read_matrix_vector_group(uint32_t n) {
   return 0;
 }
 
-
 uint32_t gte_t::read_ccr(uint32_t n) {
   if (n <= 0x17) {
     return read_matrix_vector_group(n);
@@ -45,7 +43,6 @@ uint32_t gte_t::read_ccr(uint32_t n) {
 
   return 0;
 }
-
 
 void gte_t::write_matrix_vector_group(uint32_t n, uint32_t value) {
   auto &matrix = ccr.matrix[n >> 3];
@@ -90,7 +87,6 @@ void gte_t::write_matrix_vector_group(uint32_t n, uint32_t value) {
   }
 }
 
-
 void gte_t::write_ccr(uint32_t n, uint32_t value) {
   if (n <= 0x17) {
     return write_matrix_vector_group(n, value);
@@ -132,7 +128,6 @@ void gte_t::write_ccr(uint32_t n, uint32_t value) {
     }
   }
 }
-
 
 uint32_t gte_t::read_gpr(uint32_t n) {
   switch (n) {
@@ -235,7 +230,6 @@ uint32_t gte_t::read_gpr(uint32_t n) {
       return 0;
   }
 }
-
 
 void gte_t::write_gpr(uint32_t n, uint32_t value) {
   switch (n) {

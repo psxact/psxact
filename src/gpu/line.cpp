@@ -4,7 +4,6 @@
 
 #include <cstdio>
 
-
 using psx::gpu::core_t;
 
 void core_t::draw_line() {

@@ -5,7 +5,6 @@
 #include <cassert>
 #include "utility.hpp"
 
-
 using psx::cdrom::core_t;
 
 uint8_t core_t::io_read_port_0() {
@@ -19,16 +18,13 @@ uint8_t core_t::io_read_port_0() {
     (busy                      << 7));
 }
 
-
 uint8_t core_t::io_read_port_1() {
   return response_fifo.read();
 }
 
-
 uint8_t core_t::io_read_port_2() {
   return data_fifo.read();
 }
-
 
 uint8_t core_t::io_read_port_3() {
   switch (index & 1) {
@@ -38,7 +34,6 @@ uint8_t core_t::io_read_port_3() {
 
   return 0;
 }
-
 
 uint32_t core_t::io_read_byte(uint32_t address) {
   switch (address) {
@@ -50,7 +45,6 @@ uint32_t core_t::io_read_byte(uint32_t address) {
 
   return memory_component_t::io_read_byte(address);
 }
-
 
 uint32_t core_t::io_read_word(uint32_t address) {
   if (address == 0x1f801800) {
@@ -65,43 +59,33 @@ uint32_t core_t::io_read_word(uint32_t address) {
   return memory_component_t::io_read_word(address);
 }
 
-
 void core_t::io_write_port_0_n(uint8_t data) {
   index = data & 3;
 }
-
 
 void core_t::io_write_port_1_0(uint8_t data) {
   command = data;
   command_unprocessed = 1;
 }
 
-
 void core_t::io_write_port_1_1(uint8_t) {}
-
 
 void core_t::io_write_port_1_2(uint8_t) {}
 
-
 void core_t::io_write_port_1_3(uint8_t) {}
-
 
 void core_t::io_write_port_2_0(uint8_t data) {
   parameter_fifo.write(data);
 }
-
 
 void core_t::io_write_port_2_1(uint8_t data) {
   int32_t flags = data & 0x1f;
   interrupt_enable = flags;
 }
 
-
 void core_t::io_write_port_2_2(uint8_t) {}
 
-
 void core_t::io_write_port_2_3(uint8_t) {}
-
 
 void core_t::io_write_port_3_0(uint8_t data) {
   data_fifo.clear();
@@ -116,7 +100,6 @@ void core_t::io_write_port_3_0(uint8_t data) {
   }
 }
 
-
 void core_t::io_write_port_3_1(uint8_t data) {
   int32_t flags = data & 0x1f;
   interrupt_request &= ~flags;
@@ -126,12 +109,9 @@ void core_t::io_write_port_3_1(uint8_t data) {
   }
 }
 
-
 void core_t::io_write_port_3_2(uint8_t) {}
 
-
 void core_t::io_write_port_3_3(uint8_t) {}
-
 
 void core_t::io_write_byte(uint32_t address, uint32_t data) {
   log_cdrom("io_write_byte(0x%08x, 0x%08x)", address, data);

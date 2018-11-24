@@ -3,7 +3,6 @@
 #ifndef FIFO_HPP_
 #define FIFO_HPP_
 
-
 namespace psx {
 
 template<typename T, int bits>

@@ -4,7 +4,6 @@
 
 #include "utility.hpp"
 
-
 using psx::input::core_t;
 using psx::input::input_port_t;
 
@@ -16,7 +15,6 @@ core_t::core_t(interrupt_access_t *irq)
 
   reload_baud();
 }
-
 
 uint32_t core_t::io_read_byte(uint32_t address) {
   switch (address) {
@@ -33,7 +31,6 @@ uint32_t core_t::io_read_byte(uint32_t address) {
   return memory_component_t::io_read_byte(address);
 }
 
-
 uint32_t core_t::io_read_half(uint32_t address) {
   switch (address) {
     case 0x1f801044:
@@ -45,7 +42,6 @@ uint32_t core_t::io_read_half(uint32_t address) {
 
   return memory_component_t::io_read_half(address);
 }
-
 
 uint32_t core_t::io_read_word(uint32_t address) {
   switch (address) {
@@ -72,7 +68,6 @@ uint32_t core_t::io_read_word(uint32_t address) {
   return memory_component_t::io_read_word(address);
 }
 
-
 static int32_t get_baud_rate_factor(uint32_t data) {
   switch (data & 3) {
     case 0: return 1;
@@ -83,7 +78,6 @@ static int32_t get_baud_rate_factor(uint32_t data) {
 
   return 0;
 }
-
 
 void core_t::io_write_byte(uint32_t address, uint32_t data) {
   switch (address) {
@@ -96,7 +90,6 @@ void core_t::io_write_byte(uint32_t address, uint32_t data) {
 
   return memory_component_t::io_write_byte(address, data);
 }
-
 
 void core_t::io_write_half(uint32_t address, uint32_t data) {
   switch (address) {
@@ -132,7 +125,6 @@ void core_t::io_write_half(uint32_t address, uint32_t data) {
   return memory_component_t::io_write_half(address, data);
 }
 
-
 void core_t::io_write_word(uint32_t address, uint32_t data) {
   switch (address) {
     case 0x1f801040:
@@ -145,11 +137,9 @@ void core_t::io_write_word(uint32_t address, uint32_t data) {
   return memory_component_t::io_write_word(address, data);
 }
 
-
 void core_t::reload_baud() {
   baud_timer = baud_reload * baud_factor;
 }
-
 
 void core_t::tick() {
   if (dsr_cycles && !--dsr_cycles && dsr) {
@@ -180,7 +170,6 @@ void core_t::tick() {
   }
 }
 
-
 input_port_t *core_t::get_selected_port() {
   if (ports[0].status == input_port_status_t::selected) {
     return &ports[0];
@@ -192,7 +181,6 @@ input_port_t *core_t::get_selected_port() {
 
   return nullptr;
 }
-
 
 bool core_t::send(uint8_t request, uint8_t *response) {
   auto port = get_selected_port();
@@ -220,22 +208,18 @@ bool core_t::send(uint8_t request, uint8_t *response) {
   }
 }
 
-
 bool core_t::send_controller(struct input_port_t *port, uint8_t request, uint8_t *response) {
   return send_controller_digital(port, request, response);
 }
-
 
 bool core_t::send_memory_card(struct input_port_t *port, uint8_t request, uint8_t *response) {
   return send_null(port, request, response);
 }
 
-
 bool core_t::send_null(struct input_port_t *, uint8_t, uint8_t *response) {
   *response = 0xff;
   return false;
 }
-
 
 bool core_t::send_controller_digital(struct input_port_t *port, uint8_t request, uint8_t *response) {
   auto sequence = port->sequence;
