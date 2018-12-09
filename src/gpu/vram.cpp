@@ -27,8 +27,8 @@ uint16_t core_t::vram_transfer_read() {
   }
 
   uint16_t data = vram_read(
-      transfer.reg.x + transfer.run.x,
-      transfer.reg.y + transfer.run.y);
+    transfer.reg.x + transfer.run.x,
+    transfer.reg.y + transfer.run.y);
 
   transfer.run.x++;
 
@@ -52,8 +52,8 @@ void core_t::vram_transfer_write(uint16_t data) {
   }
 
   vram_write(
-      transfer.reg.x + transfer.run.x,
-      transfer.reg.y + transfer.run.y, uint16_t(data));
+    transfer.reg.x + transfer.run.x,
+    transfer.reg.y + transfer.run.y, uint16_t(data));
 
   transfer.run.x++;
 

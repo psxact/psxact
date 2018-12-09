@@ -123,9 +123,9 @@ static core_t::tev_t get_tev(const core_t &core, uint32_t command) {
 
 static bool is_clockwise(const core_t::point_t *p) {
   int32_t sum =
-      (p[1].x - p[0].x) * (p[1].y + p[0].y) +
-      (p[2].x - p[1].x) * (p[2].y + p[1].y) +
-      (p[0].x - p[2].x) * (p[0].y + p[2].y);
+    (p[1].x - p[0].x) * (p[1].y + p[0].y) +
+    (p[2].x - p[1].x) * (p[2].y + p[1].y) +
+    (p[0].x - p[2].x) * (p[0].y + p[2].y);
 
   return sum >= 0;
 }

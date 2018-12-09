@@ -55,15 +55,14 @@ static int32_t get_y_length(uint32_t *fifo) {
 }
 
 bool core_t::get_color(uint32_t command, color_t *color, const tev_t &tev, const point_t &coord) {
-  bool blended = (command & (1 << 24)) != 0;
   bool textured = (command & (1 << 26)) != 0;
-
   if (!textured) {
     return true;
   }
 
   color_t pixel = get_texture_color(tev, coord);
 
+  bool blended = (command & (1 << 24)) != 0;
   if (blended) {
     color->r = std::min(255, (pixel.r * color->r) / 2);
     color->g = std::min(255, (pixel.g * color->g) / 2);

@@ -5,8 +5,8 @@ build_linux:
   stage: build
   image: debian:stretch
   script:
-    - ./build.sh
-    - ./package.sh
+    - ./scripts/build.sh
+    - ./scripts/package.sh
   artifacts:
     paths:
       - '*.tar.bz2'

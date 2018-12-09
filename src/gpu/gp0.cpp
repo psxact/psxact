@@ -30,9 +30,9 @@ static int command_size[256] = {
 
 void core_t::fill_rectangle() {
   uint16_t color =
-      ((fifo.buffer[0] >> 3) & 0x001f) |
-      ((fifo.buffer[0] >> 6) & 0x03e0) |
-      ((fifo.buffer[0] >> 9) & 0x7c00);
+    ((fifo.buffer[0] >> 3) & 0x001f) |
+    ((fifo.buffer[0] >> 6) & 0x03e0) |
+    ((fifo.buffer[0] >> 9) & 0x7c00);
 
   point_t point;
   point.x = (fifo.buffer[1] + 0x0) & 0x3f0;
