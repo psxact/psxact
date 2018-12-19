@@ -141,30 +141,34 @@ void core_t::reload_baud() {
   baud_timer = baud_reload * baud_factor;
 }
 
-void core_t::tick() {
-  if (dsr_cycles && !--dsr_cycles && dsr) {
-    interrupt = 1;
-    irq->send(interrupt_type_t::INPUT);
-  }
+void core_t::tick(int amount) {
+  while (amount) {
+    amount--;
 
-  baud_timer--;
+    if (dsr_cycles && !--dsr_cycles && dsr) {
+      interrupt = 1;
+      irq->send(interrupt_type_t::INPUT);
+    }
 
-  if (baud_timer == 0) {
-    reload_baud();
+    baud_timer--;
 
-    baud_elapses++;
+    if (baud_timer == 0) {
+      reload_baud();
 
-    if (baud_elapses == 8) {
-      baud_elapses = 0;
+      baud_elapses++;
 
-      if (tx_occurring) {
-        tx_occurring = 0;
-        rx_occurred = 1;
+      if (baud_elapses == 8) {
+        baud_elapses = 0;
 
-        dsr = send(tx_data, &rx_data);
-        dsr_cycles = 100;  // delay 100 cycles before issuing an interrupt, per the documentation.
+        if (tx_occurring) {
+          tx_occurring = 0;
+          rx_occurred = 1;
 
-        log_input("transfer(0x%02x) = 0x%02x", tx_data, rx_data);
+          dsr = send(tx_data, &rx_data);
+          dsr_cycles = 100;  // delay 100 cycles before issuing an interrupt, per the documentation.
+
+          log_input("transfer(0x%02x) = 0x%02x", tx_data, rx_data);
+        }
       }
     }
   }

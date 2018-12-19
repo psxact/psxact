@@ -26,6 +26,7 @@ class core_t : public memory_component_t {
   int32_t index;
   int32_t interrupt_enable;
   int32_t interrupt_request;
+  int32_t interrupt_timer;
 
   sector_timecode_t seek_timecode;
   sector_timecode_t read_timecode;
@@ -75,14 +76,6 @@ class core_t : public memory_component_t {
 
   uint32_t io_read_word(uint32_t address);
 
-  uint8_t io_read_port_0();
-
-  uint8_t io_read_port_1();
-
-  uint8_t io_read_port_2();
-
-  uint8_t io_read_port_3();
-
   void io_write_byte(uint32_t address, uint32_t data);
 
   void io_write_port_0_n(uint8_t data);
@@ -111,7 +104,7 @@ class core_t : public memory_component_t {
 
   void io_write_port_3_3(uint8_t data);
 
-  void tick();
+  void tick(int amount);
 
   void do_seek();
 

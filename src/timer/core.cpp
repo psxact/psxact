@@ -214,10 +214,14 @@ void core_t::unit_prescale(int n) {
   }
 }
 
-void core_t::tick() {
-  unit_prescale(0);
-  unit_prescale(1);
-  unit_prescale(2);
+void core_t::tick(int amount) {
+  while (amount) {
+    amount--;
+
+    unit_prescale(0);
+    unit_prescale(1);
+    unit_prescale(2);
+  }
 }
 
 void core_t::hblank(bool active) {

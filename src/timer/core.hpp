@@ -65,7 +65,7 @@ class core_t : public memory_component_t {
 
   void io_write_word(uint32_t address, uint32_t data);
 
-  void tick();
+  void tick(int amount);
 
   void hblank(bool active);
 

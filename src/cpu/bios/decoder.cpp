@@ -9,7 +9,7 @@ using psx::cpu::bios::decoder_t;
 
 decoder_t::decoder_t(memory_access_t *memory)
   : memory(memory) {
-  log = fopen("bios_call.log", "w");
+  log = fopen("bios-call.log", "w");
 }
 
 static std::string char_to_string(char c) {

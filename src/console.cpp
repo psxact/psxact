@@ -202,19 +202,17 @@ void console_t::write_word(uint32_t address, uint32_t data) {
 }
 
 void console_t::run_for_one_frame(uint16_t **vram, int *w, int *h) {
-  constexpr int ITERATIONS = 2;
+  constexpr int CYCLE_PER_CPU_TICK = 4;
 
   constexpr int CPU_FREQ = 33868800;
-  constexpr int CYCLES_PER_FRAME = CPU_FREQ / 60 / ITERATIONS;
+  constexpr int CPU_TICKS_PER_FRAME = CPU_FREQ / 60 / CYCLE_PER_CPU_TICK;
 
-  for (int i = 0; i < CYCLES_PER_FRAME; i++) {
+  for (int i = 0; i < CPU_TICKS_PER_FRAME; i++) {
     cpu->tick();
 
-    for (int j = 0; j < ITERATIONS; j++) {
-      timer->tick();
-      cdrom->tick();
-      input->tick();
-    }
+    timer->tick(CYCLE_PER_CPU_TICK);
+    cdrom->tick(CYCLE_PER_CPU_TICK);
+    input->tick(CYCLE_PER_CPU_TICK);
   }
 
   send(interrupt_type_t::VBLANK);

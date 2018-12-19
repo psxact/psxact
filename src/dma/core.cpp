@@ -78,6 +78,21 @@ void core_t::main() {
 }
 
 void core_t::run_channel_0() {
+  uint32_t address = channels[0].address;
+  uint32_t bs = (channels[0].counter >>  0) & 0xffff;
+  uint32_t ba = (channels[0].counter >> 16) & 0xffff;
+
+  bs = bs ? bs : 0x10000;
+  ba = ba ? ba : 0x10000;
+
+  for (uint32_t a = 0; a < ba; a++) {
+    for (uint32_t s = 0; s < bs; s++) {
+      uint32_t data = memory->read_word(address);
+      memory->write_word(0x1f801820, data);
+      address += 4;
+    }
+  }
+
   channels[0].control &= ~0x01000000;
 
   irq_channel(0);
@@ -85,6 +100,8 @@ void core_t::run_channel_0() {
 
 void core_t::run_channel_1() {
   channels[1].control &= ~0x01000000;
+
+  log_dma("DMA1 running");
 
   irq_channel(1);
 }
@@ -164,7 +181,7 @@ void core_t::run_channel_3() {
   counter = counter ? counter : 0x10000;
 
   for (uint32_t i = 0; i < counter; i++) {
-    uint32_t data = memory->read_word(0x1f801800);
+    uint32_t data = memory->read_word(0x1f801802);
     memory->write_word(address, data);
 
     address += 4;
@@ -260,7 +277,7 @@ void core_t::run_channel(int32_t n) {
     }
   }
 
-  printf("[DMA] Unhandled DMA %d control value: 0x%08x\n", n, channels[n].control);
+  log_dma("unhandled DMA%d control: 0x%08x", n, channels[n].control);
 }
 
 void core_t::irq_channel(int32_t n) {

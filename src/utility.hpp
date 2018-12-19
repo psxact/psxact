@@ -24,6 +24,7 @@
 #define log_dma(s, ...) logger("dma", s, __VA_ARGS__)
 #define log_gpu(s, ...) logger("gpu", s, __VA_ARGS__)
 #define log_spu(s, ...) logger("spu", s, __VA_ARGS__)
+#define log_mdec(s, ...) logger("mdec", s, __VA_ARGS__)
 #define log_cdrom(s, ...) logger("cdrom", s, __VA_ARGS__)
 #define log_input(s, ...) logger("input", s, __VA_ARGS__)
 #define log_timer(s, ...) logger("timer", s, __VA_ARGS__)

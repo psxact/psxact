@@ -16,24 +16,32 @@ core_t::core_t(interrupt_access_t *irq, const char *game_file_name)
   drive_transition(&core_t::drive_idling, 1000);
 }
 
-void core_t::tick() {
-  drive.timer--;
+void core_t::tick(int amount) {
+  while (amount) {
+    amount--;
 
-  if (drive.timer == 0) {
-    (*this.*drive.stage)();
-  }
+    drive.timer--;
 
-  logic.timer--;
+    if (drive.timer == 0) {
+      (*this.*drive.stage)();
+    }
 
-  if (logic.timer == 0) {
-    (*this.*logic.stage)();
-  }
+    logic.timer--;
 
-  if (interrupt_request) {
-    int32_t signal = interrupt_request & interrupt_enable;
-    if (signal == interrupt_request) {
-      printf("[cdrom] delivering interrupt: %d\n", interrupt_request);
-      irq->send(interrupt_type_t::CDROM);
+    if (logic.timer == 0) {
+      (*this.*logic.stage)();
+    }
+
+    if (interrupt_timer) {
+      interrupt_timer--;
+
+      if (interrupt_timer == 0 && interrupt_request) {
+        int32_t signal = interrupt_request & interrupt_enable;
+        if (signal == interrupt_request) {
+          log_cdrom("delivering interrupt: %d", interrupt_request);
+          irq->send(interrupt_type_t::CDROM);
+        }
+      }
     }
   }
 }
@@ -341,6 +349,7 @@ void core_t::logic_transferring_response() {
 
 void core_t::logic_deliver_interrupt() {
   if (interrupt_request == 0) {
+    interrupt_timer = 500;
     interrupt_request = logic.interrupt_request;
 
     logic_transition(&core_t::logic_idling, 1);
