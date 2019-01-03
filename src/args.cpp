@@ -20,7 +20,6 @@ static void show_usage() {
   printf("Usage:\n");
   printf("$ psxact [-b|--bios <file>]\n");
   printf("         [-g|--game <file>]\n");
-  printf("         [-l|--log  <counter|cpu|dma|gpu|input|mdec|spu>]\n");
 }
 
 static void fail() {

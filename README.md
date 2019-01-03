@@ -25,7 +25,18 @@ $ psxact <bios file here> <game file here>
 
 ## Building
 
-This project uses CMake for builds, and requires SDL2.
+Included in this repo is a `Dockerfile` describing a working development
+environment. To use this, do the following (Terminal inside checkout directory):
+
+```
+$ docker run --rm -it -v $PWD:/workspace adambecker/psxact /bin/bash
+```
+
+That will be enough to get you into the container, from there you can try:
+
+- `./scripts/build.sh`
+- `./scripts/lint.sh`
+- `mkdir bin && cd bin && cmake .. && make`
 
 ## Contributing
 
