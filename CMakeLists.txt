@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 3.0)
 project(psxact)
 
 # Module configuration
@@ -28,10 +28,6 @@ include_directories(
 
 # Building
 
-file(GLOB_RECURSE SOURCE_FILES
-  "src/*.cpp"
-  "src/*.hpp")
-
-add_executable(psxact ${SOURCE_FILES})
-
-target_link_libraries(psxact ${SDL2_LIBRARY})
+add_subdirectory(src)
+add_subdirectory(app)
+add_subdirectory(test)

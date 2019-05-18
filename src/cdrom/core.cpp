@@ -57,7 +57,7 @@ uint8_t core_t::get_status_byte() {
     result |= 0x20;
   }
 
-  return 0x02;
+  return result;
 }
 
 int core_t::get_cycles_per_sector() {
