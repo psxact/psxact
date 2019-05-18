@@ -88,7 +88,7 @@ void core_t::send_command(uint32_t data) {
       break;
 
     default:
-      printf("[mdec] command: %08x (unhandled)\n", command);
+      printf("[mdec] command: %08x (unhandled)\n", unsigned(command));
       break;
   }
 }
@@ -102,7 +102,7 @@ void core_t::send_parameter(int n, uint32_t data) {
     case command_t::set_iqtab:
       return n < 16
         ? send_light_tab(n, data)
-        : send_color_tab(n, data);
+        : send_color_tab(n - 16, data);
 
     case command_t::set_scale:
       return send_scale_tab(n, data);

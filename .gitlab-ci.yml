@@ -1,12 +1,16 @@
 stages:
   - build
 
-build_linux:
+
+build:linux:
   stage: build
   image: adambecker/psxact
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
   script:
-    - ./scripts/build.sh
-    - ./scripts/package.sh
+    - ./ci/build.sh
+    - ./ci/test.sh
+    - ./ci/package.sh
   artifacts:
     paths:
       - '*.tar.bz2'
