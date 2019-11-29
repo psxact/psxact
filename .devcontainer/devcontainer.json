@@ -1,8 +1,9 @@
 {
   "dockerFile": "Dockerfile",
   "extensions": [
-    "vector-of-bool.cmake-tools",
-    "ms-vscode.cpptools"
+    "ms-vscode.cmake-tools",
+    "ms-vscode.cpptools",
+    "twxs.cmake"
   ],
   "settings": {
     "editor.insertSpaces": true,

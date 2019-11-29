@@ -9,7 +9,6 @@ build:linux:
     GIT_SUBMODULE_STRATEGY: normal
   script:
     - ./ci/build.sh
-    - ./ci/test.sh
     - ./ci/package.sh
   artifacts:
     paths:
