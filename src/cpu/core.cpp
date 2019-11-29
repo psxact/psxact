@@ -292,6 +292,22 @@ static inline uint32_t overflow(uint32_t x, uint32_t y, uint32_t z) {
   return (~(x ^ y) & (x ^ z) & 0x80000000);
 }
 
+uint32_t core_t::get_pc() {
+  return regs.pc;
+}
+
+uint32_t core_t::get_rt() {
+  return get_register(decode_rt());
+}
+
+uint32_t core_t::get_rt_forwarded() {
+  return get_register_forwarded(decode_rt());
+}
+
+uint32_t core_t::get_rs() {
+  return get_register(decode_rs());
+}
+
 uint32_t core_t::get_register(uint32_t index) {
   if (is_load_delay_slot && load_index == index) {
     return load_value;
@@ -302,6 +318,12 @@ uint32_t core_t::get_register(uint32_t index) {
 
 uint32_t core_t::get_register_forwarded(uint32_t index) {
   return regs.gp[index];
+}
+
+void core_t::set_pc(uint32_t value) {
+  regs.this_pc = value;
+  regs.pc = value;
+  regs.next_pc = value + sizeof(uint32_t);
 }
 
 void core_t::set_rd(uint32_t value) {
@@ -329,16 +351,8 @@ void core_t::set_rt_load(uint32_t value) {
   regs.gp[0] = 0;
 }
 
-uint32_t core_t::get_rt() {
-  return get_register(decode_rt());
-}
-
-uint32_t core_t::get_rt_forwarded() {
-  return get_register_forwarded(decode_rt());
-}
-
-uint32_t core_t::get_rs() {
-  return get_register(decode_rs());
+void core_t::set_register(uint32_t index, uint32_t value) {
+  regs.gp[index] = value;
 }
 
 // --============--

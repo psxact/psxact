@@ -1,0 +1,11 @@
+{
+  "dockerFile": "Dockerfile",
+  "extensions": [
+    "vector-of-bool.cmake-tools",
+    "ms-vscode.cpptools"
+  ],
+  "settings": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  }
+}

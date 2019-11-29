@@ -16,6 +16,7 @@
 #include "input/core.hpp"
 #include "mdec/core.hpp"
 #include "spu/core.hpp"
+#include "blob.hpp"
 #include "limits.hpp"
 #include "utility.hpp"
 
@@ -24,7 +25,9 @@ namespace psx {
 console_t::console_t(const char *bios_file_name, const char *game_file_name)
   : bios("bios")
   , wram("wram")
-  , dmem("dmem") {
+  , dmem("dmem")
+  , bios_file_name(bios_file_name)
+  , game_file_name(game_file_name) {
   cdrom = new cdrom::core_t(this, game_file_name);
   timer = new timer::core_t(this);
   cpu = new cpu::core_t(this);
@@ -38,6 +41,9 @@ console_t::console_t(const char *bios_file_name, const char *game_file_name)
   spu = new spu::core_t();
 
   bios.load_blob(bios_file_name);
+  bios.io_write_word(0x6990, 0); // patch the bios to skip the boot-up animation
+
+  is_exe = !!(strstr(game_file_name, ".exe"));
 }
 
 void console_t::send(interrupt_type_t flag) {
@@ -48,6 +54,15 @@ void console_t::send(interrupt_type_t flag) {
 memory_component_t *console_t::decode(uint32_t address) {
 #define between(min, max) \
   limits::between<(min), (max)>(address)
+
+  if (between(0x1f801800, 0x1f801803)) {
+    if (is_exe) {
+      is_exe = false;
+      load_exe(game_file_name);
+    }
+
+    return cdrom;
+  }
 
   if (between(0x00000000, 0x007fffff)) { return &wram; }
   if (between(0x1fc00000, 0x1fc7ffff)) { return &bios; }
@@ -226,6 +241,31 @@ void console_t::run_for_one_frame(uint16_t **vram, int *w, int *h) {
   *vram = gpu->vram_data(
     gpu->display_area_x,
     gpu->display_area_y);
+}
+
+void console_t::load_exe(const char *game_file_name) {
+  // load the exe into ram
+  if (blob_t *blob = blob_t::from_file(game_file_name)) {
+    cpu->set_pc(blob->read_word(0x10));
+    cpu->set_register(4, 1);
+    cpu->set_register(5, 0);
+    cpu->set_register(28, blob->read_word(0x14));
+    cpu->set_register(29, blob->read_word(0x30) + blob->read_word(0x34));
+    cpu->set_register(30, blob->read_word(0x30) + blob->read_word(0x34));
+
+    int text_start = blob->read_word(0x18);
+    int text_count = blob->read_word(0x1c);
+
+    printf("Loading executable into WRAM..\n");
+    printf("  PC: $%08x\n", cpu->get_pc());
+    printf("  GP: $%08x\n", cpu->get_register(28));
+    printf("  SP: $%08x\n", cpu->get_register(29));
+    printf("  FP: $%08x\n", cpu->get_register(30));
+
+    for (int i = 0; i < text_count; i++) {
+      wram.io_write_byte(text_start + i, blob->read_byte(0x800 + i));
+    }
+  }
 }
 
 }  // namespace psx

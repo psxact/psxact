@@ -261,9 +261,19 @@ class core_t : public memory_component_t {
 
   uint32_t decode_rs();
 
+  uint32_t get_pc();
+
+  uint32_t get_rt();
+
+  uint32_t get_rt_forwarded();
+
+  uint32_t get_rs();
+
   uint32_t get_register(uint32_t index);
 
   uint32_t get_register_forwarded(uint32_t index);
+
+  void set_pc(uint32_t value);
 
   void set_rd(uint32_t value);
 
@@ -271,11 +281,7 @@ class core_t : public memory_component_t {
 
   void set_rt_load(uint32_t value);
 
-  uint32_t get_rt();
-
-  uint32_t get_rt_forwarded();
-
-  uint32_t get_rs();
+  void set_register(uint32_t index, uint32_t value);
 };
 
 }  // namespace cpu

@@ -199,13 +199,15 @@ void core_t::unit_tick(int n) {
   }
 }
 
-void core_t::unit_prescale(int n) {
+void core_t::unit_prescale(int n, int amount) {
   auto &prescaler = timers[n].prescaler;
 
   if (prescaler.enable == 0) {
-    unit_tick(n);
+    for (int i = 0; i < amount; i++) {
+      unit_tick(n);
+    }
   } else {
-    prescaler.cycles -= prescaler.single;
+    prescaler.cycles -= prescaler.single * amount;
 
     while (prescaler.cycles <= 0) {
       prescaler.cycles += prescaler.period;
@@ -215,13 +217,9 @@ void core_t::unit_prescale(int n) {
 }
 
 void core_t::tick(int amount) {
-  while (amount) {
-    amount--;
-
-    unit_prescale(0);
-    unit_prescale(1);
-    unit_prescale(2);
-  }
+  unit_prescale(0, amount);
+  unit_prescale(1, amount);
+  unit_prescale(2, amount);
 }
 
 void core_t::hblank(bool active) {

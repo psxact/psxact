@@ -78,7 +78,7 @@ class core_t : public memory_component_t {
 
   void unit_tick(int n);
 
-  void unit_prescale(int n);
+  void unit_prescale(int n, int amount);
 
   uint16_t unit_get_compare(int n);
 

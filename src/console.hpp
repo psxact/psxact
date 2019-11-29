@@ -67,6 +67,10 @@ class console_t
   mdec::core_t *mdec;
   spu::core_t *spu;
 
+  const char *bios_file_name;
+  const char *game_file_name;
+  bool is_exe;
+
  public:
   console_t(const char *bios_file_name, const char *game_file_name);
 
@@ -92,6 +96,8 @@ class console_t
   uint32_t read_memory_control(int size, uint32_t address);
 
   void write_memory_control(int size, uint32_t address, uint32_t data);
+
+  void load_exe(const char *game_file_name);
 };
 
 }  // namespace psx
