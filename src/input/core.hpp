@@ -36,8 +36,7 @@ class core_t : public memory_component_t {
   struct device_t {
     int output;
     int index;
-    int lower;
-    int upper;
+    uint16_t value;
   };
 
   device_t devices[2];

@@ -19,36 +19,35 @@ core_t::core_t(interrupt_access_t *irq, bool log_enabled)
 
 void core_t::frame() {
   int numkeys;
-  const uint8_t *keys = SDL_GetKeyboardState(&numkeys);
+  
+  if (const uint8_t *keys = SDL_GetKeyboardState(&numkeys)) {
+    devices[0].value =
+      ( keys[SDL_SCANCODE_RSHIFT] <<  0 ) | // 0   Select Button    (0=Pressed, 1=Released)
+      ( 0                         <<  1 ) | // 1   L3/Joy-button    (0=Pressed, 1=Released/None/Disabled) ;analog mode only
+      ( 0                         <<  2 ) | // 2   R3/Joy-button    (0=Pressed, 1=Released/None/Disabled) ;analog mode only
+      ( keys[SDL_SCANCODE_RETURN] <<  3 ) | // 3   Start Button     (0=Pressed, 1=Released)
+      ( keys[SDL_SCANCODE_UP]     <<  4 ) | // 4   Joypad Up        (0=Pressed, 1=Released)
+      ( keys[SDL_SCANCODE_RIGHT]  <<  5 ) | // 5   Joypad Right     (0=Pressed, 1=Released)
+      ( keys[SDL_SCANCODE_DOWN]   <<  6 ) | // 6   Joypad Down      (0=Pressed, 1=Released)
+      ( keys[SDL_SCANCODE_LEFT]   <<  7 ) | // 7   Joypad Left      (0=Pressed, 1=Released)
+      ( keys[SDL_SCANCODE_1]      <<  8 ) | // 8   L2 Button        (0=Pressed, 1=Released) (Lower-left shoulder)
+      ( keys[SDL_SCANCODE_3]      <<  9 ) | // 9   R2 Button        (0=Pressed, 1=Released) (Lower-right shoulder)
+      ( keys[SDL_SCANCODE_Q]      << 10 ) | // 10  L1 Button        (0=Pressed, 1=Released) (Upper-left shoulder)
+      ( keys[SDL_SCANCODE_E]      << 11 ) | // 11  R1 Button        (0=Pressed, 1=Released) (Upper-right shoulder)
+      ( keys[SDL_SCANCODE_W]      << 12 ) | // 12  /\ Button        (0=Pressed, 1=Released) (Triangle, upper button)
+      ( keys[SDL_SCANCODE_D]      << 13 ) | // 13  () Button        (0=Pressed, 1=Released) (Circle, right button)
+      ( keys[SDL_SCANCODE_X]      << 14 ) | // 14  >< Button        (0=Pressed, 1=Released) (Cross, lower button)
+      ( keys[SDL_SCANCODE_A]      << 15 ) ; // 15  [] Button        (0=Pressed, 1=Released) (Square, left button)
 
-  // 0   Select Button    (0=Pressed, 1=Released)
-  // 1   L3/Joy-button    (0=Pressed, 1=Released/None/Disabled) ;analog mode only
-  // 2   R3/Joy-button    (0=Pressed, 1=Released/None/Disabled) ;analog mode only
-  // 3   Start Button     (0=Pressed, 1=Released)
-  // 4   Joypad Up        (0=Pressed, 1=Released)
-  // 5   Joypad Right     (0=Pressed, 1=Released)
-  // 6   Joypad Down      (0=Pressed, 1=Released)
-  // 7   Joypad Left      (0=Pressed, 1=Released)
-  // 8   L2 Button        (0=Pressed, 1=Released) (Lower-left shoulder)
-  // 9   R2 Button        (0=Pressed, 1=Released) (Lower-right shoulder)
-  // 10  L1 Button        (0=Pressed, 1=Released) (Upper-left shoulder)
-  // 11  R1 Button        (0=Pressed, 1=Released) (Upper-right shoulder)
-  // 12  /\ Button        (0=Pressed, 1=Released) (Triangle, upper button)
-  // 13  () Button        (0=Pressed, 1=Released) (Circle, right button)
-  // 14  >< Button        (0=Pressed, 1=Released) (Cross, lower button)
-  // 15  [] Button        (0=Pressed, 1=Released) (Square, left button)
+    devices[1].value = 0;
+  }
+  else {
+    devices[0].value = 0;
+    devices[1].value = 0;
+  }
 
-  devices[0].lower =
-    ( keys[SDL_SCANCODE_RETURN] << 3 ) |
-    ( keys[SDL_SCANCODE_UP]     << 4 ) |
-    ( keys[SDL_SCANCODE_RIGHT]  << 5 ) |
-    ( keys[SDL_SCANCODE_DOWN]   << 6 ) |
-    ( keys[SDL_SCANCODE_LEFT]   << 7 );
-
-  devices[0].upper = 0;
-
-  devices[1].lower = 0;
-  devices[1].upper = 0;
+  devices[0].value ^= 0xffff;
+  devices[1].value ^= 0xffff;
 }
 
 void core_t::tick(int amount) {
@@ -71,8 +70,8 @@ void core_t::tick(int amount) {
           case 0: write_rx(0xff, tx_data == 0x01); break;
           case 1: write_rx(0x41, tx_data == 0x42); break;
           case 2: write_rx(0x5a, true); break;
-          case 3: write_rx(device.lower, true); break;
-          case 4: write_rx(device.upper, false); break;
+          case 3: write_rx(device.value >> 0, true); break;
+          case 4: write_rx(device.value >> 8, false); break;
         }
 
         device.index++;
@@ -102,7 +101,7 @@ uint8_t core_t::io_read_byte(uint32_t address) {
         ? rx.read()
         : 0xff;
 
-      log("returning '%02x'", data);
+      log("1040: returning '%02x'", data);
 
       return data;
   }
@@ -112,8 +111,8 @@ uint8_t core_t::io_read_byte(uint32_t address) {
 
 uint16_t core_t::io_read_half(uint32_t address) {
   switch (address) {
-    case 0x1f801044:
-      return
+    case 0x1f801044: {
+      uint16_t data =
         (1 << 0) | //   0     TX Ready Flag 1   (1=Ready/Started)
         (rx.has_data() << 1) |
         (1 << 2) | //   2     TX Ready Flag 2   (1=Ready/Finished)
@@ -122,8 +121,13 @@ uint16_t core_t::io_read_half(uint32_t address) {
         (interrupt << 9) |
         (baud_counter << 11);
 
-    case 0x1f80104a:
-      return
+      log("1044: returning '%04x'", data);
+
+      return data;
+    }
+
+    case 0x1f80104a: {
+      uint16_t data =
         (tx_enable << 0) |
         (slot_output << 1) |
         (rx_enable << 2) |
@@ -132,6 +136,11 @@ uint16_t core_t::io_read_half(uint32_t address) {
         (rx_interrupt_enable << 11) |
         (ack_interrupt_enable << 12) |
         (slot_select << 13);
+
+      log("104a: returning '%04x'", data);
+
+      return data;
+    }
   }
 
   return memory_component_t::io_read_half(address);
@@ -174,10 +183,6 @@ void core_t::io_write_half(uint32_t address, uint16_t data) {
     case 0x1f80104a:
       if (data & 0x40) {
         log("resetting input");
-
-        rx.clear();
-        devices[0].index = 0;
-        devices[1].index = 0;
       }
       else {
         if (data & 0x10) {
