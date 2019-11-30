@@ -5,7 +5,7 @@
 using psx::exp::expansion2_t;
 
 expansion2_t::expansion2_t()
-  : memory_component_t("exp2") {
+  : memory_component_t("exp2", false) {
 }
 
 void expansion2_t::io_write_byte(uint32_t address, uint32_t data) {

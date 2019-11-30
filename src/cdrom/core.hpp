@@ -70,7 +70,7 @@ class core_t : public memory_component_t {
   } mode;
 
  public:
-  core_t(interrupt_access_t *irq, const char *game_file_name);
+  core_t(interrupt_access_t *irq, const char *game_file_name, bool log_enabled);
 
   uint32_t io_read_byte(uint32_t address);
 

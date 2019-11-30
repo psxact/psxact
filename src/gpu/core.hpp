@@ -76,7 +76,7 @@ class core_t : public memory_component_t {
     } run;
   } gpu_to_cpu_transfer;
 
-  core_t();
+  core_t(bool log_enabled);
 
   uint32_t io_read_word(uint32_t address);
 

@@ -5,5 +5,5 @@
 using psx::exp::expansion3_t;
 
 expansion3_t::expansion3_t()
-  : memory_component_t("exp3") {
+  : memory_component_t("exp3", false) {
 }

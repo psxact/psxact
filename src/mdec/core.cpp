@@ -7,15 +7,15 @@
 
 using psx::mdec::core_t;
 
-core_t::core_t()
-  : memory_component_t("mdec") {
+core_t::core_t(bool log_enabled)
+  : memory_component_t("mdec", log_enabled) {
 }
 
 uint32_t core_t::io_read_word(uint32_t address) {
   switch (address) {
     case MDEC_DATA: {
       uint32_t response = 0;
-      printf("[mdec] data=%08x\n", response);
+      log("data=%08x", response);
 
       return response;
     }
@@ -24,7 +24,7 @@ uint32_t core_t::io_read_word(uint32_t address) {
       uint32_t response = status
         | ((parameter.index != parameter.total) << 29);
 
-      printf("[mdec] stat=%08x\n", response);
+      log("stat=%08x", response);
       return response;
     }
   }
@@ -45,7 +45,7 @@ void core_t::io_write_word(uint32_t address, uint32_t data) {
 
     case MDEC_CONTROL:
       if (data & (1 << 31)) {
-        printf("[mdec] reset\n");
+        log("reset");
 
         status = 0x80040000;
         parameter.index = 0;
@@ -53,7 +53,7 @@ void core_t::io_write_word(uint32_t address, uint32_t data) {
         enable_data_in  = 0;
         enable_data_out = 0;
       } else {
-        printf("[mdec] enabling DMA: %08x\n", data);
+        log("enabling DMA: %08x", data);
 
         enable_data_in = (data >> 28) & 1;
         enable_data_out = (data >> 27) & 1;
@@ -70,25 +70,25 @@ void core_t::send_command(uint32_t data) {
 
   switch (command) {
     case command_t::decode_mb:
-      printf("[mdec] command: decode_mb\n");
+      log("command: decode_mb");
       parameter.index = 0;
       parameter.total = (data & 0xffff);
       break;
 
     case command_t::set_iqtab:
-      printf("[mdec] command: set_iqtab\n");
+      log("command: set_iqtab");
       parameter.index = 0;
       parameter.total = (data & 1) ? 32 : 16;
       break;
 
     case command_t::set_scale:
-      printf("[mdec] command: set_scale\n");
+      log("command: set_scale");
       parameter.index = 0;
       parameter.total = 32;
       break;
 
     default:
-      printf("[mdec] command: %08x (unhandled)\n", unsigned(command));
+      log("command: %08x (unhandled)", unsigned(command));
       break;
   }
 }

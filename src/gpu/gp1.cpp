@@ -89,13 +89,13 @@ void core_t::gp1(uint32_t data) {
           break;
 
         default:
-          printf("gpu::gp1(0x%08x)\n", data);
+          log("gp1(0x%08x)", data);
           break;
       }
       break;
 
     default:
-      printf("gpu::gp1(0x%08x)\n", data);
+      log("gp1(0x%08x)", data);
       break;
   }
 }

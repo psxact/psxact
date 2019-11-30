@@ -6,8 +6,8 @@
 
 using psx::cdrom::core_t;
 
-core_t::core_t(interrupt_access_t *irq, const char *game_file_name)
-    : memory_component_t("cdc")
+core_t::core_t(interrupt_access_t *irq, const char *game_file_name, bool log_enabled)
+    : memory_component_t("cdc", log_enabled)
     , irq(irq)
     , game_file_name(game_file_name) {
   game_file = fopen(game_file_name, "rb+");
@@ -38,7 +38,7 @@ void core_t::tick(int amount) {
       if (interrupt_timer == 0 && interrupt_request) {
         int32_t signal = interrupt_request & interrupt_enable;
         if (signal == interrupt_request) {
-          log_cdrom("delivering interrupt: %d", interrupt_request);
+          log("delivering interrupt: %d", interrupt_request);
           irq->send(interrupt_type_t::CDROM);
         }
       }
@@ -84,7 +84,7 @@ int32_t core_t::get_read_cursor() {
 }
 
 void core_t::read_sector() {
-  log_cdrom("read_sector(\"%02d:%02d:%02d\")",
+  log("read_sector(\"%02d:%02d:%02d\")",
     read_timecode.minute,
     read_timecode.second,
     read_timecode.sector);
@@ -104,7 +104,7 @@ void core_t::read_sector() {
     minute != read_timecode.minute ||
     second != read_timecode.second ||
     sector != read_timecode.sector) {
-    log_cdrom("expecting \"%02d:%02d:%02d\", but got \"%02d:%02d:%02d\" at 0x%08x",
+    log("expecting \"%02d:%02d:%02d\", but got \"%02d:%02d:%02d\" at 0x%08x",
       read_timecode.minute,
       read_timecode.second,
       read_timecode.sector,
@@ -202,7 +202,7 @@ void core_t::command_set_seek_target(uint8_t minute, uint8_t second, uint8_t sec
 }
 
 void core_t::command_test(uint8_t function) {
-  log_cdrom("command_test(0x%02x)", function);
+  log("command_test(0x%02x)", function);
 
   switch (function) {
   case 0x20:
@@ -263,7 +263,7 @@ void core_t::logic_executing_command() {
 #define get_param() \
   logic.parameter_fifo.read()
 
-  log_cdrom("logic_executing_command(0x%02x)", logic.command);
+  log("logic_executing_command(0x%02x)", logic.command);
 
   switch (logic.command) {
   case 0x01:
@@ -322,7 +322,7 @@ void core_t::logic_executing_command() {
     break;
 
   default:
-    log_cdrom("unknown command `0x%02x'", command);
+    log("unknown command `0x%02x'", command);
     return;
   }
 

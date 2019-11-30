@@ -45,7 +45,7 @@ class core_t : public memory_component_t {
   } reverb;
 
  public:
-  core_t();
+  core_t(bool log_enabled);
 
   uint32_t io_read_half(uint32_t address);
 

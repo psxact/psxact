@@ -8,9 +8,7 @@
 int main(int argc, char *argv[]) {
   psx::args_t ctx(argc, argv);
 
-  psx::console_t *console = new psx::console_t(
-    ctx.bios_file_name,
-    ctx.game_file_name);
+  psx::console_t *console = new psx::console_t(ctx);
 
   psx::sdl2 renderer;
 
@@ -20,7 +18,8 @@ int main(int argc, char *argv[]) {
 
   do {
     console->run_for_one_frame(&vram, &w, &h);
-  } while (renderer.render(vram, w, h));
+  }
+  while (renderer.render(vram, w, h));
 
   return 0;
 }

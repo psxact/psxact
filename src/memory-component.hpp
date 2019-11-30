@@ -10,8 +10,12 @@ namespace psx {
 class memory_component_t {
   const char *name;
 
+  bool log_enabled;
+
  public:
-  explicit memory_component_t(const char *name);
+  explicit memory_component_t(const char *name, bool log_enabled);
+
+  void log(const char *fmt, ...);
 
   virtual uint32_t io_read_byte(uint32_t address);
   virtual uint32_t io_read_half(uint32_t address);

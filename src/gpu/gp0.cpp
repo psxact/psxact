@@ -164,7 +164,7 @@ void core_t::gp0(uint32_t data) {
 
       default:
         if (command_size[command] == 1) {
-          printf("gpu::gp0(0x%08x)\n", fifo.buffer[0]);
+          log("gp0(0x%08x)", fifo.buffer[0]);
         }
         break;
     }

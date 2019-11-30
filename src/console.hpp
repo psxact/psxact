@@ -4,6 +4,7 @@
 #define CONSOLE_HPP_
 
 #include <cstdint>
+#include "args.hpp"
 #include "interrupt-access.hpp"
 #include "memory.hpp"
 #include "memory-access.hpp"
@@ -72,7 +73,7 @@ class console_t
   bool is_exe;
 
  public:
-  console_t(const char *bios_file_name, const char *game_file_name);
+  console_t(args_t &args);
 
   void send(interrupt_type_t flag);
 

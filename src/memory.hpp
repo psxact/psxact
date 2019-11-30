@@ -25,7 +25,7 @@ struct memory_t : public memory_component_t {
   };
 
   explicit memory_t(const char *name)
-    : memory_component_t(name) {
+    : memory_component_t(name, false) {
 
     memset(b, 0, size_t(kSize));
   }
@@ -64,7 +64,7 @@ struct memory_t : public memory_component_t {
       fclose(file);
       return true;
     } else {
-      printf("unable to load '%s'\n", filename);
+      log("unable to load '%s'", filename);
 
       return false;
     }

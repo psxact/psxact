@@ -11,48 +11,44 @@
 namespace psx {
 namespace input {
 
-enum class input_port_status_t {
-  none,
-  selected
-};
-
-enum class input_port_access_t {
-  controller = 0,
-  memory_card = 1
-};
-
-struct input_port_t {
-  input_port_access_t access;
-  input_port_status_t status;
-  int sequence;
-  uint16_t data;
-};
-
 class core_t : public memory_component_t {
+
+  fifo_t< uint8_t, 8 > rx;
+
+  int ack;
+  int ack_interrupt_cycles;
+  int ack_interrupt_enable;
+  int baud_counter;
+  int baud_elapses;
+  int baud_factor;
+  int baud_reload;
+  int rx_enable;
+  int rx_interrupt_mode;
+  int rx_interrupt_enable;
+  int tx_data;
+  int tx_data_pending;
+  int tx_enable;
+  int tx_interrupt_enable;
+  int slot_output;
+  int slot_select;
+  int interrupt;
+
+  struct device_t {
+    int output;
+    int index;
+    int lower;
+    int upper;
+  };
+
+  device_t devices[2];
   interrupt_access_t *irq;
 
-  int32_t baud_factor;
-  int32_t baud_reload;
-  int32_t baud_timer;
-  int32_t baud_elapses;
-
-  int32_t control;
-
-  bool interrupt;
-
-  bool dsr;
-  int dsr_cycles;
-  bool tx_enable;
-  bool tx_occurring;
-  bool rx_enable;
-  bool rx_occurred;
-  uint8_t tx_data;
-  uint8_t rx_data;
-
-  input_port_t ports[2];
-
  public:
-  explicit core_t(interrupt_access_t *irq);
+  explicit core_t(interrupt_access_t *irq, bool log_enabled);
+
+  void frame();
+
+  void tick(int amount);
 
   uint32_t io_read_byte(uint32_t address);
 
@@ -66,22 +62,8 @@ class core_t : public memory_component_t {
 
   void io_write_word(uint32_t address, uint32_t data);
 
-  void tick(int amount);
-
-  void reload_baud();
-
  private:
-  input_port_t *get_selected_port();
-
-  bool send(uint8_t request, uint8_t *response);
-
-  bool send_null(input_port_t *port, uint8_t request, uint8_t *response);
-
-  bool send_memory_card(input_port_t *port, uint8_t request, uint8_t *response);
-
-  bool send_controller(input_port_t *port, uint8_t request, uint8_t *response);
-
-  bool send_controller_digital(input_port_t *port, uint8_t request, uint8_t *response);
+  void write_rx(uint8_t data, bool ack);
 };
 
 }  // namespace input

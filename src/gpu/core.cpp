@@ -8,8 +8,8 @@
 
 using psx::gpu::core_t;
 
-core_t::core_t()
-  : memory_component_t("gpu")
+core_t::core_t(bool log_enabled)
+  : memory_component_t("gpu", log_enabled)
   , vram("vram") {
 }
 

@@ -51,7 +51,7 @@ class core_t : public memory_component_t {
   static opcode_t op_table_special[64];
 
  public:
-  explicit core_t(memory_access_t *memory);
+  explicit core_t(memory_access_t *memory, bool log_enabled);
 
   cop_t *get_cop(int n);
 

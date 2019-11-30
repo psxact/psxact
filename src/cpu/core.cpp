@@ -47,8 +47,8 @@ core_t::opcode_t core_t::op_table_special[64] = {
   &core_t::op_und,     &core_t::op_und,   &core_t::op_und,  &core_t::op_und
 };
 
-core_t::core_t(memory_access_t *memory)
-  : memory_component_t("cpu")
+core_t::core_t(memory_access_t *memory, bool log_enabled)
+  : memory_component_t("cpu", log_enabled)
   , bios_call(memory)
   , memory(memory) {
   regs.gp[0] = 0;

@@ -24,7 +24,7 @@ class core_t : public memory_component_t {
   } channels[7];
 
  public:
-  core_t(interrupt_access_t *irq, memory_access_t *memory);
+  core_t(interrupt_access_t *irq, memory_access_t *memory, bool log_enabled);
 
   uint32_t io_read_word(uint32_t address);
 

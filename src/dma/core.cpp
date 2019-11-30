@@ -6,8 +6,8 @@
 
 using psx::dma::core_t;
 
-core_t::core_t(interrupt_access_t *irq, memory_access_t *memory)
-  : memory_component_t("dma")
+core_t::core_t(interrupt_access_t *irq, memory_access_t *memory, bool log_enabled)
+  : memory_component_t("dma", log_enabled)
   , irq(irq)
   , memory(memory) {
 }
@@ -101,7 +101,7 @@ void core_t::run_channel_0() {
 void core_t::run_channel_1() {
   channels[1].control &= ~0x01000000;
 
-  log_dma("DMA1 running");
+  log("DMA1 running");
 
   irq_channel(1);
 }
@@ -277,7 +277,7 @@ void core_t::run_channel(int32_t n) {
     }
   }
 
-  log_dma("unhandled DMA%d control: 0x%08x", n, channels[n].control);
+  log("unhandled DMA%d control: 0x%08x", n, channels[n].control);
 }
 
 void core_t::irq_channel(int32_t n) {

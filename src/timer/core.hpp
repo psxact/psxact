@@ -55,7 +55,7 @@ class core_t : public memory_component_t {
   timer_t timers[3];
 
  public:
-  explicit core_t(interrupt_access_t *irq);
+  explicit core_t(interrupt_access_t *irq, bool log_enabled);
 
   uint32_t io_read_half(uint32_t address);
 

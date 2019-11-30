@@ -7,8 +7,8 @@
 
 using psx::spu::core_t;
 
-core_t::core_t()
-  : memory_component_t("spu")
+core_t::core_t(bool log_enabled)
+  : memory_component_t("spu", log_enabled)
   , sound_ram("sound-ram") {
 }
 

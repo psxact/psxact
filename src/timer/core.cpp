@@ -18,8 +18,8 @@
 
 using psx::timer::core_t;
 
-core_t::core_t(interrupt_access_t *irq)
-  : memory_component_t("counter")
+core_t::core_t(interrupt_access_t *irq, bool log_enabled)
+  : memory_component_t("counter", log_enabled)
   , irq(irq) {
   unit_init(0, 11, 7 * 4);
   unit_init(1, 11, 7 * 3413);
