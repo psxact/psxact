@@ -2,7 +2,7 @@
 
 set -e
 
-cp bin/app/psxact .
+cp bin/psxact .
 
 COMMIT_DATE=`git show -s --format=%cI $CI_COMMIT_SHA`
 
