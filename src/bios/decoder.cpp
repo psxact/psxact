@@ -11,7 +11,6 @@ using psx::bios::decoder_t;
 
 decoder_t::decoder_t(memory_access_t *memory)
   : memory(memory) {
-  log = fopen("bios-call.log", "w");
 }
 
 static std::string char_to_string(char c) {
@@ -37,7 +36,7 @@ static std::string char_to_string(char c) {
 }
 
 #define log_call(fmt, ...) \
-  fprintf(log, "[%08x] " fmt "\n", pc, ## __VA_ARGS__);
+  printf("[%08x] " fmt "\n", pc, ## __VA_ARGS__);
 
 void decoder_t::decode_a(uint32_t pc, uint32_t function, uint32_t *args) {
   switch (function) {
@@ -410,14 +409,9 @@ std::string decoder_t::decode_timecode(uint32_t arg) {
   uint8_t s = read_byte(arg + 1);
   uint8_t f = read_byte(arg + 2);
 
-  std::stringstream o;
+  char buffer[11];
 
-  o << std::setbase(16)
-    << std::setfill('0')
-    << std::setw(2)
-    << '"'
-    << m << ':' << s << ':' << f
-    << '"';
+  sprintf(buffer, "\"%02d:%02d:%02d\"", m % 99, s % 60, f % 75);
 
-  return o.str();
+  return buffer;
 }

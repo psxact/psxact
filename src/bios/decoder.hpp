@@ -14,8 +14,6 @@ class decoder_t {
  private:
   memory_access_t *memory;
 
-  FILE *log;
-
  public:
   explicit decoder_t(memory_access_t *memory);
 

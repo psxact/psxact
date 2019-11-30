@@ -57,11 +57,11 @@ class core_t : public memory_component_t {
  public:
   explicit core_t(interrupt_access_t *irq, bool log_enabled);
 
-  uint32_t io_read_half(uint32_t address);
+  uint16_t io_read_half(uint32_t address);
 
   uint32_t io_read_word(uint32_t address);
 
-  void io_write_half(uint32_t address, uint32_t data);
+  void io_write_half(uint32_t address, uint16_t data);
 
   void io_write_word(uint32_t address, uint32_t data);
 

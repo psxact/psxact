@@ -8,7 +8,7 @@ expansion1_t::expansion1_t()
   : memory_component_t("exp1", false) {
 }
 
-uint32_t expansion1_t::io_read_byte(uint32_t address) {
+uint8_t expansion1_t::io_read_byte(uint32_t address) {
   if (address == 0x1f000004) {
     return 0;
   }

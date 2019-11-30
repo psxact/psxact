@@ -2,7 +2,9 @@
 
 set -e
 
-cp bin/psxact .
+PSXACT=$(find . -type f -name psxact)
+
+cp $PSXACT .
 
 COMMIT_DATE=`git show -s --format=%cI $CI_COMMIT_SHA`
 

@@ -4,8 +4,8 @@ set -e
 
 # Build
 
-mkdir -p bin
-pushd bin
+mkdir -p build
+pushd build
 
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make

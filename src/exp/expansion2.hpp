@@ -12,7 +12,7 @@ class expansion2_t : public memory_component_t {
  public:
   expansion2_t();
 
-  void io_write_byte(uint32_t address, uint32_t data);
+  void io_write_byte(uint32_t address, uint8_t data);
 };
 
 }  // namespace exp

@@ -93,11 +93,11 @@ class core_t : public memory_component_t {
 
   void set_istat(uint32_t value);
 
-  uint32_t io_read_half(uint32_t address);
+  uint16_t io_read_half(uint32_t address);
 
   uint32_t io_read_word(uint32_t address);
 
-  void io_write_half(uint32_t address, uint32_t data);
+  void io_write_half(uint32_t address, uint16_t data);
 
   void io_write_word(uint32_t address, uint32_t data);
 

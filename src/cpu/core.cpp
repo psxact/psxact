@@ -254,7 +254,7 @@ void core_t::set_istat(uint32_t value) {
   update_irq(value, get_imask());
 }
 
-uint32_t core_t::io_read_half(uint32_t address) {
+uint16_t core_t::io_read_half(uint32_t address) {
   switch (address) {
     case 0x1f801070:
       return get_istat();
@@ -270,7 +270,7 @@ uint32_t core_t::io_read_word(uint32_t address) {
   return io_read_half(address);
 }
 
-void core_t::io_write_half(uint32_t address, uint32_t data) {
+void core_t::io_write_half(uint32_t address, uint16_t data) {
   switch (address) {
     case 0x1f801070:
       return set_istat(data & istat);
@@ -471,7 +471,7 @@ void core_t::op_cop(int n) {
     case 0x06: return cop->write_ccr(rd, get_register(rt));
   }
 
-  printf("[cpu] op_cop%d(0x%08x)\n", n, code);
+  log("op_cop%d(0x%08x)", n, code);
 }
 
 void core_t::op_cop0() {

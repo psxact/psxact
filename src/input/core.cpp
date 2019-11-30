@@ -95,7 +95,7 @@ void core_t::tick(int amount) {
   }
 }
 
-uint32_t core_t::io_read_byte(uint32_t address) {
+uint8_t core_t::io_read_byte(uint32_t address) {
   switch (address) {
     case 0x1f801040:
       uint8_t data = rx.has_data()
@@ -110,7 +110,7 @@ uint32_t core_t::io_read_byte(uint32_t address) {
   return memory_component_t::io_read_byte(address);
 }
 
-uint32_t core_t::io_read_half(uint32_t address) {
+uint16_t core_t::io_read_half(uint32_t address) {
   switch (address) {
     case 0x1f801044:
       return
@@ -141,7 +141,7 @@ uint32_t core_t::io_read_word(uint32_t address) {
   return memory_component_t::io_read_word(address);
 }
 
-void core_t::io_write_byte(uint32_t address, uint32_t data) {
+void core_t::io_write_byte(uint32_t address, uint8_t data) {
   switch (address) {
     case 0x1f801040:
       tx_data = data & 0xff;
@@ -153,7 +153,7 @@ void core_t::io_write_byte(uint32_t address, uint32_t data) {
   return memory_component_t::io_write_byte(address, data);
 }
 
-void core_t::io_write_half(uint32_t address, uint32_t data) {
+void core_t::io_write_half(uint32_t address, uint16_t data) {
   switch (address) {
     case 0x1f801048:
       // 1F801048h JOY_MODE (R/W) (usually 000Dh, ie. 8bit, no parity, MUL1)

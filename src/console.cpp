@@ -107,7 +107,7 @@ uint32_t console_t::read_memory_control(int size, uint32_t address) {
   throw std::exception();
 }
 
-uint32_t console_t::read_byte(uint32_t address) {
+uint8_t console_t::read_byte(uint32_t address) {
   auto component = decode(address);
 
   return component != nullptr
@@ -115,7 +115,7 @@ uint32_t console_t::read_byte(uint32_t address) {
     : read_memory_control(1, address);
 }
 
-uint32_t console_t::read_half(uint32_t address) {
+uint16_t console_t::read_half(uint32_t address) {
   auto component = decode(address);
 
   return component != nullptr
@@ -192,7 +192,7 @@ void console_t::write_memory_control(int size, uint32_t address, uint32_t data) 
   throw std::exception();
 }
 
-void console_t::write_byte(uint32_t address, uint32_t data) {
+void console_t::write_byte(uint32_t address, uint8_t data) {
   auto component = decode(address);
 
   return (component != nullptr)
@@ -200,7 +200,7 @@ void console_t::write_byte(uint32_t address, uint32_t data) {
     : write_memory_control(1, address, data);
 }
 
-void console_t::write_half(uint32_t address, uint32_t data) {
+void console_t::write_half(uint32_t address, uint16_t data) {
   auto component = decode(address);
 
   return (component != nullptr)

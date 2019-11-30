@@ -34,11 +34,11 @@ struct memory_t : public memory_component_t {
     return &b[address];
   }
 
-  uint32_t io_read_byte(uint32_t address) {
+  uint8_t io_read_byte(uint32_t address) {
     return b[(address & kMask) / 1];
   }
 
-  uint32_t io_read_half(uint32_t address) {
+  uint16_t io_read_half(uint32_t address) {
     return h[(address & kMask) / 2];
   }
 
@@ -46,11 +46,11 @@ struct memory_t : public memory_component_t {
     return w[(address & kMask) / 4];
   }
 
-  void io_write_byte(uint32_t address, uint32_t data) {
+  void io_write_byte(uint32_t address, uint8_t data) {
     b[(address & kMask) / 1] = uint8_t(data);
   }
 
-  void io_write_half(uint32_t address, uint32_t data) {
+  void io_write_half(uint32_t address, uint16_t data) {
     h[(address & kMask) / 2] = uint16_t(data);
   }
 

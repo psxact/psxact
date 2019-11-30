@@ -26,7 +26,7 @@ core_t::core_t(interrupt_access_t *irq, bool log_enabled)
   unit_init(2,  1, 8);
 }
 
-uint32_t core_t::io_read_half(uint32_t address) {
+uint16_t core_t::io_read_half(uint32_t address) {
   auto m = (address >> 2) & 3;
   auto n = (address >> 4) & 3;
 
@@ -46,7 +46,7 @@ uint32_t core_t::io_read_word(uint32_t address) {
   return io_read_half(address);
 }
 
-void core_t::io_write_half(uint32_t address, uint32_t data) {
+void core_t::io_write_half(uint32_t address, uint16_t data) {
   auto m = (address >> 2) & 3;
   auto n = (address >> 4) & 3;
 

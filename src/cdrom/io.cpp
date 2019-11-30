@@ -7,7 +7,7 @@
 
 using psx::cdrom::core_t;
 
-uint32_t core_t::io_read_byte(uint32_t address) {
+uint8_t core_t::io_read_byte(uint32_t address) {
   switch (address) {
     case 0x1f801800:
       return uint8_t(
@@ -98,7 +98,7 @@ void core_t::io_write_port_3_2(uint8_t) {}
 
 void core_t::io_write_port_3_3(uint8_t) {}
 
-void core_t::io_write_byte(uint32_t address, uint32_t data) {
+void core_t::io_write_byte(uint32_t address, uint8_t data) {
   log("io_write_byte(0x%08x, 0x%08x)", address, data);
 
   switch (address) {

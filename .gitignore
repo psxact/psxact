@@ -10,3 +10,4 @@ cmake-build-*/
 # Files
 
 *.log
+*.tar.bz2
