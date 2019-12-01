@@ -4,53 +4,39 @@
 
 #include <SDL.h>
 
+#include "input/devices/digital-pad.hpp"
+#include "input/devices/not-connected.hpp"
 #include "utility.hpp"
 
+using namespace psx::input;
 using psx::input::core_t;
 
 core_t::core_t(interrupt_access_t *irq, bool log_enabled)
   : memory_component_t("input", log_enabled)
-  , devices()
+  , ports()
   , irq(irq) {
   baud_factor = 1;
   baud_reload = 0x0088;
   baud_counter = baud_reload * baud_factor;
+
+  device_t *not_connected = (device_t *) &devices::not_connected_t::instance;
+
+  ports[0].memcard = not_connected;
+  ports[0].control = new devices::digital_pad_t();
+  ports[1].memcard = not_connected;
+  ports[1].control = not_connected;
 }
 
 void core_t::frame() {
-  int numkeys;
-  
-  if (const uint8_t *keys = SDL_GetKeyboardState(&numkeys)) {
-    devices[0].value =
-      ( keys[SDL_SCANCODE_RSHIFT] <<  0 ) | // 0   Select Button    (0=Pressed, 1=Released)
-      ( 0                         <<  1 ) | // 1   L3/Joy-button    (0=Pressed, 1=Released/None/Disabled) ;analog mode only
-      ( 0                         <<  2 ) | // 2   R3/Joy-button    (0=Pressed, 1=Released/None/Disabled) ;analog mode only
-      ( keys[SDL_SCANCODE_RETURN] <<  3 ) | // 3   Start Button     (0=Pressed, 1=Released)
-      ( keys[SDL_SCANCODE_UP]     <<  4 ) | // 4   Joypad Up        (0=Pressed, 1=Released)
-      ( keys[SDL_SCANCODE_RIGHT]  <<  5 ) | // 5   Joypad Right     (0=Pressed, 1=Released)
-      ( keys[SDL_SCANCODE_DOWN]   <<  6 ) | // 6   Joypad Down      (0=Pressed, 1=Released)
-      ( keys[SDL_SCANCODE_LEFT]   <<  7 ) | // 7   Joypad Left      (0=Pressed, 1=Released)
-      ( keys[SDL_SCANCODE_1]      <<  8 ) | // 8   L2 Button        (0=Pressed, 1=Released) (Lower-left shoulder)
-      ( keys[SDL_SCANCODE_3]      <<  9 ) | // 9   R2 Button        (0=Pressed, 1=Released) (Lower-right shoulder)
-      ( keys[SDL_SCANCODE_Q]      << 10 ) | // 10  L1 Button        (0=Pressed, 1=Released) (Upper-left shoulder)
-      ( keys[SDL_SCANCODE_E]      << 11 ) | // 11  R1 Button        (0=Pressed, 1=Released) (Upper-right shoulder)
-      ( keys[SDL_SCANCODE_W]      << 12 ) | // 12  /\ Button        (0=Pressed, 1=Released) (Triangle, upper button)
-      ( keys[SDL_SCANCODE_D]      << 13 ) | // 13  () Button        (0=Pressed, 1=Released) (Circle, right button)
-      ( keys[SDL_SCANCODE_X]      << 14 ) | // 14  >< Button        (0=Pressed, 1=Released) (Cross, lower button)
-      ( keys[SDL_SCANCODE_A]      << 15 ) ; // 15  [] Button        (0=Pressed, 1=Released) (Square, left button)
-
-    devices[1].value = 0;
+  for (port_t &port : ports) {
+    port.control->frame();
+    port.memcard->frame();
   }
-  else {
-    devices[0].value = 0;
-    devices[1].value = 0;
-  }
-
-  devices[0].value ^= 0xffff;
-  devices[1].value ^= 0xffff;
 }
 
 void core_t::tick(int amount) {
+  port_t &port = ports[port_select];
+
   baud_counter -= amount;
 
   while (baud_counter <= 0) {
@@ -62,35 +48,40 @@ void core_t::tick(int amount) {
 
       if (tx_data_pending) {
         tx_data_pending = 0;
-        log("sending '%02x' to slot %d", tx_data, slot_select);
 
-        device_t &device = devices[slot_select];
+        if (port.selected == nullptr) {
+          if (tx_data & 0x80) {
+            log("selecting memory card on port %d", port_select);
+            port.selected = port.memcard;
+          }
+          else {
+            log("selecting controller on port %d", port_select);
+            port.selected = port.control;
+          }
 
-        switch (device.index) {
-          case 0: write_rx(0xff, tx_data == 0x01); break;
-          case 1: write_rx(0x41, tx_data == 0x42); break;
-          case 2: write_rx(0x5a, true); break;
-          case 3: write_rx(device.value >> 0, true); break;
-          case 4: write_rx(device.value >> 8, false); break;
+          port.selected->reset();
         }
 
-        device.index++;
+        uint8_t rx_data;
+        port.selected->send(tx_data, &rx_data);
+
+        log("sent '%02x' to slot %d, received '%02x' (ack: %d)", tx_data, port_select, rx_data, ack);
+
+        write_rx(rx_data);
       }
     }
   }
 
-  if (ack_interrupt_cycles) {
-    ack_interrupt_cycles -= amount;
+  if (port.selected) {
+    device_ack_t next_ack = port.selected->tick(amount);
 
-    if (ack_interrupt_cycles <= 0) {
-      ack_interrupt_cycles = 0;
-
-      if (ack_interrupt_enable && ack) {
-        log("sending ack interrupt");
-
-        irq->send(interrupt_type_t::INPUT);
+    if (ack_interrupt_enable) {
+      if (ack == device_ack_t::LOW && next_ack == device_ack_t::HIGH) {
+        send_interrupt();
       }
     }
+
+    ack = next_ack;
   }
 }
 
@@ -117,7 +108,7 @@ uint16_t core_t::io_read_half(uint32_t address) {
         (rx.has_data() << 1) |
         (1 << 2) | //   2     TX Ready Flag 2   (1=Ready/Finished)
         (0 << 3) | //   3     RX Parity Error   (0=No, 1=Error; Wrong Parity, when enabled)  (sticky)
-        (ack << 7) |
+        (int(ack) << 7) |
         (interrupt << 9) |
         (baud_counter << 11);
 
@@ -129,13 +120,13 @@ uint16_t core_t::io_read_half(uint32_t address) {
     case 0x1f80104a: {
       uint16_t data =
         (tx_enable << 0) |
-        (slot_output << 1) |
+        (port_output << 1) |
         (rx_enable << 2) |
         (rx_interrupt_mode << 8) |
         (tx_interrupt_enable << 10) |
         (rx_interrupt_enable << 11) |
         (ack_interrupt_enable << 12) |
-        (slot_select << 13);
+        (port_select << 13);
 
       log("104a: returning '%04x'", data);
 
@@ -183,6 +174,10 @@ void core_t::io_write_half(uint32_t address, uint16_t data) {
     case 0x1f80104a:
       if (data & 0x40) {
         log("resetting input");
+        interrupt = 0;
+        port_output = 0;
+        port_select = 0;
+        rx.clear();
       }
       else {
         if (data & 0x10) {
@@ -190,20 +185,21 @@ void core_t::io_write_half(uint32_t address, uint16_t data) {
         }
 
         tx_enable = (data >> 0) & 1;
-        slot_output = (data >> 1) & 1;
+        port_output = (data >> 1) & 1;
         rx_enable = (data >> 2) & 1;
         rx_interrupt_mode = (data >> 8) & 3;
         tx_interrupt_enable = (data >> 10) & 1;
         rx_interrupt_enable = (data >> 11) & 1;
         ack_interrupt_enable = (data >> 12) & 1;
-        slot_select = (data >> 13) & 1;
+        port_select = (data >> 13) & 1;
 
-        if (devices[slot_select].output < slot_output) {
-          log("resetting slot %d", slot_select);
-          devices[slot_select].index = 0;
+        if (ports[port_select].output < port_output) {
+          log("resetting slot %d", port_select);
+
+          ports[port_select].selected = nullptr;
         }
 
-        devices[slot_select].output = slot_output;
+        ports[port_select].output = port_output;
       }
       return;
 
@@ -219,15 +215,17 @@ void core_t::io_write_word(uint32_t address, uint32_t data) {
   return memory_component_t::io_write_word(address, data);
 }
 
-void core_t::write_rx(uint8_t data, bool ack) {
+void core_t::write_rx(uint8_t data) {
   rx.write(data);
 
   if (rx_interrupt_enable) {
-    log("sending rx interrupt");
-
-    irq->send(interrupt_type_t::INPUT);
+    send_interrupt();
   }
+}
 
-  this->ack = ack;
-  this->ack_interrupt_cycles = 100;
+void core_t::send_interrupt() {
+    log("sending interrupt");
+
+    interrupt = 1;
+    irq->send(interrupt_type_t::INPUT);
 }

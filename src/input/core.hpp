@@ -3,6 +3,7 @@
 #ifndef INPUT_CORE_HPP_
 #define INPUT_CORE_HPP_
 
+#include "input/device.hpp"
 #include "console.hpp"
 #include "fifo.hpp"
 #include "interrupt-access.hpp"
@@ -11,12 +12,18 @@
 namespace psx {
 namespace input {
 
+struct port_t {
+  device_t *memcard;
+  device_t *control;
+  device_t *selected;
+  int output;
+};
+
 class core_t : public memory_component_t {
 
   fifo_t< uint8_t, 8 > rx;
 
-  int ack;
-  int ack_interrupt_cycles;
+  device_ack_t ack;
   int ack_interrupt_enable;
   int baud_counter;
   int baud_elapses;
@@ -29,17 +36,11 @@ class core_t : public memory_component_t {
   int tx_data_pending;
   int tx_enable;
   int tx_interrupt_enable;
-  int slot_output;
-  int slot_select;
+  int port_output;
+  int port_select;
   int interrupt;
 
-  struct device_t {
-    int output;
-    int index;
-    uint16_t value;
-  };
-
-  device_t devices[2];
+  port_t ports[2];
   interrupt_access_t *irq;
 
  public:
@@ -62,7 +63,9 @@ class core_t : public memory_component_t {
   void io_write_word(uint32_t address, uint32_t data);
 
  private:
-  void write_rx(uint8_t data, bool ack);
+  void write_rx(uint8_t data);
+
+  void send_interrupt();
 };
 
 }  // namespace input
