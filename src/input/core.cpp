@@ -155,7 +155,7 @@ void core_t::io_write_half(uint32_t address, uint16_t data) {
   switch (address) {
     case 0x1f801048:
       // 1F801048h JOY_MODE (R/W) (usually 000Dh, ie. 8bit, no parity, MUL1)
-      // 
+      //
       //   0-1   Baudrate Reload Factor (1=MUL1, 2=MUL16, 3=MUL64) (or 0=MUL1, too)
       //   2-3   Character Length       (0=5bits, 1=6bits, 2=7bits, 3=8bits)
       //   4     Parity Enable          (0=No, 1=Enable)
@@ -191,9 +191,9 @@ void core_t::io_write_half(uint32_t address, uint16_t data) {
         dsr.interrupt_enable = (data >> 12) & 1;
         port.select = (data >> 13) & 1;
 
-	      port.control[0]->set_dtr(port.output == 1 && port.select == 0);
+        port.control[0]->set_dtr(port.output == 1 && port.select == 0);
         port.memcard[0]->set_dtr(port.output == 1 && port.select == 0);
-	      port.control[1]->set_dtr(port.output == 1 && port.select == 1);
+        port.control[1]->set_dtr(port.output == 1 && port.select == 1);
         port.memcard[1]->set_dtr(port.output == 1 && port.select == 1);
       }
       return;

@@ -3,12 +3,10 @@
 #ifndef GPU_CORE_HPP_
 #define GPU_CORE_HPP_
 
-#include "console.hpp"
 #include "memory.hpp"
 #include "memory-component.hpp"
 
-namespace psx {
-namespace gpu {
+namespace psx::gpu {
 
 constexpr int GPU_GP0 = 0x1f801810;
 constexpr int GPU_GP1 = 0x1f801814;
@@ -175,7 +173,6 @@ class core_t : public memory_component_t {
     int32_t w0, int32_t w1, int32_t w2, color_t *color);
 };
 
-}  // namespace gpu
-}  // namespace psx
+}  // namespace psx::gpu
 
 #endif  // GPU_CORE_HPP_

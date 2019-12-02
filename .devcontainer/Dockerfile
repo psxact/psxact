@@ -6,7 +6,6 @@ RUN apt -y update && apt -y install --no-install-recommends \
         git \
         git-lfs \
         libsdl2-dev \
-        python-pip \
  && apt -y autoremove \
  && apt -y clean \
  && rm -rf /var/lib/apt/lists/*

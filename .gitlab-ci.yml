@@ -4,9 +4,11 @@ stages:
 
 build:linux:
   stage: build
-  image: adambecker/psxact
+  image: debian:buster
   variables:
     GIT_SUBMODULE_STRATEGY: normal
+  before_script:
+    - apt update && apt -y install build-essential cmake git libsdl2-dev
   script:
     - ./ci/build.sh
     - ./ci/package.sh

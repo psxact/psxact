@@ -3,12 +3,10 @@
 #ifndef TIMER_CORE_HPP_
 #define TIMER_CORE_HPP_
 
-#include "console.hpp"
 #include "interrupt-access.hpp"
 #include "memory-component.hpp"
 
-namespace psx {
-namespace timer {
+namespace psx::timer {
 
 struct timer_t {
   uint16_t counter;
@@ -97,7 +95,6 @@ class core_t : public memory_component_t {
   void unit_set_counter(int n, uint16_t data);
 };
 
-}  // namespace timer
-}  // namespace psx
+}  // namespace psx::timer
 
 #endif  // TIMER_CORE_HPP_

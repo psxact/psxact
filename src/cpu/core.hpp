@@ -8,12 +8,10 @@
 #include "cpu/cop.hpp"
 #include "cpu/cop0/sys.hpp"
 #include "cpu/cop2/gte.hpp"
-#include "console.hpp"
 #include "memory-access.hpp"
 #include "memory-component.hpp"
 
-namespace psx {
-namespace cpu {
+namespace psx::cpu {
 
 class core_t : public memory_component_t {
   bios::decoder_t bios_call;
@@ -284,7 +282,6 @@ class core_t : public memory_component_t {
   void set_register(uint32_t index, uint32_t value);
 };
 
-}  // namespace cpu
-}  // namespace psx
+}  // namespace psx::cpu
 
 #endif  // CPU_CORE_HPP_

@@ -5,8 +5,7 @@
 
 #include "memory-component.hpp"
 
-namespace psx {
-namespace exp {
+namespace psx::exp {
 
 class expansion2_t : public memory_component_t {
  public:
@@ -15,7 +14,6 @@ class expansion2_t : public memory_component_t {
   void io_write_byte(uint32_t address, uint8_t data);
 };
 
-}  // namespace exp
-}  // namespace psx
+}  // namespace psx::exp
 
 #endif  // EXP_EXPANSION2_HPP_

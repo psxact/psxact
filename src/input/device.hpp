@@ -5,8 +5,7 @@
 
 #include <cstdint>
 
-namespace psx {
-namespace input {
+namespace psx::input {
 
 enum class device_dsr_t {
   HIGH = 0,
@@ -39,7 +38,6 @@ class device_t {
   virtual void set_dtr(bool next_dtr);
 };
 
-}  // namespace input
-}  // namespace psx
+}  // namespace psx::input
 
 #endif  // INPUT_DEVICE_HPP_

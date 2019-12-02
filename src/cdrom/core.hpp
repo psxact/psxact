@@ -6,13 +6,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string>
-#include "console.hpp"
 #include "fifo.hpp"
 #include "interrupt-access.hpp"
 #include "memory-component.hpp"
 
-namespace psx {
-namespace cdrom {
+namespace psx::cdrom {
 
 struct sector_timecode_t {
   uint8_t minute;
@@ -165,7 +163,6 @@ class core_t : public memory_component_t {
   void drive_reading();
 };
 
-}  // namespace cdrom
-}  // namespace psx
+}  // namespace psx::cdrom
 
 #endif  // CDROM_CORE_HPP_

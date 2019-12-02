@@ -3,11 +3,9 @@
 #ifndef MDEC_CORE_HPP_
 #define MDEC_CORE_HPP_
 
-#include "console.hpp"
 #include "memory-component.hpp"
 
-namespace psx {
-namespace mdec {
+namespace psx::mdec {
 
 enum {
   MDEC_DATA = 0x1f801820,
@@ -58,7 +56,6 @@ class core_t : public memory_component_t {
   void send_scale_tab(int n, uint32_t data);
 };
 
-}  // namespace mdec
-}  // namespace psx
+}  // namespace psx::mdec
 
 #endif  // MDEC_CORE_HPP_

@@ -7,7 +7,7 @@ using namespace psx::input::devices;
 
 void digital_pad_t::frame() {
   int numkeys;
-  
+
   if (const uint8_t *keys = SDL_GetKeyboardState(&numkeys)) {
     bits =
       ( keys[SDL_SCANCODE_RSHIFT] <<  0 ) | // 0   Select Button    (0=Pressed, 1=Released)

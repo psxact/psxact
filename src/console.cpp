@@ -5,17 +5,6 @@
 #include <cassert>
 #include <cstring>
 #include <exception>
-#include "cdrom/core.hpp"
-#include "timer/core.hpp"
-#include "cpu/core.hpp"
-#include "dma/core.hpp"
-#include "exp/expansion1.hpp"
-#include "exp/expansion2.hpp"
-#include "exp/expansion3.hpp"
-#include "gpu/core.hpp"
-#include "input/core.hpp"
-#include "mdec/core.hpp"
-#include "spu/core.hpp"
 #include "blob.hpp"
 #include "limits.hpp"
 #include "utility.hpp"

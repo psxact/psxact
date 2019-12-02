@@ -7,8 +7,7 @@
 #include <string>
 #include "memory-access.hpp"
 
-namespace psx {
-namespace bios {
+namespace psx::bios {
 
 class decoder_t {
  private:
@@ -31,7 +30,6 @@ class decoder_t {
   std::string decode_timecode(uint32_t arg);
 };
 
-}  // namespace bios
-}  // namespace psx
+}  // namespace psx::bios
 
 #endif  // CPU_BIOS_DECODER_HPP_

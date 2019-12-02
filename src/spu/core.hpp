@@ -3,12 +3,10 @@
 #ifndef SPU_CORE_HPP_
 #define SPU_CORE_HPP_
 
-#include "console.hpp"
 #include "memory.hpp"
 #include "memory-component.hpp"
 
-namespace psx {
-namespace spu {
+namespace psx::spu {
 
 class core_t : public memory_component_t {
   uint16_t control;
@@ -53,7 +51,6 @@ class core_t : public memory_component_t {
   void io_write_word(uint32_t address, uint32_t data);
 };
 
-}  // namespace spu
-}  // namespace psx
+}  // namespace psx::spu
 
 #endif  // SPU_CORE_HPP_

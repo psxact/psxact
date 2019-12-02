@@ -5,15 +5,13 @@
 
 #include "memory-component.hpp"
 
-namespace psx {
-namespace exp {
+namespace psx::exp {
 
 class expansion3_t : public memory_component_t {
  public:
   expansion3_t();
 };
 
-}  // namespace exp
-}  // namespace psx
+}  // namespace psx::exp
 
 #endif  // EXP_EXPANSION3_HPP_

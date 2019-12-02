@@ -4,50 +4,23 @@
 #define CONSOLE_HPP_
 
 #include <cstdint>
+#include "cdrom/core.hpp"
+#include "cpu/core.hpp"
+#include "dma/core.hpp"
+#include "exp/expansion1.hpp"
+#include "exp/expansion2.hpp"
+#include "exp/expansion3.hpp"
+#include "gpu/core.hpp"
+#include "input/core.hpp"
+#include "mdec/core.hpp"
+#include "spu/core.hpp"
+#include "timer/core.hpp"
 #include "args.hpp"
 #include "interrupt-access.hpp"
 #include "memory.hpp"
 #include "memory-access.hpp"
 
 namespace psx {
-
-namespace cdrom {
-class core_t;
-}
-
-namespace timer {
-class core_t;
-}
-
-namespace cpu {
-class core_t;
-}
-
-namespace dma {
-class core_t;
-}
-
-namespace exp {
-class expansion1_t;
-class expansion2_t;
-class expansion3_t;
-}
-
-namespace gpu {
-class core_t;
-}
-
-namespace input {
-class core_t;
-}
-
-namespace mdec {
-class core_t;
-}
-
-namespace spu {
-class core_t;
-}
 
 class console_t
   : public memory_access_t

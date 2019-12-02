@@ -6,9 +6,7 @@
 #include <cstdint>
 #include "cpu/cop.hpp"
 
-namespace psx {
-namespace cpu {
-namespace cop0 {
+namespace psx::cpu::cop0 {
 
 enum class exception_t {
   interrupt,
@@ -45,8 +43,6 @@ class sys_t : public cop_t {
   void rfe();
 };
 
-}  // namespace cop0
-}  // namespace cpu
-}  // namespace psx
+}  // namespace psx::cpu::cop0
 
 #endif  // CPU_COP0_SYS_HPP_

@@ -7,9 +7,7 @@
 #include <cstdint>
 #include "cpu/cop.hpp"
 
-namespace psx {
-namespace cpu {
-namespace cop2 {
+namespace psx::cpu::cop2 {
 
 class gte_t : public cop_t {
   enum class matrix_t {
@@ -194,8 +192,6 @@ class gte_t : public cop_t {
   int32_t flag_h(int64_t value);
 };
 
-}  // namespace cop2
-}  // namespace cpu
-}  // namespace psx
+}  // namespace psx::cpu::cop2
 
 #endif  // CPU_COP2_GTE_HPP_

@@ -6,8 +6,7 @@
 #include <cstdint>
 #include <cstdio>
 
-namespace psx {
-namespace utility {
+namespace psx::utility {
 
 template<int bits>
 inline uint32_t sclip(uint32_t value) {
@@ -46,7 +45,6 @@ inline int clz(uint32_t value) {
   return count;
 }
 
-}  // namespace utility
-}  // namespace psx
+}  // namespace psx::utility
 
 #endif  // UTILITY_HPP_

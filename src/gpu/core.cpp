@@ -3,7 +3,6 @@
 #include "gpu/core.hpp"
 
 #include <cassert>
-#include "console.hpp"
 #include "utility.hpp"
 
 using namespace psx::gpu;

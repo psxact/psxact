@@ -5,8 +5,7 @@
 
 #include <cstdint>
 
-namespace psx {
-namespace cpu {
+namespace psx::cpu {
 
 class cop_t {
  public:
@@ -19,7 +18,6 @@ class cop_t {
   virtual void write_gpr(uint32_t n, uint32_t value) = 0;
 };
 
-}  // namespace cpu
-}  // namespace psx
+}  // namespace psx::cpu
 
 #endif  // CPU_COP_HPP_

@@ -6,9 +6,7 @@
 #include <cstdint>
 #include "input/device.hpp"
 
-namespace psx {
-namespace input {
-namespace devices {
+namespace psx::input::devices {
 
 class digital_pad_t : public device_t {
   int bit = 0;
@@ -23,8 +21,6 @@ class digital_pad_t : public device_t {
   void set_dtr(bool next_dtr);
 };
 
-}  // namespace devices
-}  // namespace input
-}  // namespace psx
+}  // namespace psx::input::devices
 
 #endif  // INPUT_DEVICES_DIGITAL_PAD_HPP_

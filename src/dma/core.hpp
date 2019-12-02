@@ -7,8 +7,7 @@
 #include "memory-access.hpp"
 #include "memory-component.hpp"
 
-namespace psx {
-namespace dma {
+namespace psx::dma {
 
 class core_t : public memory_component_t {
   interrupt_access_t *irq;
@@ -55,7 +54,6 @@ class core_t : public memory_component_t {
   void update_irq_active_flag();
 };
 
-}  // namespace dma
-}  // namespace psx
+}  // namespace psx::dma
 
 #endif  // DMA_CORE_HPP_

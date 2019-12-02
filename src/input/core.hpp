@@ -4,13 +4,11 @@
 #define INPUT_CORE_HPP_
 
 #include "input/device.hpp"
-#include "console.hpp"
 #include "fifo.hpp"
 #include "interrupt-access.hpp"
 #include "memory-component.hpp"
 
-namespace psx {
-namespace input {
+namespace psx::input {
 
 class core_t : public memory_component_t {
 
@@ -77,7 +75,6 @@ class core_t : public memory_component_t {
   void send_interrupt();
 };
 
-}  // namespace input
-}  // namespace psx
+}  // namespace psx::input
 
 #endif  // INPUT_CORE_HPP_
