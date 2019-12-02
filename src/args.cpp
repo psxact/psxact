@@ -52,29 +52,32 @@ args_t::args_t(int argc, char **argv)
       case 'b': this->bios_file_name = optarg; break;
       case 'g': this->game_file_name = optarg; break;
       case 'l':
-        if (strncmp(optarg, "cpu", 3) == 0) {
+        if (strcmp(optarg, "cpu") == 0) {
           this->log_cpu = true;
         }
-        else if (strncmp(optarg, "dma", 3) == 0) {
+        else if (strcmp(optarg, "dma") == 0) {
           this->log_dma = true;
         }
-        else if (strncmp(optarg, "gpu", 3) == 0) {
+        else if (strcmp(optarg, "gpu") == 0) {
           this->log_gpu = true;
         }
-        else if (strncmp(optarg, "spu", 3) == 0) {
+        else if (strcmp(optarg, "spu") == 0) {
           this->log_spu = true;
         }
-        else if (strncmp(optarg, "mdec", 4) == 0) {
+        else if (strcmp(optarg, "mdec") == 0) {
           this->log_mdec = true;
         }
-        else if (strncmp(optarg, "cdrom", 5) == 0) {
+        else if (strcmp(optarg, "cdrom") == 0) {
           this->log_cdrom = true;
         }
-        else if (strncmp(optarg, "input", 5) == 0) {
+        else if (strcmp(optarg, "input") == 0) {
           this->log_input = true;
         }
-        else if (strncmp(optarg, "timer", 5) == 0) {
+        else if (strcmp(optarg, "timer") == 0) {
           this->log_timer = true;
+        }
+        else {
+          fprintf(stderr, "unrecognized argument to --log: %s\n", optarg);
         }
         break;
 

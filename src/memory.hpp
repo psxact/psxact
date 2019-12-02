@@ -63,7 +63,8 @@ struct memory_t : public memory_component_t {
       fread(b, sizeof(uint8_t), kSize, file);
       fclose(file);
       return true;
-    } else {
+    }
+    else {
       log("unable to load '%s'", filename);
 
       return false;

@@ -79,6 +79,8 @@ void core_t::copy_vram_to_wram() {
 }
 
 void core_t::gp0(uint32_t data) {
+  log("gp0(%08x)", data);
+
   if (cpu_to_gpu_transfer.run.active) {
     uint16_t lower = uint16_t(data >> 0);
     uint16_t upper = uint16_t(data >> 16);
@@ -160,12 +162,6 @@ void core_t::gp0(uint32_t data) {
       case 0xe6:
         status &= ~0x1800;
         status |= (fifo.buffer[0] << 11) & 0x1800;
-        break;
-
-      default:
-        if (command_size[command] == 1) {
-          log("gp0(0x%08x)", fifo.buffer[0]);
-        }
         break;
     }
   }

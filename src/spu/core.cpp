@@ -13,6 +13,8 @@ core_t::core_t(bool log_enabled)
 }
 
 uint16_t core_t::io_read_half(uint32_t address) {
+  log("io_read_half(0x%08x)", address);
+
   if (address >= 0x1f801c00 && address <= 0x1f801d7f) {
     auto n = (address >> 4) & 31;
     auto m = (address >> 1) & 7;
@@ -92,6 +94,8 @@ uint16_t core_t::io_read_half(uint32_t address) {
 }
 
 void core_t::io_write_half(uint32_t address, uint16_t data) {
+  log("io_write_half(0x%08x, 0x%04x)", address, data);
+
   if (address >= 0x1f801c00 && address <= 0x1f801d7f) {
     auto n = (address >> 4) & 31;
     auto m = (address >> 1) & 7;

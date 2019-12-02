@@ -62,7 +62,8 @@ public:
       fread(blob->buffer, sizeof(uint8_t), size, file);
       fclose(file);
       return blob;
-    } else {
+    }
+    else {
       printf("unable to load '%s'\n", filename);
       return nullptr;
     }

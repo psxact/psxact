@@ -20,9 +20,17 @@ uint8_t core_t::io_read_byte(uint32_t address) {
         (busy                      << 7));
 
     case 0x1f801801:
+      if (response_fifo.is_empty()) {
+        log("!!! RESPONSE FIFO EMPTY !!!");
+      }
+
       return response_fifo.read();
 
     case 0x1f801802:
+      if (data_fifo.is_empty()) {
+        log("!!! DATA FIFO EMPTY !!!");
+      }
+
       return data_fifo.read();
 
     case 0x1f801803:

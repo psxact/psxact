@@ -22,7 +22,8 @@ int64_t gte_t::flag_a(int32_t n, int64_t value) {
 
   if (value > max) {
     set_flag(A1_MAX - n);
-  } else if (value < min) {
+  }
+  else if (value < min) {
     set_flag(A1_MIN - n);
   }
 

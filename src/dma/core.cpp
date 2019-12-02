@@ -29,7 +29,8 @@ uint32_t core_t::io_read_word(uint32_t address) {
       case 2: return 0x7ffac68b;
       case 3: return 0x00fffff7;
     }
-  } else {
+  }
+  else {
     switch (get_register_index(address)) {
       case 0: return channels[channel].address;
       case 1: return channels[channel].counter;
@@ -56,7 +57,8 @@ void core_t::io_write_word(uint32_t address, uint32_t data) {
       case 2: break;
       case 3: break;
     }
-  } else {
+  }
+  else {
     switch (get_register_index(address)) {
       case 0: channels[channel].address = data & 0x00ffffff; break;
       case 1: channels[channel].counter = data & 0xffffffff; break;
@@ -78,6 +80,8 @@ void core_t::main() {
 }
 
 void core_t::run_channel_0() {
+  log("running dma(0): cpu -> mdec");
+
   uint32_t address = channels[0].address;
   uint32_t bs = (channels[0].counter >>  0) & 0xffff;
   uint32_t ba = (channels[0].counter >> 16) & 0xffff;
@@ -99,14 +103,16 @@ void core_t::run_channel_0() {
 }
 
 void core_t::run_channel_1() {
-  channels[1].control &= ~0x01000000;
+  log("running dma(1): cpu <- mdec");
 
-  log("DMA1 running");
+  channels[1].control &= ~0x01000000;
 
   irq_channel(1);
 }
 
 void core_t::run_channel_2_data_read() {
+  log("running dma(2): cpu <- gpu");
+
   uint32_t address = channels[2].address;
   uint32_t bs = (channels[2].counter >> 0) & 0xffff;
   uint32_t ba = (channels[2].counter >> 16) & 0xffff;
@@ -128,6 +134,8 @@ void core_t::run_channel_2_data_read() {
 }
 
 void core_t::run_channel_2_data_write() {
+  log("running dma(2): cpu -> gpu");
+
   uint32_t address = channels[2].address;
   uint32_t bs = (channels[2].counter >>  0) & 0xffff;
   uint32_t ba = (channels[2].counter >> 16) & 0xffff;
@@ -149,6 +157,8 @@ void core_t::run_channel_2_data_write() {
 }
 
 void core_t::run_channel_2_list() {
+  log("running dma(2): cpu -> gpu (list)");
+
   uint32_t address = channels[2].address & 0x1ffffc;
 
   while (1) {
@@ -175,6 +185,8 @@ void core_t::run_channel_2_list() {
 }
 
 void core_t::run_channel_3() {
+  log("running dma(3): cpu <- cdrom");
+
   uint32_t address = channels[3].address;
   uint32_t counter = channels[3].counter & 0xffff;
 
@@ -193,6 +205,8 @@ void core_t::run_channel_3() {
 }
 
 void core_t::run_channel_4_write() {
+  log("running dma(4): cpu -> spu");
+
   uint32_t address = channels[4].address;
   uint32_t counter = channels[4].counter & 0xffff;
 
@@ -211,6 +225,8 @@ void core_t::run_channel_4_write() {
 }
 
 void core_t::run_channel_6() {
+  log("running dma(6)");
+
   uint32_t address = channels[6].address;
   uint32_t counter = channels[6].counter & 0xffff;
 
@@ -232,6 +248,7 @@ void core_t::run_channel(int32_t n) {
   if (n == 0) {
     switch (channels[0].control) {
       case 0x00000000: return;
+      case 0x00000201: return;
       case 0x01000201: return run_channel_0();
     }
   }
@@ -303,7 +320,8 @@ void core_t::update_irq_active_flag() {
     }
 
     dicr |= 0x80000000;
-  } else {
+  }
+  else {
     dicr &= ~0x80000000;
   }
 }

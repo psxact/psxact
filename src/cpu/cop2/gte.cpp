@@ -200,7 +200,8 @@ int64_t gte_t::transform_buggy(uint32_t code, matrix_t mx, vector_t cv, int32_t 
         mulr[0] = -((gpr.rgbc.r << 4) * vector[0]);
         mulr[1] = (gpr.rgbc.r << 4) * vector[1];
         mulr[2] = gpr.ir0 * vector[2];
-      } else {
+      }
+      else {
         int32_t cr =
           i == 1
             ? ccr.matrix[static_cast<int>(matrix_t::rot)][0][2]
@@ -210,7 +211,8 @@ int64_t gte_t::transform_buggy(uint32_t code, matrix_t mx, vector_t cv, int32_t 
         mulr[1] = cr * vector[1];
         mulr[2] = cr * vector[2];
       }
-    } else {
+    }
+    else {
       mulr[0] = matrix[i][0] * vector[0];
       mulr[1] = matrix[i][1] * vector[1];
       mulr[2] = matrix[i][2] * vector[2];

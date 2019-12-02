@@ -12,6 +12,8 @@ core_t::core_t(bool log_enabled)
 }
 
 uint32_t core_t::io_read_word(uint32_t address) {
+  log("io_read_word(0x%08x)", address);
+
   switch (address) {
     case MDEC_DATA: {
       uint32_t response = 0;
@@ -33,11 +35,14 @@ uint32_t core_t::io_read_word(uint32_t address) {
 }
 
 void core_t::io_write_word(uint32_t address, uint32_t data) {
+  log("io_write_word(0x%08x, 0x%08x)", address, data);
+
   switch (address) {
     case MDEC_COMMAND:
       if (parameter.index == parameter.total) {
         send_command(data);
-      } else {
+      }
+      else {
         send_parameter(parameter.index, data);
         parameter.index++;
       }
@@ -52,7 +57,8 @@ void core_t::io_write_word(uint32_t address, uint32_t data) {
         parameter.total = 0;
         enable_data_in  = 0;
         enable_data_out = 0;
-      } else {
+      }
+      else {
         log("enabling DMA: %08x", data);
 
         enable_data_in = (data >> 28) & 1;

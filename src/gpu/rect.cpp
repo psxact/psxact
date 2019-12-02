@@ -67,7 +67,8 @@ bool core_t::get_color(uint32_t command, color_t *color, const tev_t &tev, const
     color->r = std::min(255, (pixel.r * color->r) / 2);
     color->g = std::min(255, (pixel.g * color->g) / 2);
     color->b = std::min(255, (pixel.b * color->b) / 2);
-  } else {
+  }
+  else {
     color->r = pixel.r;
     color->g = pixel.g;
     color->b = pixel.b;

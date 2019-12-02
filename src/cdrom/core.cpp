@@ -63,7 +63,8 @@ uint8_t core_t::get_status_byte() {
 int core_t::get_cycles_per_sector() {
   if (mode.double_speed) {
     return (33868800 * 2) / 150;
-  } else {
+  }
+  else {
     return (33868800 * 2) / 75;
   }
 }
@@ -235,10 +236,12 @@ void core_t::logic_idling() {
 
     if (parameter_fifo.is_empty()) {
       logic_transition(&core_t::logic_transferring_command, 1000);
-    } else {
+    }
+    else {
       logic_transition(&core_t::logic_transferring_parameters, 1000);
     }
-  } else {
+  }
+  else {
     logic_transition(&core_t::logic_idling, 1000);
   }
 }
@@ -248,7 +251,8 @@ void core_t::logic_transferring_parameters() {
 
   if (parameter_fifo.is_empty()) {
     logic_transition(&core_t::logic_transferring_command, 1000);
-  } else {
+  }
+  else {
     logic_transition(&core_t::logic_transferring_parameters, 1000);
   }
 }
@@ -342,7 +346,8 @@ void core_t::logic_transferring_response() {
 
   if (logic.response_fifo.is_empty()) {
     logic_transition(&core_t::logic_deliver_interrupt, 1000);
-  } else {
+  }
+  else {
     logic_transition(&core_t::logic_transferring_response, 1000);
   }
 }
@@ -353,7 +358,8 @@ void core_t::logic_deliver_interrupt() {
     interrupt_request = logic.interrupt_request;
 
     logic_transition(&core_t::logic_idling, 1);
-  } else {
+  }
+  else {
     logic_transition(&core_t::logic_deliver_interrupt, 1);
   }
 }
@@ -388,7 +394,8 @@ void core_t::drive_getting_id() {
 
     drive_transition(&core_t::drive_idling, 1000);
     logic_transition(&core_t::logic_clearing_response, 1000);
-  } else {
+  }
+  else {
     drive_transition(&core_t::drive_getting_id, 1000);
   }
 }
@@ -400,7 +407,8 @@ void core_t::drive_int2() {
 
     drive_transition(&core_t::drive_idling, 1000);
     logic_transition(&core_t::logic_clearing_response, 1000);
-  } else {
+  }
+  else {
     drive_transition(&core_t::drive_int2, 1000);
   }
 }

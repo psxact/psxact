@@ -7,6 +7,8 @@
 using psx::gpu::core_t;
 
 void core_t::gp1(uint32_t data) {
+  log("gp1(%08x)", data);
+
   switch ((data >> 24) & 0x3f) {
     case 0x00:
       status = 0x14802000;
@@ -87,15 +89,7 @@ void core_t::gp1(uint32_t data) {
         case 0x07:
           data_latch = 2;
           break;
-
-        default:
-          log("gp1(0x%08x)", data);
-          break;
       }
-      break;
-
-    default:
-      log("gp1(0x%08x)", data);
       break;
   }
 }

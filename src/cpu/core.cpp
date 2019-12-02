@@ -92,7 +92,8 @@ void core_t::tick() {
 
   if (iec && irq) {
     enter_exception(cop0::exception_t::interrupt);
-  } else {
+  }
+  else {
     uint32_t code = (this->code >> 26) & 63;
     if (code)
       (*this.*op_table[code])();
@@ -141,7 +142,8 @@ void core_t::enter_exception(cop0::exception_t code) {
   if (is_branch_delay_slot) {
     epc = regs.this_pc - 4;
     cause |= 0x80000000;
-  } else {
+  }
+  else {
     epc = regs.this_pc;
     cause &= ~0x80000000;
   }
@@ -228,6 +230,8 @@ void core_t::write_data_word(uint32_t address, uint32_t data) {
 }
 
 void core_t::update_irq(uint32_t stat, uint32_t mask) {
+  log("update irq: stat=0x%08x, mask=0x%08x", stat, mask);
+
   istat = stat;
   imask = mask;
 
@@ -311,7 +315,8 @@ uint32_t core_t::get_rs() {
 uint32_t core_t::get_register(uint32_t index) {
   if (is_load_delay_slot && load_index == index) {
     return load_value;
-  } else {
+  }
+  else {
     return regs.gp[index];
   }
 }
@@ -497,13 +502,16 @@ void core_t::op_div() {
   if (dividend == int32_t(0x80000000) && divisor == int32_t(0xffffffff)) {
     regs.lo = 0x80000000;
     regs.hi = 0;
-  } else if (dividend >= 0 && divisor == 0) {
+  }
+  else if (dividend >= 0 && divisor == 0) {
     regs.lo = uint32_t(0xffffffff);
     regs.hi = uint32_t(dividend);
-  } else if (dividend <= 0 && divisor == 0) {
+  }
+  else if (dividend <= 0 && divisor == 0) {
     regs.lo = uint32_t(0x00000001);
     regs.hi = uint32_t(dividend);
-  } else {
+  }
+  else {
     regs.lo = uint32_t(dividend / divisor);
     regs.hi = uint32_t(dividend % divisor);
   }
@@ -516,7 +524,8 @@ void core_t::op_divu() {
   if (divisor) {
     regs.lo = dividend / divisor;
     regs.hi = dividend % divisor;
-  } else {
+  }
+  else {
     regs.lo = 0xffffffff;
     regs.hi = dividend;
   }

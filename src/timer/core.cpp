@@ -19,7 +19,7 @@
 using psx::timer::core_t;
 
 core_t::core_t(interrupt_access_t *irq, bool log_enabled)
-  : memory_component_t("counter", log_enabled)
+  : memory_component_t("timer", log_enabled)
   , irq(irq) {
   unit_init(0, 11, 7 * 4);
   unit_init(1, 11, 7 * 3413);
@@ -33,6 +33,8 @@ uint16_t core_t::io_read_half(uint32_t address) {
   if (n == 3) {
     return 0;
   }
+
+  log("io_read_half(0x%08x)", address);
 
   switch (m) {
     case  0: return unit_get_counter(n);
@@ -53,6 +55,8 @@ void core_t::io_write_half(uint32_t address, uint16_t data) {
   if (n == 3) {
     return;
   }
+
+  log("io_write_half(0x%08x, 0x%04x)", address, data);
 
   switch (m) {
     case  0: return unit_set_counter(n, data);
@@ -135,11 +139,14 @@ void core_t::unit_set_control(int n, uint16_t data) {
 
   if (timer.sync.enable == 0) {
     timer.running = 1;
-  } else if (n == 0) {
+  }
+  else if (n == 0) {
     timer.running = is_running(timer.sync.mode, in_hblank);
-  } else if (n == 1) {
+  }
+  else if (n == 1) {
     timer.running = is_running(timer.sync.mode, in_vblank);
-  } else if (n == 2) {
+  }
+  else if (n == 2) {
     timer.running = is_running(timer.sync.mode);
   }
 }
@@ -175,15 +182,20 @@ void core_t::unit_tick(int n) {
   auto &timer = timers[n];
 
   if (timer.running) {
-    timer.counter++;
+    unit_check_compare(n);
+    unit_check_maximum(n);
 
-    if (timer.counter == 0) {
-      timer.maximum.reached = 1;
-
-      if (timer.maximum.irq_enable) {
-        unit_irq(n);
-      }
+    if (timer.maximum.reached || (timer.compare.reached && timer.compare.reset_counter)) {
+      timer.counter = 0;
     }
+    else {
+      timer.counter++;
+    }
+  }
+}
+
+void core_t::unit_check_compare(int n) {
+  auto &timer = timers[n];
 
     if (timer.counter == timer.compare.value) {
       timer.compare.reached = 1;
@@ -191,10 +203,17 @@ void core_t::unit_tick(int n) {
       if (timer.compare.irq_enable) {
         unit_irq(n);
       }
+  }
+}
 
-      if (timer.compare.reset_counter) {
-        timer.counter = 0;
-      }
+void core_t::unit_check_maximum(int n) {
+  auto &timer = timers[n];
+
+  if (timer.counter == 0xffff) {
+    timer.maximum.reached = 1;
+
+    if (timer.maximum.irq_enable) {
+      unit_irq(n);
     }
   }
 }
@@ -206,7 +225,8 @@ void core_t::unit_prescale(int n, int amount) {
     for (int i = 0; i < amount; i++) {
       unit_tick(n);
     }
-  } else {
+  }
+  else {
     prescaler.cycles -= prescaler.single * amount;
 
     while (prescaler.cycles <= 0) {

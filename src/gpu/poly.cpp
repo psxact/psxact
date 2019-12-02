@@ -114,7 +114,8 @@ static core_t::tev_t get_tev(const core_t &core, uint32_t command) {
 
   if (command & (1 << 26)) {
     result.color_mix_mode = (texpage >> 5) & 3;
-  } else {
+  }
+  else {
     result.color_mix_mode = (core.status >> 5) & 3;
   }
 
@@ -168,7 +169,8 @@ bool core_t::get_color(
 
   if (blended) {
     *color = get_texture_color(triangle.tev, coord);
-  } else {
+  }
+  else {
     color_t color1 = get_texture_color(triangle.tev, coord);
     color_t color2 = color_lerp(triangle.colors, w0, w1, w2);
 
@@ -283,7 +285,8 @@ static void put_in_clockwise_order(
     indices[0] = 0;
     indices[1] = 1;
     indices[2] = 2;
-  } else {
+  }
+  else {
     indices[0] = 0;
     indices[1] = 2;
     indices[2] = 1;
