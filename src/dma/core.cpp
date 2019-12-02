@@ -4,7 +4,7 @@
 
 #include "utility.hpp"
 
-using psx::dma::core_t;
+using namespace psx::dma;
 
 core_t::core_t(interrupt_access_t *irq, memory_access_t *memory, bool log_enabled)
   : memory_component_t("dma", log_enabled)

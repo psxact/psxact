@@ -5,7 +5,7 @@
 #include "limits.hpp"
 #include "utility.hpp"
 
-using psx::cpu::cop2::gte_t;
+using namespace psx::cpu::cop2;
 
 uint32_t gte_t::read_matrix_vector_group(uint32_t n) {
   auto &matrix = ccr.matrix[n >> 3];

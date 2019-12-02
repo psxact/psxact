@@ -5,7 +5,7 @@
 #include <cassert>
 #include "utility.hpp"
 
-using psx::cdrom::core_t;
+using namespace psx::cdrom;
 
 uint8_t core_t::io_read_byte(uint32_t address) {
   switch (address) {

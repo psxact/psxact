@@ -4,7 +4,7 @@
 
 #include "utility.hpp"
 
-using psx::gpu::core_t;
+using namespace psx::gpu;
 
 static int command_size[256] = {
   1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // $00

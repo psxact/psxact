@@ -4,7 +4,7 @@
 
 #include "utility.hpp"
 
-using psx::cdrom::core_t;
+using namespace psx::cdrom;
 
 core_t::core_t(interrupt_access_t *irq, const char *game_file_name, bool log_enabled)
     : memory_component_t("cdc", log_enabled)

@@ -20,7 +20,7 @@
 #include "limits.hpp"
 #include "utility.hpp"
 
-namespace psx {
+using namespace psx;
 
 console_t::console_t(args_t &args)
   : bios("bios")
@@ -269,5 +269,3 @@ void console_t::load_exe(const char *game_file_name) {
     }
   }
 }
-
-}  // namespace psx

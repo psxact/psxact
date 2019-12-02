@@ -2,7 +2,7 @@
 
 #include "exp/expansion1.hpp"
 
-using psx::exp::expansion1_t;
+using namespace psx::exp;
 
 expansion1_t::expansion1_t()
   : memory_component_t("exp1", false) {

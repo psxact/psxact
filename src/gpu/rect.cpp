@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-using psx::gpu::core_t;
+using namespace psx::gpu;
 
 // Rect Commands
 //

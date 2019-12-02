@@ -2,7 +2,7 @@
 
 #include "gpu/core.hpp"
 
-using psx::gpu::core_t;
+using namespace psx::gpu;
 
 uint16_t *core_t::vram_data(int x, int y) {
   return reinterpret_cast<uint16_t *>(vram.get_pointer(vram_address(x, y)));

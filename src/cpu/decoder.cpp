@@ -4,7 +4,7 @@
 
 #include "utility.hpp"
 
-using psx::cpu::core_t;
+using namespace psx::cpu;
 
 uint32_t core_t::decode_iconst() {
   return utility::sclip<16>(code);

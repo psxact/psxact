@@ -4,7 +4,7 @@
 
 #include "limits.hpp"
 
-using psx::gpu::core_t;
+using namespace psx::gpu;
 
 static const int dither_lut[4][4] = {
   { -4,  0, -3,  1 },

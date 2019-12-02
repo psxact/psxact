@@ -5,7 +5,7 @@
 #include <assert.h>
 #include "utility.hpp"
 
-using psx::spu::core_t;
+using namespace psx::spu;
 
 core_t::core_t(bool log_enabled)
   : memory_component_t("spu", log_enabled)

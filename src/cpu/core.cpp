@@ -6,8 +6,7 @@
 #include "cpu/cop2/gte.hpp"
 #include "utility.hpp"
 
-using psx::cpu::core_t;
-using psx::cpu::cop_t;
+using namespace psx::cpu;
 
 core_t::opcode_t core_t::op_table[64] = {
   nullptr,          &core_t::op_bxx,   &core_t::op_j,    &core_t::op_jal,

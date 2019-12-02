@@ -7,7 +7,7 @@
 #include <string>
 #include "utility.hpp"
 
-using psx::bios::decoder_t;
+using namespace psx::bios;
 
 decoder_t::decoder_t(memory_access_t *memory)
   : memory(memory) {

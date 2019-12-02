@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "utility.hpp"
 
-using psx::gpu::core_t;
+using namespace psx::gpu;
 
 static const int32_t point_factor_lut[4] = {
   1, 2, 2, 3

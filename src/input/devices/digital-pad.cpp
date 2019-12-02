@@ -3,9 +3,9 @@
 #include "input/devices/digital-pad.hpp"
 #include <SDL.h>
 
-using namespace psx::input;
+using namespace psx::input::devices;
 
-void devices::digital_pad_t::frame() {
+void digital_pad_t::frame() {
   int numkeys;
   
   if (const uint8_t *keys = SDL_GetKeyboardState(&numkeys)) {
@@ -34,7 +34,7 @@ void devices::digital_pad_t::frame() {
   bits ^= 0xffff;
 }
 
-int devices::digital_pad_t::send(int data) {
+int digital_pad_t::send(int data) {
   if (!dtr) {
     return 1;
   }
@@ -84,7 +84,7 @@ int devices::digital_pad_t::send(int data) {
   return tx_bit;
 }
 
-void devices::digital_pad_t::set_dtr(bool next_dtr) {
+void digital_pad_t::set_dtr(bool next_dtr) {
   if (!dtr && next_dtr) {
     step = 0;
     bit = 0;

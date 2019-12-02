@@ -4,7 +4,7 @@
 
 #include <string>
 
-using psx::cpu::core_t;
+using namespace psx::cpu;
 
 #define get_iconst() decode_iconst()
 #define get_uconst() decode_uconst()

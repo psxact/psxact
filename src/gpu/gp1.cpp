@@ -4,7 +4,7 @@
 
 #include "utility.hpp"
 
-using psx::gpu::core_t;
+using namespace psx::gpu;
 
 void core_t::gp1(uint32_t data) {
   log("gp1(%08x)", data);

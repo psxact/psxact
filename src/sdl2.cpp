@@ -4,7 +4,7 @@
 
 #include <cstdio>
 
-namespace psx {
+using namespace psx;
 
 static constexpr int window_width = 640;
 static constexpr int window_height = 480;
@@ -106,5 +106,3 @@ void sdl2::resize(int w, int h) {
     w,
     h);
 }
-
-}  // namespace psx

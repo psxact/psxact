@@ -8,7 +8,6 @@
 #include "utility.hpp"
 
 using namespace psx::input;
-using psx::input::core_t;
 
 core_t::core_t(interrupt_access_t *irq, bool log_enabled)
   : memory_component_t("input", log_enabled)

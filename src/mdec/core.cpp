@@ -5,7 +5,7 @@
 #include <cstdio>
 #include "utility.hpp"
 
-using psx::mdec::core_t;
+using namespace psx::mdec;
 
 core_t::core_t(bool log_enabled)
   : memory_component_t("mdec", log_enabled) {

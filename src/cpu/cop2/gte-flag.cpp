@@ -4,7 +4,7 @@
 
 #include "limits.hpp"
 
-using psx::cpu::cop2::gte_t;
+using namespace psx::cpu::cop2;
 
 void gte_t::set_flag(int32_t flag) {
   ccr.flag |= 1 << flag;

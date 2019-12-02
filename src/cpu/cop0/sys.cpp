@@ -2,7 +2,7 @@
 
 #include "cpu/cop0/sys.hpp"
 
-using psx::cpu::cop0::sys_t;
+using namespace psx::cpu::cop0;
 
 void sys_t::run(uint32_t n) {
   if (n == 0x10) {

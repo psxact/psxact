@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-namespace psx {
+using namespace psx;
 
 memory_component_t::memory_component_t(const char *name, bool log_enabled)
   : name(name)
@@ -52,5 +52,3 @@ void memory_component_t::io_write_half(uint32_t address, uint16_t data) {
 void memory_component_t::io_write_word(uint32_t address, uint32_t data) {
   log("io_write_word(0x%08x, 0x%08x)", address, data);
 }
-
-}  // namespace psx
