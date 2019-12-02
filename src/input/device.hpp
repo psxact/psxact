@@ -8,26 +8,35 @@
 namespace psx {
 namespace input {
 
-// Represents the /ACK input, active-low.
-enum class device_ack_t {
+enum class device_dsr_t {
   HIGH = 0,
   LOW = 1
 };
 
 class device_t {
  private:
-  device_ack_t ack;
-  int ack_cycles;
+  static const int DSR_DELAY_PERIOD = 100;
+  static const int DSR_PULSE_PERIOD = 100;
+
+  bool dsr_pending = false;
+  int dsr_cycles = 0;
 
  protected:
-  void start_ack_sequence();
+  bool dtr = false;
+
+  device_t() {}
+  ~device_t() {}
+
+  void start_dsr_pulse();
 
  public:
-  device_ack_t tick(int amount);
+  static device_t not_connected;
 
-  virtual void frame() = 0;
-  virtual void reset() = 0;
-  virtual void send(uint8_t request, uint8_t *response) = 0;
+  void tick(int amount, device_dsr_t &dsr);
+
+  virtual void frame();
+  virtual int send(int request);
+  virtual void set_dtr(bool next_dtr);
 };
 
 }  // namespace input

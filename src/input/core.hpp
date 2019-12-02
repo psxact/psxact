@@ -12,35 +12,44 @@
 namespace psx {
 namespace input {
 
-struct port_t {
-  device_t *memcard;
-  device_t *control;
-  device_t *selected;
-  int output;
-};
-
 class core_t : public memory_component_t {
 
-  fifo_t< uint8_t, 8 > rx;
+  struct {
+    int counter = 0x0088;
+    int factor = 1;
+    int reload = 0x0088;
+  } baud;
 
-  device_ack_t ack;
-  int ack_interrupt_enable;
-  int baud_counter;
-  int baud_elapses;
-  int baud_factor;
-  int baud_reload;
-  int rx_enable;
-  int rx_interrupt_mode;
-  int rx_interrupt_enable;
-  int tx_data;
-  int tx_data_pending;
-  int tx_enable;
-  int tx_interrupt_enable;
-  int port_output;
-  int port_select;
-  int interrupt;
+  struct {
+    device_dsr_t level;
+    int interrupt_enable;
+  } dsr;
 
-  port_t ports[2];
+  struct {
+    fifo_t< uint8_t, 8 > fifo;
+    bool enable;
+    bool interrupt_enable;
+    int interrupt_mode;
+    uint8_t buffer;
+  } rx;
+
+  struct {
+    uint8_t buffer;
+    bool enable;
+    bool pending;
+    bool interrupt_enable;
+  } tx;
+
+  struct {
+    device_t *memcard[2];
+    device_t *control[2];
+    int output;
+    int select;
+  } port;
+
+  int bit = 0;
+  int interrupt = 0;
+
   interrupt_access_t *irq;
 
  public:

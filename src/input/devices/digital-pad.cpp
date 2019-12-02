@@ -34,43 +34,63 @@ void devices::digital_pad_t::frame() {
   bits ^= 0xffff;
 }
 
-void devices::digital_pad_t::reset() {
-  step = 0;
+int devices::digital_pad_t::send(int data) {
+  if (!dtr) {
+    return 1;
+  }
+
+  int tx_bit = (tx_buffer >> bit) & 1;
+  tx_buffer |= (1 << bit);
+
+  rx_buffer &= ~(1 << bit);
+  rx_buffer |= data << bit;
+
+  bit++;
+
+  if (bit == 8) {
+    bit = 0;
+
+    switch (step) {
+      case 0:
+        if (rx_buffer == 0x01) {
+          start_dsr_pulse();
+          tx_buffer = 0x41;
+          step++;
+        }
+        break;
+
+      case 1:
+        if (rx_buffer == 0x42) {
+          start_dsr_pulse();
+          tx_buffer = 0x5a;
+          step++;
+        }
+        break;
+
+      case 2:
+        start_dsr_pulse();
+        tx_buffer = uint8_t(bits >> 0);
+        step++;
+        break;
+
+      case 3:
+        start_dsr_pulse();
+        tx_buffer = uint8_t(bits >> 8);
+        step++;
+        break;
+    }
+  }
+
+  return tx_bit;
 }
 
-void devices::digital_pad_t::send(uint8_t request, uint8_t *response) {
-  printf("step(%d) request: %02x\n", step, request);
-
-  int current_step = step;
-  step++;
-
-  switch (current_step) {
-    case 0:
-      if (request == 0x01) {
-        *response = 0xff;
-        start_ack_sequence();
-      }
-      break;
-
-    case 1:
-      if (request == 0x42) {
-        *response = 0x41;
-        start_ack_sequence();
-      }
-      break;
-
-    case 2:
-      *response = 0x5a;
-      start_ack_sequence();
-      break;
-
-    case 3:
-      *response = uint8_t(bits >> 0);
-      start_ack_sequence();
-      break;
-
-    case 4:
-      *response = uint8_t(bits >> 8);
-      break;
+void devices::digital_pad_t::set_dtr(bool next_dtr) {
+  if (!dtr && next_dtr) {
+    step = 0;
+    bit = 0;
+    rx_buffer = 0;
+    tx_buffer = 0xff;
   }
+
+  dtr = next_dtr;
 }
