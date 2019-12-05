@@ -76,10 +76,6 @@ class core_t : public memory_component_t {
 
   void unit_tick(int n);
 
-  void unit_check_compare(int n);
-
-  void unit_check_maximum(int n);
-
   void unit_prescale(int n, int amount);
 
   uint16_t unit_get_compare(int n);

@@ -182,20 +182,15 @@ void core_t::unit_tick(int n) {
   auto &timer = timers[n];
 
   if (timer.running) {
-    unit_check_compare(n);
-    unit_check_maximum(n);
+    timer.counter++;
 
-    if (timer.maximum.reached || (timer.compare.reached && timer.compare.reset_counter)) {
-      timer.counter = 0;
-    }
-    else {
-      timer.counter++;
-    }
-  }
-}
+    if (timer.counter == 0) {
+      timer.maximum.reached = 1;
 
-void core_t::unit_check_compare(int n) {
-  auto &timer = timers[n];
+      if (timer.maximum.irq_enable) {
+        unit_irq(n);
+      }
+    }
 
     if (timer.counter == timer.compare.value) {
       timer.compare.reached = 1;
@@ -203,17 +198,10 @@ void core_t::unit_check_compare(int n) {
       if (timer.compare.irq_enable) {
         unit_irq(n);
       }
-  }
-}
 
-void core_t::unit_check_maximum(int n) {
-  auto &timer = timers[n];
-
-  if (timer.counter == 0xffff) {
-    timer.maximum.reached = 1;
-
-    if (timer.maximum.irq_enable) {
-      unit_irq(n);
+      if (timer.compare.reset_counter) {
+        timer.counter = 0;
+      }
     }
   }
 }
