@@ -49,7 +49,8 @@ core_t::opcode_t core_t::op_table_special[64] = {
 core_t::core_t(memory_access_t *memory, bool log_enabled)
   : memory_component_t("cpu", log_enabled)
   , bios_call(memory)
-  , memory(memory) {
+  , memory(memory)
+  , dcache("dcache") {
   regs.gp[0] = 0;
   regs.pc = 0xbfc00000;
   regs.next_pc = regs.pc + 4;
@@ -112,12 +113,16 @@ static uint32_t segments[8] = {
   0xffffffff   //
 };
 
+static inline uint32_t get_segment(uint32_t address) {
+  return address >> 29;
+}
+
 static inline uint32_t map_address(uint32_t address) {
-  return address & segments[address >> 29];
+  return address & segments[get_segment(address)];
 }
 
 void core_t::log_bios_calls() {
-  switch (regs.this_pc) {
+  switch (map_address(regs.this_pc)) {
     case 0xa0:
       return bios_call.decode_a(regs.gp[31], regs.gp[9], &regs.gp[4]);
 
@@ -174,58 +179,65 @@ void core_t::read_code() {
   code = memory->read_word(map_address(regs.this_pc));
 }
 
-uint32_t core_t::read_data_byte(uint32_t address) {
-  if (get_cop(0)->read_gpr(12) & (1 << 16)) {
-    return 0;  // isc=1
+bool core_t::use_dcache(uint32_t address) {
+  if (get_segment(address) > KSEG0) {
+    return false;
   }
 
-  // TODO(Adam): read cache?
-  return memory->read_byte(map_address(address));
+  if ((address & ~0x3ff) == 0x1f800000) {
+    log("data-cache memory access ~%08x", address);
+    return true;
+  }
+
+  uint32_t cop0r12 = get_cop(0)->read_gpr(12);
+  if ((cop0r12 & (cop0::ISC | cop0::SWC)) == cop0::ISC) { // swc=0, isc=1
+    log("data-cache isolated access ~%08x", address);
+    return true;
+  }
+
+  return false;
+}
+
+uint32_t core_t::read_data_byte(uint32_t address) {
+  address = map_address(address);
+  return use_dcache(address)
+    ? dcache.io_read_byte(address)
+    : memory->read_byte(address);
 }
 
 uint32_t core_t::read_data_half(uint32_t address) {
-  if (get_cop(0)->read_gpr(12) & (1 << 16)) {
-    return 0;  // isc=1
-  }
-
-  // TODO(Adam): read cache?
-  return memory->read_half(map_address(address));
+  address = map_address(address);
+  return use_dcache(address)
+    ? dcache.io_read_half(address)
+    : memory->read_half(address);
 }
 
 uint32_t core_t::read_data_word(uint32_t address) {
-  if (get_cop(0)->read_gpr(12) & (1 << 16)) {
-    return 0;  // isc=1
-  }
-
-  // TODO(Adam): read cache?
-  return memory->read_word(map_address(address));
+  address = map_address(address);
+  return use_dcache(address)
+    ? dcache.io_read_word(address)
+    : memory->read_word(address);
 }
 
 void core_t::write_data_byte(uint32_t address, uint32_t data) {
-  if (get_cop(0)->read_gpr(12) & (1 << 16)) {
-    return;  // isc=1
-  }
-
-  // TODO(Adam): write cache?
-  return memory->write_byte(map_address(address), data);
+  address = map_address(address);
+  return use_dcache(address)
+    ? dcache.io_write_byte(address, data)
+    : memory->write_byte(address, data);
 }
 
 void core_t::write_data_half(uint32_t address, uint32_t data) {
-  if (get_cop(0)->read_gpr(12) & (1 << 16)) {
-    return;  // isc=1
-  }
-
-  // TODO(Adam): write cache?
-  return memory->write_half(map_address(address), data);
+  address = map_address(address);
+  return use_dcache(address)
+    ? dcache.io_write_half(address, data)
+    : memory->write_half(address, data);
 }
 
 void core_t::write_data_word(uint32_t address, uint32_t data) {
-  if (get_cop(0)->read_gpr(12) & (1 << 16)) {
-    return;  // isc=1
-  }
-
-  // TODO(Adam): write cache?
-  return memory->write_word(map_address(address), data);
+  address = map_address(address);
+  return use_dcache(address)
+    ? dcache.io_write_word(address, data)
+    : memory->write_word(address, data);
 }
 
 void core_t::update_irq(uint32_t stat, uint32_t mask) {

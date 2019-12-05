@@ -8,10 +8,18 @@
 #include "cpu/cop.hpp"
 #include "cpu/cop0/sys.hpp"
 #include "cpu/cop2/gte.hpp"
+#include "memory.hpp"
 #include "memory-access.hpp"
 #include "memory-component.hpp"
 
 namespace psx::cpu {
+
+enum segment_t {
+  KUSEG = 0,
+  KSEG0 = 4,
+  KSEG1 = 5,
+  KSEG2 = 6
+};
 
 class core_t : public memory_component_t {
   bios::decoder_t bios_call;
@@ -19,6 +27,8 @@ class core_t : public memory_component_t {
   memory_access_t *memory;
 
   cop_t *cop[4];
+
+  memory_t< kib(1) > dcache;
 
   struct {
     uint32_t gp[32];
@@ -70,6 +80,8 @@ class core_t : public memory_component_t {
   void update_irq(uint32_t stat, uint32_t mask);
 
   void read_code();
+
+  bool use_dcache(uint32_t address);
 
   uint32_t read_data_byte(uint32_t address);
 

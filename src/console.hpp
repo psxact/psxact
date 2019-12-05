@@ -27,7 +27,6 @@ class console_t
   , public interrupt_access_t {
   memory_t< kib(512) > bios;
   memory_t< mib(2) > wram;
-  memory_t< kib(1) > dmem;
 
   cdrom::core_t *cdrom;
   timer::core_t *timer;

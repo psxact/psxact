@@ -14,7 +14,6 @@ using namespace psx;
 console_t::console_t(args_t &args)
   : bios("bios")
   , wram("wram")
-  , dmem("dmem")
   , bios_file_name(args.bios_file_name)
   , game_file_name(args.game_file_name) {
   cdrom = new cdrom::core_t(this, game_file_name, args.log_cdrom);
@@ -55,7 +54,6 @@ memory_component_t *console_t::decode(uint32_t address) {
 
   if (between(0x00000000, 0x007fffff)) { return &wram; }
   if (between(0x1fc00000, 0x1fc7ffff)) { return &bios; }
-  if (between(0x1f800000, 0x1f8003ff)) { return &dmem; }
   if (between(0x1f801040, 0x1f80104f)) { return input; }
   if (between(0x1f801070, 0x1f801077)) { return cpu; }
   if (between(0x1f801080, 0x1f8010ff)) { return dma; }

@@ -8,6 +8,11 @@
 
 namespace psx::cpu::cop0 {
 
+enum status_flags_t {
+  ISC = 1 << 16,
+  SWC = 1 << 17
+};
+
 enum class exception_t {
   interrupt,
   tlb_modification,
