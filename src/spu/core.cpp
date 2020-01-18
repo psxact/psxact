@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #include "spu/core.hpp"
 
 #include <assert.h>

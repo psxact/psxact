@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #include "cpu/core.hpp"
 
 #include "cpu/cop0/sys.hpp"

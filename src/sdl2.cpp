@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #include "sdl2.hpp"
 
 #include <cstdio>

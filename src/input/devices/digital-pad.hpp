@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef INPUT_DEVICES_DIGITAL_PAD_HPP_
 #define INPUT_DEVICES_DIGITAL_PAD_HPP_
 

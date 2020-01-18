@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef MEMORY_ACCESS_HPP_
 #define MEMORY_ACCESS_HPP_
 

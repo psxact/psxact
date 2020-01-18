@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef INPUT_DEVICE_HPP_
 #define INPUT_DEVICE_HPP_
 

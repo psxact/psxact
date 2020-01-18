@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #include "cpu/cop0/sys.hpp"
 
 using namespace psx::cpu::cop0;

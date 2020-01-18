@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #include <cstdio>
 #include "args.hpp"
 #include "console.hpp"

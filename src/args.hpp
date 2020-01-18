@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef ARGS_HPP_
 #define ARGS_HPP_
 

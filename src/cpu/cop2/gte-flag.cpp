@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #include "cpu/cop2/gte.hpp"
 
 #include "limits.hpp"

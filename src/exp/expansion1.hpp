@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef EXP_EXPANSION1_HPP_
 #define EXP_EXPANSION1_HPP_
 

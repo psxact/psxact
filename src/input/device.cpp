@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #include "input/device.hpp"
 
 using namespace psx::input;

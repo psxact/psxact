@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef CONSOLE_HPP_
 #define CONSOLE_HPP_
 

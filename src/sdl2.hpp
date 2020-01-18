@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef SDL2_HPP_
 #define SDL2_HPP_
 

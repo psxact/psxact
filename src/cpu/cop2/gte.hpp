@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef CPU_COP2_GTE_HPP_
 #define CPU_COP2_GTE_HPP_
 

@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef FIFO_HPP_
 #define FIFO_HPP_
 

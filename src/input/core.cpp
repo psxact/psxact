@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #include "input/core.hpp"
 
 #include <SDL.h>

@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef BLOB_HPP_
 #define BLOB_HPP_
 

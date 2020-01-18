@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef TIMER_CORE_HPP_
 #define TIMER_CORE_HPP_
 

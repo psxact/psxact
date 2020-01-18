@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #include "input/devices/digital-pad.hpp"
 #include <SDL.h>
 

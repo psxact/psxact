@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #include "gpu/core.hpp"
 
 #include <algorithm>

@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #include "memory-component.hpp"
 
 #include <stdio.h>

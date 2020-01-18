@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef MDEC_CORE_HPP_
 #define MDEC_CORE_HPP_
 

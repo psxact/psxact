@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef CPU_COP0_SYS_HPP_
 #define CPU_COP0_SYS_HPP_
 

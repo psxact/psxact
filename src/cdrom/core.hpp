@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef CDROM_CORE_HPP_
 #define CDROM_CORE_HPP_
 

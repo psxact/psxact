@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef LIMITS_HPP_
 #define LIMITS_HPP_
 

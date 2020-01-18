@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef INPUT_CORE_HPP_
 #define INPUT_CORE_HPP_
 

@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef DMA_CORE_HPP_
 #define DMA_CORE_HPP_
 

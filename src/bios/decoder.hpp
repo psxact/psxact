@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef CPU_BIOS_DECODER_HPP_
 #define CPU_BIOS_DECODER_HPP_
 

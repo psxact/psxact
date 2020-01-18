@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #include "exp/expansion2.hpp"
 
 using namespace psx::exp;

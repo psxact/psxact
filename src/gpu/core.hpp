@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef GPU_CORE_HPP_
 #define GPU_CORE_HPP_
 

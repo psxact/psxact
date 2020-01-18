@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef SPU_CORE_HPP_
 #define SPU_CORE_HPP_
 

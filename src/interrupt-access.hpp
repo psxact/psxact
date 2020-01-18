@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef INTERRUPT_ACCESS_HPP_
 #define INTERRUPT_ACCESS_HPP_
 

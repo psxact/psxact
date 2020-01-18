@@ -1,5 +1,3 @@
-// Copyright 2018 psxact
-
 #ifndef UTILITY_HPP_
 #define UTILITY_HPP_
 
