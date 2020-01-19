@@ -1,7 +1,6 @@
 #include "cpu/cop2/gte.hpp"
 
 #include "util/uint.hpp"
-#include "limits.hpp"
 
 using namespace psx::cpu::cop2;
 using namespace psx::util;

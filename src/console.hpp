@@ -59,7 +59,9 @@ class console_t
 
   void write_word(uint32_t address, uint32_t data);
 
-  void run_for_one_frame(uint16_t **vram, int *w, int *h);
+  void run_for_one_frame();
+
+  void get_video_params(uint16_t **vram, int *w, int *h);
 
  private:
   memory_component_t *decode(uint32_t address);

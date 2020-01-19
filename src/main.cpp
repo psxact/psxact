@@ -15,7 +15,8 @@ int main(int argc, char *argv[]) {
   int h;
 
   do {
-    console->run_for_one_frame(&vram, &w, &h);
+    console->run_for_one_frame();
+    console->get_video_params(&vram, &w, &h);
   }
   while (renderer.render(vram, w, h));
 

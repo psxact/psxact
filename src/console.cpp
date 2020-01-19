@@ -3,10 +3,11 @@
 #include <cassert>
 #include <cstring>
 #include <exception>
-#include "blob.hpp"
-#include "limits.hpp"
+#include "util/blob.hpp"
+#include "util/range.hpp"
 
 using namespace psx;
+using namespace psx::util;
 
 console_t::console_t(args_t &args)
   : bios("bios")
@@ -42,7 +43,7 @@ void console_t::send(interrupt_type_t flag) {
 
 memory_component_t *console_t::decode(uint32_t address) {
 #define between(min, max) \
-  limits::between<(min), (max)>(address)
+  range::between<(min), (max)>(address)
 
   if (between(0x1f801800, 0x1f801803)) {
     if (is_exe) {
@@ -204,7 +205,7 @@ void console_t::write_word(uint32_t address, uint32_t data) {
     : write_memory_control(4, address, data);
 }
 
-void console_t::run_for_one_frame(uint16_t **vram, int *w, int *h) {
+void console_t::run_for_one_frame() {
   constexpr int CYCLE_PER_CPU_TICK = 3;
 
   constexpr int CPU_FREQ = 33868800;
@@ -221,7 +222,9 @@ void console_t::run_for_one_frame(uint16_t **vram, int *w, int *h) {
   input->frame();
 
   send(interrupt_type_t::VBLANK);
+}
 
+void console_t::get_video_params(uint16_t **vram, int *w, int *h) {
   static const int w_lut[8] = { 256, 368, 320, 368, 512, 368, 640, 368 };
   static const int h_lut[2] = { 240, 480 };
 

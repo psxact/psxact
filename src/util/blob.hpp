@@ -1,11 +1,11 @@
-#ifndef BLOB_HPP_
-#define BLOB_HPP_
+#ifndef UTIL_BLOB_HPP_
+#define UTIL_BLOB_HPP_
 
 #include <cstdint>
 #include <cstring>
 #include <cstdio>
 
-namespace psx {
+namespace psx::util {
 
 class blob_t {
   uint8_t *buffer;
@@ -68,6 +68,6 @@ public:
   }
 };
 
-}  // namespace psx
+}  // namespace psx::util
 
-#endif  // BLOB_HPP_
+#endif  // UTIL_BLOB_HPP_
