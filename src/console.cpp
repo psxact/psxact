@@ -29,6 +29,10 @@ console_t::console_t(args_t &args)
   bios.load_blob(bios_file_name);
   bios.io_write_word(0x6990, 0); // patch the bios to skip the boot-up animation
 
+  bios.io_write_word(0x6f0c, 0x34010001); // li $at, 0x1
+  bios.io_write_word(0x6f10, 0x0ff019e1); // jal 0xbfc06784
+  bios.io_write_word(0x6f14, 0xaf81a9c0); // sw $at -0x5460($gp)
+
   is_exe = !!(strstr(game_file_name, ".exe"));
 }
 

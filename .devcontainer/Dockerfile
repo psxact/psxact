@@ -9,3 +9,8 @@ RUN apt -y update && apt -y install --no-install-recommends \
  && apt -y autoremove \
  && apt -y clean \
  && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd psxact -g 1000 \
+ && useradd psxact -g 1000 -u 1000 -m -s /bin/bash
+
+USER psxact
