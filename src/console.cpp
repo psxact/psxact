@@ -5,7 +5,6 @@
 #include <exception>
 #include "blob.hpp"
 #include "limits.hpp"
-#include "utility.hpp"
 
 using namespace psx;
 
@@ -206,7 +205,7 @@ void console_t::write_word(uint32_t address, uint32_t data) {
 }
 
 void console_t::run_for_one_frame(uint16_t **vram, int *w, int *h) {
-  constexpr int CYCLE_PER_CPU_TICK = 4;
+  constexpr int CYCLE_PER_CPU_TICK = 3;
 
   constexpr int CPU_FREQ = 33868800;
   constexpr int CPU_TICKS_PER_FRAME = CPU_FREQ / 60 / CYCLE_PER_CPU_TICK;

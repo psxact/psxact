@@ -1,7 +1,7 @@
 #include "memory-component.hpp"
 
-#include <stdio.h>
-#include <stdarg.h>
+#include <cstdio>
+#include <cstdarg>
 
 using namespace psx;
 

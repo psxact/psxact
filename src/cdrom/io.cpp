@@ -1,7 +1,6 @@
 #include "cdrom/core.hpp"
 
 #include <cassert>
-#include "utility.hpp"
 
 using namespace psx::cdrom;
 

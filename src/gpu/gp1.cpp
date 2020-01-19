@@ -1,8 +1,9 @@
 #include "gpu/core.hpp"
 
-#include "utility.hpp"
+#include "util/uint.hpp"
 
 using namespace psx::gpu;
+using namespace psx::util;
 
 void core_t::gp1(uint32_t data) {
   log("gp1(%08x)", data);
@@ -34,18 +35,18 @@ void core_t::gp1(uint32_t data) {
       break;
 
     case 0x05:
-      display_area_x = utility::uclip<10>(data >> 0);
-      display_area_y = utility::uclip<9>(data >> 10);
+      display_area_x = uint_t<10>::trunc(data >> 0);
+      display_area_y = uint_t<9>::trunc(data >> 10);
       break;
 
     case 0x06:
-      display_area_x1 = utility::uclip<12>(data >> 0);
-      display_area_x2 = utility::uclip<12>(data >> 12);
+      display_area_x1 = uint_t<12>::trunc(data >> 0);
+      display_area_x2 = uint_t<12>::trunc(data >> 12);
       break;
 
     case 0x07:
-      display_area_y1 = utility::uclip<10>(data >> 0);
-      display_area_y2 = utility::uclip<10>(data >> 10);
+      display_area_y1 = uint_t<10>::trunc(data >> 0);
+      display_area_y2 = uint_t<10>::trunc(data >> 10);
       break;
 
     case 0x08:

@@ -1,8 +1,9 @@
 #include "gpu/core.hpp"
 
-#include "limits.hpp"
+#include "util/uint.hpp"
 
 using namespace psx::gpu;
+using namespace psx::util;
 
 static const int dither_lut[4][4] = {
   { -4,  0, -3,  1 },
@@ -21,9 +22,9 @@ void core_t::draw_point(point_t point, color_t color) {
 
   auto dither = dither_lut[point.y & 3][point.x & 3];
 
-  color.r = ulimit<8>::clamp(color.r + dither);
-  color.g = ulimit<8>::clamp(color.g + dither);
-  color.b = ulimit<8>::clamp(color.b + dither);
+  color.r = uint_t<8>::clamp(color.r + dither);
+  color.g = uint_t<8>::clamp(color.g + dither);
+  color.b = uint_t<8>::clamp(color.b + dither);
 
   vram_write(point.x, point.y, color_to_uint16(color));
 }

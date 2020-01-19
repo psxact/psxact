@@ -1,9 +1,10 @@
 #include "cpu/cop2/gte.hpp"
 
+#include "util/uint.hpp"
 #include "limits.hpp"
-#include "utility.hpp"
 
 using namespace psx::cpu::cop2;
+using namespace psx::util;
 
 uint32_t gte_t::read_matrix_vector_group(uint32_t n) {
   auto &matrix = ccr.matrix[n >> 3];
@@ -214,9 +215,9 @@ uint32_t gte_t::read_gpr(uint32_t n) {
     case 0x1c:
     case 0x1d:
       return uint32_t(
-          (ulimit<5>::clamp(gpr.vector[3][0] >> 7) << 0) |
-          (ulimit<5>::clamp(gpr.vector[3][1] >> 7) << 5) |
-          (ulimit<5>::clamp(gpr.vector[3][2] >> 7) << 10));
+          (uint_t<5>::clamp(gpr.vector[3][0] >> 7) << 0) |
+          (uint_t<5>::clamp(gpr.vector[3][1] >> 7) << 5) |
+          (uint_t<5>::clamp(gpr.vector[3][2] >> 7) << 10));
 
     case 0x1e:
       return uint32_t(gpr.lzcs);
@@ -367,8 +368,8 @@ void gte_t::write_gpr(uint32_t n, uint32_t value) {
     case 0x1e:
       gpr.lzcs = int32_t(value);
       gpr.lzcr = gpr.lzcs < 0
-        ? utility::clz<32>(~value)
-        : utility::clz<32>(value);
+        ? uint_t<32>::clz(~value)
+        : uint_t<32>::clz(value);
       break;
 
     case 0x1f:

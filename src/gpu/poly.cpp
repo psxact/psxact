@@ -1,9 +1,11 @@
 #include "gpu/core.hpp"
 
 #include <algorithm>
-#include "utility.hpp"
+#include "util/int.hpp"
+#include "util/uint.hpp"
 
 using namespace psx::gpu;
+using namespace psx::util;
 
 static const int32_t point_factor_lut[4] = {
   1, 2, 2, 3
@@ -41,9 +43,9 @@ static core_t::color_t decode_color(const core_t &core, int32_t n) {
 
   core_t::color_t result;
 
-  result.r = psx::utility::uclip<8>(value >> (8 * 0));
-  result.g = psx::utility::uclip<8>(value >> (8 * 1));
-  result.b = psx::utility::uclip<8>(value >> (8 * 2));
+  result.r = uint_t<8>::trunc(value >> (8 * 0));
+  result.g = uint_t<8>::trunc(value >> (8 * 1));
+  result.b = uint_t<8>::trunc(value >> (8 * 2));
 
   return result;
 }
@@ -53,8 +55,8 @@ static core_t::point_t decode_point(const core_t &core, int32_t n) {
 
   core_t::point_t result;
 
-  result.x = core.x_offset + psx::utility::sclip<11>(value);
-  result.y = core.y_offset + psx::utility::sclip<11>(value >> 16);
+  result.x = core.x_offset + int_t<11>::trunc(value);
+  result.y = core.y_offset + int_t<11>::trunc(value >> 16);
 
   return result;
 }
@@ -64,8 +66,8 @@ static core_t::point_t decode_coord(const core_t &core, int32_t n) {
 
   core_t::point_t result;
 
-  result.x = psx::utility::uclip<8>(value >> 0);
-  result.y = psx::utility::uclip<8>(value >> 8);
+  result.x = uint_t<8>::trunc(value >> 0);
+  result.y = uint_t<8>::trunc(value >> 8);
 
   return result;
 }

@@ -1,7 +1,6 @@
 #include "mdec/core.hpp"
 
 #include <cstdio>
-#include "utility.hpp"
 
 using namespace psx::mdec;
 

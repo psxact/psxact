@@ -12,8 +12,6 @@
 
 #include "timer/core.hpp"
 
-#include "utility.hpp"
-
 using namespace psx::timer;
 
 core_t::core_t(interrupt_access_t *irq, bool log_enabled)

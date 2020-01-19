@@ -1,12 +1,14 @@
 #ifndef CDROM_CORE_HPP_
 #define CDROM_CORE_HPP_
 
-#include <stdint.h>
-#include <stdio.h>
+#include <cstdint>
+#include <cstdio>
 #include <string>
-#include "fifo.hpp"
+#include "util/fifo.hpp"
 #include "interrupt-access.hpp"
 #include "memory-component.hpp"
+
+using namespace psx::util;
 
 namespace psx::cdrom {
 

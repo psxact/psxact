@@ -1,9 +1,10 @@
 #include "cpu/cop2/gte.hpp"
 
 #include <algorithm>
-#include "utility.hpp"
+#include "util/uint.hpp"
 
 using namespace psx::cpu::cop2;
+using namespace psx::util;
 
 static const uint8_t unr_table[0x101] = {
   0xff, 0xfd, 0xfb, 0xf9, 0xf7, 0xf5, 0xf3, 0xf1, 0xef, 0xee, 0xec, 0xea, 0xe8, 0xe6, 0xe4, 0xe3,
@@ -30,7 +31,7 @@ uint32_t gte_t::divide() {
     return flag_e();
   }
 
-  uint32_t z = utility::clz<16>(gpr.sz[3]);
+  uint32_t z = uint_t<16>::clz(gpr.sz[3]);
   uint64_t n = uint64_t(ccr.h) << z;
   uint32_t d = gpr.sz[3] << z;
   uint32_t u = unr_table[((d & 0x7fff) + 0x40) >> 7] + 0x101;

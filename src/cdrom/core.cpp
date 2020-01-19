@@ -1,8 +1,9 @@
 #include "cdrom/core.hpp"
 
-#include "utility.hpp"
+#include "util/bcd.hpp"
 
 using namespace psx::cdrom;
+using namespace psx::util;
 
 core_t::core_t(interrupt_access_t *irq, const char *game_file_name, bool log_enabled)
     : memory_component_t("cdc", log_enabled)
@@ -95,9 +96,9 @@ void core_t::read_sector() {
   fseek(game_file, cursor, SEEK_SET);
   fread(data_buffer, sizeof(uint8_t), 0x930, game_file);
 
-  auto minute = utility::bcd_to_dec(data_buffer[12]);
-  auto second = utility::bcd_to_dec(data_buffer[13]);
-  auto sector = utility::bcd_to_dec(data_buffer[14]);
+  auto minute = bcd::to_dec(data_buffer[12]);
+  auto second = bcd::to_dec(data_buffer[13]);
+  auto sector = bcd::to_dec(data_buffer[14]);
 
   if (
     minute != read_timecode.minute ||
@@ -273,9 +274,9 @@ void core_t::logic_executing_command() {
     break;
 
   case 0x02: {
-    uint8_t minute = utility::bcd_to_dec(get_param());
-    uint8_t second = utility::bcd_to_dec(get_param());
-    uint8_t sector = utility::bcd_to_dec(get_param());
+    uint8_t minute = bcd::to_dec(get_param());
+    uint8_t second = bcd::to_dec(get_param());
+    uint8_t sector = bcd::to_dec(get_param());
 
     command_set_seek_target(minute, second, sector);
     break;

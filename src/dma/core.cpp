@@ -1,7 +1,5 @@
 #include "dma/core.hpp"
 
-#include "utility.hpp"
-
 using namespace psx::dma;
 
 core_t::core_t(interrupt_access_t *irq, memory_access_t *memory, bool log_enabled)

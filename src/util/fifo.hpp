@@ -1,7 +1,7 @@
-#ifndef FIFO_HPP_
-#define FIFO_HPP_
+#ifndef UTIL_FIFO_HPP_
+#define UTIL_FIFO_HPP_
 
-namespace psx {
+namespace psx::util {
 
 template<typename T, int bits>
 class fifo_t {
@@ -49,6 +49,6 @@ class fifo_t {
   }
 };
 
-}  // namespace psx
+}  // namespace psx::util
 
-#endif  // FIFO_HPP_
+#endif  // UTIL_FIFO_HPP_

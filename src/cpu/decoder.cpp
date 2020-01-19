@@ -1,29 +1,31 @@
 #include "cpu/core.hpp"
 
-#include "utility.hpp"
+#include "util/int.hpp"
+#include "util/uint.hpp"
 
 using namespace psx::cpu;
+using namespace psx::util;
 
 uint32_t core_t::decode_iconst() {
-  return utility::sclip<16>(code);
+  return int_t<16>::trunc(code);
 }
 
 uint32_t core_t::decode_uconst() {
-  return utility::uclip<16>(code);
+  return uint_t<16>::trunc(code);
 }
 
 uint32_t core_t::decode_sa() {
-  return utility::uclip<5>(code >> 6);
+  return uint_t<5>::trunc(code >> 6);
 }
 
 uint32_t core_t::decode_rd() {
-  return utility::uclip<5>(code >> 11);
+  return uint_t<5>::trunc(code >> 11);
 }
 
 uint32_t core_t::decode_rt() {
-  return utility::uclip<5>(code >> 16);
+  return uint_t<5>::trunc(code >> 16);
 }
 
 uint32_t core_t::decode_rs() {
-  return utility::uclip<5>(code >> 21);
+  return uint_t<5>::trunc(code >> 21);
 }

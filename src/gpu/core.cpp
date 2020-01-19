@@ -1,7 +1,6 @@
 #include "gpu/core.hpp"
 
 #include <cassert>
-#include "utility.hpp"
 
 using namespace psx::gpu;
 

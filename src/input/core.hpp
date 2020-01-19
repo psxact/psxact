@@ -2,9 +2,11 @@
 #define INPUT_CORE_HPP_
 
 #include "input/device.hpp"
-#include "fifo.hpp"
+#include "util/fifo.hpp"
 #include "interrupt-access.hpp"
 #include "memory-component.hpp"
+
+using namespace psx::util;
 
 namespace psx::input {
 

@@ -1,9 +1,6 @@
 #include "input/core.hpp"
 
-#include <SDL.h>
-
 #include "input/devices/digital-pad.hpp"
-#include "utility.hpp"
 
 using namespace psx::input;
 

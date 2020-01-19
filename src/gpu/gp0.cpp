@@ -1,8 +1,10 @@
 #include "gpu/core.hpp"
 
-#include "utility.hpp"
+#include "util/int.hpp"
+#include "util/uint.hpp"
 
 using namespace psx::gpu;
+using namespace psx::util;
 
 static int command_size[256] = {
   1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // $00
@@ -136,10 +138,10 @@ void core_t::gp0(uint32_t data) {
         break;
 
       case 0xe2:
-        texture_window_mask_x = utility::uclip<5>(fifo.buffer[0] >> 0);
-        texture_window_mask_y = utility::uclip<5>(fifo.buffer[0] >> 5);
-        texture_window_offset_x = utility::uclip<5>(fifo.buffer[0] >> 10);
-        texture_window_offset_y = utility::uclip<5>(fifo.buffer[0] >> 15);
+        texture_window_mask_x = uint_t<5>::trunc(fifo.buffer[0] >> 0);
+        texture_window_mask_y = uint_t<5>::trunc(fifo.buffer[0] >> 5);
+        texture_window_offset_x = uint_t<5>::trunc(fifo.buffer[0] >> 10);
+        texture_window_offset_y = uint_t<5>::trunc(fifo.buffer[0] >> 15);
         break;
 
       case 0xe3:
@@ -153,8 +155,8 @@ void core_t::gp0(uint32_t data) {
         break;
 
       case 0xe5:
-        x_offset = utility::sclip<11>(fifo.buffer[0] >> 0);
-        y_offset = utility::sclip<11>(fifo.buffer[0] >> 11);
+        x_offset = int_t<11>::trunc(fifo.buffer[0] >> 0);
+        y_offset = int_t<11>::trunc(fifo.buffer[0] >> 11);
         break;
 
       case 0xe6:

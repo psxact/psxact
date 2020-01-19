@@ -2,9 +2,11 @@
 
 #include "cpu/cop0/sys.hpp"
 #include "cpu/cop2/gte.hpp"
-#include "utility.hpp"
+#include "util/int.hpp"
+#include "util/uint.hpp"
 
 using namespace psx::cpu;
+using namespace psx::util;
 
 core_t::opcode_t core_t::op_table[64] = {
   nullptr,          &core_t::op_bxx,   &core_t::op_j,    &core_t::op_jal,
@@ -568,7 +570,7 @@ void core_t::op_jr() {
 void core_t::op_lb() {
   uint32_t address = get_rs() + decode_iconst();
   uint32_t data = read_data_byte(address);
-  data = utility::sclip<8>(data);
+  data = int_t<8>::trunc(data);
 
   set_rt_load(data);
 }
@@ -576,7 +578,7 @@ void core_t::op_lb() {
 void core_t::op_lbu() {
   uint32_t address = get_rs() + decode_iconst();
   uint32_t data = read_data_byte(address);
-  data = utility::uclip<8>(data);
+  data = uint_t<8>::trunc(data);
 
   set_rt_load(data);
 }
@@ -588,7 +590,7 @@ void core_t::op_lh() {
   }
 
   uint32_t data = read_data_half(address);
-  data = utility::sclip<16>(data);
+  data = int_t<16>::trunc(data);
 
   set_rt_load(data);
 }
@@ -600,7 +602,7 @@ void core_t::op_lhu() {
   }
 
   uint32_t data = read_data_half(address);
-  data = utility::uclip<16>(data);
+  data = uint_t<16>::trunc(data);
 
   set_rt_load(data);
 }
