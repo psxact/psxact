@@ -5,7 +5,10 @@ using namespace psx::dma;
 core_t::core_t(interrupt_access_t *irq, memory_access_t *memory, bool log_enabled)
   : memory_component_t("dma", log_enabled)
   , irq(irq)
-  , memory(memory) {
+  , memory(memory)
+  , dpcr(0x07654321)
+  , dicr(0x00000000)
+  , channels() {
 }
 
 static uint32_t get_channel_index(uint32_t address) {

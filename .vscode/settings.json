@@ -1,0 +1,25 @@
+{
+  "files.associations": {
+    "typeinfo": "cpp",
+    "random": "cpp",
+    "optional": "cpp",
+    "istream": "cpp",
+    "ostream": "cpp",
+    "system_error": "cpp",
+    "array": "cpp",
+    "functional": "cpp",
+    "tuple": "cpp",
+    "type_traits": "cpp",
+    "utility": "cpp",
+    "cwchar": "cpp",
+    "limits": "cpp",
+    "*.tcc": "cpp",
+    "string_view": "cpp",
+    "initializer_list": "cpp",
+    "cstddef": "cpp",
+    "cstdint": "cpp",
+    "algorithm": "cpp",
+    "cmath": "cpp"
+  },
+  "cmake.configureOnOpen": false
+}

@@ -9,10 +9,11 @@
 using namespace psx;
 
 static const option options[] = {
-  { .name = "bios", .has_arg = required_argument, .flag = 0, .val = 'b' },
-  { .name = "game", .has_arg = required_argument, .flag = 0, .val = 'g' },
-  { .name = "log",  .has_arg = required_argument, .flag = 0, .val = 'l' },
-  {}
+  { .name = "bios",     .has_arg = required_argument, .flag = 0, .val = 'b' },
+  { .name = "game",     .has_arg = required_argument, .flag = 0, .val = 'g' },
+  { .name = "log",      .has_arg = required_argument, .flag = 0, .val = 'l' },
+  { .name = "headless", .has_arg =       no_argument, .flag = 0, .val = 'h' },
+  {},
 };
 
 static void show_usage() {
@@ -20,6 +21,7 @@ static void show_usage() {
   printf("$ psxact [-b|--bios <file>]\n");
   printf("         [-g|--game <file>]\n");
   printf("         [-l|--log  <component>]\n");
+  printf("         [--headless]\n");
 }
 
 static void fail() {
@@ -30,6 +32,7 @@ static void fail() {
 args_t::args_t(int argc, char **argv)
   : bios_file_name("bios.rom")
   , game_file_name("")
+  , headless(false)
   , log_cpu(false)
   , log_dma(false)
   , log_gpu(false)
@@ -49,6 +52,7 @@ args_t::args_t(int argc, char **argv)
     switch (c) {
       case 'b': this->bios_file_name = optarg; break;
       case 'g': this->game_file_name = optarg; break;
+      case 'h': this->headless = true; break;
       case 'l':
         if (strcmp(optarg, "cpu") == 0) {
           this->log_cpu = true;

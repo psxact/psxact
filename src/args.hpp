@@ -6,6 +6,7 @@ namespace psx {
 struct args_t {
   const char *bios_file_name;
   const char *game_file_name;
+  bool headless;
   bool log_cpu;
   bool log_dma;
   bool log_gpu;

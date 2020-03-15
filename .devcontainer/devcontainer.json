@@ -1,5 +1,7 @@
 {
-  "dockerFile": "Dockerfile",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "dev",
+  "workspaceFolder": "/workspaces/psxact",
   "extensions": [
     "ms-vscode.cmake-tools",
     "ms-vscode.cpptools",

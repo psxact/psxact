@@ -7,7 +7,12 @@ using namespace psx;
 static constexpr int window_width = 640;
 static constexpr int window_height = 480;
 
-sdl2::sdl2() {
+sdl2::sdl2()
+  : window()
+  , renderer()
+  , texture()
+  , texture_size_x(window_width)
+  , texture_size_y(window_height) {
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
 
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
@@ -42,27 +47,27 @@ sdl2::~sdl2() {
 bool sdl2::render(uint16_t *src_pixels, int w, int h) {
   resize(w, h);
 
-  void *dst_pixels;
-  int dst_pitch;
+  void *dst_pixels = nullptr;
+  int dst_pitch = 0;
   int src_pitch = 1024 * sizeof(uint16_t);
 
-  SDL_LockTexture(texture, nullptr, &dst_pixels, &dst_pitch);
+  if (SDL_LockTexture(texture, nullptr, &dst_pixels, &dst_pitch) == 0) {
+    uint16_t *dst = reinterpret_cast<uint16_t *>(dst_pixels);
+    uint16_t *src = reinterpret_cast<uint16_t *>(src_pixels);
 
-  uint16_t *dst = reinterpret_cast<uint16_t *>(dst_pixels);
-  uint16_t *src = reinterpret_cast<uint16_t *>(src_pixels);
+    for (int py = 0; py < h; py++) {
+      for (int px = 0; px < w; px++) {
+        dst[px] = src[px];
+      }
 
-  for (int py = 0; py < h; py++) {
-    for (int px = 0; px < w; px++) {
-      dst[px] = src[px];
+      src += src_pitch / sizeof(uint16_t);
+      dst += dst_pitch / sizeof(uint16_t);
     }
 
-    src += src_pitch / sizeof(uint16_t);
-    dst += dst_pitch / sizeof(uint16_t);
+    SDL_UnlockTexture(texture);
+    SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+    SDL_RenderPresent(renderer);
   }
-
-  SDL_UnlockTexture(texture);
-  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-  SDL_RenderPresent(renderer);
 
   return handle_events();
 }

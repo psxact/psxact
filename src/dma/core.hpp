@@ -11,8 +11,8 @@ class core_t : public memory_component_t {
   interrupt_access_t *irq;
   memory_access_t *memory;
 
-  uint32_t dpcr = 0x07654321;
-  uint32_t dicr = 0x00000000;
+  uint32_t dpcr;
+  uint32_t dicr;
 
   struct {
     uint32_t address;

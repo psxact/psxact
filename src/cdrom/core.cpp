@@ -8,7 +8,27 @@ using namespace psx::util;
 core_t::core_t(interrupt_access_t *irq, const char *game_file_name, bool log_enabled)
     : memory_component_t("cdc", log_enabled)
     , irq(irq)
-    , game_file_name(game_file_name) {
+    , index()
+    , interrupt_enable()
+    , interrupt_request()
+    , interrupt_timer()
+    , seek_timecode()
+    , read_timecode()
+    , seek_unprocessed()
+    , parameter_fifo()
+    , response_fifo()
+    , data_fifo()
+    , data_buffer() // TODO: Replace with heap-allocation
+    , command()
+    , command_unprocessed()
+    , busy()
+    , is_seeking()
+    , is_reading()
+    , game_file_name(game_file_name)
+    , game_file()
+    , logic()
+    , drive()
+    , mode() {
   game_file = fopen(game_file_name, "rb+");
 
   logic_transition(&core_t::logic_idling, 1000);

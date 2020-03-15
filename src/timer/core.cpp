@@ -16,7 +16,10 @@ using namespace psx::timer;
 
 core_t::core_t(interrupt_access_t *irq, bool log_enabled)
   : memory_component_t("timer", log_enabled)
-  , irq(irq) {
+  , irq(irq)
+  , in_hblank(false)
+  , in_vblank(false)
+  , timers() {
   unit_init(0, 11, 7 * 4);
   unit_init(1, 11, 7 * 3413);
   unit_init(2,  1, 8);
