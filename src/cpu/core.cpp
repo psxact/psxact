@@ -179,65 +179,91 @@ void core_t::read_code() {
   code = memory->read_word(map_address(regs.this_pc));
 }
 
-bool core_t::use_dcache(uint32_t address) {
-  if (get_segment(address) > KSEG0) {
-    return false;
-  }
-
-  if ((address & ~0x3ff) == 0x1f800000) {
-    log("data-cache memory access ~%08x", address);
-    return true;
-  }
-
+io_target_t core_t::get_target(uint32_t address) {
   uint32_t cop0r12 = get_cop(0)->read_gpr(12);
-  if ((cop0r12 & (cop0::ISC | cop0::SWC)) == cop0::ISC) { // swc=0, isc=1
-    log("data-cache isolated access ~%08x", address);
-    return true;
+  if (cop0r12 & cop0::ISC) {
+    if (cop0r12 & cop0::SWC) {
+      log("i-cache isolated access ~%08x", address);
+      return io_target_t::ICACHE;
+    }
+    else {
+      log("d-cache isolated access ~%08x", address);
+      return io_target_t::DCACHE;
+    }
   }
 
-  return false;
+  if ((address & 0x7ffffc00) == 0x1f800000 && get_segment(address) < KSEG1) {
+    log("data-cache memory access ~%08x", address);
+    return io_target_t::DCACHE;
+  }
+
+  return io_target_t::MEMORY;
 }
 
 uint32_t core_t::read_data_byte(uint32_t address) {
   address = map_address(address);
-  return use_dcache(address)
-    ? dcache.io_read_byte(address)
-    : memory->read_byte(address);
+
+  switch (get_target(address)) {
+    case io_target_t::ICACHE: return 0;
+    case io_target_t::DCACHE: return dcache.io_read_byte(address);
+    case io_target_t::MEMORY: return memory->read_byte(address);
+  }
+
+  return 0;
 }
 
 uint32_t core_t::read_data_half(uint32_t address) {
   address = map_address(address);
-  return use_dcache(address)
-    ? dcache.io_read_half(address)
-    : memory->read_half(address);
+
+  switch (get_target(address)) {
+    case io_target_t::ICACHE: return 0;
+    case io_target_t::DCACHE: return dcache.io_read_half(address);
+    case io_target_t::MEMORY: return memory->read_half(address);
+  }
+
+  return 0;
 }
 
 uint32_t core_t::read_data_word(uint32_t address) {
   address = map_address(address);
-  return use_dcache(address)
-    ? dcache.io_read_word(address)
-    : memory->read_word(address);
+
+  switch (get_target(address)) {
+    case io_target_t::ICACHE: return 0;
+    case io_target_t::DCACHE: return dcache.io_read_word(address);
+    case io_target_t::MEMORY: return memory->read_word(address);
+  }
+
+  return 0;
 }
 
 void core_t::write_data_byte(uint32_t address, uint32_t data) {
   address = map_address(address);
-  return use_dcache(address)
-    ? dcache.io_write_byte(address, data)
-    : memory->write_byte(address, data);
+
+  switch (get_target(address)) {
+    case io_target_t::ICACHE: break;
+    case io_target_t::DCACHE: dcache.io_write_byte(address, data); break;
+    case io_target_t::MEMORY: memory->write_byte(address, data); break;
+  }
 }
 
 void core_t::write_data_half(uint32_t address, uint32_t data) {
   address = map_address(address);
-  return use_dcache(address)
-    ? dcache.io_write_half(address, data)
-    : memory->write_half(address, data);
+
+  switch (get_target(address)) {
+    case io_target_t::ICACHE: break;
+    case io_target_t::DCACHE: dcache.io_write_half(address, data); break;
+    case io_target_t::MEMORY: memory->write_half(address, data); break;
+  }
 }
 
 void core_t::write_data_word(uint32_t address, uint32_t data) {
   address = map_address(address);
-  return use_dcache(address)
-    ? dcache.io_write_word(address, data)
-    : memory->write_word(address, data);
+
+  switch (get_target(address)) {
+    case io_target_t::ICACHE: break;
+    case io_target_t::DCACHE: dcache.io_write_word(address, data); break;
+    case io_target_t::MEMORY: memory->write_word(address, data); break;
+  }
 }
 
 void core_t::update_irq(uint32_t stat, uint32_t mask) {

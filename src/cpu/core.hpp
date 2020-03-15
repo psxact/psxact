@@ -12,6 +12,12 @@
 
 namespace psx::cpu {
 
+enum class io_target_t {
+  MEMORY,
+  ICACHE,
+  DCACHE
+};
+
 enum segment_t {
   KUSEG = 0,
   KSEG0 = 4,
@@ -79,7 +85,7 @@ class core_t : public memory_component_t {
 
   void read_code();
 
-  bool use_dcache(uint32_t address);
+  io_target_t get_target(uint32_t address);
 
   uint32_t read_data_byte(uint32_t address);
 
