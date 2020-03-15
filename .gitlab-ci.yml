@@ -5,16 +5,14 @@ stages:
 build:linux:
   stage: build
   image: debian:buster
-  variables:
-    GIT_SUBMODULE_STRATEGY: normal
   before_script:
     - apt update && apt -y install build-essential cmake git libsdl2-dev
   script:
     - ./ci/build.sh
     - ./ci/package.sh
   artifacts:
+    expire_in: 1 week
     paths:
       - '*.tar.bz2'
-    expire_in: 1 week
   tags:
     - docker

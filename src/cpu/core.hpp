@@ -65,6 +65,8 @@ class core_t : public memory_component_t {
  public:
   explicit core_t(memory_access_t *memory, bool log_enabled);
 
+  uint32_t get_code() const;
+
   cop_t *get_cop(int n);
 
   bool get_cop_usable(int n);

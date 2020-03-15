@@ -94,11 +94,11 @@ void core_t::tick() {
     enter_exception(cop0::exception_t::interrupt);
   }
   else {
-    uint32_t code = (this->code >> 26) & 63;
+    uint32_t code = (get_code() >> 26) & 63;
     if (code)
       (*this.*op_table[code])();
     else
-      (*this.*op_table_special[this->code & 63])();
+      (*this.*op_table_special[get_code() & 63])();
   }
 }
 
@@ -174,7 +174,7 @@ void core_t::read_code() {
   regs.pc = regs.next_pc;
   regs.next_pc += 4;
 
-  // TODO(Adam): read i-cache
+  // TODO: read i-cache
 
   code = memory->read_word(map_address(regs.this_pc));
 }
@@ -333,6 +333,10 @@ static inline uint32_t overflow(uint32_t x, uint32_t y, uint32_t z) {
   return (~(x ^ y) & (x ^ z) & 0x80000000);
 }
 
+uint32_t core_t::get_code() const {
+  return code;
+}
+
 uint32_t core_t::get_pc() {
   return regs.pc;
 }
@@ -478,11 +482,11 @@ void core_t::op_bxx() {
   // bgezal rs,$nnnn
   // bltz rs,$nnnn
   // bltzal rs,$nnnn
-  bool condition = (code & (1 << 16))
+  bool condition = (get_code() & (1 << 16))
     ? int32_t(get_rs()) >= 0
     : int32_t(get_rs()) <  0;
 
-  if ((code & 0x1e0000) == 0x100000) {
+  if ((get_code() & 0x1e0000) == 0x100000) {
     regs.gp[31] = regs.next_pc;
   }
 
@@ -499,8 +503,8 @@ void core_t::op_cop(int n) {
 
   auto cop = get_cop(n);
 
-  if (code & (1 << 25)) {
-    return cop->run(code & 0x1ffffff);
+  if (get_code() & (1 << 25)) {
+    return cop->run(get_code() & 0x1ffffff);
   }
 
   uint32_t rd = decode_rd();
@@ -513,7 +517,7 @@ void core_t::op_cop(int n) {
     case 0x06: return cop->write_ccr(rd, get_register(rt));
   }
 
-  log("op_cop%d(0x%08x)", n, code);
+  log("op_cop%d(0x%08x)", n, get_code());
 }
 
 void core_t::op_cop0() {
@@ -569,13 +573,13 @@ void core_t::op_divu() {
 }
 
 void core_t::op_j() {
-  regs.next_pc = (regs.pc & 0xf0000000) | ((code << 2) & 0x0ffffffc);
+  regs.next_pc = (regs.pc & 0xf0000000) | ((get_code() << 2) & 0x0ffffffc);
   is_branch = true;
 }
 
 void core_t::op_jal() {
   regs.gp[31] = regs.next_pc;
-  regs.next_pc = (regs.pc & 0xf0000000) | ((code << 2) & 0x0ffffffc);
+  regs.next_pc = (regs.pc & 0xf0000000) | ((get_code() << 2) & 0x0ffffffc);
   is_branch = true;
 }
 

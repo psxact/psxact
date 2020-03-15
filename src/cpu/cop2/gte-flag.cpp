@@ -140,7 +140,7 @@ int32_t gte_t::flag_g(int32_t n, int32_t value) {
 }
 
 int32_t gte_t::flag_h(int64_t value) {
-  const int32_t max = uint_t<12>::max + 1;  // TODO(Adam): why is this one different?
+  const int32_t max = uint_t<12>::max + 1;  // TODO: why is this one different?
   const int32_t min = uint_t<12>::min;
 
   if (value < min) {

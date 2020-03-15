@@ -27,7 +27,7 @@ static const char *register_names[32] = {
 };
 
 void core_t::disassemble_special(FILE *file) {
-  switch (code & 0x3f) {
+  switch (get_code() & 0x3f) {
   case 0x00: fprintf(file, "sll       %s, %s, #%d\n", get_rd(), get_rt(), get_sa()); break;
 
   case 0x02: fprintf(file, "srl       %s, %s, #%d\n", get_rd(), get_rt(), get_sa()); break;
@@ -65,7 +65,7 @@ void core_t::disassemble_special(FILE *file) {
   case 0x2b: fprintf(file, "sltu      %s, %s, %s\n", get_rd(), get_rs(), get_rt()); break;
 
   default:
-    fprintf(file, "unknown (0x%08x)\n", code);
+    fprintf(file, "unknown (0x%08x)\n", get_code());
     break;
   }
 }
@@ -81,7 +81,7 @@ void core_t::disassemble_reg_imm(FILE *file) {
   case 0x11: fprintf(file, "bgezal    %s, 0x%08x\n", get_rs(), pc + 4 + (get_iconst() << 2)); break;
 
   default:
-    fprintf(file, "unknown (0x%08x)\n", code);
+    fprintf(file, "unknown (0x%08x)\n", get_code());
     break;
   }
 }
@@ -91,17 +91,17 @@ void core_t::disassemble(FILE *file) {
 
   fprintf(file, "%08X: ", pc);
 
-  if (code == 0) {
+  if (get_code() == 0) {
     fprintf(file, "nop       \n");
     return;
   }
 
-  switch ((code >> 26) & 0x3f) {
+  switch ((get_code() >> 26) & 0x3f) {
   case 0x00: disassemble_special(file); break;
   case 0x01: disassemble_reg_imm(file); break;
 
-  case 0x02: fprintf(file, "j         0x%08x\n", (pc & ~0x0fffffff) | ((code << 2) & 0x0fffffff)); break;
-  case 0x03: fprintf(file, "jal       0x%08x\n", (pc & ~0x0fffffff) | ((code << 2) & 0x0fffffff)); break;
+  case 0x02: fprintf(file, "j         0x%08x\n", (pc & ~0x0fffffff) | ((get_code() << 2) & 0x0fffffff)); break;
+  case 0x03: fprintf(file, "jal       0x%08x\n", (pc & ~0x0fffffff) | ((get_code() << 2) & 0x0fffffff)); break;
 
   case 0x04: fprintf(file, "beq       %s, %s, 0x%08x\n", get_rs(), get_rt(), pc + 4 + (get_iconst() << 2)); break;
   case 0x05: fprintf(file, "bne       %s, %s, 0x%08x\n", get_rs(), get_rt(), pc + 4 + (get_iconst() << 2)); break;
@@ -121,7 +121,7 @@ void core_t::disassemble(FILE *file) {
   case 0x11:
   case 0x12:
   case 0x13: {
-    uint32_t co = (code >> 26) & 3;
+    uint32_t co = (get_code() >> 26) & 3;
 
     switch (decode_rs()) {
     case 0x00: fprintf(file, "mfc%d      %s, %s\n", co, get_rt(), get_rd()); break;
@@ -130,17 +130,17 @@ void core_t::disassemble(FILE *file) {
     case 0x06: fprintf(file, "ctc%d      %s, %s\n", co, get_rt(), get_rd()); break;
 
     case 0x10:
-      switch (code & 0x3f) {
+      switch (get_code() & 0x3f) {
       case 0x10: fprintf(file, "rfe\n"); break;
 
       default:
-        fprintf(file, "unknown (0x%08x)\n", code);
+        fprintf(file, "unknown (0x%08x)\n", get_code());
         break;
       }
       break;
 
     default:
-      fprintf(file, "unknown (0x%08x)\n", code);
+      fprintf(file, "unknown (0x%08x)\n", get_code());
       break;
     }
 
@@ -163,7 +163,7 @@ void core_t::disassemble(FILE *file) {
   case 0x2e: fprintf(file, "swr       %s, 0x%04x(%s)\n", get_rt(), get_iconst(), get_rs()); break;
 
   default:
-    fprintf(file, "unknown (0x%08x)\n", code);
+    fprintf(file, "unknown (0x%08x)\n", get_code());
     break;
   }
 }
