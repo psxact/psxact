@@ -25,7 +25,7 @@ enum segment_t {
   KSEG2 = 6
 };
 
-class core_t : public memory_component_t {
+class core_t final : public memory_component_t {
   bios::decoder_t bios_call;
 
   memory_access_t *memory;

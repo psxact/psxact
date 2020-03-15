@@ -12,6 +12,9 @@ core_t::core_t(bool log_enabled)
   , sound_ram("sound-ram") {
 }
 
+core_t::~core_t() {
+}
+
 uint16_t core_t::io_read_half(uint32_t address) {
   log("io_read_half(0x%08x)", address);
 

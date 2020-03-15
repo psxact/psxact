@@ -6,7 +6,35 @@ using namespace psx::gpu;
 
 core_t::core_t(bool log_enabled)
   : memory_component_t("gpu", log_enabled)
-  , vram("vram") {
+  , vram()
+  , data_latch(0)
+  , status(0x14802000)
+  , texture_window_mask_x()
+  , texture_window_mask_y()
+  , texture_window_offset_x()
+  , texture_window_offset_y()
+  , drawing_area_x1()
+  , drawing_area_y1()
+  , drawing_area_x2()
+  , drawing_area_y2()
+  , x_offset()
+  , y_offset()
+  , display_area_x()
+  , display_area_y()
+  , display_area_x1()
+  , display_area_y1()
+  , display_area_x2()
+  , display_area_y2()
+  , textured_rectangle_x_flip()
+  , textured_rectangle_y_flip()
+  , fifo()
+  , cpu_to_gpu_transfer()
+  , gpu_to_cpu_transfer() {
+  vram = new memory_t< mib(1) >("vram");
+}
+
+core_t::~core_t() {
+  delete vram;
 }
 
 uint32_t core_t::data() {

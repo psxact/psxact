@@ -13,6 +13,8 @@ class memory_component_t {
  public:
   explicit memory_component_t(const char *name, bool log_enabled);
 
+  virtual ~memory_component_t() {}
+
   void log(const char *fmt, ...);
 
   virtual uint8_t io_read_byte(uint32_t address);

@@ -7,7 +7,7 @@
 
 namespace psx::dma {
 
-class core_t : public memory_component_t {
+class core_t final : public memory_component_t {
   interrupt_access_t *irq;
   memory_access_t *memory;
 

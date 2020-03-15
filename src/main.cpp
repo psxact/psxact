@@ -18,15 +18,17 @@ int main(int argc, char *argv[]) {
     run(console);
   }
 
+  delete console;
+
   return 0;
 }
 
 void run(psx::console_t *console) {
-  psx::sdl2 renderer;
+  psx::sdl2 renderer = psx::sdl2();
 
-  uint16_t *vram;
-  int w;
-  int h;
+  uint16_t *vram = nullptr;
+  int w = 0;
+  int h = 0;
 
   do {
     console->run_for_one_frame();
@@ -36,13 +38,8 @@ void run(psx::console_t *console) {
 }
 
 void run_headless(psx::console_t *console) {
-  uint16_t *vram;
-  int w;
-  int h;
-
   do {
     console->run_for_one_frame();
-    console->get_video_params(&vram, &w, &h);
   }
   while (1);
 }

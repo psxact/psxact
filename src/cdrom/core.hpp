@@ -18,7 +18,7 @@ struct sector_timecode_t {
   uint8_t sector;
 };
 
-class core_t : public memory_component_t {
+class core_t final : public memory_component_t {
   interrupt_access_t *irq;
 
   int32_t index;

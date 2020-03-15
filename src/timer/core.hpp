@@ -42,7 +42,7 @@ struct timer_t {
   } prescaler;
 };
 
-class core_t : public memory_component_t {
+class core_t final : public memory_component_t {
   interrupt_access_t *irq;
 
   bool in_hblank;

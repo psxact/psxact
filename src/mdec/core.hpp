@@ -18,7 +18,7 @@ enum class command_t {
   set_scale = 3
 };
 
-class core_t : public memory_component_t {
+class core_t final : public memory_component_t {
  private:
   uint32_t status;
 

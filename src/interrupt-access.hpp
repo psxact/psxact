@@ -19,6 +19,8 @@ enum class interrupt_type_t {
 
 class interrupt_access_t {
  public:
+  virtual ~interrupt_access_t() {}
+
   virtual void send(interrupt_type_t flag) = 0;
 };
 

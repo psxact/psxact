@@ -10,10 +10,11 @@ using namespace psx;
 using namespace psx::util;
 
 console_t::console_t(args_t &args)
-  : bios("bios")
-  , wram("wram")
-  , bios_file_name(args.bios_file_name)
+  : bios_file_name(args.bios_file_name)
   , game_file_name(args.game_file_name) {
+  bios = new memory_t< kib(512) >("bios");
+  wram = new memory_t< mib(2) >("wram");
+
   cdrom = new cdrom::core_t(this, game_file_name, args.log_cdrom);
   timer = new timer::core_t(this, args.log_timer);
   cpu = new cpu::core_t(this, args.log_cpu);
@@ -26,14 +27,30 @@ console_t::console_t(args_t &args)
   mdec = new mdec::core_t(args.log_mdec);
   spu = new spu::core_t(args.log_spu);
 
-  bios.load_blob(bios_file_name);
-  bios.io_write_word(0x6990, 0); // patch the bios to skip the boot-up animation
+  bios->load_blob(bios_file_name);
+  bios->io_write_word(0x6990, 0); // patch the bios to skip the boot-up animation
 
-  bios.io_write_word(0x6f0c, 0x34010001); // li $at, 0x1
-  bios.io_write_word(0x6f10, 0x0ff019e1); // jal 0xbfc06784
-  bios.io_write_word(0x6f14, 0xaf81a9c0); // sw $at -0x5460($gp)
+  bios->io_write_word(0x6f0c, 0x34010001); // li $at, 0x1
+  bios->io_write_word(0x6f10, 0x0ff019e1); // jal 0xbfc06784
+  bios->io_write_word(0x6f14, 0xaf81a9c0); // sw $at -0x5460($gp)
 
   is_exe = !!(strstr(game_file_name, ".exe"));
+}
+
+console_t::~console_t() {
+  delete bios;
+  delete wram;
+  delete cdrom;
+  delete timer;
+  delete cpu;
+  delete dma;
+  delete exp1;
+  delete exp2;
+  delete exp3;
+  delete gpu;
+  delete input;
+  delete mdec;
+  delete spu;
 }
 
 void console_t::send(interrupt_type_t flag) {
@@ -54,8 +71,8 @@ memory_component_t *console_t::decode(uint32_t address) {
     return cdrom;
   }
 
-  if (between(0x00000000, 0x007fffff)) { return &wram; }
-  if (between(0x1fc00000, 0x1fc7ffff)) { return &bios; }
+  if (between(0x00000000, 0x007fffff)) { return wram; }
+  if (between(0x1fc00000, 0x1fc7ffff)) { return bios; }
   if (between(0x1f801040, 0x1f80104f)) { return input; }
   if (between(0x1f801070, 0x1f801077)) { return cpu; }
   if (between(0x1f801080, 0x1f8010ff)) { return dma; }
@@ -256,7 +273,7 @@ void console_t::load_exe(const char *game_file_name) {
     printf("  FP: $%08x\n", cpu->get_register(30));
 
     for (int i = 0; i < text_count; i++) {
-      wram.io_write_byte(text_start + i, blob->read_byte(0x800 + i));
+      wram->io_write_byte(text_start + i, blob->read_byte(0x800 + i));
     }
   }
 }

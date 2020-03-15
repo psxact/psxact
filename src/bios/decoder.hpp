@@ -7,7 +7,7 @@
 
 namespace psx::bios {
 
-class decoder_t {
+class decoder_t final {
  private:
   memory_access_t *memory;
 

@@ -11,9 +11,9 @@ constexpr int GPU_GP1 = 0x1f801814;
 constexpr int GPU_READ = 0x1f801810;
 constexpr int GPU_STAT = 0x1f801814;
 
-class core_t : public memory_component_t {
+class core_t final : public memory_component_t {
  public:
-  memory_t< mib(1) > vram;
+  memory_t< mib(1) > *vram;
 
   uint32_t data_latch = 0;
   uint32_t status = 0x14802000;
@@ -73,6 +73,8 @@ class core_t : public memory_component_t {
   } gpu_to_cpu_transfer;
 
   core_t(bool log_enabled);
+
+  ~core_t();
 
   uint32_t io_read_word(uint32_t address);
 

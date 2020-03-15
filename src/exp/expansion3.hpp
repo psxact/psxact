@@ -5,7 +5,7 @@
 
 namespace psx::exp {
 
-class expansion3_t : public memory_component_t {
+class expansion3_t final : public memory_component_t {
  public:
   expansion3_t();
 };

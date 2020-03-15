@@ -20,11 +20,11 @@
 
 namespace psx {
 
-class console_t
+class console_t final
   : public memory_access_t
   , public interrupt_access_t {
-  memory_t< kib(512) > bios;
-  memory_t< mib(2) > wram;
+  memory_t< kib(512) > *bios;
+  memory_t< mib(2) > *wram;
 
   cdrom::core_t *cdrom;
   timer::core_t *timer;
@@ -44,6 +44,8 @@ class console_t
 
  public:
   console_t(args_t &args);
+
+  ~console_t();
 
   void send(interrupt_type_t flag);
 

@@ -7,6 +7,8 @@ namespace psx {
 
 class memory_access_t {
  public:
+  virtual ~memory_access_t() {}
+
   virtual uint8_t read_byte(uint32_t address) = 0;
   virtual uint16_t read_half(uint32_t address) = 0;
   virtual uint32_t read_word(uint32_t address) = 0;

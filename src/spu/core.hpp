@@ -6,7 +6,7 @@
 
 namespace psx::spu {
 
-class core_t : public memory_component_t {
+class core_t final : public memory_component_t {
   uint16_t control;
   uint16_t status;
 
@@ -42,6 +42,8 @@ class core_t : public memory_component_t {
 
  public:
   core_t(bool log_enabled);
+
+  ~core_t();
 
   uint16_t io_read_half(uint32_t address);
 

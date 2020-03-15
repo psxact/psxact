@@ -10,7 +10,7 @@ using namespace psx::util;
 
 namespace psx::input {
 
-class core_t : public memory_component_t {
+class core_t final : public memory_component_t {
 
   struct {
     int counter = 0x0088;
