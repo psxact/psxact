@@ -17,8 +17,9 @@ core_t::core_t(interrupt_access_t *irq, const char *game_file_name, bool log_ena
     , seek_unprocessed()
     , parameter_fifo()
     , response_fifo()
-    , data_fifo()
-    , data_buffer() // TODO: Replace with heap-allocation
+    , rx_buffer() // TODO: Replace with heap-allocation
+    , rx_index()
+    , rx_active()
     , command()
     , command_unprocessed()
     , busy()
@@ -109,16 +110,25 @@ void core_t::read_sector() {
     read_timecode.second,
     read_timecode.sector);
 
+  if (mode.read_whole_sector) {
+    rx_index = 12;
+    rx_len = 0x930;
+  }
+  else {
+    rx_index = 24;
+    rx_len = 0x818;
+  }
+
   is_reading = 1;
 
   int32_t cursor = get_read_cursor();
 
   fseek(game_file, cursor, SEEK_SET);
-  fread(data_buffer, sizeof(uint8_t), 0x930, game_file);
+  fread(rx_buffer, sizeof(uint8_t), 0x930, game_file);
 
-  auto minute = bcd::to_dec(data_buffer[12]);
-  auto second = bcd::to_dec(data_buffer[13]);
-  auto sector = bcd::to_dec(data_buffer[14]);
+  auto minute = bcd::to_dec(rx_buffer[12]);
+  auto second = bcd::to_dec(rx_buffer[13]);
+  auto sector = bcd::to_dec(rx_buffer[14]);
 
   if (
     minute != read_timecode.minute ||

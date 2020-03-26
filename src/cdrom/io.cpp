@@ -13,7 +13,7 @@ uint8_t core_t::io_read_byte(uint32_t address) {
         (parameter_fifo.is_empty() << 3) |
         (parameter_fifo.has_room() << 4) |
         (response_fifo.has_data()  << 5) |
-        (data_fifo.has_data()      << 6) |
+        ((rx_index < rx_len)       << 6) |
         (busy                      << 7));
 
     case 0x1f801801:
@@ -23,12 +23,19 @@ uint8_t core_t::io_read_byte(uint32_t address) {
 
       return response_fifo.read();
 
-    case 0x1f801802:
-      if (data_fifo.is_empty()) {
-        log("!!! DATA FIFO EMPTY !!!");
+    case 0x1f801802: {
+      auto data = rx_buffer[rx_index];
+
+      if (rx_active) {
+        rx_index += 1;
+
+        if (rx_index == rx_len) {
+          rx_active = false;
+        }
       }
 
-      return data_fifo.read();
+      return data;
+    }
 
     case 0x1f801803:
       switch (index & 1) {
@@ -41,12 +48,12 @@ uint8_t core_t::io_read_byte(uint32_t address) {
   return memory_component_t::io_read_byte(address);
 }
 
-uint32_t core_t::io_read_word(uint32_t address) {
+uint32_t core_t::io_read_word(uint32_t) {
   return
-    (io_read_byte(address) << (8 * 0)) |
-    (io_read_byte(address) << (8 * 1)) |
-    (io_read_byte(address) << (8 * 2)) |
-    (io_read_byte(address) << (8 * 3));
+    (io_read_byte(0x1f801802) << (8 * 0)) |
+    (io_read_byte(0x1f801802) << (8 * 1)) |
+    (io_read_byte(0x1f801802) << (8 * 2)) |
+    (io_read_byte(0x1f801802) << (8 * 3));
 }
 
 void core_t::io_write_port_0_n(uint8_t data) {
@@ -78,15 +85,11 @@ void core_t::io_write_port_2_2(uint8_t) {}
 void core_t::io_write_port_2_3(uint8_t) {}
 
 void core_t::io_write_port_3_0(uint8_t data) {
-  data_fifo.clear();
+  auto prev_active = rx_active;
+  rx_active = (data & 0x80) != 0;
 
-  if (data & 0x80) {
-    int skip = mode.read_whole_sector ? 12 : 24;
-    int size = mode.read_whole_sector ? 0x924 : 0x800;
-
-    for (int i = 0; i < size; i++) {
-      data_fifo.write(data_buffer[i + skip]);
-    }
+  if (rx_active && !prev_active) {
+    rx_index = mode.read_whole_sector ? 12 : 24;
   }
 }
 

@@ -8,5 +8,7 @@ cmake-build-*/
 
 # Files
 
+*.bin
 *.log
 *.tar.bz2
+scratchpad

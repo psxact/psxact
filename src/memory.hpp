@@ -56,7 +56,7 @@ struct memory_t : public memory_component_t {
   }
 
   bool load_blob(const char *filename) {
-    if (FILE* file = fopen(filename, "rb+")) {
+    if (FILE *file = fopen(filename, "rb+")) {
       fread(b, sizeof(uint8_t), kSize, file);
       fclose(file);
       return true;

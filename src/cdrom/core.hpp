@@ -32,8 +32,10 @@ class core_t final : public memory_component_t {
 
   fifo_t<uint8_t, 4> parameter_fifo;
   fifo_t<uint8_t, 4> response_fifo;
-  fifo_t<uint8_t, 12> data_fifo;
-  uint8_t data_buffer[4096];
+  uint8_t rx_buffer[4096];
+  uint16_t rx_index;
+  uint16_t rx_len;
+  bool rx_active;
 
   uint8_t command;
   bool command_unprocessed;
