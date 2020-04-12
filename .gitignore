@@ -9,6 +9,7 @@ cmake-build-*/
 # Files
 
 *.bin
+*.env
 *.log
 *.tar.bz2
 scratchpad

@@ -1,6 +1,8 @@
 #ifndef UTIL_FIFO_HPP_
 #define UTIL_FIFO_HPP_
 
+#include <cstdint>
+
 namespace psx::util {
 
 template<typename T, int bits>

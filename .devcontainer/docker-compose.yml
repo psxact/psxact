@@ -4,5 +4,5 @@ services:
     build: .
     command: sleep infinity
     volumes:
-      - /mnt/games:/mnt/games
+      - $GAME_PATH:/mnt/games
       - ..:/workspaces/psxact

@@ -62,12 +62,10 @@ void core_t::tick(int amount) {
     }
   }
 
-  dsr.level = device_dsr_t::HIGH;
-
-  port.control[0]->tick(amount, dsr.level);
-  port.memcard[0]->tick(amount, dsr.level);
-  port.control[1]->tick(amount, dsr.level);
-  port.memcard[1]->tick(amount, dsr.level);
+  dsr.level = port.control[0]->tick(amount, device_dsr_t::HIGH);
+  dsr.level = port.memcard[0]->tick(amount, dsr.level);
+  dsr.level = port.control[1]->tick(amount, dsr.level);
+  dsr.level = port.memcard[1]->tick(amount, dsr.level);
 
   if (dsr.level == device_dsr_t::LOW) {
     send_interrupt();

@@ -20,7 +20,7 @@ void device_t::start_dsr_pulse() {
   dsr_cycles = 0;
 }
 
-void device_t::tick(int amount, device_dsr_t &dsr) {
+device_dsr_t device_t::tick(int amount, device_dsr_t dsr) {
   if (dsr_pending) {
     dsr_cycles += amount;
 
@@ -28,7 +28,9 @@ void device_t::tick(int amount, device_dsr_t &dsr) {
       dsr_pending = false;
     }
     else if (dsr_cycles >= DSR_DELAY_PERIOD) {
-      dsr = device_dsr_t::LOW;
+      return device_dsr_t::LOW;
     }
   }
+
+  return dsr;
 }

@@ -29,7 +29,7 @@ class device_t {
  public:
   static device_t not_connected;
 
-  void tick(int amount, device_dsr_t &dsr);
+  device_dsr_t tick(int amount, device_dsr_t dsr);
 
   virtual void frame();
   virtual int send(int request);
