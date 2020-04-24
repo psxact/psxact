@@ -2,7 +2,6 @@
 
 bin/
 build/
-cmake-build-*/
 .idea/
 .vs/
 

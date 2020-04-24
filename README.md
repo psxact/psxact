@@ -32,11 +32,9 @@ environment. To use this, do the following (Terminal inside checkout directory):
 $ docker run --rm -it -v $PWD:/workspace adambecker/psxact /bin/bash
 ```
 
-That will be enough to get you into the container, from there you can try:
+That will be enough to get you into the container, from there you can try building:
 
-- `./scripts/build.sh`
-- `./scripts/lint.sh`
-- `mkdir bin && cd bin && cmake .. && make`
+- `scons -j $(nproc)`
 
 ## Contributing
 
