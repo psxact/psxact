@@ -1,14 +1,15 @@
 ![Logo](images/logo.png)
 
-This project aims to emulate the PlayStation&trade; 1 console in an accurate
-fashion. No hacks or shortcuts will be used to accomplish this goal. Everything
-needed will be provided by default, this means there aren't any plug-ins to
-locate, maintain, or configure.
+## Goals
+
+1. Emulate the PlayStation&trade; 1 console as accurately and efficiently as possible.
+2. All behaviors verified with a [suite of hardware tests][hw-tests].
+3. Clean and simple code.
 
 ## Current Status
 
 Currently, the emulator is capable of booting a small amount of commercial
-games with compatibility constantly evolving.
+games.
 
 ![Current status](images/current.png)
 
@@ -20,27 +21,24 @@ Once you have a BIOS file, PSXACT can be invoked via command line, using the
 following simple interface:
 
 ```
-$ psxact <bios file here> <game file here>
+$ psxact -b <bios file here> -g <game file here>
 ```
 
 ## Building
 
-Included in this repo is a `Dockerfile` describing a working development
-environment. To use this, do the following (Terminal inside checkout directory):
-
-```
-$ docker run --rm -it -v $PWD:/workspace adambecker/psxact /bin/bash
-```
-
-That will be enough to get you into the container, from there you can try building:
-
-- `scons -j $(nproc)`
+This project uses [SCons][scons] for building, and relies on [SDL2][sdl2] for
+multimedia. At the very simplest, building is accomplished by invoking `scons`
+from the root of the project.
 
 ## Contributing
 
 If you'd like to contribute, please create a fork and issue pull requests!
-Newcomers and experts alike are welcome to [contribute](.github/CONTRIBUTING.md).
+Newcomers and experts alike are welcome to contribute.
 
 ## Communication
 
 Join us on our `freenode` channel, `#psxact`!
+
+[hw-tests]: https://gitlab.com/psx-emu-dev/psx-hardware-tests
+[scons]: https://scons.org/
+[sdl2]: https://www.libsdl.org/

@@ -2,10 +2,15 @@ import os, fnmatch
 
 env = Environment()
 env['CCFLAGS'] = [
+  '-flto',
   '-std=c++17',
   '-Wall',
   '-Wextra',
   '-I', 'src'
+]
+
+env['LINKFLAGS'] = [
+  '-flto'
 ]
 
 debug = ARGUMENTS.get('debug', 0)
