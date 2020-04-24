@@ -9,7 +9,8 @@ cmake-build-*/
 # Files
 
 *.bin
+*.dblite
 *.env
 *.log
 *.tar.bz2
-scratchpad
+*.txt

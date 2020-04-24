@@ -2,7 +2,7 @@
 #define SDL2_HPP_
 
 #define SDL_MAIN_HANDLED
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 namespace psx {
 

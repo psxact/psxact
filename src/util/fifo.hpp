@@ -41,14 +41,6 @@ class fifo_t {
   bool is_full() const {
     return rd_ptr == (wr_ptr ^ mask_msb);
   }
-
-  bool has_data() const {
-    return !is_empty();
-  }
-
-  bool has_room() const {
-    return !is_full();
-  }
 };
 
 }  // namespace psx::util

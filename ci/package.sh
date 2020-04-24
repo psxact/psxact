@@ -1,6 +1,4 @@
-#!/bin/bash
-
-set -e
+#!/bin/bash -ex
 
 PSXACT=$(find . -type f -name psxact)
 

@@ -11,8 +11,8 @@ uint8_t core_t::io_read_byte(uint32_t address) {
         (index                     << 0) |
     //  (xa_adpcm.has_data()       << 2) |
         (parameter_fifo.is_empty() << 3) |
-        (parameter_fifo.has_room() << 4) |
-        (response_fifo.has_data()  << 5) |
+        (!parameter_fifo.is_full() << 4) |
+        (!response_fifo.is_empty() << 5) |
         ((rx_index < rx_len)       << 6) |
         (busy                      << 7));
 

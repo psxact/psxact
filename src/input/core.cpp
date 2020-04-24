@@ -75,9 +75,9 @@ void core_t::tick(int amount) {
 uint8_t core_t::io_read_byte(uint32_t address) {
   switch (address) {
     case 0x1f801040:
-      uint8_t data = rx.fifo.has_data()
-        ? rx.fifo.read()
-        : 0xff;
+      uint8_t data = rx.fifo.is_empty()
+        ? 0xff
+        : rx.fifo.read();
 
       log("1040: rx '%02x'", data);
 
@@ -92,7 +92,7 @@ uint16_t core_t::io_read_half(uint32_t address) {
     case 0x1f801044: {
       uint16_t data =
         (tx.pending ? 0 : 1) | //   0     TX Ready Flag 1   (1=Ready/Started)
-        (rx.fifo.has_data() << 1) |
+        (!rx.fifo.is_empty() << 1) |
         (1 << 2) | //   2     TX Ready Flag 2   (1=Ready/Finished)
         (0 << 3) | //   3     RX Parity Error   (0=No, 1=Error; Wrong Parity, when enabled)  (sticky)
         (int(dsr.level) << 7) |

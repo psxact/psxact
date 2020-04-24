@@ -3,12 +3,13 @@
   "service": "dev",
   "workspaceFolder": "/workspaces/psxact",
   "extensions": [
-    "ms-vscode.cmake-tools",
-    "ms-vscode.cpptools",
-    "twxs.cmake"
+    "ms-vscode.cpptools"
   ],
   "settings": {
     "editor.insertSpaces": true,
-    "editor.tabSize": 2
+    "editor.tabSize": 2,
+    "files.associations": {
+      "SConstruct": "python"
+    }
   }
 }
