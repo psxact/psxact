@@ -8,36 +8,11 @@
 using namespace psx::spu;
 using namespace psx::util;
 
-static void audio_callback(void *userdata, uint8_t *stream, int len) {
-  auto spu = ((psx::spu::core_t *) userdata)->get_sample();
-  auto ptr = (int16_t *) stream;
-
-  for (int i = 0; i < len; i += 2) {
-    *ptr = *spu;
-    ptr++;
-    spu++;
-  }
-}
-
 core_t::core_t(bool log_enabled)
   : addressable_t("spu", log_enabled) {
-
-  SDL_AudioSpec want;
-  SDL_AudioSpec have;
-
-  want.callback = audio_callback;
-  want.channels = 2;
-  want.format = AUDIO_S16;
-  want.freq = 44100;
-  want.samples = 1024;
-  want.userdata = this;
-
-  SDL_OpenAudio(&want, &have);
-  SDL_PauseAudio(0);
 }
 
 core_t::~core_t() {
-  SDL_CloseAudio();
 }
 
 uint16_t core_t::get_register(register_t reg) {
@@ -46,6 +21,14 @@ uint16_t core_t::get_register(register_t reg) {
 
 void core_t::put_register(register_t reg, uint16_t val) {
   registers[uint32_t(reg) - 0x1f801c00] = val;
+}
+
+void core_t::put_status_register() {
+  uint16_t status = 0;
+  
+  status |= get_register(register_t::control) & 0x3f;
+
+  put_register(register_t::status, status);
 }
 
 void core_t::run(int amount) {
@@ -58,6 +41,8 @@ void core_t::run(int amount) {
 }
 
 void core_t::tick() {
+  put_status_register();
+
   int lsample = 0;
   int rsample = 0;
 
@@ -72,10 +57,10 @@ void core_t::tick() {
 
   key_on = 0;
 
-  sample_buffer[sample_buffer_index] = int_t<16>::clamp(lsample);
-  sample_buffer_index = (sample_buffer_index + 1) & 2047;
-  sample_buffer[sample_buffer_index] = int_t<16>::clamp(rsample);
-  sample_buffer_index = (sample_buffer_index + 1) & 2047;
+  sample_buffer[sample_buffer_index & 0x7ff] = int_t<16>::clamp(lsample);
+  sample_buffer_index++;
+  // sample_buffer[sample_buffer_index & 0x7ff] = int_t<16>::clamp(rsample);
+  // sample_buffer_index++;
 
   // update ENDX
   put_register(register_t::endx_lo, uint16_t(endx >> 0));
@@ -135,13 +120,7 @@ void core_t::voice_decoder_tick(int v) {
       endx |= (1 << v);
     }
 
-    uint16_t header = ram.read(voice.current_address);
-
-    if (voice.current_address == 0x820 && header == 0) {
-      log("!! read bogus value !!");
-    }
-
-    voice.put_header(header);
+    voice.put_header(ram.read(voice.current_address));
     voice.current_address++;
   }
 
@@ -149,6 +128,14 @@ void core_t::voice_decoder_tick(int v) {
   voice.current_address++;
 }
 
-const int16_t* core_t::get_sample() const {
-  return sample_buffer;
+int16_t* core_t::get_sample_buffer() const {
+  return (int16_t *) sample_buffer;
+}
+
+uint32_t core_t::get_sample_buffer_index() const {
+  return sample_buffer_index;
+}
+
+void core_t::reset_sample() {
+  sample_buffer_index = 0;
 }

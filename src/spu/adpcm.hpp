@@ -6,11 +6,11 @@
 namespace psx::spu {
 
   struct adpcm_header_t {
-    int shift; // 0..3
-    int filter; // 4..7
-    bool loop_end; // 8
-    bool loop_repeat; // 9
-    bool loop_start; // 10
+    int shift;
+    int filter;
+    bool loop_end;
+    bool loop_repeat;
+    bool loop_start;
 
     static adpcm_header_t create(uint16_t header);
   };

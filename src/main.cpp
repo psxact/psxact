@@ -1,7 +1,8 @@
 #include <cstdio>
 #include "args.hpp"
 #include "console.hpp"
-#include "sdl2.hpp"
+#include "sdl2-audio.hpp"
+#include "sdl2-video.hpp"
 
 void run(psx::console_t *console);
 void run_headless(psx::console_t *console);
@@ -24,17 +25,32 @@ int main(int argc, char *argv[]) {
 }
 
 void run(psx::console_t *console) {
-  psx::sdl2 renderer = psx::sdl2();
-
-  uint16_t *vram = nullptr;
-  int w = 0;
-  int h = 0;
+  psx::sdl2_audio_t audio = psx::sdl2_audio_t();
+  psx::sdl2_video_t video = psx::sdl2_video_t();
 
   do {
     console->run_for_one_frame();
+
+    int16_t *sound;
+    int32_t sound_len;
+
+    console->get_audio_params(&sound, &sound_len);
+    if (!audio.render(sound, sound_len)) {
+      printf("%s\n", SDL_GetError());
+      break;
+    }
+
+    uint16_t *vram;
+    int w;
+    int h;
+
     console->get_video_params(&vram, &w, &h);
+    if (!video.render(vram, w, h)) {
+      printf("%s\n", SDL_GetError());
+      break;
+    }
   }
-  while (renderer.render(vram, w, h));
+  while (1);
 }
 
 void run_headless(psx::console_t *console) {

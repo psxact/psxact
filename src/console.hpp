@@ -63,6 +63,8 @@ class console_t final
 
   void run_for_one_frame();
 
+  void get_audio_params(int16_t **sound, int *len);
+
   void get_video_params(uint16_t **vram, int *w, int *h);
 
  private:

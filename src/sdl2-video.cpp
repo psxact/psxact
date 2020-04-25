@@ -1,4 +1,4 @@
-#include "sdl2.hpp"
+#include "sdl2-video.hpp"
 
 #include <cstdio>
 
@@ -7,7 +7,7 @@ using namespace psx;
 static constexpr int window_width = 640;
 static constexpr int window_height = 480;
 
-sdl2::sdl2()
+sdl2_video_t::sdl2_video_t()
   : window()
   , renderer()
   , texture()
@@ -38,13 +38,13 @@ sdl2::sdl2()
     window_height);
 }
 
-sdl2::~sdl2() {
+sdl2_video_t::~sdl2_video_t() {
   SDL_DestroyWindow(window);
   SDL_DestroyRenderer(renderer);
   SDL_DestroyTexture(texture);
 }
 
-bool sdl2::render(uint16_t *src_pixels, int w, int h) {
+bool sdl2_video_t::render(uint16_t *src_pixels, int w, int h) {
   resize(w, h);
 
   void *dst_pixels = nullptr;
@@ -72,7 +72,7 @@ bool sdl2::render(uint16_t *src_pixels, int w, int h) {
   return handle_events();
 }
 
-bool sdl2::handle_events() {
+bool sdl2_video_t::handle_events() {
   SDL_Event event;
 
   bool alive = true;
@@ -92,7 +92,7 @@ bool sdl2::handle_events() {
   return alive;
 }
 
-void sdl2::resize(int w, int h) {
+void sdl2_video_t::resize(int w, int h) {
   if (texture_size_x == w && texture_size_y == h) {
     return;
   }

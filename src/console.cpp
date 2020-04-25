@@ -224,7 +224,7 @@ void console_t::io_write_word(uint32_t address, uint32_t data) {
 }
 
 void console_t::run_for_one_frame() {
-  constexpr int CYCLE_PER_CPU_TICK = 4;
+  constexpr int CYCLE_PER_CPU_TICK = 2;
 
   constexpr int CPU_FREQ = 33868800;
   constexpr int CPU_TICKS_PER_FRAME = CPU_FREQ / 60 / CYCLE_PER_CPU_TICK;
@@ -241,6 +241,13 @@ void console_t::run_for_one_frame() {
   input->frame();
 
   interrupt(interrupt_type_t::vblank);
+}
+
+void console_t::get_audio_params(int16_t **sound, int *len) {
+  *sound = spu->get_sample_buffer();
+  *len = spu->get_sample_buffer_index();
+
+  spu->reset_sample();
 }
 
 void console_t::get_video_params(uint16_t **vram, int *w, int *h) {

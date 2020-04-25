@@ -9,15 +9,17 @@
 namespace psx::spu {
 
   enum class register_t {
-    kon_lo = 0x1F801D88,
-    kon_hi = 0x1F801D8A,
-    pmon_lo = 0x1F801D90,
-    pmon_hi = 0x1F801D92,
-    endx_lo = 0x1F801D9C,
-    endx_hi = 0x1F801D9A,
-    ram_addr_irq = 0x1F801DA4,
-    ram_addr = 0x1F801DA6,
-    ram_data = 0x1F801DA8
+    kon_lo       = 0x1f801d88,
+    kon_hi       = 0x1f801d8a,
+    pmon_lo      = 0x1f801d90,
+    pmon_hi      = 0x1f801d92,
+    endx_lo      = 0x1f801d9c,
+    endx_hi      = 0x1f801d9a,
+    ram_addr_irq = 0x1f801da4,
+    ram_addr     = 0x1f801da6,
+    ram_data     = 0x1f801da8,
+    control      = 0x1f801daa,
+    status       = 0x1f801dae
   };
 
   class core_t final : public addressable_t {
@@ -45,10 +47,13 @@ namespace psx::spu {
     void run(int amount);
     void tick();
 
-    const int16_t *get_sample() const;
+    int16_t *get_sample_buffer() const;
+    uint32_t get_sample_buffer_index() const;
+    void reset_sample();
 
     uint16_t get_register(register_t reg);
     void put_register(register_t reg, uint16_t value);
+    void put_status_register();
 
     uint16_t io_read_half(uint32_t address);
     void io_write_half(uint32_t address, uint16_t data);
