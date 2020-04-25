@@ -6,9 +6,8 @@
 #include "cpu/cop.hpp"
 #include "cpu/cop0/sys.hpp"
 #include "cpu/cop2/gte.hpp"
+#include "addressable.hpp"
 #include "memory.hpp"
-#include "memory-access.hpp"
-#include "memory-component.hpp"
 
 namespace psx::cpu {
 
@@ -25,10 +24,10 @@ enum segment_t {
   KSEG2 = 6
 };
 
-class core_t final : public memory_component_t {
+class core_t final : public addressable_t {
   bios::decoder_t bios_call;
 
-  memory_access_t *memory;
+  addressable_t *memory;
 
   cop_t *cop[4];
 
@@ -63,7 +62,7 @@ class core_t final : public memory_component_t {
   static opcode_t op_table_special[64];
 
  public:
-  explicit core_t(memory_access_t *memory, bool log_enabled);
+  explicit core_t(addressable_t *memory, bool log_enabled);
 
   uint32_t get_code() const;
 

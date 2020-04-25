@@ -5,7 +5,7 @@
 using namespace psx::input;
 
 core_t::core_t(interrupt_access_t *irq, bool log_enabled)
-  : memory_component_t("input", log_enabled)
+  : addressable_t("input", log_enabled)
   , baud()
   , dsr()
   , rx()
@@ -84,7 +84,7 @@ uint8_t core_t::io_read_byte(uint32_t address) {
       return data;
   }
 
-  return memory_component_t::io_read_byte(address);
+  return addressable_t::io_read_byte(address);
 }
 
 uint16_t core_t::io_read_half(uint32_t address) {
@@ -124,11 +124,11 @@ uint16_t core_t::io_read_half(uint32_t address) {
       return baud.reload;
   }
 
-  return memory_component_t::io_read_half(address);
+  return addressable_t::io_read_half(address);
 }
 
 uint32_t core_t::io_read_word(uint32_t address) {
-  return memory_component_t::io_read_word(address);
+  return addressable_t::io_read_word(address);
 }
 
 void core_t::io_write_byte(uint32_t address, uint8_t data) {
@@ -141,7 +141,7 @@ void core_t::io_write_byte(uint32_t address, uint8_t data) {
       return;
   }
 
-  return memory_component_t::io_write_byte(address, data);
+  return addressable_t::io_write_byte(address, data);
 }
 
 void core_t::io_write_half(uint32_t address, uint16_t data) {
@@ -196,11 +196,11 @@ void core_t::io_write_half(uint32_t address, uint16_t data) {
       return;
   }
 
-  return memory_component_t::io_write_half(address, data);
+  return addressable_t::io_write_half(address, data);
 }
 
 void core_t::io_write_word(uint32_t address, uint32_t data) {
-  return memory_component_t::io_write_word(address, data);
+  return addressable_t::io_write_word(address, data);
 }
 
 void core_t::write_rx(uint8_t data) {

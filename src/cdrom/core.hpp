@@ -5,8 +5,8 @@
 #include <cstdio>
 #include <string>
 #include "util/fifo.hpp"
+#include "addressable.hpp"
 #include "interrupt-access.hpp"
-#include "memory-component.hpp"
 
 using namespace psx::util;
 
@@ -18,7 +18,7 @@ struct sector_timecode_t {
   uint8_t sector;
 };
 
-class core_t final : public memory_component_t {
+class core_t final : public addressable_t {
   interrupt_access_t *irq;
 
   int32_t index;

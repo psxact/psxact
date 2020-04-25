@@ -1,11 +1,11 @@
 #ifndef EXP_EXPANSION2_HPP_
 #define EXP_EXPANSION2_HPP_
 
-#include "memory-component.hpp"
+#include "addressable.hpp"
 
 namespace psx::exp {
 
-class expansion2_t final : public memory_component_t {
+class expansion2_t final : public addressable_t {
  public:
   expansion2_t();
 

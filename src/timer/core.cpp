@@ -15,7 +15,7 @@
 using namespace psx::timer;
 
 core_t::core_t(interrupt_access_t *irq, bool log_enabled)
-  : memory_component_t("timer", log_enabled)
+  : addressable_t("timer", log_enabled)
   , irq(irq)
   , in_hblank(false)
   , in_vblank(false)

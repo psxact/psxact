@@ -2,8 +2,8 @@
 
 using namespace psx::dma;
 
-core_t::core_t(interrupt_access_t *irq, memory_access_t *memory, bool log_enabled)
-  : memory_component_t("dma", log_enabled)
+core_t::core_t(interrupt_access_t *irq, addressable_t *memory, bool log_enabled)
+  : addressable_t("dma", log_enabled)
   , irq(irq)
   , memory(memory)
   , dpcr(0x07654321)
@@ -90,8 +90,8 @@ void core_t::run_channel_0() {
 
   for (uint32_t a = 0; a < ba; a++) {
     for (uint32_t s = 0; s < bs; s++) {
-      uint32_t data = memory->read_word(address);
-      memory->write_word(0x1f801820, data);
+      uint32_t data = memory->io_read_word(address);
+      memory->io_write_word(0x1f801820, data);
       address += 4;
     }
   }
@@ -121,8 +121,8 @@ void core_t::run_channel_2_data_read() {
 
   for (uint32_t a = 0; a < ba; a++) {
     for (uint32_t s = 0; s < bs; s++) {
-      uint32_t data = memory->read_word(0x1f801810);
-      memory->write_word(address, data);
+      uint32_t data = memory->io_read_word(0x1f801810);
+      memory->io_write_word(address, data);
       address += 4;
     }
   }
@@ -144,8 +144,8 @@ void core_t::run_channel_2_data_write() {
 
   for (uint32_t a = 0; a < ba; a++) {
     for (uint32_t s = 0; s < bs; s++) {
-      uint32_t data = memory->read_word(address);
-      memory->write_word(0x1f801810, data);
+      uint32_t data = memory->io_read_word(address);
+      memory->io_write_word(0x1f801810, data);
       address += 4;
     }
   }
@@ -161,14 +161,14 @@ void core_t::run_channel_2_list() {
   uint32_t address = channels[2].address & 0x1ffffc;
 
   while (1) {
-    uint32_t header = memory->read_word(address);
+    uint32_t header = memory->io_read_word(address);
     uint32_t length = header >> 24;
 
     for (uint32_t i = 0; i < length; i++) {
       address = (address + 4) & 0x1ffffc;
 
-      uint32_t data = memory->read_word(address);
-      memory->write_word(0x1f801810, data);
+      uint32_t data = memory->io_read_word(address);
+      memory->io_write_word(0x1f801810, data);
     }
 
     if (header & 0x800000) {
@@ -192,8 +192,8 @@ void core_t::run_channel_3() {
   counter = counter ? counter : 0x10000;
 
   for (uint32_t i = 0; i < counter; i++) {
-    uint32_t data = memory->read_word(0x1f801802);
-    memory->write_word(address, data);
+    uint32_t data = memory->io_read_word(0x1f801802);
+    memory->io_write_word(address, data);
 
     address += 4;
   }
@@ -212,8 +212,8 @@ void core_t::run_channel_4_write() {
   counter = counter ? counter : 0x10000;
 
   for (uint32_t i = 0; i < counter; i++) {
-    uint32_t data = memory->read_word(address);
-    memory->write_word(0x1f801da8, data);
+    uint32_t data = memory->io_read_word(address);
+    memory->io_write_word(0x1f801da8, data);
 
     address += 4;
   }
@@ -232,11 +232,11 @@ void core_t::run_channel_6() {
   counter = counter ? counter : 0x10000;
 
   for (uint32_t i = 1; i < counter; i++) {
-    memory->write_word(address, address - 4);
+    memory->io_write_word(address, address - 4);
     address -= 4;
   }
 
-  memory->write_word(address, 0x00ffffff);
+  memory->io_write_word(address, 0x00ffffff);
 
   channels[6].control &= ~0x01000000;
 

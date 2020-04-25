@@ -3,14 +3,14 @@
 
 #include "input/device.hpp"
 #include "util/fifo.hpp"
+#include "addressable.hpp"
 #include "interrupt-access.hpp"
-#include "memory-component.hpp"
 
 using namespace psx::util;
 
 namespace psx::input {
 
-class core_t final : public memory_component_t {
+class core_t final : public addressable_t {
 
   struct {
     int counter = 0x0088;

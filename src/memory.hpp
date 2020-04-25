@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <cstring>
 #include <cstdio>
-#include "memory-component.hpp"
+#include "addressable.hpp"
 
 namespace psx {
 
@@ -13,7 +13,7 @@ constexpr uint32_t mib(uint32_t x) { return 1024 * kib(x); }
 constexpr uint32_t gib(uint32_t x) { return 1024 * mib(x); }
 
 template<uint32_t kSize>
-struct memory_t : public memory_component_t {
+struct memory_t : public addressable_t {
   static constexpr int kMask = kSize - 1;
 
   union {
@@ -23,7 +23,7 @@ struct memory_t : public memory_component_t {
   };
 
   explicit memory_t(const char *name)
-    : memory_component_t(name, false)
+    : addressable_t(name, false)
     , b() {
   }
 

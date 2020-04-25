@@ -3,7 +3,7 @@
 using namespace psx::exp;
 
 expansion1_t::expansion1_t()
-  : memory_component_t("exp1", false) {
+  : addressable_t("exp1", false) {
 }
 
 uint8_t expansion1_t::io_read_byte(uint32_t address) {
@@ -15,5 +15,5 @@ uint8_t expansion1_t::io_read_byte(uint32_t address) {
     return 0;
   }
 
-  return memory_component_t::io_read_byte(address);
+  return addressable_t::io_read_byte(address);
 }

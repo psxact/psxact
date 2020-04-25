@@ -3,5 +3,5 @@
 using namespace psx::exp;
 
 expansion3_t::expansion3_t()
-  : memory_component_t("exp3", false) {
+  : addressable_t("exp3", false) {
 }

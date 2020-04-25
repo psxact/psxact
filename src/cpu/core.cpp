@@ -46,8 +46,8 @@ core_t::opcode_t core_t::op_table_special[64] = {
   &core_t::op_und,     &core_t::op_und,   &core_t::op_und,  &core_t::op_und
 };
 
-core_t::core_t(memory_access_t *memory, bool log_enabled)
-  : memory_component_t("cpu", log_enabled)
+core_t::core_t(addressable_t *memory, bool log_enabled)
+  : addressable_t("cpu", log_enabled)
   , bios_call(memory)
   , memory(memory)
   , dcache("dcache") {
@@ -176,7 +176,7 @@ void core_t::read_code() {
 
   // TODO: read i-cache
 
-  code = memory->read_word(map_address(regs.this_pc));
+  code = memory->io_read_word(map_address(regs.this_pc));
 }
 
 io_target_t core_t::get_target(uint32_t address) {
@@ -206,7 +206,7 @@ uint32_t core_t::read_data_byte(uint32_t address) {
   switch (get_target(address)) {
     case io_target_t::ICACHE: return 0;
     case io_target_t::DCACHE: return dcache.io_read_byte(address);
-    case io_target_t::MEMORY: return memory->read_byte(address);
+    case io_target_t::MEMORY: return memory->io_read_byte(address);
   }
 
   return 0;
@@ -218,7 +218,7 @@ uint32_t core_t::read_data_half(uint32_t address) {
   switch (get_target(address)) {
     case io_target_t::ICACHE: return 0;
     case io_target_t::DCACHE: return dcache.io_read_half(address);
-    case io_target_t::MEMORY: return memory->read_half(address);
+    case io_target_t::MEMORY: return memory->io_read_half(address);
   }
 
   return 0;
@@ -230,7 +230,7 @@ uint32_t core_t::read_data_word(uint32_t address) {
   switch (get_target(address)) {
     case io_target_t::ICACHE: return 0;
     case io_target_t::DCACHE: return dcache.io_read_word(address);
-    case io_target_t::MEMORY: return memory->read_word(address);
+    case io_target_t::MEMORY: return memory->io_read_word(address);
   }
 
   return 0;
@@ -242,7 +242,7 @@ void core_t::write_data_byte(uint32_t address, uint32_t data) {
   switch (get_target(address)) {
     case io_target_t::ICACHE: break;
     case io_target_t::DCACHE: dcache.io_write_byte(address, data); break;
-    case io_target_t::MEMORY: memory->write_byte(address, data); break;
+    case io_target_t::MEMORY: memory->io_write_byte(address, data); break;
   }
 }
 
@@ -252,7 +252,7 @@ void core_t::write_data_half(uint32_t address, uint32_t data) {
   switch (get_target(address)) {
     case io_target_t::ICACHE: break;
     case io_target_t::DCACHE: dcache.io_write_half(address, data); break;
-    case io_target_t::MEMORY: memory->write_half(address, data); break;
+    case io_target_t::MEMORY: memory->io_write_half(address, data); break;
   }
 }
 
@@ -262,7 +262,7 @@ void core_t::write_data_word(uint32_t address, uint32_t data) {
   switch (get_target(address)) {
     case io_target_t::ICACHE: break;
     case io_target_t::DCACHE: dcache.io_write_word(address, data); break;
-    case io_target_t::MEMORY: memory->write_word(address, data); break;
+    case io_target_t::MEMORY: memory->io_write_word(address, data); break;
   }
 }
 

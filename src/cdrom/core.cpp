@@ -6,7 +6,7 @@ using namespace psx::cdrom;
 using namespace psx::util;
 
 core_t::core_t(interrupt_access_t *irq, const char *game_file_name, bool log_enabled)
-    : memory_component_t("cdc", log_enabled)
+    : addressable_t("cdc", log_enabled)
     , irq(irq)
     , index()
     , interrupt_enable()

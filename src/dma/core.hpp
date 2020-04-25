@@ -1,27 +1,28 @@
 #ifndef DMA_CORE_HPP_
 #define DMA_CORE_HPP_
 
+#include "addressable.hpp"
 #include "interrupt-access.hpp"
-#include "memory-access.hpp"
-#include "memory-component.hpp"
 
 namespace psx::dma {
 
-class core_t final : public memory_component_t {
+struct channel_t {
+  uint32_t address;
+  uint32_t counter;
+  uint32_t control;
+};
+
+class core_t final : public addressable_t {
   interrupt_access_t *irq;
-  memory_access_t *memory;
+  addressable_t *memory;
 
   uint32_t dpcr;
   uint32_t dicr;
 
-  struct {
-    uint32_t address;
-    uint32_t counter;
-    uint32_t control;
-  } channels[7];
+  channel_t channels[7];
 
  public:
-  core_t(interrupt_access_t *irq, memory_access_t *memory, bool log_enabled);
+  core_t(interrupt_access_t *irq, addressable_t *memory, bool log_enabled);
 
   uint32_t io_read_word(uint32_t address);
 

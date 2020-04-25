@@ -1,19 +1,19 @@
-#ifndef MEMORY_COMPONENT_HPP_
-#define MEMORY_COMPONENT_HPP_
+#ifndef ADDRESSABLE_HPP_
+#define ADDRESSABLE_HPP_
 
 #include <cstdint>
 
 namespace psx {
 
-class memory_component_t {
+class addressable_t {
   const char *name;
 
   bool log_enabled;
 
  public:
-  explicit memory_component_t(const char *name, bool log_enabled);
+  explicit addressable_t(const char *name, bool log_enabled);
 
-  virtual ~memory_component_t() {}
+  virtual ~addressable_t() {}
 
   void log(const char *fmt, ...);
 
@@ -28,4 +28,4 @@ class memory_component_t {
 
 }  // namespace psx
 
-#endif  // MEMORY_COMPONENT_HPP_
+#endif  // ADDRESSABLE_HPP_

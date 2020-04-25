@@ -1,8 +1,8 @@
 #ifndef TIMER_CORE_HPP_
 #define TIMER_CORE_HPP_
 
+#include "addressable.hpp"
 #include "interrupt-access.hpp"
-#include "memory-component.hpp"
 
 namespace psx::timer {
 
@@ -42,7 +42,7 @@ struct timer_t {
   } prescaler;
 };
 
-class core_t final : public memory_component_t {
+class core_t final : public addressable_t {
   interrupt_access_t *irq;
 
   bool in_hblank;

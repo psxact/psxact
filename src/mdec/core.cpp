@@ -5,7 +5,7 @@
 using namespace psx::mdec;
 
 core_t::core_t(bool log_enabled)
-  : memory_component_t("mdec", log_enabled) {
+  : addressable_t("mdec", log_enabled) {
 }
 
 uint32_t core_t::io_read_word(uint32_t address) {
@@ -37,7 +37,7 @@ uint32_t core_t::io_read_word(uint32_t address) {
     }
   }
 
-  return core_t::io_read_word(address);
+  return addressable_t::io_read_word(address);
 }
 
 void core_t::io_write_word(uint32_t address, uint32_t data) {

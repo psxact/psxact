@@ -5,7 +5,7 @@
 using namespace psx::gpu;
 
 core_t::core_t(bool log_enabled)
-  : memory_component_t("gpu", log_enabled)
+  : addressable_t("gpu", log_enabled)
   , vram()
   , data_latch(0)
   , status(0x14802000)

@@ -2,7 +2,7 @@
 #define MDEC_CORE_HPP_
 
 #include "util/fifo.hpp"
-#include "memory-component.hpp"
+#include "addressable.hpp"
 
 namespace psx::mdec {
 
@@ -28,7 +28,7 @@ enum class command_t {
   set_scale = 3
 };
 
-class core_t final : public memory_component_t {
+class core_t final : public addressable_t {
  private:
   block_t block;
   command_t command;

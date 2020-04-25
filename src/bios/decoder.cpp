@@ -6,7 +6,7 @@
 
 using namespace psx::bios;
 
-decoder_t::decoder_t(memory_access_t *memory)
+decoder_t::decoder_t(addressable_t *memory)
   : memory(memory) {
 }
 
@@ -377,7 +377,7 @@ void decoder_t::decode_c(uint32_t pc, uint32_t function, uint32_t *args) {
 }
 
 uint8_t decoder_t::read_byte(uint32_t address) {
-  return memory->read_byte(address & 0x1fffffff);
+  return memory->io_read_byte(address & 0x1fffffff);
 }
 
 std::string decoder_t::decode_string(uint32_t arg) {

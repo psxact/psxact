@@ -1,12 +1,12 @@
 #ifndef SPU_CORE_HPP_
 #define SPU_CORE_HPP_
 
+#include "addressable.hpp"
 #include "memory.hpp"
-#include "memory-component.hpp"
 
 namespace psx::spu {
 
-class core_t final : public memory_component_t {
+class core_t final : public addressable_t {
   uint16_t control;
   uint16_t status;
 

@@ -10,7 +10,8 @@ using namespace psx;
 using namespace psx::util;
 
 console_t::console_t(args_t &args)
-  : bios_file_name(args.bios_file_name)
+  : addressable_t("console", false)
+  , bios_file_name(args.bios_file_name)
   , game_file_name(args.game_file_name) {
   bios = new memory_t< kib(512) >("bios");
   wram = new memory_t< mib(2) >("wram");
@@ -58,7 +59,7 @@ void console_t::send(interrupt_type_t flag) {
   cpu->set_istat(istat);
 }
 
-memory_component_t *console_t::decode(uint32_t address) {
+addressable_t *console_t::decode(uint32_t address) {
 #define between(min, max) \
   range::between<(min), (max)>(address)
 
@@ -113,7 +114,7 @@ uint32_t console_t::read_memory_control(int size, uint32_t address) {
   throw std::exception();
 }
 
-uint8_t console_t::read_byte(uint32_t address) {
+uint8_t console_t::io_read_byte(uint32_t address) {
   auto component = decode(address);
 
   return component != nullptr
@@ -121,7 +122,7 @@ uint8_t console_t::read_byte(uint32_t address) {
     : read_memory_control(1, address);
 }
 
-uint16_t console_t::read_half(uint32_t address) {
+uint16_t console_t::io_read_half(uint32_t address) {
   auto component = decode(address);
 
   return component != nullptr
@@ -129,7 +130,7 @@ uint16_t console_t::read_half(uint32_t address) {
     : read_memory_control(2, address);
 }
 
-uint32_t console_t::read_word(uint32_t address) {
+uint32_t console_t::io_read_word(uint32_t address) {
   auto component = decode(address);
 
   return component != nullptr
@@ -198,7 +199,7 @@ void console_t::write_memory_control(int size, uint32_t address, uint32_t data) 
   throw std::exception();
 }
 
-void console_t::write_byte(uint32_t address, uint8_t data) {
+void console_t::io_write_byte(uint32_t address, uint8_t data) {
   auto component = decode(address);
 
   return (component != nullptr)
@@ -206,7 +207,7 @@ void console_t::write_byte(uint32_t address, uint8_t data) {
     : write_memory_control(1, address, data);
 }
 
-void console_t::write_half(uint32_t address, uint16_t data) {
+void console_t::io_write_half(uint32_t address, uint16_t data) {
   auto component = decode(address);
 
   return (component != nullptr)
@@ -214,7 +215,7 @@ void console_t::write_half(uint32_t address, uint16_t data) {
     : write_memory_control(2, address, data);
 }
 
-void console_t::write_word(uint32_t address, uint32_t data) {
+void console_t::io_write_word(uint32_t address, uint32_t data) {
   auto component = decode(address);
 
   return (component != nullptr)

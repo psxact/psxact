@@ -8,7 +8,7 @@ using namespace psx::spu;
 using namespace psx::util;
 
 core_t::core_t(bool log_enabled)
-  : memory_component_t("spu", log_enabled)
+  : addressable_t("spu", log_enabled)
   , sound_ram("sound-ram") {
 }
 
@@ -93,7 +93,7 @@ uint16_t core_t::io_read_half(uint32_t address) {
       return uint_t<16>::trunc(current_main_volume_right);
   }
 
-  return memory_component_t::io_read_half(address);
+  return addressable_t::io_read_half(address);
 }
 
 void core_t::io_write_half(uint32_t address, uint16_t data) {
@@ -223,7 +223,7 @@ void core_t::io_write_half(uint32_t address, uint16_t data) {
       return;
   }
 
-  return memory_component_t::io_write_half(address, data);
+  return addressable_t::io_write_half(address, data);
 }
 
 void core_t::io_write_word(uint32_t address, uint32_t data) {
@@ -234,5 +234,5 @@ void core_t::io_write_word(uint32_t address, uint32_t data) {
       return;
   }
 
-  memory_component_t::io_write_word(address, data);
+  addressable_t::io_write_word(address, data);
 }

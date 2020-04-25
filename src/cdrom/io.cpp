@@ -45,7 +45,7 @@ uint8_t core_t::io_read_byte(uint32_t address) {
       break;
   }
 
-  return memory_component_t::io_read_byte(address);
+  return addressable_t::io_read_byte(address);
 }
 
 uint32_t core_t::io_read_word(uint32_t) {
@@ -141,5 +141,5 @@ void core_t::io_write_byte(uint32_t address, uint8_t data) {
       break;
   }
 
-  return memory_component_t::io_write_byte(address, data);
+  return addressable_t::io_write_byte(address, data);
 }

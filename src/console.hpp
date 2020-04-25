@@ -13,15 +13,15 @@
 #include "mdec/core.hpp"
 #include "spu/core.hpp"
 #include "timer/core.hpp"
+#include "addressable.hpp"
 #include "args.hpp"
 #include "interrupt-access.hpp"
 #include "memory.hpp"
-#include "memory-access.hpp"
 
 namespace psx {
 
 class console_t final
-  : public memory_access_t
+  : public addressable_t
   , public interrupt_access_t {
   memory_t< kib(512) > *bios;
   memory_t< mib(2) > *wram;
@@ -49,24 +49,24 @@ class console_t final
 
   void send(interrupt_type_t flag);
 
-  uint8_t read_byte(uint32_t address);
+  uint8_t io_read_byte(uint32_t address);
 
-  uint16_t read_half(uint32_t address);
+  uint16_t io_read_half(uint32_t address);
 
-  uint32_t read_word(uint32_t address);
+  uint32_t io_read_word(uint32_t address);
 
-  void write_byte(uint32_t address, uint8_t data);
+  void io_write_byte(uint32_t address, uint8_t data);
 
-  void write_half(uint32_t address, uint16_t data);
+  void io_write_half(uint32_t address, uint16_t data);
 
-  void write_word(uint32_t address, uint32_t data);
+  void io_write_word(uint32_t address, uint32_t data);
 
   void run_for_one_frame();
 
   void get_video_params(uint16_t **vram, int *w, int *h);
 
  private:
-  memory_component_t *decode(uint32_t address);
+  addressable_t *decode(uint32_t address);
 
   uint32_t read_memory_control(int size, uint32_t address);
 
