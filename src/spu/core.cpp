@@ -1,238 +1,154 @@
 #include "spu/core.hpp"
 
 #include <cassert>
+#include <SDL2/SDL.h>
 #include "util/int.hpp"
 #include "util/uint.hpp"
 
 using namespace psx::spu;
 using namespace psx::util;
 
+static void audio_callback(void *userdata, uint8_t *stream, int len) {
+  auto spu = ((psx::spu::core_t *) userdata)->get_sample();
+  auto ptr = (int16_t *) stream;
+
+  for (int i = 0; i < len; i += 2) {
+    *ptr = *spu;
+    ptr++;
+    spu++;
+  }
+}
+
 core_t::core_t(bool log_enabled)
-  : addressable_t("spu", log_enabled)
-  , sound_ram("sound-ram") {
+  : addressable_t("spu", log_enabled) {
+
+  SDL_AudioSpec want;
+  SDL_AudioSpec have;
+
+  want.callback = audio_callback;
+  want.channels = 2;
+  want.format = AUDIO_S16;
+  want.freq = 44100;
+  want.samples = 1024;
+  want.userdata = this;
+
+  SDL_OpenAudio(&want, &have);
+  SDL_PauseAudio(0);
 }
 
 core_t::~core_t() {
+  SDL_CloseAudio();
 }
 
-uint16_t core_t::io_read_half(uint32_t address) {
-  log("io_read_half(0x%08x)", address);
-
-  if (address >= 0x1f801c00 && address <= 0x1f801d7f) {
-    auto n = (address >> 4) & 31;
-    auto m = (address >> 1) & 7;
-
-    return registers[n][m];
-  }
-
-  switch (address) {
-    case 0x1f801d80:
-      return (main_volume_left & 0xffff);
-
-    case 0x1f801d82:
-      return (main_volume_right & 0xffff);
-
-    case 0x1f801d88:
-      return uint_t<16>::trunc(key_on);
-
-    case 0x1f801d8a:
-      return uint_t<8>::trunc(key_on >> 16);
-
-    case 0x1f801d8c:
-      return uint_t<16>::trunc(key_off);
-
-    case 0x1f801d8e:
-      return uint_t<8>::trunc(key_off >> 16);
-
-    case 0x1f801d90:
-      return uint_t<16>::trunc(pitch_modulation_on);
-
-    case 0x1f801d92:
-      return uint_t<8>::trunc(pitch_modulation_on >> 16);
-
-    case 0x1f801d94:
-      return uint_t<16>::trunc(noise_on);
-
-    case 0x1f801d96:
-      return uint_t<8>::trunc(noise_on >> 16);
-
-    case 0x1f801d98:
-      return uint_t<16>::trunc(echo_on);
-
-    case 0x1f801d9a:
-      return uint_t<8>::trunc(echo_on >> 16);
-
-    case 0x1f801d9c:
-      return uint_t<16>::trunc(voice_status);
-
-    case 0x1f801d9e:
-      return uint_t<8>::trunc(voice_status >> 16);
-
-    case 0x1f801da6:
-      return sound_ram_address_latch;
-
-    case 0x1f801daa:
-      return control;
-
-    case 0x1f801dac:
-      return sound_ram_transfer_control;
-
-    case 0x1f801dae:
-      return (control & 0x3f);
-
-    case 0x1f801db0:
-      return uint_t<16>::trunc(cd_input_volume_left);
-
-    case 0x1f801db2:
-      return uint_t<16>::trunc(cd_input_volume_right);
-
-    case 0x1f801db8:
-      return uint_t<16>::trunc(current_main_volume_left);
-
-    case 0x1f801dba:
-      return uint_t<16>::trunc(current_main_volume_right);
-  }
-
-  return addressable_t::io_read_half(address);
+uint16_t core_t::get_register(register_t reg) {
+  return registers[uint32_t(reg) - 0x1f801c00];
 }
 
-void core_t::io_write_half(uint32_t address, uint16_t data) {
-  log("io_write_half(0x%08x, 0x%04x)", address, data);
+void core_t::put_register(register_t reg, uint16_t val) {
+  registers[uint32_t(reg) - 0x1f801c00] = val;
+}
 
-  if (address >= 0x1f801c00 && address <= 0x1f801d7f) {
-    auto n = (address >> 4) & 31;
-    auto m = (address >> 1) & 7;
+void core_t::run(int amount) {
+  prescaler += amount;
 
-    registers[n][m] = uint16_t(data);
+  while (prescaler >= 0x300) {
+    prescaler -= 0x300;
+    tick();
+  }
+}
+
+void core_t::tick() {
+  int lsample = 0;
+  int rsample = 0;
+
+  for (int v = 0; v < 24; v++) {
+    int32_t l, r;
+
+    voice_tick(v, &l, &r);
+
+    lsample += l;
+    rsample += r;
+  }
+
+  key_on = 0;
+
+  sample_buffer[sample_buffer_index] = int_t<16>::clamp(lsample);
+  sample_buffer_index = (sample_buffer_index + 1) & 2047;
+  sample_buffer[sample_buffer_index] = int_t<16>::clamp(rsample);
+  sample_buffer_index = (sample_buffer_index + 1) & 2047;
+
+  // update ENDX
+  put_register(register_t::endx_lo, uint16_t(endx >> 0));
+  put_register(register_t::endx_hi, uint16_t(endx >> 16));
+}
+
+void core_t::voice_tick(int v, int32_t *l, int32_t *r) {
+  auto &voice = voices[v];
+  if (voice.start_delay > 0) {
+    voice.start_delay--;
     return;
   }
 
-  if (address >= 0x1f801dc0 && address <= 0x1f801dff) {
-    auto n = (address >> 1) & 0x1f;
+  voice_decoder_tick(v);
 
-    reverb.registers[n] = int_t<16>::trunc(data);
+  int32_t raw = voice.raw_sample();
+  int32_t sample = raw; // TODO: apply ADSR
+
+  // if (v == 1) {
+  //   sound_ram.write(0x400, sample);
+  // }
+
+  // if (v == 3) {
+  //   sound_ram.write(0x600, sample);
+  // }
+
+  int32_t left = voice.volume_left.apply(sample);
+  int32_t right = voice.volume_right.apply(sample);
+
+  voice.counter_step();
+
+  if (key_on & (1 << v)) {
+    endx &= ~(1 << v);
+    voice.start_delay = 4;
+    voice.phase = 0;
+    voice.header = adpcm_header_t::create(0);
+    voice.decoder_fifo.clear();
+    voice.last_samples[0] = 0;
+    voice.last_samples[1] = 0;
+    voice.current_address = voice.start_address & ~7;
+  }
+
+  *l = left;
+  *r = right;
+}
+
+void core_t::voice_decoder_tick(int v) {
+  auto &voice = voices[v];
+
+  if (voice.decoder_fifo.size() >= 11) {
     return;
   }
 
-  switch (address) {
-    case 0x1f801d80:
-      current_main_volume_left = int_t<16>::trunc(data);
-      return;
+  if ((voice.current_address & 7) == 0) {
+    if (voice.header.loop_end) {
+      voice.current_address = voice.loop_address & ~7;
+      endx |= (1 << v);
+    }
 
-    case 0x1f801d82:
-      current_main_volume_right = int_t<16>::trunc(data);
-      return;
+    uint16_t header = ram.read(voice.current_address);
 
-    case 0x1f801d84:
-      reverb.output_volume_left = int_t<16>::trunc(data);
-      return;
+    if (voice.current_address == 0x820 && header == 0) {
+      log("!! read bogus value !!");
+    }
 
-    case 0x1f801d86:
-      reverb.output_volume_right = int_t<16>::trunc(data);
-      return;
-
-    case 0x1f801d88:
-      key_on &= 0xff0000;
-      key_on |= uint_t<16>::trunc(data);
-      return;
-
-    case 0x1f801d8a:
-      key_on &= 0x00ffff;
-      key_on |= uint_t<8>::trunc(data) << 16;
-      return;
-
-    case 0x1f801d8c:
-      key_off &= 0xff0000;
-      key_off |= uint_t<16>::trunc(data);
-      return;
-
-    case 0x1f801d8e:
-      key_off &= 0x00ffff;
-      key_off |= uint_t<8>::trunc(data) << 16;
-      return;
-
-    case 0x1f801d90:
-      pitch_modulation_on &= 0xff0000;
-      pitch_modulation_on |= uint_t<16>::trunc(data);
-      return;
-
-    case 0x1f801d92:
-      pitch_modulation_on &= 0x00ffff;
-      pitch_modulation_on |= uint_t<8>::trunc(data) << 16;
-      return;
-
-    case 0x1f801d94:
-      noise_on &= 0xff0000;
-      noise_on |= uint_t<16>::trunc(data);
-      return;
-
-    case 0x1f801d96:
-      noise_on &= 0x00ffff;
-      noise_on |= uint_t<8>::trunc(data) << 16;
-      return;
-
-    case 0x1f801d98:
-      echo_on &= 0xff0000;
-      echo_on |= uint_t<16>::trunc(data);
-      return;
-
-    case 0x1f801d9a:
-      echo_on &= 0x00ffff;
-      echo_on |= uint_t<8>::trunc(data) << 16;
-      return;
-
-    case 0x1f801d9c: return;
-    case 0x1f801d9e: return;
-
-    case 0x1f801da2:
-      reverb.start_address = uint_t<16>::trunc(data);
-      return;
-
-    case 0x1f801da6:
-      sound_ram_address = uint16_t(data) << 3;
-      sound_ram_address_latch = uint16_t(data);
-      return;
-
-    case 0x1f801da8:
-      sound_ram.io_write_half(sound_ram_address, data);
-      sound_ram_address = (sound_ram_address + 1) & 0x7ffff;
-      return;
-
-    case 0x1f801daa:
-      control = uint16_t(data);
-      return;
-
-    case 0x1f801dac:
-      assert(uint_t<16>::trunc(data) == 0x0004);
-      return;
-
-    case 0x1f801db0:
-      cd_input_volume_left = int_t<16>::trunc(data);
-      return;
-
-    case 0x1f801db2:
-      cd_input_volume_right = int_t<16>::trunc(data);
-      return;
-
-    case 0x1f801db4:
-      external_input_volume_left = int_t<16>::trunc(data);
-      return;
-
-    case 0x1f801db6:
-      external_input_volume_right = int_t<16>::trunc(data);
-      return;
+    voice.put_header(header);
+    voice.current_address++;
   }
 
-  return addressable_t::io_write_half(address, data);
+  voice.put_sample(ram.read(voice.current_address));
+  voice.current_address++;
 }
 
-void core_t::io_write_word(uint32_t address, uint32_t data) {
-  switch (address) {
-    case 0x1f801da8:
-      io_write_half(address, data);
-      io_write_half(address, data >> 16);
-      return;
-  }
-
-  addressable_t::io_write_word(address, data);
+const int16_t* core_t::get_sample() const {
+  return sample_buffer;
 }

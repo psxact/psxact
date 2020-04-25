@@ -29,7 +29,7 @@ console_t::console_t(args_t &args)
   spu = new spu::core_t(args.log_spu);
 
   bios->load_blob(bios_file_name);
-  bios->io_write_word(0x6990, 0); // patch the bios to skip the boot-up animation
+  // bios->io_write_word(0x6990, 0); // patch the bios to skip the boot-up animation
 
   bios->io_write_word(0x6f0c, 0x34010001); // li $at, 0x1
   bios->io_write_word(0x6f10, 0x0ff019e1); // jal 0xbfc06784
@@ -224,13 +224,14 @@ void console_t::io_write_word(uint32_t address, uint32_t data) {
 }
 
 void console_t::run_for_one_frame() {
-  constexpr int CYCLE_PER_CPU_TICK = 3;
+  constexpr int CYCLE_PER_CPU_TICK = 4;
 
   constexpr int CPU_FREQ = 33868800;
   constexpr int CPU_TICKS_PER_FRAME = CPU_FREQ / 60 / CYCLE_PER_CPU_TICK;
 
   for (int i = 0; i < CPU_TICKS_PER_FRAME; i++) {
     cpu->tick();
+    spu->run(CYCLE_PER_CPU_TICK);
 
     timer->tick(CYCLE_PER_CPU_TICK);
     cdrom->tick(CYCLE_PER_CPU_TICK);

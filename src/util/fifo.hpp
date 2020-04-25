@@ -1,6 +1,7 @@
 #ifndef UTIL_FIFO_HPP_
 #define UTIL_FIFO_HPP_
 
+#include <cassert>
 #include <cstdint>
 
 namespace psx::util {
@@ -22,7 +23,18 @@ class fifo_t {
     wr_ptr = 0;
   }
 
+  void discard(int how_many) {
+    assert(size() >= how_many);
+    rd_ptr = (rd_ptr + how_many) & mask;
+  }
+
+  const T &at(int index) const {
+    assert(size() > index);
+    return buffer[(rd_ptr + index) & mask_lsb];
+  }
+
   const T &read() {
+    assert(!is_empty());
     T &value = buffer[rd_ptr & mask_lsb];
     rd_ptr = (rd_ptr + 1) & mask;
 
@@ -30,6 +42,7 @@ class fifo_t {
   }
 
   void write(const T &value) {
+    assert(!is_full());
     buffer[wr_ptr & mask_lsb] = value;
     wr_ptr = (wr_ptr + 1) & mask;
   }
@@ -40,6 +53,10 @@ class fifo_t {
 
   bool is_full() const {
     return rd_ptr == (wr_ptr ^ mask_msb);
+  }
+
+  int size() const {
+    return (wr_ptr - rd_ptr) & mask;
   }
 };
 
