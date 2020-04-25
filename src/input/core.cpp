@@ -4,7 +4,7 @@
 
 using namespace psx::input;
 
-core_t::core_t(interrupt_access_t *irq, bool log_enabled)
+core_t::core_t(interruptible_t *irq, bool log_enabled)
   : addressable_t("input", log_enabled)
   , baud()
   , dsr()
@@ -216,6 +216,6 @@ void core_t::send_interrupt() {
     log("sending interrupt");
 
     interrupt = 1;
-    irq->send(interrupt_type_t::INPUT);
+    irq->interrupt(interrupt_type_t::input);
   }
 }

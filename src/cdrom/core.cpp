@@ -5,7 +5,7 @@
 using namespace psx::cdrom;
 using namespace psx::util;
 
-core_t::core_t(interrupt_access_t *irq, const char *game_file_name, bool log_enabled)
+core_t::core_t(interruptible_t *irq, const char *game_file_name, bool log_enabled)
     : addressable_t("cdc", log_enabled)
     , irq(irq)
     , index()
@@ -59,7 +59,7 @@ void core_t::tick(int amount) {
         int32_t signal = interrupt_request & interrupt_enable;
         if (signal == interrupt_request) {
           log("delivering interrupt: %d", interrupt_request);
-          irq->send(interrupt_type_t::CDROM);
+          irq->interrupt(interrupt_type_t::cdrom);
         }
       }
     }

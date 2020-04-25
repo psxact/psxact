@@ -15,14 +15,14 @@
 #include "timer/core.hpp"
 #include "addressable.hpp"
 #include "args.hpp"
-#include "interrupt-access.hpp"
+#include "interruptible.hpp"
 #include "memory.hpp"
 
 namespace psx {
 
 class console_t final
   : public addressable_t
-  , public interrupt_access_t {
+  , public interruptible_t {
   memory_t< kib(512) > *bios;
   memory_t< mib(2) > *wram;
 
@@ -47,7 +47,7 @@ class console_t final
 
   ~console_t();
 
-  void send(interrupt_type_t flag);
+  void interrupt(interrupt_type_t flag);
 
   uint8_t io_read_byte(uint32_t address);
 

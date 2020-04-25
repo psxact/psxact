@@ -6,7 +6,7 @@
 #include <string>
 #include "util/fifo.hpp"
 #include "addressable.hpp"
-#include "interrupt-access.hpp"
+#include "interruptible.hpp"
 
 using namespace psx::util;
 
@@ -19,7 +19,7 @@ struct sector_timecode_t {
 };
 
 class core_t final : public addressable_t {
-  interrupt_access_t *irq;
+  interruptible_t *irq;
 
   int32_t index;
   int32_t interrupt_enable;
@@ -70,7 +70,7 @@ class core_t final : public addressable_t {
   } mode;
 
  public:
-  core_t(interrupt_access_t *irq, const char *game_file_name, bool log_enabled);
+  core_t(interruptible_t *irq, const char *game_file_name, bool log_enabled);
 
   uint8_t io_read_byte(uint32_t address);
 

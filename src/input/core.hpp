@@ -4,7 +4,7 @@
 #include "input/device.hpp"
 #include "util/fifo.hpp"
 #include "addressable.hpp"
-#include "interrupt-access.hpp"
+#include "interruptible.hpp"
 
 using namespace psx::util;
 
@@ -48,10 +48,10 @@ class core_t final : public addressable_t {
   int bit = 0;
   int interrupt = 0;
 
-  interrupt_access_t *irq;
+  interruptible_t *irq;
 
  public:
-  explicit core_t(interrupt_access_t *irq, bool log_enabled);
+  explicit core_t(interruptible_t *irq, bool log_enabled);
 
   void frame();
 

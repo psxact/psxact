@@ -54,7 +54,7 @@ console_t::~console_t() {
   delete spu;
 }
 
-void console_t::send(interrupt_type_t flag) {
+void console_t::interrupt(interrupt_type_t flag) {
   int istat = cpu->get_istat() | static_cast<int>(flag);
   cpu->set_istat(istat);
 }
@@ -239,7 +239,7 @@ void console_t::run_for_one_frame() {
 
   input->frame();
 
-  send(interrupt_type_t::VBLANK);
+  interrupt(interrupt_type_t::vblank);
 }
 
 void console_t::get_video_params(uint16_t **vram, int *w, int *h) {

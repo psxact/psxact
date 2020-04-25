@@ -2,7 +2,7 @@
 #define TIMER_CORE_HPP_
 
 #include "addressable.hpp"
-#include "interrupt-access.hpp"
+#include "interruptible.hpp"
 
 namespace psx::timer {
 
@@ -43,7 +43,7 @@ struct timer_t {
 };
 
 class core_t final : public addressable_t {
-  interrupt_access_t *irq;
+  interruptible_t *irq;
 
   bool in_hblank;
   bool in_vblank;
@@ -51,7 +51,7 @@ class core_t final : public addressable_t {
   timer_t timers[3];
 
  public:
-  explicit core_t(interrupt_access_t *irq, bool log_enabled);
+  explicit core_t(interruptible_t *irq, bool log_enabled);
 
   uint16_t io_read_half(uint32_t address);
 

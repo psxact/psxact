@@ -2,7 +2,7 @@
 #define DMA_CORE_HPP_
 
 #include "addressable.hpp"
-#include "interrupt-access.hpp"
+#include "interruptible.hpp"
 
 namespace psx::dma {
 
@@ -13,7 +13,7 @@ struct channel_t {
 };
 
 class core_t final : public addressable_t {
-  interrupt_access_t *irq;
+  interruptible_t *irq;
   addressable_t *memory;
 
   uint32_t dpcr;
@@ -22,7 +22,7 @@ class core_t final : public addressable_t {
   channel_t channels[7];
 
  public:
-  core_t(interrupt_access_t *irq, addressable_t *memory, bool log_enabled);
+  core_t(interruptible_t *irq, addressable_t *memory, bool log_enabled);
 
   uint32_t io_read_word(uint32_t address);
 

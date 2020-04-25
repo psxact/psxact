@@ -14,7 +14,7 @@
 
 using namespace psx::timer;
 
-core_t::core_t(interrupt_access_t *irq, bool log_enabled)
+core_t::core_t(interruptible_t *irq, bool log_enabled)
   : addressable_t("timer", log_enabled)
   , irq(irq)
   , in_hblank(false)
@@ -169,9 +169,9 @@ void core_t::unit_irq(int n) {
 
     if (interrupt.bit == 0) {
       switch (n) {
-        case 0: return irq->send(interrupt_type_t::TMR0);
-        case 1: return irq->send(interrupt_type_t::TMR1);
-        case 2: return irq->send(interrupt_type_t::TMR2);
+        case 0: return irq->interrupt(interrupt_type_t::timer0);
+        case 1: return irq->interrupt(interrupt_type_t::timer1);
+        case 2: return irq->interrupt(interrupt_type_t::timer2);
       }
     }
   }

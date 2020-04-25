@@ -2,7 +2,7 @@
 
 using namespace psx::dma;
 
-core_t::core_t(interrupt_access_t *irq, addressable_t *memory, bool log_enabled)
+core_t::core_t(interruptible_t *irq, addressable_t *memory, bool log_enabled)
   : addressable_t("dma", log_enabled)
   , irq(irq)
   , memory(memory)
@@ -315,7 +315,7 @@ void core_t::update_irq_active_flag() {
 
   if (active) {
     if (!(dicr & 0x80000000)) {
-      irq->send(interrupt_type_t::DMA);
+      irq->interrupt(interrupt_type_t::dma);
     }
 
     dicr |= 0x80000000;
