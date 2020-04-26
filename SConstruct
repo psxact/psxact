@@ -2,23 +2,22 @@ import os, fnmatch
 
 env = Environment()
 env['CCFLAGS'] = [
-  '-flto',
   '-std=c++17',
   '-Wall',
   '-Wextra',
   '-I', 'src'
 ]
 
-env['LINKFLAGS'] = [
-  '-flto'
-]
+env['LINKFLAGS'] = []
 
 debug = ARGUMENTS.get('debug', 0)
 
 if int(debug):
-  env.Append(CCFLAGS = '-g')
+  env.Append(CCFLAGS=['-pg', '-no-pie'])
+  env.Append(LINKFLAGS=['-pg', '-no-pie'])
 else:
-  env.Append(CCFLAGS = '-O3')
+  env.Append(CCFLAGS=['-O3', '-flto'])
+  env.Append(LINKFLAGS=['-flto'])
 
 def build_obj(file):
   return env.Object('build/{}.o'.format(file), file)

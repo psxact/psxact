@@ -56,10 +56,6 @@ void core_t::io_write_half(uint32_t address, uint16_t data) {
       break;
 
     case register_t::ram_data:
-      if (ram_address == 0x820 && data == 0x0200) {
-        printf("wrote good value: 0x%04x\n", data);
-      }
-
       ram.write(ram_address, data);
       ram_address++;
       break;

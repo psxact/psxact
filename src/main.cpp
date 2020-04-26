@@ -1,15 +1,21 @@
+#include <csignal>
 #include <cstdio>
 #include "args.hpp"
 #include "console.hpp"
 #include "sdl2-audio.hpp"
 #include "sdl2-video.hpp"
 
+void signal_handler(int) {
+  exit(0);
+}
+
 void run(psx::console_t *console);
 void run_headless(psx::console_t *console);
 
 int main(int argc, char *argv[]) {
-  psx::args_t args(argc, argv);
+  signal(SIGINT, signal_handler);
 
+  psx::args_t args(argc, argv);
   psx::console_t *console = new psx::console_t(args);
 
   if (args.headless) {

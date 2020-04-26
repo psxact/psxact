@@ -37,6 +37,7 @@ class console_t final
   input::core_t *input;
   mdec::core_t *mdec;
   spu::core_t *spu;
+  int cycles;
 
   const char *bios_file_name;
   const char *game_file_name;

@@ -78,7 +78,7 @@ bool core_t::get_cop_usable(int n) {
     : (stat & mask) != 0;
 }
 
-void core_t::tick() {
+int core_t::tick() {
   read_code();
 
   is_branch_delay_slot = is_branch;
@@ -100,6 +100,8 @@ void core_t::tick() {
     else
       (*this.*op_table_special[get_code() & 63])();
   }
+
+  return 4;
 }
 
 static uint32_t segments[8] = {

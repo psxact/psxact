@@ -224,19 +224,21 @@ void console_t::io_write_word(uint32_t address, uint32_t data) {
 }
 
 void console_t::run_for_one_frame() {
-  constexpr int CYCLE_PER_CPU_TICK = 2;
-
   constexpr int CPU_FREQ = 33868800;
-  constexpr int CPU_TICKS_PER_FRAME = CPU_FREQ / 60 / CYCLE_PER_CPU_TICK;
+  constexpr int CPU_TICKS_PER_FRAME = CPU_FREQ / 60;
 
-  for (int i = 0; i < CPU_TICKS_PER_FRAME; i++) {
-    cpu->tick();
-    spu->run(CYCLE_PER_CPU_TICK);
+  while (cycles < CPU_TICKS_PER_FRAME) {
+    int amount = cpu->tick();
 
-    timer->tick(CYCLE_PER_CPU_TICK);
-    cdrom->tick(CYCLE_PER_CPU_TICK);
-    input->tick(CYCLE_PER_CPU_TICK);
+    spu->run(amount);
+    timer->run(amount);
+    cdrom->tick(amount);
+    input->tick(amount);
+
+    cycles += amount;
   }
+
+  cycles -= CPU_TICKS_PER_FRAME;
 
   input->frame();
 

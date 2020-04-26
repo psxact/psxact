@@ -11,5 +11,6 @@ build/
 *.dblite
 *.env
 *.log
+*.out
 *.tar.bz2
 *.txt

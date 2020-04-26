@@ -76,7 +76,7 @@ class core_t final : public addressable_t {
 
   void disassemble_reg_imm(FILE *file);
 
-  void tick();
+  int tick();
 
   void enter_exception(cop0::exception_t code);
 

@@ -8,6 +8,7 @@
   "settings": {
     "editor.insertSpaces": true,
     "editor.tabSize": 2,
+    "C_Cpp.autoAddFileAssociations": false,
     "files.associations": {
       "SConstruct": "python"
     }
