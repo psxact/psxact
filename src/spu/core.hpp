@@ -30,6 +30,8 @@ namespace psx::spu {
     uint32_t ram_address_irq;
     uint16_t ram_transfer_control;
 
+    uint32_t capture_address;
+
     voice_t voices[24];
     uint32_t key_on;
     uint32_t pmon;

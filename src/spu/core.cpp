@@ -27,6 +27,7 @@ void core_t::put_status_register() {
   uint16_t status = 0;
   
   status |= get_register(register_t::control) & 0x3f;
+  status |= (capture_address & 0x100) << 3;
 
   put_register(register_t::status, status);
 }
@@ -59,8 +60,10 @@ void core_t::tick() {
 
   sample_buffer[sample_buffer_index & 0x7ff] = int_t<16>::clamp(lsample);
   sample_buffer_index++;
-  // sample_buffer[sample_buffer_index & 0x7ff] = int_t<16>::clamp(rsample);
-  // sample_buffer_index++;
+  sample_buffer[sample_buffer_index & 0x7ff] = int_t<16>::clamp(rsample);
+  sample_buffer_index++;
+
+  capture_address = (capture_address + 1) & 0x1ff;
 
   // update ENDX
   put_register(register_t::endx_lo, uint16_t(endx >> 0));
@@ -79,13 +82,13 @@ void core_t::voice_tick(int v, int32_t *l, int32_t *r) {
   int32_t raw = voice.raw_sample();
   int32_t sample = raw; // TODO: apply ADSR
 
-  // if (v == 1) {
-  //   sound_ram.write(0x400, sample);
-  // }
+  if (v == 1) {
+    ram.write(0x400 | capture_address, sample);
+  }
 
-  // if (v == 3) {
-  //   sound_ram.write(0x600, sample);
-  // }
+  if (v == 3) {
+    ram.write(0x600 | capture_address, sample);
+  }
 
   int32_t left = voice.volume_left.apply(sample);
   int32_t right = voice.volume_right.apply(sample);

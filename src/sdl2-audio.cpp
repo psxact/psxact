@@ -7,16 +7,19 @@ using namespace psx;
 constexpr int sample_rate = 44100;
 constexpr int sample_size = sample_rate / 60;
 
-sdl2_audio_t::sdl2_audio_t() {
+sdl2_audio_t::sdl2_audio_t()
+  : device_id()
+  , want()
+  , have() {
+
   SDL_Init(SDL_INIT_AUDIO);
 
-  want = SDL_AudioSpec {};
   want.freq = sample_rate;
   want.format = AUDIO_S16;
   want.samples = sample_size;
   want.callback = nullptr;
   want.padding = 0;
-  want.channels = 1;
+  want.channels = 2;
 
   device_id = SDL_OpenAudioDevice(nullptr, 0, &want, &have, SDL_AUDIO_ALLOW_ANY_CHANGE);
 
