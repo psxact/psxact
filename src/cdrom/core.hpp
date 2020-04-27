@@ -6,6 +6,7 @@
 #include <string>
 #include "util/fifo.hpp"
 #include "addressable.hpp"
+#include "dma-comms.hpp"
 #include "interruptible.hpp"
 
 using namespace psx::util;
@@ -18,7 +19,9 @@ struct sector_timecode_t {
   uint8_t sector;
 };
 
-class core_t final : public addressable_t {
+class core_t final
+    : public addressable_t
+    , public dma_comms_t {
   interruptible_t *irq;
 
   int32_t index;
@@ -72,9 +75,15 @@ class core_t final : public addressable_t {
  public:
   core_t(interruptible_t *irq, const char *game_file_name, bool log_enabled);
 
-  uint8_t io_read_byte(uint32_t address);
+  int dma_speed();
 
-  uint32_t io_read_word(uint32_t address);
+  bool dma_ready();
+
+  uint32_t dma_read();
+
+  void dma_write(uint32_t val);
+
+  uint8_t io_read_byte(uint32_t address);
 
   void io_write_byte(uint32_t address, uint8_t data);
 

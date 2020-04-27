@@ -2,6 +2,28 @@
 
 using namespace psx::spu;
 
+int core_t::dma_speed() {
+  return 4;
+}
+
+bool core_t::dma_ready() {
+  return true;
+}
+
+uint32_t core_t::dma_read() {
+  return 0;
+}
+
+void core_t::dma_write(uint32_t val) {
+  // TODO: there should be a FIFO that gets filled/emptied to transfer words.
+
+  uint16_t lo = uint16_t(val);
+  uint16_t hi = uint16_t(val >> 16);
+
+  io_write_half(uint32_t(register_t::ram_data), lo);
+  io_write_half(uint32_t(register_t::ram_data), hi);
+}
+
 uint16_t core_t::io_read_half(uint32_t address) {
   return get_register(register_t(address));
 }

@@ -4,6 +4,25 @@
 
 using namespace psx::cdrom;
 
+int core_t::dma_speed() {
+  return 40;
+}
+
+bool core_t::dma_ready() {
+  return true;
+}
+
+uint32_t core_t::dma_read() {
+  return
+    (io_read_byte(0x1f801802) << (8 * 0)) |
+    (io_read_byte(0x1f801802) << (8 * 1)) |
+    (io_read_byte(0x1f801802) << (8 * 2)) |
+    (io_read_byte(0x1f801802) << (8 * 3));
+}
+
+void core_t::dma_write(uint32_t val) {
+}
+
 uint8_t core_t::io_read_byte(uint32_t address) {
   switch (address) {
     case 0x1f801800:
@@ -46,14 +65,6 @@ uint8_t core_t::io_read_byte(uint32_t address) {
   }
 
   return addressable_t::io_read_byte(address);
-}
-
-uint32_t core_t::io_read_word(uint32_t) {
-  return
-    (io_read_byte(0x1f801802) << (8 * 0)) |
-    (io_read_byte(0x1f801802) << (8 * 1)) |
-    (io_read_byte(0x1f801802) << (8 * 2)) |
-    (io_read_byte(0x1f801802) << (8 * 3));
 }
 
 void core_t::io_write_port_0_n(uint8_t data) {

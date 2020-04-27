@@ -2,6 +2,7 @@
 #define GPU_CORE_HPP_
 
 #include "addressable.hpp"
+#include "dma-comms.hpp"
 #include "memory.hpp"
 
 namespace psx::gpu {
@@ -11,7 +12,9 @@ constexpr int GPU_GP1 = 0x1f801814;
 constexpr int GPU_READ = 0x1f801810;
 constexpr int GPU_STAT = 0x1f801814;
 
-class core_t final : public addressable_t {
+class core_t final
+    : public addressable_t
+    , public dma_comms_t {
  public:
   memory_t< mib(1) > *vram;
 
@@ -75,6 +78,14 @@ class core_t final : public addressable_t {
   core_t(bool log_enabled);
 
   ~core_t();
+
+  int dma_speed();
+
+  bool dma_ready();
+
+  uint32_t dma_read();
+
+  void dma_write(uint32_t val);
 
   uint32_t io_read_word(uint32_t address);
 

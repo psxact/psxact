@@ -37,6 +37,22 @@ core_t::~core_t() {
   delete vram;
 }
 
+int core_t::dma_speed() {
+  return 1;
+}
+
+bool core_t::dma_ready() {
+  return true;
+}
+
+uint32_t core_t::dma_read() {
+  return data();
+}
+
+void core_t::dma_write(uint32_t val) {
+  gp0(val);
+}
+
 uint32_t core_t::data() {
   if (gpu_to_cpu_transfer.run.active) {
     uint16_t lower = vram_transfer_read();

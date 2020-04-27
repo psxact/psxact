@@ -3,6 +3,7 @@
 
 #include "spu/voice.hpp"
 #include "addressable.hpp"
+#include "dma-comms.hpp"
 #include "sound-ram.hpp"
 #include "memory.hpp"
 
@@ -22,7 +23,9 @@ namespace psx::spu {
     status       = 0x1f801dae
   };
 
-  class core_t final : public addressable_t {
+  class core_t final
+      : public addressable_t
+      , public dma_comms_t {
     uint16_t registers[512];
 
     sound_ram_t ram;
@@ -56,6 +59,11 @@ namespace psx::spu {
     uint16_t get_register(register_t reg);
     void put_register(register_t reg, uint16_t value);
     void put_status_register();
+
+    int dma_speed();
+    bool dma_ready();
+    uint32_t dma_read();
+    void dma_write(uint32_t val);
 
     uint16_t io_read_half(uint32_t address);
     void io_write_half(uint32_t address, uint16_t data);

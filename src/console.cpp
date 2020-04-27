@@ -28,6 +28,12 @@ console_t::console_t(args_t &args)
   mdec = new mdec::core_t(args.log_mdec);
   spu = new spu::core_t(args.log_spu);
 
+  dma->attach(2, gpu);
+  dma->attach(3, cdrom);
+  dma->attach(4, spu);
+  dma->attach(5, nullptr); // PIO
+  dma->attach(6, nullptr); // OTC - special cased in the DMA code.
+
   bios->load_blob(bios_file_name);
   // bios->io_write_word(0x6990, 0); // patch the bios to skip the boot-up animation
 
@@ -228,7 +234,7 @@ void console_t::run_for_one_frame() {
   constexpr int CPU_TICKS_PER_FRAME = CPU_FREQ / 60;
 
   while (cycles < CPU_TICKS_PER_FRAME) {
-    int amount = cpu->tick();
+    int amount = cpu->tick() + dma->tick();
 
     spu->run(amount);
     timer->run(amount);
