@@ -6,7 +6,7 @@ build:linux:
   stage: build
   image: debian:buster
   before_script:
-    - apt update && apt -y install build-essential git libsdl2-dev scons
+    - apt update && apt -y install build-essential git libgtest-dev libsdl2-dev scons
   script:
     - ./ci/build.sh
     - ./ci/test.sh
