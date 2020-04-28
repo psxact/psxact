@@ -31,16 +31,8 @@ static void fail() {
 
 args_t::args_t(int argc, char **argv)
   : bios_file_name("bios.rom")
-  , game_file_name("")
-  , headless(false)
-  , log_cpu(false)
-  , log_dma(false)
-  , log_gpu(false)
-  , log_spu(false)
-  , log_mdec(false)
-  , log_cdrom(false)
-  , log_input(false)
-  , log_timer(false) {
+  , game_file_name("") {
+
   if (argc == 1) {
     fail();
   }

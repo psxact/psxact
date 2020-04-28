@@ -11,11 +11,10 @@ addressable_t::addressable_t(const char *name, bool log_enabled)
 }
 
 void addressable_t::log(const char *format, ...) const {
-  va_list arg;
-
   if (log_enabled) {
     printf("[%s] ", name);
 
+    va_list arg;
     va_start(arg, format);
     vprintf(format, arg);
     va_end(arg);
