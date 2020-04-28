@@ -28,6 +28,8 @@ console_t::console_t(args_t &args)
   mdec = new mdec::core_t(args.log_mdec);
   spu = new spu::core_t(args.log_spu);
 
+  dma->attach(0, mdec);
+  dma->attach(1, mdec);
   dma->attach(2, gpu);
   dma->attach(3, cdrom);
   dma->attach(4, spu);
@@ -35,7 +37,7 @@ console_t::console_t(args_t &args)
   dma->attach(6, nullptr); // OTC - special cased in the DMA code.
 
   bios->load_blob(bios_file_name);
-  // bios->io_write_word(0x6990, 0); // patch the bios to skip the boot-up animation
+  bios->io_write_word(0x6990, 0); // patch the bios to skip the boot-up animation
 
   bios->io_write_word(0x6f0c, 0x34010001); // li $at, 0x1
   bios->io_write_word(0x6f10, 0x0ff019e1); // jal 0xbfc06784
@@ -230,7 +232,7 @@ void console_t::io_write_word(uint32_t address, uint32_t data) {
 }
 
 void console_t::run_for_one_frame() {
-  constexpr int CPU_FREQ = 33868800;
+  constexpr int CPU_FREQ = 33'868'800;
   constexpr int CPU_TICKS_PER_FRAME = CPU_FREQ / 60;
 
   while (cycles < CPU_TICKS_PER_FRAME) {

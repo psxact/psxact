@@ -9,6 +9,7 @@ build:linux:
     - apt update && apt -y install build-essential git libsdl2-dev scons
   script:
     - ./ci/build.sh
+    - ./ci/test.sh
     - ./ci/package.sh
   artifacts:
     expire_in: 1 week

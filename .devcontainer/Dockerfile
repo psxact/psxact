@@ -1,10 +1,11 @@
 FROM debian:buster
 
-RUN apt -y update && apt -y install --no-install-recommends \
+RUN apt -y update && apt -y install --no-install-recommends --no-install-suggests \
         build-essential \
         gdb \
         git \
         git-lfs \
+        libgtest-dev \
         libsdl2-dev \
         scons \
  && apt -y autoremove \

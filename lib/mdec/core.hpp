@@ -3,6 +3,7 @@
 
 #include "util/fifo.hpp"
 #include "addressable.hpp"
+#include "dma-comms.hpp"
 
 namespace psx::mdec {
 
@@ -28,7 +29,9 @@ enum class command_t {
   set_scale = 3
 };
 
-class core_t final : public addressable_t {
+class core_t final
+    : public addressable_t
+    , public dma_comms_t {
  private:
   block_t block;
   command_t command;
@@ -55,19 +58,19 @@ class core_t final : public addressable_t {
  public:
   core_t(bool log_enabled);
 
-  uint32_t io_read_word(uint32_t address);
+  void send_command(uint32_t data);
+  void send_parameter(int n, uint32_t data);
+  void send_color_tab(int n, uint32_t data);
+  void send_light_tab(int n, uint32_t data);
+  void send_scale_tab(int n, uint32_t data);
 
+  uint32_t io_read_word(uint32_t address);
   void io_write_word(uint32_t address, uint32_t data);
 
-  void send_command(uint32_t data);
-
-  void send_parameter(int n, uint32_t data);
-
-  void send_color_tab(int n, uint32_t data);
-
-  void send_light_tab(int n, uint32_t data);
-
-  void send_scale_tab(int n, uint32_t data);
+  int dma_speed();
+  bool dma_ready();
+  uint32_t dma_read();
+  void dma_write(uint32_t val);
 };
 
 }  // namespace psx::mdec
