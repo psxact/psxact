@@ -3,6 +3,7 @@
 
 #include "addressable.hpp"
 #include "dma-comms.hpp"
+#include "irq-line.hpp"
 #include "memory.hpp"
 
 namespace psx::gpu {
@@ -15,6 +16,10 @@ constexpr int GPU_STAT = 0x1f801814;
 class core_t final
     : public addressable_t
     , public dma_comms_t {
+  irq_line_t irq;
+  int prescaler = {};
+  int counter = {};
+
  public:
   memory_t< mib(1) > *vram;
 
@@ -75,21 +80,25 @@ class core_t final
     } run = {};
   } gpu_to_cpu_transfer = {};
 
-  core_t(bool log_enabled);
+  core_t(irq_line_t irq, bool log_enabled);
 
   ~core_t();
 
-  int dma_speed();
+  /// Called with the number of CPU cycles that have elapsed.
+  /// Returns true if a frame has elapsed, false otherwise.
+  bool run(int amount);
 
-  bool dma_ready();
+  /// Called with the number of GPU cycles that have elapsed.
+  /// Returns true if a frame has elapsed, false otherwise.
+  bool tick(int amount);
 
-  uint32_t dma_read();
+  int dma_speed() override;
+  bool dma_ready() override;
+  uint32_t dma_read() override;
+  void dma_write(uint32_t val) override;
 
-  void dma_write(uint32_t val);
-
-  uint32_t io_read_word(uint32_t address);
-
-  void io_write_word(uint32_t address, uint32_t data);
+  uint32_t io_read_word(uint32_t address) override;
+  void io_write_word(uint32_t address, uint32_t data) override;
 
   uint32_t data();
 

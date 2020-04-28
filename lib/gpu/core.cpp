@@ -4,37 +4,46 @@
 
 using namespace psx::gpu;
 
-core_t::core_t(bool log_enabled)
+core_t::core_t(irq_line_t irq, bool log_enabled)
   : addressable_t("gpu", log_enabled)
-  , vram()
-  , data_latch(0)
-  , status(0x14802000)
-  , texture_window_mask_x()
-  , texture_window_mask_y()
-  , texture_window_offset_x()
-  , texture_window_offset_y()
-  , drawing_area_x1()
-  , drawing_area_y1()
-  , drawing_area_x2()
-  , drawing_area_y2()
-  , x_offset()
-  , y_offset()
-  , display_area_x()
-  , display_area_y()
-  , display_area_x1()
-  , display_area_y1()
-  , display_area_x2()
-  , display_area_y2()
-  , textured_rectangle_x_flip()
-  , textured_rectangle_y_flip()
-  , fifo()
-  , cpu_to_gpu_transfer()
-  , gpu_to_cpu_transfer() {
+  , irq(irq) {
   vram = new memory_t< mib(1) >("vram");
 }
 
 core_t::~core_t() {
   delete vram;
+}
+
+bool core_t::run(int amount) {
+  // time-base conversion
+  prescaler += amount * 11;
+  int ticks = prescaler / 7;
+  prescaler = prescaler % 7;
+
+  // the real update function
+  return tick(ticks);
+}
+
+bool core_t::tick(int amount) {
+  constexpr int VBLANK_START = 241 * 3413;
+  constexpr int VBLANK_END = 263 * 3413;
+
+  assert(amount < VBLANK_END);
+
+  int prev = counter;
+  int next = counter + amount;
+
+  counter = next % VBLANK_END;
+
+  if (prev < VBLANK_START && next >= VBLANK_START) {
+    irq(irq_line_state_t::active);
+  }
+
+  if (prev < VBLANK_END && next >= VBLANK_END) {
+    irq(irq_line_state_t::clear);
+  }
+
+  return next >= VBLANK_END;
 }
 
 int core_t::dma_speed() {

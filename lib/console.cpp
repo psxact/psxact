@@ -5,6 +5,7 @@
 #include <exception>
 #include "util/blob.hpp"
 #include "util/range.hpp"
+#include "irq-line.hpp"
 
 using namespace psx;
 using namespace psx::util;
@@ -23,7 +24,7 @@ console_t::console_t(args_t &args)
   exp1 = new exp::expansion1_t();
   exp2 = new exp::expansion2_t();
   exp3 = new exp::expansion3_t();
-  gpu = new gpu::core_t(args.log_gpu);
+  gpu = new gpu::core_t(irq_line_t(*this, interrupt_type_t::vblank), args.log_gpu);
   input = new input::core_t(*this, args.log_input);
   mdec = new mdec::core_t(args.log_mdec);
   spu = new spu::core_t(args.log_spu);
@@ -232,25 +233,18 @@ void console_t::io_write_word(uint32_t address, uint32_t data) {
 }
 
 void console_t::run_for_one_frame() {
-  constexpr int CPU_FREQ = 33'868'800;
-  constexpr int CPU_TICKS_PER_FRAME = CPU_FREQ / 60;
+  int amount;
 
-  while (cycles < CPU_TICKS_PER_FRAME) {
-    int amount = cpu->tick() + dma->tick();
+  do {
+    amount = cpu->tick() + dma->tick();
 
     spu->run(amount);
     timer->run(amount);
     cdrom->tick(amount);
     input->tick(amount);
-
-    cycles += amount;
-  }
-
-  cycles -= CPU_TICKS_PER_FRAME;
+  } while (!gpu->run(amount));
 
   input->frame();
-
-  interrupt(interrupt_type_t::vblank);
 }
 
 void console_t::get_audio_params(int16_t **sound, int *len) {

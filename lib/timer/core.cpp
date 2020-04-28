@@ -60,7 +60,7 @@ void core_t::timer_run(int n, int system, int system_over_8) {
       break;
 
     case timer_source_t::system_over_8:
-      counter += system_over_8;
+      counter += system;
       break;
 
     case timer_source_t::hblank:
