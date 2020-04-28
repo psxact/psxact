@@ -7,16 +7,16 @@
 namespace psx::input::devices {
 
 class digital_pad_t : public device_t {
-  int bit = 0;
-  int step = 0;
-  uint16_t bits = 0;
-  uint8_t rx_buffer = 0;
-  uint8_t tx_buffer = 0xff;
+  int bit = {};
+  int step = {};
+  uint16_t bits = {};
+  uint8_t rx_buffer = {};
+  uint8_t tx_buffer = {0xff};
 
  public:
-  void frame();
-  int send(int request);
-  void set_dtr(bool next_dtr);
+  void frame() override;
+  int send(int request) override;
+  void set_dtr(bool next_dtr) override;
 };
 
 }  // namespace psx::input::devices

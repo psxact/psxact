@@ -27,15 +27,10 @@ static const uint32_t REG_BIT1[32] = {
   0x00000000, 0x00000000, 0x00000000, 0x00000000, // ctrl
 };
 
-core_t::core_t(interruptible_t *irq, addressable_t *memory, bool log_enabled)
+core_t::core_t(interruptible_t &irq, addressable_t &memory, bool log_enabled)
   : addressable_t("dma", log_enabled)
   , irq(irq)
-  , memory(memory)
-  , priority_len()
-  , priority_lut()
-  , pcr()
-  , icr()
-  , channels() {
+  , memory(memory) {
 }
 
 void core_t::attach(int n, dma_comms_t *comms) {
@@ -118,11 +113,11 @@ int core_t::tick_sync_mode_otc() {
   auto time = bc;
 
   while (--bc) {
-    memory->io_write_word(address, address - 4);
+    memory.io_write_word(address, address - 4);
     address -= 4;
   }
 
-  memory->io_write_word(address, 0x00ffffff);
+  memory.io_write_word(address, 0x00ffffff);
 
   channel.control &= ~(1 << 24);
   irq_channel(6);
@@ -140,7 +135,7 @@ int core_t::tick_sync_mode_0(int n) {
 
   if (channels[n].control & 1) {
     do {
-      uint32_t word = memory->io_read_word(address);
+      uint32_t word = memory.io_read_word(address);
       address += address_step;
 
       channels[n].comms->dma_write(word);
@@ -149,7 +144,7 @@ int core_t::tick_sync_mode_0(int n) {
     do {
       uint32_t word = channels[n].comms->dma_read();
 
-      memory->io_write_word(address, word);
+      memory.io_write_word(address, word);
       address += address_step;
     } while (--bc);
   }
@@ -173,7 +168,7 @@ int core_t::tick_sync_mode_1(int n) {
       uint16_t bc = bs;
 
       do {
-        uint32_t word = memory->io_read_word(address);
+        uint32_t word = memory.io_read_word(address);
         address += address_step;
 
         channels[n].comms->dma_write(word);
@@ -186,7 +181,7 @@ int core_t::tick_sync_mode_1(int n) {
       do {
         uint32_t word = channels[n].comms->dma_read();
 
-        memory->io_write_word(address, word);
+        memory.io_write_word(address, word);
         address += address_step;
       } while (--bc);
     } while (--ba);
@@ -203,7 +198,7 @@ int core_t::tick_sync_mode_2(int n) {
   int time = 0;
 
   do {
-    uint32_t header = memory->io_read_word(channels[n].address);
+    uint32_t header = memory.io_read_word(channels[n].address);
     uint32_t length = (header >> 24) & 0xff;
 
     time += channels[n].comms->dma_speed() * (length + 1);
@@ -211,7 +206,7 @@ int core_t::tick_sync_mode_2(int n) {
     while (length--) {
       channels[n].address += 4;
 
-      uint32_t data = memory->io_read_word(channels[n].address);
+      uint32_t data = memory.io_read_word(channels[n].address);
       channels[n].comms->dma_write(data);
     }
 
@@ -245,7 +240,7 @@ void core_t::update_irq_active_flag() {
   if (active) {
     if ((icr & 0x80000000) == 0) {
       log("sending interrupt");
-      irq->interrupt(interrupt_type_t::dma);
+      irq.interrupt(interrupt_type_t::dma);
     }
 
     icr |= 0x80000000;

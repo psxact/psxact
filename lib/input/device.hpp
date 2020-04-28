@@ -15,11 +15,11 @@ class device_t {
   static const int DSR_DELAY_PERIOD = 100;
   static const int DSR_PULSE_PERIOD = 100;
 
-  bool dsr_pending = false;
-  int dsr_cycles = 0;
+  bool dsr_pending = {};
+  int dsr_cycles = {};
 
  protected:
-  bool dtr = false;
+  bool dtr = {};
 
   device_t() {}
   ~device_t() {}

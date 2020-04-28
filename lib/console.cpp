@@ -16,15 +16,15 @@ console_t::console_t(args_t &args)
   bios = new memory_t< kib(512) >("bios");
   wram = new memory_t< mib(2) >("wram");
 
-  cdrom = new cdrom::core_t(this, game_file_name, args.log_cdrom);
-  timer = new timer::core_t(this, args.log_timer);
-  cpu = new cpu::core_t(this, args.log_cpu);
-  dma = new dma::core_t(this, this, args.log_dma);
+  cdrom = new cdrom::core_t(*this, game_file_name, args.log_cdrom);
+  timer = new timer::core_t(*this, args.log_timer);
+  cpu = new cpu::core_t(*this, args.log_cpu);
+  dma = new dma::core_t(*this, *this, args.log_dma);
   exp1 = new exp::expansion1_t();
   exp2 = new exp::expansion2_t();
   exp3 = new exp::expansion3_t();
   gpu = new gpu::core_t(args.log_gpu);
-  input = new input::core_t(this, args.log_input);
+  input = new input::core_t(*this, args.log_input);
   mdec = new mdec::core_t(args.log_mdec);
   spu = new spu::core_t(args.log_spu);
 

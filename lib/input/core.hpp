@@ -16,42 +16,42 @@ class core_t final : public addressable_t {
     int counter = 0x0088;
     int factor = 1;
     int reload = 0x0088;
-  } baud;
+  } baud = {};
 
   struct {
-    device_dsr_t level;
-    int interrupt_enable;
-  } dsr;
+    device_dsr_t level = {};
+    int interrupt_enable = {};
+  } dsr = {};
 
   struct {
-    fifo_t< uint8_t, 8 > fifo;
-    bool enable;
-    bool interrupt_enable;
-    int interrupt_mode;
-    uint8_t buffer;
-  } rx;
+    fifo_t< uint8_t, 3 > fifo = {};
+    bool enable = {};
+    bool interrupt_enable = {};
+    int interrupt_mode = {};
+    uint8_t buffer = {};
+  } rx = {};
 
   struct {
-    uint8_t buffer;
-    bool enable;
-    bool pending;
-    bool interrupt_enable;
-  } tx;
+    uint8_t buffer = {};
+    bool enable = {};
+    bool pending = {};
+    bool interrupt_enable = {};
+  } tx = {};
 
   struct {
-    device_t *memcard[2];
-    device_t *control[2];
-    int output;
-    int select;
-  } port;
+    device_t *memcard[2] = {};
+    device_t *control[2] = {};
+    int output = {};
+    int select = {};
+  } port = {};
 
-  int bit = 0;
-  int interrupt = 0;
+  int bit = {};
+  int interrupt = {};
 
-  interruptible_t *irq;
+  interruptible_t &irq;
 
  public:
-  explicit core_t(interruptible_t *irq, bool log_enabled);
+  explicit core_t(interruptible_t &irq, bool log_enabled);
 
   void frame();
 

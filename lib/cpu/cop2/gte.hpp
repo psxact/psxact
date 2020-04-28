@@ -30,36 +30,36 @@ class gte_t : public cop_t {
       uint8_t c;
     };
 
-    uint32_t value;
+    uint32_t value = {};
   };
 
   struct {
-    int32_t matrix[4][3][3];
-    int32_t vector[4][3];
-    int32_t ofx;
-    int32_t ofy;
-    int32_t h;
-    int32_t dqa;
-    int32_t dqb;
-    int32_t zsf3;
-    int32_t zsf4;
-    uint32_t flag;
-  } ccr;
+    int32_t matrix[4][3][3] = {};
+    int32_t vector[4][3] = {};
+    int32_t ofx = {};
+    int32_t ofy = {};
+    int32_t h = {};
+    int32_t dqa = {};
+    int32_t dqb = {};
+    int32_t zsf3 = {};
+    int32_t zsf4 = {};
+    uint32_t flag = {};
+  } ccr = {};
 
   struct {
-    int32_t vector[4][3];
-    color_t rgbc;
-    int32_t otz;
-    int32_t ir0;
-    int32_t sx[3];
-    int32_t sy[3];
-    int32_t sz[4];
-    color_t rgb[3];
-    int32_t res;
-    int32_t mac[4];
-    int32_t lzcs;
-    int32_t lzcr;
-  } gpr;
+    int32_t vector[4][3] = {};
+    color_t rgbc = {};
+    int32_t otz = {};
+    int32_t ir0 = {};
+    int32_t sx[3] = {};
+    int32_t sy[3] = {};
+    int32_t sz[4] = {};
+    color_t rgb[3] = {};
+    int32_t res = {};
+    int32_t mac[4] = {};
+    int32_t lzcs = {};
+    int32_t lzcr = {};
+  } gpr = {};
 
  public:
   void run(uint32_t code);

@@ -46,9 +46,8 @@ core_t::opcode_t core_t::op_table_special[64] = {
   &core_t::op_und,     &core_t::op_und,   &core_t::op_und,  &core_t::op_und
 };
 
-core_t::core_t(addressable_t *memory, bool log_enabled)
+core_t::core_t(addressable_t &memory, bool log_enabled)
   : addressable_t("cpu", log_enabled)
-  , bios_call(memory)
   , memory(memory)
   , dcache("dcache") {
   regs.gp[0] = 0;
@@ -61,11 +60,11 @@ core_t::core_t(addressable_t *memory, bool log_enabled)
   cop[0]->write_gpr(12, 0x00000000);
 }
 
-cop_t *core_t::get_cop(int n) {
+cop_t *core_t::get_cop(int n) const {
   return cop[n];
 }
 
-bool core_t::get_cop_usable(int n) {
+bool core_t::get_cop_usable(int n) const {
   if (get_cop(n) == nullptr) {
     return false;
   }
@@ -123,19 +122,6 @@ static inline uint32_t map_address(uint32_t address) {
   return address & segments[get_segment(address)];
 }
 
-void core_t::log_bios_calls() {
-  switch (map_address(regs.this_pc)) {
-    case 0xa0:
-      return bios_call.decode_a(regs.gp[31], regs.gp[9], &regs.gp[4]);
-
-    case 0xb0:
-      return bios_call.decode_b(regs.gp[31], regs.gp[9], &regs.gp[4]);
-
-    case 0xc0:
-      return bios_call.decode_c(regs.gp[31], regs.gp[9], &regs.gp[4]);
-  }
-}
-
 void core_t::enter_exception(cop0::exception_t code) {
   uint32_t status = get_cop(0)->read_gpr(12);
   status = (status & ~0x3f) | ((status << 2) & 0x3f);
@@ -178,10 +164,10 @@ void core_t::read_code() {
 
   // TODO: read i-cache
 
-  code = memory->io_read_word(map_address(regs.this_pc));
+  code = memory.io_read_word(map_address(regs.this_pc));
 }
 
-io_target_t core_t::get_target(uint32_t address) {
+io_target_t core_t::get_target(uint32_t address) const {
   uint32_t cop0r12 = get_cop(0)->read_gpr(12);
   if (cop0r12 & cop0::ISC) {
     if (cop0r12 & cop0::SWC) {
@@ -208,7 +194,7 @@ uint32_t core_t::read_data_byte(uint32_t address) {
   switch (get_target(address)) {
     case io_target_t::ICACHE: return 0;
     case io_target_t::DCACHE: return dcache.io_read_byte(address);
-    case io_target_t::MEMORY: return memory->io_read_byte(address);
+    case io_target_t::MEMORY: return memory.io_read_byte(address);
   }
 
   return 0;
@@ -220,7 +206,7 @@ uint32_t core_t::read_data_half(uint32_t address) {
   switch (get_target(address)) {
     case io_target_t::ICACHE: return 0;
     case io_target_t::DCACHE: return dcache.io_read_half(address);
-    case io_target_t::MEMORY: return memory->io_read_half(address);
+    case io_target_t::MEMORY: return memory.io_read_half(address);
   }
 
   return 0;
@@ -232,7 +218,7 @@ uint32_t core_t::read_data_word(uint32_t address) {
   switch (get_target(address)) {
     case io_target_t::ICACHE: return 0;
     case io_target_t::DCACHE: return dcache.io_read_word(address);
-    case io_target_t::MEMORY: return memory->io_read_word(address);
+    case io_target_t::MEMORY: return memory.io_read_word(address);
   }
 
   return 0;
@@ -244,7 +230,7 @@ void core_t::write_data_byte(uint32_t address, uint32_t data) {
   switch (get_target(address)) {
     case io_target_t::ICACHE: break;
     case io_target_t::DCACHE: dcache.io_write_byte(address, data); break;
-    case io_target_t::MEMORY: memory->io_write_byte(address, data); break;
+    case io_target_t::MEMORY: memory.io_write_byte(address, data); break;
   }
 }
 
@@ -254,7 +240,7 @@ void core_t::write_data_half(uint32_t address, uint32_t data) {
   switch (get_target(address)) {
     case io_target_t::ICACHE: break;
     case io_target_t::DCACHE: dcache.io_write_half(address, data); break;
-    case io_target_t::MEMORY: memory->io_write_half(address, data); break;
+    case io_target_t::MEMORY: memory.io_write_half(address, data); break;
   }
 }
 
@@ -264,7 +250,7 @@ void core_t::write_data_word(uint32_t address, uint32_t data) {
   switch (get_target(address)) {
     case io_target_t::ICACHE: break;
     case io_target_t::DCACHE: dcache.io_write_word(address, data); break;
-    case io_target_t::MEMORY: memory->io_write_word(address, data); break;
+    case io_target_t::MEMORY: memory.io_write_word(address, data); break;
   }
 }
 
@@ -281,7 +267,7 @@ void core_t::update_irq(uint32_t stat, uint32_t mask) {
   get_cop(0)->write_gpr(13, flag);
 }
 
-uint32_t core_t::get_imask() {
+uint32_t core_t::get_imask() const {
   return imask;
 }
 
@@ -289,7 +275,7 @@ void core_t::set_imask(uint32_t value) {
   update_irq(get_istat(), value);
 }
 
-uint32_t core_t::get_istat() {
+uint32_t core_t::get_istat() const {
   return istat;
 }
 
@@ -339,23 +325,23 @@ uint32_t core_t::get_code() const {
   return code;
 }
 
-uint32_t core_t::get_pc() {
+uint32_t core_t::get_pc() const {
   return regs.pc;
 }
 
-uint32_t core_t::get_rt() {
+uint32_t core_t::get_rt() const {
   return get_register(decode_rt());
 }
 
-uint32_t core_t::get_rt_forwarded() {
+uint32_t core_t::get_rt_forwarded() const {
   return get_register_forwarded(decode_rt());
 }
 
-uint32_t core_t::get_rs() {
+uint32_t core_t::get_rs() const {
   return get_register(decode_rs());
 }
 
-uint32_t core_t::get_register(uint32_t index) {
+uint32_t core_t::get_register(uint32_t index) const {
   if (is_load_delay_slot && load_index == index) {
     return load_value;
   }
@@ -364,7 +350,7 @@ uint32_t core_t::get_register(uint32_t index) {
   }
 }
 
-uint32_t core_t::get_register_forwarded(uint32_t index) {
+uint32_t core_t::get_register_forwarded(uint32_t index) const {
   return regs.gp[index];
 }
 

@@ -15,26 +15,26 @@ struct channel_t {
 };
 
 class core_t final : public addressable_t {
-  interruptible_t *irq;
-  addressable_t *memory;
+  interruptible_t &irq;
+  addressable_t &memory;
 
   /// The number of channels in `priority_lut'
-  int priority_len;
+  int priority_len = {};
 
   /// The prioritized list of channels
-  int priority_lut[7];
+  int priority_lut[7] = {};
 
   /// Priority control register
-  uint32_t pcr;
+  uint32_t pcr = {};
 
   /// Interrupt control register
-  uint32_t icr;
+  uint32_t icr = {};
 
   /// The nominal list of channels
-  channel_t channels[7];
+  channel_t channels[7] = {};
 
  public:
-  core_t(interruptible_t *irq, addressable_t *memory, bool log_enabled);
+  core_t(interruptible_t &irq, addressable_t &memory, bool log_enabled);
 
   void attach(int n, dma_comms_t *comms);
 

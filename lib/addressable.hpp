@@ -6,16 +6,16 @@
 namespace psx {
 
 class addressable_t {
-  const char *name;
+  const char *name = {};
 
-  bool log_enabled;
+  bool log_enabled = {};
 
  public:
   explicit addressable_t(const char *name, bool log_enabled);
 
   virtual ~addressable_t() {}
 
-  void log(const char *fmt, ...);
+  void log(const char *fmt, ...) const;
 
   virtual uint8_t io_read_byte(uint32_t address);
   virtual uint16_t io_read_half(uint32_t address);

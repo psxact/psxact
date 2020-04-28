@@ -25,35 +25,33 @@ enum segment_t {
 };
 
 class core_t final : public addressable_t {
-  bios::decoder_t bios_call;
+  addressable_t &memory;
 
-  addressable_t *memory;
-
-  cop_t *cop[4];
+  cop_t *cop[4] = {};
 
   memory_t< kib(1) > dcache;
 
   struct {
-    uint32_t gp[32];
-    uint32_t lo;
-    uint32_t hi;
-    uint32_t pc;
-    uint32_t this_pc;
-    uint32_t next_pc;
-  } regs;
+    uint32_t gp[32] = {};
+    uint32_t lo = {};
+    uint32_t hi = {};
+    uint32_t pc = {};
+    uint32_t this_pc = {};
+    uint32_t next_pc = {};
+  } regs = {};
 
-  uint32_t code;
+  uint32_t code = {};
 
-  bool is_branch;
-  bool is_branch_delay_slot;
+  bool is_branch = {};
+  bool is_branch_delay_slot = {};
 
-  bool is_load;
-  bool is_load_delay_slot;
-  uint32_t load_index;
-  uint32_t load_value;
+  bool is_load = {};
+  bool is_load_delay_slot = {};
+  uint32_t load_index = {};
+  uint32_t load_value = {};
 
-  uint32_t istat;
-  uint32_t imask;
+  uint32_t istat = {};
+  uint32_t imask = {};
 
   typedef void (core_t:: *opcode_t)();
 
@@ -62,31 +60,23 @@ class core_t final : public addressable_t {
   static opcode_t op_table_special[64];
 
  public:
-  explicit core_t(addressable_t *memory, bool log_enabled);
+  explicit core_t(addressable_t &memory, bool log_enabled);
 
   uint32_t get_code() const;
 
-  cop_t *get_cop(int n);
+  cop_t *get_cop(int n) const;
 
-  bool get_cop_usable(int n);
-
-  void disassemble(FILE *file);
-
-  void disassemble_special(FILE *file);
-
-  void disassemble_reg_imm(FILE *file);
+  bool get_cop_usable(int n) const;
 
   int tick();
 
   void enter_exception(cop0::exception_t code);
 
-  void log_bios_calls();
-
   void update_irq(uint32_t stat, uint32_t mask);
 
   void read_code();
 
-  io_target_t get_target(uint32_t address);
+  io_target_t get_target(uint32_t address) const;
 
   uint32_t read_data_byte(uint32_t address);
 
@@ -100,11 +90,11 @@ class core_t final : public addressable_t {
 
   void write_data_word(uint32_t address, uint32_t data);
 
-  uint32_t get_imask();
+  uint32_t get_imask() const;
 
   void set_imask(uint32_t value);
 
-  uint32_t get_istat();
+  uint32_t get_istat() const;
 
   void set_istat(uint32_t value);
 
@@ -264,29 +254,29 @@ class core_t final : public addressable_t {
 
   void op_und();
 
-  uint32_t decode_iconst();
+  uint32_t decode_iconst() const;
 
-  uint32_t decode_uconst();
+  uint32_t decode_uconst() const;
 
-  uint32_t decode_sa();
+  uint32_t decode_sa() const;
 
-  uint32_t decode_rd();
+  uint32_t decode_rd() const;
 
-  uint32_t decode_rt();
+  uint32_t decode_rt() const;
 
-  uint32_t decode_rs();
+  uint32_t decode_rs() const;
 
-  uint32_t get_pc();
+  uint32_t get_pc() const;
 
-  uint32_t get_rt();
+  uint32_t get_rt() const;
 
-  uint32_t get_rt_forwarded();
+  uint32_t get_rt_forwarded() const;
 
-  uint32_t get_rs();
+  uint32_t get_rs() const;
 
-  uint32_t get_register(uint32_t index);
+  uint32_t get_register(uint32_t index) const;
 
-  uint32_t get_register_forwarded(uint32_t index);
+  uint32_t get_register_forwarded(uint32_t index) const;
 
   void set_pc(uint32_t value);
 

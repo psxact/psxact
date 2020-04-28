@@ -18,62 +18,62 @@ class core_t final
  public:
   memory_t< mib(1) > *vram;
 
-  uint32_t data_latch = 0;
+  uint32_t data_latch = {};
   uint32_t status = 0x14802000;
-  uint32_t texture_window_mask_x;
-  uint32_t texture_window_mask_y;
-  uint32_t texture_window_offset_x;
-  uint32_t texture_window_offset_y;
-  int32_t drawing_area_x1;
-  int32_t drawing_area_y1;
-  int32_t drawing_area_x2;
-  int32_t drawing_area_y2;
-  int32_t x_offset;
-  int32_t y_offset;
-  uint32_t display_area_x;
-  uint32_t display_area_y;
-  uint32_t display_area_x1;
-  uint32_t display_area_y1;
-  uint32_t display_area_x2;
-  uint32_t display_area_y2;
-  bool textured_rectangle_x_flip;
-  bool textured_rectangle_y_flip;
+  uint32_t texture_window_mask_x = {};
+  uint32_t texture_window_mask_y = {};
+  uint32_t texture_window_offset_x = {};
+  uint32_t texture_window_offset_y = {};
+  int32_t drawing_area_x1 = {};
+  int32_t drawing_area_y1 = {};
+  int32_t drawing_area_x2 = {};
+  int32_t drawing_area_y2 = {};
+  int32_t x_offset = {};
+  int32_t y_offset = {};
+  uint32_t display_area_x = {};
+  uint32_t display_area_y = {};
+  uint32_t display_area_x1 = {};
+  uint32_t display_area_y1 = {};
+  uint32_t display_area_x2 = {};
+  uint32_t display_area_y2 = {};
+  bool textured_rectangle_x_flip = {};
+  bool textured_rectangle_y_flip = {};
 
   struct {
-    uint32_t buffer[16];
-    int32_t wr;
-    int32_t rd;
-  } fifo;
-
-  struct {
-    struct {
-      int32_t x;
-      int32_t y;
-      int32_t w;
-      int32_t h;
-    } reg;
-
-    struct {
-      bool active;
-      int32_t x;
-      int32_t y;
-    } run;
-  } cpu_to_gpu_transfer;
+    uint32_t buffer[16] = {};
+    int32_t wr = {};
+    int32_t rd = {};
+  } fifo = {};
 
   struct {
     struct {
-      int32_t x;
-      int32_t y;
-      int32_t w;
-      int32_t h;
-    } reg;
+      int32_t x = {};
+      int32_t y = {};
+      int32_t w = {};
+      int32_t h = {};
+    } reg = {};
 
     struct {
-      bool active;
-      int32_t x;
-      int32_t y;
-    } run;
-  } gpu_to_cpu_transfer;
+      bool active = {};
+      int32_t x = {};
+      int32_t y = {};
+    } run = {};
+  } cpu_to_gpu_transfer = {};
+
+  struct {
+    struct {
+      int32_t x = {};
+      int32_t y = {};
+      int32_t w = {};
+      int32_t h = {};
+    } reg = {};
+
+    struct {
+      bool active = {};
+      int32_t x = {};
+      int32_t y = {};
+    } run = {};
+  } gpu_to_cpu_transfer = {};
 
   core_t(bool log_enabled);
 
@@ -112,26 +112,26 @@ class core_t final
   void vram_transfer_write(uint16_t data);
 
   struct color_t {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
+    uint8_t r = {};
+    uint8_t g = {};
+    uint8_t b = {};
   };
 
   struct point_t {
-    int32_t x;
-    int32_t y;
+    int32_t x = {};
+    int32_t y = {};
   };
 
   struct tev_t {
     // from 'palette'
-    int32_t palette_page_x;
-    int32_t palette_page_y;
+    int32_t palette_page_x = {};
+    int32_t palette_page_y = {};
 
     // from 'texpage'
-    int32_t texture_colors;
-    int32_t texture_page_x;
-    int32_t texture_page_y;
-    int32_t color_mix_mode;
+    int32_t texture_colors = {};
+    int32_t texture_page_x = {};
+    int32_t texture_page_y = {};
+    int32_t color_mix_mode = {};
   };
 
   void copy_vram_to_vram();
@@ -171,11 +171,11 @@ class core_t final
   // triangle drawing
 
   struct triangle_t {
-    core_t::color_t colors[3];
-    core_t::point_t coords[3];
-    core_t::point_t points[3];
+    core_t::color_t colors[3] = {};
+    core_t::point_t coords[3] = {};
+    core_t::point_t points[3] = {};
 
-    core_t::tev_t tev;
+    core_t::tev_t tev = {};
   };
 
   void draw_triangle(uint32_t command, const triangle_t &triangle);

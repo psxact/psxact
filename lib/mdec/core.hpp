@@ -36,24 +36,25 @@ class core_t final
   block_t block;
   command_t command;
 
-  util::fifo_t<uint8_t, 6> data_in;
-  util::fifo_t<uint8_t, 6> data_out;
+  util::fifo_t<uint8_t, 6> data_in = {};
+  util::fifo_t<uint8_t, 6> data_out = {};
 
-  uint32_t output_depth;
-  bool output_signed;
-  bool output_bit15;
+  uint32_t output_depth = {};
+  bool output_signed = {};
+  bool output_bit15 = {};
 
   struct {
-    uint32_t index;
-    uint32_t total;
-  } parameter;
+    uint32_t index = {};
+    uint32_t total = {};
+  } parameter = {};
 
-  uint8_t light_tab[64];
-  uint8_t color_tab[64];
-  int16_t scale_tab[64];
+  uint8_t light_tab[64] = {};
+  uint8_t color_tab[64] = {};
+  int16_t scale_tab[64] = {};
 
-  bool enable_data_in;
-  bool enable_data_out;
+  bool command_busy = {};
+  bool enable_data_in = {};
+  bool enable_data_out = {};
 
  public:
   core_t(bool log_enabled);
@@ -64,13 +65,13 @@ class core_t final
   void send_light_tab(int n, uint32_t data);
   void send_scale_tab(int n, uint32_t data);
 
-  uint32_t io_read_word(uint32_t address);
-  void io_write_word(uint32_t address, uint32_t data);
+  uint32_t io_read_word(uint32_t address) override;
+  void io_write_word(uint32_t address, uint32_t data) override;
 
-  int dma_speed();
-  bool dma_ready();
-  uint32_t dma_read();
-  void dma_write(uint32_t val);
+  int dma_speed() override;
+  bool dma_ready() override;
+  uint32_t dma_read() override;
+  void dma_write(uint32_t val) override;
 };
 
 }  // namespace psx::mdec

@@ -10,7 +10,7 @@ addressable_t::addressable_t(const char *name, bool log_enabled)
   , log_enabled(log_enabled) {
 }
 
-void addressable_t::log(const char *format, ...) {
+void addressable_t::log(const char *format, ...) const {
   va_list arg;
 
   if (log_enabled) {

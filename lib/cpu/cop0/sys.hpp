@@ -28,7 +28,7 @@ enum class exception_t {
 };
 
 class sys_t : public cop_t {
-  uint32_t regs[16];
+  uint32_t regs[16] = {};
 
  public:
   void run(uint32_t n);

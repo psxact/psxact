@@ -20,12 +20,12 @@ namespace psx::timer {
   };
 
   class core_t final : public addressable_t {
-    interruptible_t *irq { nullptr };
-    timer_t timers[3] { };
-    int prescale_system_over_8 { 0 };
+    interruptible_t &irq;
+    timer_t timers[3] = {};
+    int prescale_system_over_8 = {};
 
   public:
-    explicit core_t(interruptible_t *irq, bool log_enabled);
+    explicit core_t(interruptible_t &irq, bool log_enabled);
 
     void run(int amount);
 

@@ -9,10 +9,10 @@ namespace psx::bios {
 
 class decoder_t final {
  private:
-  addressable_t *memory;
+  addressable_t &memory;
 
  public:
-  explicit decoder_t(addressable_t *memory);
+  explicit decoder_t(addressable_t &memory);
 
   void decode_a(uint32_t pc, uint32_t function, uint32_t *args);
 

@@ -4,15 +4,8 @@
 
 using namespace psx::input;
 
-core_t::core_t(interruptible_t *irq, bool log_enabled)
+core_t::core_t(interruptible_t &irq, bool log_enabled)
   : addressable_t("input", log_enabled)
-  , baud()
-  , dsr()
-  , rx()
-  , tx()
-  , port()
-  , bit()
-  , interrupt()
   , irq(irq) {
   port.memcard[0] = &device_t::not_connected;
   port.control[0] = new devices::digital_pad_t();
@@ -216,6 +209,6 @@ void core_t::send_interrupt() {
     log("sending interrupt");
 
     interrupt = 1;
-    irq->interrupt(interrupt_type_t::input);
+    irq.interrupt(interrupt_type_t::input);
   }
 }

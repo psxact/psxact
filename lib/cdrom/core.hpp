@@ -22,58 +22,58 @@ struct sector_timecode_t {
 class core_t final
     : public addressable_t
     , public dma_comms_t {
-  interruptible_t *irq;
+  interruptible_t &irq;
 
-  int32_t index;
-  int32_t interrupt_enable;
-  int32_t interrupt_request;
-  int32_t interrupt_timer;
+  int32_t index = {};
+  int32_t interrupt_enable = {};
+  int32_t interrupt_request = {};
+  int32_t interrupt_timer = {};
 
-  sector_timecode_t seek_timecode;
-  sector_timecode_t read_timecode;
-  bool seek_unprocessed;
+  sector_timecode_t seek_timecode = {};
+  sector_timecode_t read_timecode = {};
+  bool seek_unprocessed = {};
 
-  fifo_t<uint8_t, 4> parameter_fifo;
-  fifo_t<uint8_t, 4> response_fifo;
-  uint8_t rx_buffer[4096];
-  uint16_t rx_index;
-  uint16_t rx_len;
-  bool rx_active;
+  fifo_t<uint8_t, 4> parameter_fifo = {};
+  fifo_t<uint8_t, 4> response_fifo = {};
+  uint8_t rx_buffer[4096] = {};
+  uint16_t rx_index = {};
+  uint16_t rx_len = {};
+  bool rx_active = {};
 
-  uint8_t command;
-  bool command_unprocessed;
-  bool busy;
-  bool is_seeking;
-  bool is_reading;
+  uint8_t command = {};
+  bool command_unprocessed = {};
+  bool busy = {};
+  bool is_seeking = {};
+  bool is_reading = {};
 
-  std::string game_file_name;
-  FILE *game_file;
+  std::string game_file_name = {};
+  FILE *game_file = {};
 
   typedef void (core_t:: *stage_t)();
 
   struct {
-    stage_t stage;
-    int32_t timer;
+    stage_t stage = {};
+    int32_t timer = {};
 
-    int32_t interrupt_request;
+    int32_t interrupt_request = {};
 
-    fifo_t<uint8_t, 4> parameter_fifo;
-    fifo_t<uint8_t, 4> response_fifo;
-    uint8_t command;
-  } logic;
-
-  struct {
-    stage_t stage;
-    int32_t timer;
-  } drive;
+    fifo_t<uint8_t, 4> parameter_fifo = {};
+    fifo_t<uint8_t, 4> response_fifo = {};
+    uint8_t command = {};
+  } logic = {};
 
   struct {
-    bool double_speed;
-    bool read_whole_sector;
-  } mode;
+    stage_t stage = {};
+    int32_t timer = {};
+  } drive = {};
+
+  struct {
+    bool double_speed = {};
+    bool read_whole_sector = {};
+  } mode = {};
 
  public:
-  core_t(interruptible_t *irq, const char *game_file_name, bool log_enabled);
+  core_t(interruptible_t &irq, const char *game_file_name, bool log_enabled);
 
   int dma_speed();
 

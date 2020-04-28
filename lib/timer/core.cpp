@@ -27,7 +27,7 @@
 
 using namespace psx::timer;
 
-core_t::core_t(interruptible_t *irq, bool log_enabled)
+core_t::core_t(interruptible_t &irq, bool log_enabled)
   : addressable_t("timer", log_enabled)
   , irq(irq) {
 }
@@ -113,9 +113,9 @@ void core_t::timer_irq(int n) {
 
     // Interrupts are enabled, and we had a falling-edge of bit10.
     switch (n) {
-      case 0: irq->interrupt(interrupt_type_t::timer0); break;
-      case 1: irq->interrupt(interrupt_type_t::timer1); break;
-      case 2: irq->interrupt(interrupt_type_t::timer2); break;
+      case 0: irq.interrupt(interrupt_type_t::timer0); break;
+      case 1: irq.interrupt(interrupt_type_t::timer1); break;
+      case 2: irq.interrupt(interrupt_type_t::timer2); break;
     }
   }
 
