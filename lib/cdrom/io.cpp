@@ -20,7 +20,7 @@ uint32_t core_t::dma_read() {
     (io_read_byte(0x1f801802) << (8 * 3));
 }
 
-void core_t::dma_write(uint32_t val) {
+void core_t::dma_write(uint32_t) {
 }
 
 uint8_t core_t::io_read_byte(uint32_t address) {

@@ -13,14 +13,11 @@ core_t::core_t(interruptible_t &irq, bool log_enabled)
   port.control[1] = &device_t::not_connected;
 }
 
-void core_t::frame() {
-  for (device_t *memcard : port.memcard) {
-    memcard->frame();
-  }
-
-  for (device_t *control : port.control) {
-    control->frame();
-  }
+void core_t::latch(const host_device_t &device1, const host_device_t &device2) {
+  port.memcard[0]->latch(device1);
+  port.memcard[1]->latch(device2);
+  port.control[0]->latch(device1);
+  port.control[1]->latch(device2);
 }
 
 void core_t::tick(int amount) {

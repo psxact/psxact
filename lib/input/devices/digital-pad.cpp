@@ -1,33 +1,26 @@
 #include "input/devices/digital-pad.hpp"
-#include <SDL2/SDL.h>
 
+using namespace psx::input;
 using namespace psx::input::devices;
 
-void digital_pad_t::frame() {
-  int numkeys;
-
-  if (const uint8_t *keys = SDL_GetKeyboardState(&numkeys)) {
-    bits =
-      ( keys[SDL_SCANCODE_RSHIFT] <<  0 ) | // 0   Select Button    (0=Pressed, 1=Released)
-      ( 0                         <<  1 ) | // 1   L3/Joy-button    (0=Pressed, 1=Released/None/Disabled) ;analog mode only
-      ( 0                         <<  2 ) | // 2   R3/Joy-button    (0=Pressed, 1=Released/None/Disabled) ;analog mode only
-      ( keys[SDL_SCANCODE_RETURN] <<  3 ) | // 3   Start Button     (0=Pressed, 1=Released)
-      ( keys[SDL_SCANCODE_UP]     <<  4 ) | // 4   Joypad Up        (0=Pressed, 1=Released)
-      ( keys[SDL_SCANCODE_RIGHT]  <<  5 ) | // 5   Joypad Right     (0=Pressed, 1=Released)
-      ( keys[SDL_SCANCODE_DOWN]   <<  6 ) | // 6   Joypad Down      (0=Pressed, 1=Released)
-      ( keys[SDL_SCANCODE_LEFT]   <<  7 ) | // 7   Joypad Left      (0=Pressed, 1=Released)
-      ( keys[SDL_SCANCODE_1]      <<  8 ) | // 8   L2 Button        (0=Pressed, 1=Released) (Lower-left shoulder)
-      ( keys[SDL_SCANCODE_3]      <<  9 ) | // 9   R2 Button        (0=Pressed, 1=Released) (Lower-right shoulder)
-      ( keys[SDL_SCANCODE_Q]      << 10 ) | // 10  L1 Button        (0=Pressed, 1=Released) (Upper-left shoulder)
-      ( keys[SDL_SCANCODE_E]      << 11 ) | // 11  R1 Button        (0=Pressed, 1=Released) (Upper-right shoulder)
-      ( keys[SDL_SCANCODE_W]      << 12 ) | // 12  /\ Button        (0=Pressed, 1=Released) (Triangle, upper button)
-      ( keys[SDL_SCANCODE_D]      << 13 ) | // 13  () Button        (0=Pressed, 1=Released) (Circle, right button)
-      ( keys[SDL_SCANCODE_X]      << 14 ) | // 14  >< Button        (0=Pressed, 1=Released) (Cross, lower button)
-      ( keys[SDL_SCANCODE_A]      << 15 ) ; // 15  [] Button        (0=Pressed, 1=Released) (Square, left button)
-  }
-  else {
-    bits = 0;
-  }
+void digital_pad_t::latch(const host_device_t &device) {
+  bits =
+    (int(device.select)               <<  0) |
+    (0                                <<  1) | // 1   L3/Joy-button ; analog mode only
+    (0                                <<  2) | // 2   R3/Joy-button ; analog mode only
+    (int(device.start)                <<  3) |
+    (int(device.dpad_up)              <<  4) |
+    (int(device.dpad_right)           <<  5) |
+    (int(device.dpad_down)            <<  6) |
+    (int(device.dpad_left)            <<  7) |
+    (int(device.left_back_shoulder)   <<  8) |
+    (int(device.right_back_shoulder)  <<  9) |
+    (int(device.left_front_shoulder)  << 10) |
+    (int(device.right_front_shoulder) << 11) |
+    (int(device.button_3)             << 12) |
+    (int(device.button_2)             << 13) |
+    (int(device.button_0)             << 14) |
+    (int(device.button_1)             << 15);
 
   bits ^= 0xffff;
 }

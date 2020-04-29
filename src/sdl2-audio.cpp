@@ -1,7 +1,5 @@
 #include "sdl2-audio.hpp"
 
-#include <cassert>
-
 using namespace psx;
 
 constexpr int sample_rate = 44100;
@@ -11,8 +9,6 @@ sdl2_audio_t::sdl2_audio_t()
   : device_id()
   , want()
   , have() {
-
-  SDL_Init(SDL_INIT_AUDIO);
 
   want.freq = sample_rate;
   want.format = AUDIO_S16;
@@ -34,6 +30,6 @@ sdl2_audio_t::~sdl2_audio_t() {
   SDL_CloseAudioDevice(device_id);
 }
 
-bool sdl2_audio_t::render(int16_t *sound_buffer, int len) {
-  return SDL_QueueAudio(device_id, sound_buffer, len * sizeof(int16_t)) == 0;
+bool sdl2_audio_t::render(psx::output_params_audio_t &params) {
+  return SDL_QueueAudio(device_id, params.buffer, params.buffer_len * sizeof(int16_t)) == 0;
 }

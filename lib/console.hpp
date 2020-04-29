@@ -10,6 +10,7 @@
 #include "exp/expansion3.hpp"
 #include "gpu/core.hpp"
 #include "input/core.hpp"
+#include "input/host-device.hpp"
 #include "mdec/core.hpp"
 #include "spu/core.hpp"
 #include "timer/core.hpp"
@@ -19,6 +20,27 @@
 #include "memory.hpp"
 
 namespace psx {
+
+struct input_params_t {
+  psx::input::host_device_t device1;
+  psx::input::host_device_t device2;
+};
+
+struct output_params_audio_t {
+  int16_t *buffer;
+  int32_t buffer_len;
+};
+
+struct output_params_video_t {
+  uint16_t *buffer;
+  int32_t width;
+  int32_t height;
+};
+
+struct output_params_t {
+  output_params_audio_t audio;
+  output_params_video_t video;
+};
 
 class console_t final
   : public addressable_t
@@ -51,28 +73,21 @@ class console_t final
   void interrupt(interrupt_type_t flag);
 
   uint8_t io_read_byte(uint32_t address);
-
   uint16_t io_read_half(uint32_t address);
-
   uint32_t io_read_word(uint32_t address);
 
   void io_write_byte(uint32_t address, uint8_t data);
-
   void io_write_half(uint32_t address, uint16_t data);
-
   void io_write_word(uint32_t address, uint32_t data);
 
-  void run_for_one_frame();
-
-  void get_audio_params(int16_t **sound, int *len);
-
-  void get_video_params(uint16_t **vram, int *w, int *h);
+  void run_for_one_frame(input_params_t &input, output_params_t &output);
 
  private:
+  void get_audio_params(int16_t **sound, int *len);
+  void get_video_params(uint16_t **vram, int *w, int *h);
+
   addressable_t *decode(uint32_t address);
-
   uint32_t read_memory_control(int size, uint32_t address);
-
   void write_memory_control(int size, uint32_t address, uint32_t data);
 
   void load_exe(const char *game_file_name);

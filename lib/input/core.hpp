@@ -2,6 +2,7 @@
 #define INPUT_CORE_HPP_
 
 #include "input/device.hpp"
+#include "input/host-device.hpp"
 #include "util/fifo.hpp"
 #include "addressable.hpp"
 #include "interruptible.hpp"
@@ -53,21 +54,17 @@ class core_t final : public addressable_t {
  public:
   explicit core_t(interruptible_t &irq, bool log_enabled);
 
-  void frame();
+  void latch(const host_device_t &device1, const host_device_t &device2);
 
   void tick(int amount);
 
-  uint8_t io_read_byte(uint32_t address);
+  uint8_t io_read_byte(uint32_t address) override;
+  uint16_t io_read_half(uint32_t address) override;
+  uint32_t io_read_word(uint32_t address) override;
 
-  uint16_t io_read_half(uint32_t address);
-
-  uint32_t io_read_word(uint32_t address);
-
-  void io_write_byte(uint32_t address, uint8_t data);
-
-  void io_write_half(uint32_t address, uint16_t data);
-
-  void io_write_word(uint32_t address, uint32_t data);
+  void io_write_byte(uint32_t address, uint8_t data) override;
+  void io_write_half(uint32_t address, uint16_t data) override;
+  void io_write_word(uint32_t address, uint32_t data) override;
 
  private:
   void write_rx(uint8_t data);

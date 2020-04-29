@@ -1,8 +1,9 @@
-#ifndef SDL2_HPP_
-#define SDL2_HPP_
+#ifndef SDL2_VIDEO_HPP_
+#define SDL2_VIDEO_HPP_
 
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
+#include "console.hpp"
 
 namespace psx {
 
@@ -17,7 +18,7 @@ namespace psx {
     sdl2_video_t();
     ~sdl2_video_t();
 
-    bool render(uint16_t *src_pixels, int w, int h);
+    bool render(psx::output_params_video_t &params);
 
   private:
     bool handle_events();
@@ -26,4 +27,4 @@ namespace psx {
   };
 }  // namespace psx
 
-#endif  // SDL2_HPP_
+#endif  // SDL2_VIDEO_HPP_

@@ -1,7 +1,5 @@
 #include "sdl2-video.hpp"
 
-#include <cstdio>
-
 using namespace psx;
 
 static constexpr int window_width = 640;
@@ -13,7 +11,6 @@ sdl2_video_t::sdl2_video_t()
   , texture()
   , texture_size_x(window_width)
   , texture_size_y(window_height) {
-  SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
 
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 
@@ -44,19 +41,20 @@ sdl2_video_t::~sdl2_video_t() {
   SDL_DestroyTexture(texture);
 }
 
-bool sdl2_video_t::render(uint16_t *src_pixels, int w, int h) {
-  resize(w, h);
+bool sdl2_video_t::render(psx::output_params_video_t &params) {
+  resize(params.width, params.height);
 
   void *dst_pixels = nullptr;
   int dst_pitch = 0;
+  void *src_pixels = params.buffer;
   int src_pitch = 1024 * sizeof(uint16_t);
 
   if (SDL_LockTexture(texture, nullptr, &dst_pixels, &dst_pitch) == 0) {
     uint16_t *dst = reinterpret_cast<uint16_t *>(dst_pixels);
     uint16_t *src = reinterpret_cast<uint16_t *>(src_pixels);
 
-    for (int py = 0; py < h; py++) {
-      for (int px = 0; px < w; px++) {
+    for (int py = 0; py < params.height; py++) {
+      for (int px = 0; px < params.width; px++) {
         dst[px] = src[px];
       }
 

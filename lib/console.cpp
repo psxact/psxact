@@ -232,19 +232,30 @@ void console_t::io_write_word(uint32_t address, uint32_t data) {
     : write_memory_control(4, address, data);
 }
 
-void console_t::run_for_one_frame() {
-  int amount;
+void console_t::run_for_one_frame(input_params_t &i, output_params_t &o) {
+  input->latch(i.device1, i.device2);
 
-  do {
-    amount = cpu->tick() + dma->tick();
+  while (1) {
+    int amount = cpu->tick() + dma->tick();
 
     spu->run(amount);
     timer->run(amount);
     cdrom->tick(amount);
     input->tick(amount);
-  } while (!gpu->run(amount));
 
-  input->frame();
+    if (gpu->run(amount)) {
+      break;
+    }
+  }
+
+  get_audio_params(
+    &o.audio.buffer,
+    &o.audio.buffer_len);
+
+  get_video_params(
+    &o.video.buffer,
+    &o.video.width,
+    &o.video.height);
 }
 
 void console_t::get_audio_params(int16_t **sound, int *len) {

@@ -81,6 +81,9 @@ void core_t::io_write_half(uint32_t address, uint16_t data) {
       ram.write(ram_address, data);
       ram_address++;
       break;
+
+    default:
+      break;
   }
 }
 

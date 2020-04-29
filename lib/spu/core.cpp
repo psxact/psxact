@@ -1,9 +1,9 @@
 #include "spu/core.hpp"
 
 #include <cassert>
-#include <SDL2/SDL.h>
 #include "util/int.hpp"
 #include "util/uint.hpp"
+#include "timing.hpp"
 
 using namespace psx::spu;
 using namespace psx::util;
@@ -35,8 +35,8 @@ void core_t::put_status_register() {
 void core_t::run(int amount) {
   prescaler += amount;
 
-  while (prescaler >= 0x300) {
-    prescaler -= 0x300;
+  while (prescaler >= SPU_DIVIDER) {
+    prescaler -= SPU_DIVIDER;
     tick();
   }
 }

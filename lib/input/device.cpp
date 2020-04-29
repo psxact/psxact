@@ -4,7 +4,7 @@ using namespace psx::input;
 
 device_t device_t::not_connected = device_t();
 
-void device_t::frame() {
+void device_t::latch(const host_device_t &) {
 }
 
 int device_t::send(int) {

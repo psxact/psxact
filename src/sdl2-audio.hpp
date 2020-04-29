@@ -2,6 +2,7 @@
 #define SDL2_AUDIO_HPP_
 
 #include <SDL2/SDL.h>
+#include "console.hpp"
 
 namespace psx {
 
@@ -14,7 +15,7 @@ namespace psx {
     sdl2_audio_t();
     ~sdl2_audio_t();
 
-    bool render(int16_t *audio_buffer, int length);
+    bool render(psx::output_params_audio_t &params);
   };
 }  // namespace psx
 

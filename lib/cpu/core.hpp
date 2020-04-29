@@ -2,7 +2,6 @@
 #define CPU_CORE_HPP_
 
 #include <cstdio>
-#include "bios/decoder.hpp"
 #include "cpu/cop.hpp"
 #include "cpu/cop0/sys.hpp"
 #include "cpu/cop2/gte.hpp"

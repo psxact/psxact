@@ -14,7 +14,7 @@ class digital_pad_t : public device_t {
   uint8_t tx_buffer = {0xff};
 
  public:
-  void frame() override;
+  void latch(const host_device_t &device) override;
   int send(int request) override;
   void set_dtr(bool next_dtr) override;
 };

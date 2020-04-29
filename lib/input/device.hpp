@@ -2,6 +2,7 @@
 #define INPUT_DEVICE_HPP_
 
 #include <cstdint>
+#include "input/host-device.hpp"
 
 namespace psx::input {
 
@@ -31,7 +32,7 @@ class device_t {
 
   device_dsr_t tick(int amount, device_dsr_t dsr);
 
-  virtual void frame();
+  virtual void latch(const host_device_t &device);
   virtual int send(int request);
   virtual void set_dtr(bool next_dtr);
 };
