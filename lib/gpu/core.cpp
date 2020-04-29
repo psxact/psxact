@@ -25,8 +25,20 @@ bool core_t::run(int amount) {
 }
 
 bool core_t::tick(int amount) {
-  constexpr int VBLANK_START = 241 * 3413;
-  constexpr int VBLANK_END = 263 * 3413;
+  constexpr double NTSC_COLOR_CARRIER = 3'579'545.454545455;
+  constexpr double NTSC_SCANLINE = 227.5;
+  constexpr double NTSC_SCANLINE_FREQ = NTSC_COLOR_CARRIER / NTSC_SCANLINE;
+  constexpr double NTSC_LINES_PER_FIELD = 262.5;
+  constexpr double NTSC_LINES_PER_FRAME = 525;
+
+  constexpr double GPU_FREQ = 53'222'400.0;
+  constexpr double GPU_LINE_LENGTH = GPU_FREQ / NTSC_SCANLINE_FREQ;
+
+  constexpr double FRAME_RATE = (GPU_FREQ / GPU_LINE_LENGTH) / NTSC_LINES_PER_FRAME;
+  constexpr double FIELD_RATE = (GPU_FREQ / GPU_LINE_LENGTH) / NTSC_LINES_PER_FIELD;
+
+  constexpr int VBLANK_START = int32_t(241 * GPU_LINE_LENGTH + 0.5);
+  constexpr int VBLANK_END = int32_t(262.5 * GPU_LINE_LENGTH + 0.5);
 
   assert(amount < VBLANK_END);
 

@@ -60,7 +60,7 @@ void core_t::timer_run(int n, int system, int system_over_8) {
       break;
 
     case timer_source_t::system_over_8:
-      counter += system;
+      counter += system_over_8;
       break;
 
     case timer_source_t::hblank:
@@ -77,7 +77,7 @@ void core_t::timer_run(int n, int system, int system_over_8) {
   target = timer.counter_target;
 
   if (timer.counter < target && counter >= target) {
-    if ((timer.control & (1 << 3)) == 0) counter %= target;
+    if ((timer.control & (1 << 3)) != 0) counter %= target;
     if ((timer.control & (1 << 4)) != 0) timer_irq(n); // 4     IRQ when Counter=Target (0=Disable, 1=Enable)
     timer.control |= (1 << 11);
   }
@@ -85,7 +85,7 @@ void core_t::timer_run(int n, int system, int system_over_8) {
   target = 0x10000;
 
   if (timer.counter < target && counter > target) {
-    if ((timer.control & (1 << 3)) != 0) counter %= target;
+    if ((timer.control & (1 << 3)) == 0) counter %= target;
     if ((timer.control & (1 << 5)) != 0) timer_irq(n); // 5     IRQ when Counter=FFFFh  (0=Disable, 1=Enable)
     timer.control |= (1 << 12);
   }
@@ -109,8 +109,6 @@ void core_t::timer_irq(int n) {
   }
 
   if (old_10 && !new_10) {
-    log("Sending interrupt for timer %d", n);
-
     // Interrupts are enabled, and we had a falling-edge of bit10.
     switch (n) {
       case 0: irq.interrupt(interrupt_type_t::timer0); break;
