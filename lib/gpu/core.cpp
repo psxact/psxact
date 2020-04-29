@@ -7,12 +7,26 @@ using namespace psx::gpu;
 
 core_t::core_t(irq_line_t irq, bool log_enabled)
   : addressable_t("gpu", log_enabled)
-  , irq(irq) {
+  , irq(irq)
+  , h_resolution(gpu_h_resolution_t::h256)
+  , v_resolution(gpu_v_resolution_t::v240) {
   vram = new memory_t< mib(1) >("vram");
 }
 
 core_t::~core_t() {
   delete vram;
+}
+
+uint16_t *core_t::get_video_buffer() const {
+  return (uint16_t *)video_buffer;
+}
+
+int32_t core_t::get_width() const {
+  return 640;
+}
+
+int32_t core_t::get_height() const {
+  return 480;
 }
 
 bool core_t::run(int amount) {
@@ -42,11 +56,50 @@ bool core_t::tick(int amount) {
 
   if (prev < VBLANK_END && next >= VBLANK_END) {
     irq(irq_line_state_t::clear);
-
-    // TODO: we just finished a field, should we toggle the field flag, and other book-keeping?
   }
 
-  return next >= VBLANK_END;
+  if (next >= VBLANK_END) {
+    render_field_to_buffer();
+    return true;
+  }
+
+  return false;
+}
+
+void core_t::render_field_to_buffer() {
+  int target_line = 0;
+
+  if (get_v_resolution() == gpu_v_resolution_t::v480) {
+    // 480i, draw the line specified by the line field flag
+    target_line = int(field);
+    field = field == gpu_field_t::even ? gpu_field_t::odd : gpu_field_t::even;
+  } else {
+    // 240p, always draw even lines
+    target_line = 0;
+  }
+
+  const int width = int(get_h_resolution());
+  const int height = 240;
+
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      video_buffer[(y * 2) + target_line][x] = vram_read(
+        display_area_x + x,
+        display_area_y + y);
+    }
+  }
+}
+
+uint32_t core_t::get_status() const {
+  return status;
+}
+
+gpu_h_resolution_t core_t::get_h_resolution() const {
+  return h_resolution;
+}
+
+gpu_v_resolution_t core_t::get_v_resolution() const {
+  return v_resolution;
 }
 
 int core_t::dma_speed() {

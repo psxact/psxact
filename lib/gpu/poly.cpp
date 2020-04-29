@@ -116,7 +116,7 @@ static core_t::tev_t get_tev(const core_t &core, uint32_t command) {
     result.color_mix_mode = (texpage >> 5) & 3;
   }
   else {
-    result.color_mix_mode = (core.status >> 5) & 3;
+    result.color_mix_mode = (core.get_status() >> 5) & 3;
   }
 
   return result;
@@ -235,7 +235,7 @@ void core_t::draw_triangle(uint32_t command, const triangle_t &triangle) {
         color_t color;
 
         if (get_color(command, triangle, w0, w1, w2, &color)) {
-          if ((command & (1 << 25)) != 0 && color.semi_transparent) {
+          if (command & (1 << 25)) {
             color_t bg = uint16_to_color(vram_read(point.x, point.y));
 
             switch (triangle.tev.color_mix_mode) {

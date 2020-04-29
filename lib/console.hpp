@@ -83,8 +83,8 @@ class console_t final
   void run_for_one_frame(input_params_t &input, output_params_t &output);
 
  private:
-  void get_audio_params(int16_t **sound, int *len);
-  void get_video_params(uint16_t **vram, int *w, int *h);
+  void get_audio_params(output_params_audio_t &params);
+  void get_video_params(output_params_video_t &params);
 
   addressable_t *decode(uint32_t address);
   uint32_t read_memory_control(int size, uint32_t address);

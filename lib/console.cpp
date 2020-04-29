@@ -248,33 +248,21 @@ void console_t::run_for_one_frame(input_params_t &i, output_params_t &o) {
     }
   }
 
-  get_audio_params(
-    &o.audio.buffer,
-    &o.audio.buffer_len);
-
-  get_video_params(
-    &o.video.buffer,
-    &o.video.width,
-    &o.video.height);
+  get_audio_params(o.audio);
+  get_video_params(o.video);
 }
 
-void console_t::get_audio_params(int16_t **sound, int *len) {
-  *sound = spu->get_sample_buffer();
-  *len = spu->get_sample_buffer_index();
+void console_t::get_audio_params(output_params_audio_t &params) {
+  params.buffer = spu->get_sample_buffer();
+  params.buffer_len = spu->get_sample_buffer_index();
 
   spu->reset_sample();
 }
 
-void console_t::get_video_params(uint16_t **vram, int *w, int *h) {
-  static const int w_lut[8] = { 256, 368, 320, 368, 512, 368, 640, 368 };
-  static const int h_lut[2] = { 240, 480 };
-
-  *w = w_lut[(gpu->status >> 16) & 7];
-  *h = h_lut[(gpu->status >> 19) & 1];
-
-  *vram = gpu->vram_data(
-    gpu->display_area_x,
-    gpu->display_area_y);
+void console_t::get_video_params(output_params_video_t &params) {
+  params.buffer = gpu->get_video_buffer();
+  params.width = int(gpu->get_h_resolution());
+  params.height = 480;
 }
 
 void console_t::load_exe(const char *game_file_name) {

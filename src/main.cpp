@@ -62,11 +62,6 @@ void run(psx::console_t *console) {
       break;
     }
 
-#if defined(FULL_VRAM)
-    o.video.width = 1024;
-    o.video.height = 512;
-#endif
-
     if (!video.render(o.video)) {
       printf("%s\n", SDL_GetError());
       break;

@@ -48,12 +48,30 @@ void core_t::gp1(uint32_t data) {
       display_area_y2 = uint_t<10>::trunc(data >> 10);
       break;
 
-    case 0x08:
+    case 0x08: {
+      if (data & (1 << 6)) {
+        h_resolution = gpu_h_resolution_t::h368;
+      } else {
+        switch (data & (3 << 0)) {
+          case 0: h_resolution = gpu_h_resolution_t::h256; break;
+          case 1: h_resolution = gpu_h_resolution_t::h320; break;
+          case 2: h_resolution = gpu_h_resolution_t::h512; break;
+          case 3: h_resolution = gpu_h_resolution_t::h640; break;
+        }
+      }
+
+      if ((data & (1 << 2)) && (data & (1 << 5))) {
+        v_resolution = gpu_v_resolution_t::v480;
+      } else {
+        v_resolution = gpu_v_resolution_t::v240;
+      }
+
       status &= ~0x7f4000;
       status |= (data << 17) & 0x7e0000;
-      status |= (data << 10) & 0x10000;
-      status |= (data << 7) & 0x4000;
+      status |= (data << 10) & 0x010000;
+      status |= (data <<  7) & 0x004000;
       break;
+    }
 
     case 0x10:
     case 0x11:

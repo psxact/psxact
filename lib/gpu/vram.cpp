@@ -2,10 +2,6 @@
 
 using namespace psx::gpu;
 
-uint16_t *core_t::vram_data(int x, int y) {
-  return static_cast<uint16_t *>(vram->get_pointer(vram_address(x, y)));
-}
-
 uint32_t core_t::vram_address(int x, int y) {
   return ((y * 1024) + x) * sizeof(uint16_t);
 }

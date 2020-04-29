@@ -9,6 +9,24 @@
 
 namespace psx::gpu {
 
+enum class gpu_h_resolution_t {
+  h256 = 256,
+  h320 = 320,
+  h368 = 368,
+  h512 = 512,
+  h640 = 640
+};
+
+enum class gpu_v_resolution_t {
+  v240 = 240,
+  v480 = 480
+};
+
+enum class gpu_field_t {
+  even,
+  odd
+};
+
 constexpr int GPU_GP0 = 0x1f801810;
 constexpr int GPU_GP1 = 0x1f801814;
 constexpr int GPU_READ = 0x1f801810;
@@ -21,11 +39,17 @@ class core_t final
   int prescaler = {};
   int counter = {};
 
+  gpu_h_resolution_t h_resolution = gpu_h_resolution_t::h256;
+  gpu_v_resolution_t v_resolution = gpu_v_resolution_t::v240;
+  gpu_field_t field = gpu_field_t::even;
+  uint16_t video_buffer[480][640];
+
+  uint32_t status = 0x14802000;
+
  public:
   memory_t< mib(1) > *vram;
 
   uint32_t data_latch = {};
-  uint32_t status = 0x14802000;
   uint32_t texture_window_mask_x = {};
   uint32_t texture_window_mask_y = {};
   uint32_t texture_window_offset_x = {};
@@ -78,16 +102,28 @@ class core_t final
   } gpu_to_cpu_transfer = {};
 
   core_t(irq_line_t irq, bool log_enabled);
-
   ~core_t();
 
+  // Interface for external video rendering
+
+  uint16_t *get_video_buffer() const;
+  int32_t get_width() const;
+  int32_t get_height() const;
+
   /// Called with the number of CPU cycles that have elapsed.
-  /// Returns true if a frame has elapsed, false otherwise.
+  /// Returns true if a field has elapsed, false otherwise.
   bool run(int amount);
 
   /// Called with the number of GPU cycles that have elapsed.
-  /// Returns true if a frame has elapsed, false otherwise.
+  /// Returns true if a field has elapsed, false otherwise.
   bool tick(int amount);
+
+  /// Called at the end of a field to draw the field into the video buffer.
+  void render_field_to_buffer();
+
+  uint32_t get_status() const;
+  gpu_h_resolution_t get_h_resolution() const;
+  gpu_v_resolution_t get_v_resolution() const;
 
   int dma_speed() override;
   bool dma_ready() override;
@@ -98,25 +134,18 @@ class core_t final
   void io_write_word(uint32_t address, uint32_t data) override;
 
   uint32_t data();
-
   uint32_t stat();
 
   void gp0(uint32_t data);
-
   void gp1(uint32_t data);
 
   void run_command();
 
   uint32_t vram_address(int x, int y);
-
-  uint16_t *vram_data(int x, int y);
-
   uint16_t vram_read(int x, int y);
-
   void vram_write(int x, int y, uint16_t data);
 
   uint16_t vram_transfer_read();
-
   void vram_transfer_write(uint16_t data);
 
   struct color_t {
@@ -143,19 +172,13 @@ class core_t final
   };
 
   void copy_vram_to_vram();
-
   void copy_wram_to_vram();
-
   void copy_vram_to_wram();
 
   void draw_point(point_t point, color_t color);
-
   void draw_line();
-
   void draw_polygon();
-
   void draw_rectangle();
-
   void fill_rectangle();
 
   // common functionality
@@ -165,11 +188,8 @@ class core_t final
   uint16_t color_to_uint16(const color_t &color);
 
   color_t get_texture_color__4bpp(const tev_t &tev, const point_t &coord);
-
   color_t get_texture_color__8bpp(const tev_t &tev, const point_t &coord);
-
   color_t get_texture_color_15bpp(const tev_t &tev, const point_t &coord);
-
   color_t get_texture_color(const tev_t &tev, const point_t &coord);
 
   // rectangle drawing

@@ -2,13 +2,8 @@
 
 using namespace psx;
 
-#if defined(FULL_VRAM)
-static constexpr int window_width = 1024;
-static constexpr int window_height = 512;
-#else
 static constexpr int window_width = 640;
 static constexpr int window_height = 480;
-#endif
 
 sdl2_video_t::sdl2_video_t()
   : window()
@@ -52,7 +47,7 @@ bool sdl2_video_t::render(psx::output_params_video_t &params) {
   void *dst_pixels = nullptr;
   int dst_pitch = 0;
   void *src_pixels = params.buffer;
-  int src_pitch = 1024 * sizeof(uint16_t);
+  int src_pitch = 640 * sizeof(uint16_t);
 
   if (SDL_LockTexture(texture, nullptr, &dst_pixels, &dst_pitch) == 0) {
     uint16_t *dst = reinterpret_cast<uint16_t *>(dst_pixels);
