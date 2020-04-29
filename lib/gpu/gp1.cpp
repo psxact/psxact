@@ -16,8 +16,7 @@ void core_t::gp1(uint32_t data) {
       break;
 
     case 0x01:
-      fifo.wr = 0;
-      fifo.rd = 0;
+      fifo.clear();
       break;
 
     case 0x02:

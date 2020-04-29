@@ -1,20 +1,31 @@
 #include <csignal>
 #include <cstdio>
+#include <execinfo.h>
 #include "args.hpp"
 #include "console.hpp"
 #include "sdl2-audio.hpp"
 #include "sdl2-video.hpp"
 #include "sdl2-input.hpp"
 
-void signal_handler(int) {
-  exit(0);
+void signal_handler(int sig) {
+  void *array[10];
+  size_t size;
+
+  // get void*'s for all entries on the stack
+  size = backtrace(array, 10);
+
+  // print out all the frames to stderr
+  fprintf(stderr, "Error: signal %d:\n", sig);
+  backtrace_symbols_fd(array, size, 2);
+  exit(1);
 }
 
 void run(psx::console_t *console);
 void run_headless(psx::console_t *console);
 
 int main(int argc, char *argv[]) {
-  signal(SIGINT, signal_handler);
+  signal(SIGABRT, signal_handler);
+  signal(SIGSEGV, signal_handler);
 
   SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
 
@@ -50,6 +61,11 @@ void run(psx::console_t *console) {
       printf("%s\n", SDL_GetError());
       break;
     }
+
+#if defined(FULL_VRAM)
+    o.video.width = 1024;
+    o.video.height = 512;
+#endif
 
     if (!video.render(o.video)) {
       printf("%s\n", SDL_GetError());

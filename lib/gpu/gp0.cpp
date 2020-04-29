@@ -29,18 +29,20 @@ static int command_size[256] = {
 };
 
 void core_t::fill_rectangle() {
+  assert(fifo.size() == 3);
+
   uint16_t color =
-    ((fifo.buffer[0] >> 3) & 0x001f) |
-    ((fifo.buffer[0] >> 6) & 0x03e0) |
-    ((fifo.buffer[0] >> 9) & 0x7c00);
+    ((fifo.at(0) >> 3) & 0x001f) |
+    ((fifo.at(0) >> 6) & 0x03e0) |
+    ((fifo.at(0) >> 9) & 0x7c00);
 
   point_t point;
-  point.x = (fifo.buffer[1] + 0x0) & 0x3f0;
-  point.y = (fifo.buffer[1] >> 16) & 0x1ff;
+  point.x = (fifo.at(1) + 0x0) & 0x3f0;
+  point.y = (fifo.at(1) >> 16) & 0x1ff;
 
   point_t count;
-  count.x = (fifo.buffer[2] + 0xf) & 0x7f0;
-  count.y = (fifo.buffer[2] >> 16) & 0x1ff;
+  count.x = (fifo.at(2) + 0xf) & 0x7f0;
+  count.y = (fifo.at(2) >> 16) & 0x1ff;
 
   for (int y = 0; y < count.y; y++) {
     for (int x = 0; x < count.x; x++) {
@@ -55,11 +57,13 @@ void core_t::fill_rectangle() {
 void core_t::copy_vram_to_vram() {}
 
 void core_t::copy_wram_to_vram() {
+  assert(fifo.size() == 3);
+
   auto &transfer = cpu_to_gpu_transfer;
-  transfer.reg.x = fifo.buffer[1] & 0xffff;
-  transfer.reg.y = fifo.buffer[1] >> 16;
-  transfer.reg.w = fifo.buffer[2] & 0xffff;
-  transfer.reg.h = fifo.buffer[2] >> 16;
+  transfer.reg.x = fifo.at(1) & 0xffff;
+  transfer.reg.y = fifo.at(1) >> 16;
+  transfer.reg.w = fifo.at(2) & 0xffff;
+  transfer.reg.h = fifo.at(2) >> 16;
 
   transfer.run.x = 0;
   transfer.run.y = 0;
@@ -67,11 +71,13 @@ void core_t::copy_wram_to_vram() {
 }
 
 void core_t::copy_vram_to_wram() {
+  assert(fifo.size() == 3);
+
   auto &transfer = gpu_to_cpu_transfer;
-  transfer.reg.x = fifo.buffer[1] & 0xffff;
-  transfer.reg.y = fifo.buffer[1] >> 16;
-  transfer.reg.w = fifo.buffer[2] & 0xffff;
-  transfer.reg.h = fifo.buffer[2] >> 16;
+  transfer.reg.x = fifo.at(1) & 0xffff;
+  transfer.reg.y = fifo.at(1) >> 16;
+  transfer.reg.w = fifo.at(2) & 0xffff;
+  transfer.reg.h = fifo.at(2) >> 16;
 
   transfer.run.x = 0;
   transfer.run.y = 0;
@@ -90,79 +96,84 @@ void core_t::gp0(uint32_t data) {
     return;
   }
 
-  fifo.buffer[fifo.wr] = data;
-  fifo.wr = (fifo.wr + 1) & 0xf;
+  fifo.write(data);
 
-  uint32_t command = fifo.buffer[0] >> 24;
+  uint32_t command = fifo.at(0) >> 24;
 
-  if (fifo.wr == command_size[command]) {
-    fifo.wr = 0;
+  if (fifo.size() == command_size[command]) {
+    run_command();
+    fifo.clear();
+  }
+}
 
-    switch (command & 0xe0) {
-      case 0x20:
-        return draw_polygon();
+void core_t::run_command() {
+  uint32_t command = fifo.at(0) >> 24;
 
-      case 0x40:
-        return draw_line();
+  switch (command & 0xe0) {
+    case 0x20:
+      return draw_polygon();
 
-      case 0x60:
-        return draw_rectangle();
+    case 0x40:
+      return draw_line();
 
-      case 0x80:
-        return copy_vram_to_vram();
+    case 0x60:
+      return draw_rectangle();
 
-      case 0xa0:
-        return copy_wram_to_vram();
+    case 0x80:
+      return copy_vram_to_vram();
 
-      case 0xc0:
-        return copy_vram_to_wram();
-      }
+    case 0xa0:
+      return copy_wram_to_vram();
 
-      switch (command) {
-      case 0x00:  // nop
-        break;
-
-      case 0x01:  // clear texture cache
-        break;
-
-      case 0x02:
-        return fill_rectangle();
-
-      case 0xe1:
-        status &= ~0x87ff;
-        status |= (fifo.buffer[0] << 0) & 0x7ff;
-        status |= (fifo.buffer[0] << 4) & 0x8000;
-
-        textured_rectangle_x_flip = ((fifo.buffer[0] >> 12) & 1) != 0;
-        textured_rectangle_y_flip = ((fifo.buffer[0] >> 13) & 1) != 0;
-        break;
-
-      case 0xe2:
-        texture_window_mask_x = uint_t<5>::trunc(fifo.buffer[0] >> 0);
-        texture_window_mask_y = uint_t<5>::trunc(fifo.buffer[0] >> 5);
-        texture_window_offset_x = uint_t<5>::trunc(fifo.buffer[0] >> 10);
-        texture_window_offset_y = uint_t<5>::trunc(fifo.buffer[0] >> 15);
-        break;
-
-      case 0xe3:
-        drawing_area_x1 = (fifo.buffer[0] >> 0) & 0x3ff;
-        drawing_area_y1 = (fifo.buffer[0] >> 10) & 0x3ff;
-        break;
-
-      case 0xe4:
-        drawing_area_x2 = (fifo.buffer[0] >> 0) & 0x3ff;
-        drawing_area_y2 = (fifo.buffer[0] >> 10) & 0x3ff;
-        break;
-
-      case 0xe5:
-        x_offset = int_t<11>::trunc(fifo.buffer[0] >> 0);
-        y_offset = int_t<11>::trunc(fifo.buffer[0] >> 11);
-        break;
-
-      case 0xe6:
-        status &= ~0x1800;
-        status |= (fifo.buffer[0] << 11) & 0x1800;
-        break;
+    case 0xc0:
+      return copy_vram_to_wram();
     }
+
+    switch (command) {
+    case 0x00:  // nop
+      break;
+
+    case 0x01:  // clear texture cache
+      break;
+
+    case 0x02:
+      return fill_rectangle();
+
+    case 0xe1:
+      status &= ~0x87ff;
+      status |= (fifo.at(0) << 0) & 0x7ff;
+      status |= (fifo.at(0) << 4) & 0x8000;
+
+      textured_rectangle_x_flip = ((fifo.at(0) >> 12) & 1) != 0;
+      textured_rectangle_y_flip = ((fifo.at(0) >> 13) & 1) != 0;
+      break;
+
+    case 0xe2:
+      texture_window_mask_x = uint_t<5>::trunc(fifo.at(0) >> 0);
+      texture_window_mask_y = uint_t<5>::trunc(fifo.at(0) >> 5);
+      texture_window_offset_x = uint_t<5>::trunc(fifo.at(0) >> 10);
+      texture_window_offset_y = uint_t<5>::trunc(fifo.at(0) >> 15);
+      break;
+
+    case 0xe3:
+      assert(fifo.size() == 1);
+      drawing_area_x1 = (fifo.at(0) >> 0) & 0x3ff;
+      drawing_area_y1 = (fifo.at(0) >> 10) & 0x3ff;
+      break;
+
+    case 0xe4:
+      drawing_area_x2 = (fifo.at(0) >> 0) & 0x3ff;
+      drawing_area_y2 = (fifo.at(0) >> 10) & 0x3ff;
+      break;
+
+    case 0xe5:
+      x_offset = int_t<11>::trunc(fifo.at(0) >> 0);
+      y_offset = int_t<11>::trunc(fifo.at(0) >> 11);
+      break;
+
+    case 0xe6:
+      status &= ~0x1800;
+      status |= (fifo.at(0) << 11) & 0x1800;
+      break;
   }
 }

@@ -5,5 +5,5 @@
 using namespace psx::gpu;
 
 void core_t::draw_line() {
-  log("draw_line(0x%02x)", fifo.buffer[0] >> 24);
+  log("draw_line(0x%02x)", fifo.at(0) >> 24);
 }

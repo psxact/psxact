@@ -2,8 +2,13 @@
 
 using namespace psx;
 
+#if defined(FULL_VRAM)
+static constexpr int window_width = 1024;
+static constexpr int window_height = 512;
+#else
 static constexpr int window_width = 640;
 static constexpr int window_height = 480;
+#endif
 
 sdl2_video_t::sdl2_video_t()
   : window()

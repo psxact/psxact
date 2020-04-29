@@ -1,6 +1,7 @@
 #ifndef GPU_CORE_HPP_
 #define GPU_CORE_HPP_
 
+#include "util/fifo.hpp"
 #include "addressable.hpp"
 #include "dma-comms.hpp"
 #include "irq-line.hpp"
@@ -44,11 +45,7 @@ class core_t final
   bool textured_rectangle_x_flip = {};
   bool textured_rectangle_y_flip = {};
 
-  struct {
-    uint32_t buffer[16] = {};
-    int32_t wr = {};
-    int32_t rd = {};
-  } fifo = {};
+  psx::util::fifo_t< uint32_t, 4 > fifo = {};
 
   struct {
     struct {
@@ -107,6 +104,8 @@ class core_t final
   void gp0(uint32_t data);
 
   void gp1(uint32_t data);
+
+  void run_command();
 
   uint32_t vram_address(int x, int y);
 
