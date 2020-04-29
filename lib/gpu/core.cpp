@@ -162,23 +162,7 @@ void core_t::io_write_word(uint32_t address, uint32_t data) {
 
 // common functionality
 
-core_t::color_t core_t::uint16_to_color(uint16_t value) {
-  color_t color;
-  color.r = (value << 3) & 0xf8;
-  color.g = (value >> 2) & 0xf8;
-  color.b = (value >> 7) & 0xf8;
-
-  return color;
-}
-
-uint16_t core_t::color_to_uint16(const color_t &color) {
-  return
-    ((color.r >> 3) & 0x001f) |
-    ((color.g << 2) & 0x03e0) |
-    ((color.b << 7) & 0x7c00);
-}
-
-core_t::color_t core_t::get_texture_color__4bpp(const tev_t &tev, const point_t &coord) {
+color_t core_t::get_texture_color__4bpp(const tev_t &tev, const point_t &coord) {
   uint16_t texel = vram_read(
     tev.texture_page_x + coord.x / 4,
     tev.texture_page_y + coord.y);
@@ -189,10 +173,10 @@ core_t::color_t core_t::get_texture_color__4bpp(const tev_t &tev, const point_t 
     tev.palette_page_x + texel,
     tev.palette_page_y);
 
-  return uint16_to_color(pixel);
+  return color_t::from_uint16(pixel);
 }
 
-core_t::color_t core_t::get_texture_color__8bpp(const tev_t &tev, const point_t &coord) {
+color_t core_t::get_texture_color__8bpp(const tev_t &tev, const point_t &coord) {
   uint16_t texel = vram_read(
     tev.texture_page_x + coord.x / 2,
     tev.texture_page_y + coord.y);
@@ -203,18 +187,18 @@ core_t::color_t core_t::get_texture_color__8bpp(const tev_t &tev, const point_t 
     tev.palette_page_x + texel,
     tev.palette_page_y);
 
-  return uint16_to_color(pixel);
+  return color_t::from_uint16(pixel);
 }
 
-core_t::color_t core_t::get_texture_color_15bpp(const tev_t &tev, const point_t &coord) {
+color_t core_t::get_texture_color_15bpp(const tev_t &tev, const point_t &coord) {
   uint16_t pixel = vram_read(
     tev.texture_page_x + coord.x,
     tev.texture_page_y + coord.y);
 
-  return uint16_to_color(pixel);
+  return color_t::from_uint16(pixel);
 }
 
-core_t::color_t core_t::get_texture_color(const tev_t &tev, const point_t &coord) {
+color_t core_t::get_texture_color(const tev_t &tev, const point_t &coord) {
   switch (tev.texture_colors) {
   default:
   case 0:

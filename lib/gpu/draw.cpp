@@ -26,5 +26,5 @@ void core_t::draw_point(point_t point, color_t color) {
   color.g = uint_t<8>::clamp(color.g + dither);
   color.b = uint_t<8>::clamp(color.b + dither);
 
-  vram_write(point.x, point.y, color_to_uint16(color));
+  vram_write(point.x, point.y, color.to_uint16());
 }

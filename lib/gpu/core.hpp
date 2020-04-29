@@ -1,6 +1,7 @@
 #ifndef GPU_CORE_HPP_
 #define GPU_CORE_HPP_
 
+#include "gpu/color.hpp"
 #include "util/fifo.hpp"
 #include "addressable.hpp"
 #include "dma-comms.hpp"
@@ -148,12 +149,6 @@ class core_t final
   uint16_t vram_transfer_read();
   void vram_transfer_write(uint16_t data);
 
-  struct color_t {
-    uint8_t r = {};
-    uint8_t g = {};
-    uint8_t b = {};
-  };
-
   struct point_t {
     int32_t x = {};
     int32_t y = {};
@@ -183,10 +178,6 @@ class core_t final
 
   // common functionality
 
-  color_t uint16_to_color(uint16_t value);
-
-  uint16_t color_to_uint16(const color_t &color);
-
   color_t get_texture_color__4bpp(const tev_t &tev, const point_t &coord);
   color_t get_texture_color__8bpp(const tev_t &tev, const point_t &coord);
   color_t get_texture_color_15bpp(const tev_t &tev, const point_t &coord);
@@ -199,7 +190,7 @@ class core_t final
   // triangle drawing
 
   struct triangle_t {
-    core_t::color_t colors[3] = {};
+    color_t colors[3] = {};
     core_t::point_t coords[3] = {};
     core_t::point_t points[3] = {};
 

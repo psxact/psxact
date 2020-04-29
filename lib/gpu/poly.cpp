@@ -38,10 +38,10 @@ static int32_t get_coord_factor(uint32_t command) {
   return get_factor(coord_factor_lut, command);
 }
 
-static core_t::color_t decode_color(const core_t &core, int32_t n) {
+static color_t decode_color(const core_t &core, int32_t n) {
   uint32_t value = core.fifo.at(n);
 
-  core_t::color_t result;
+  color_t result;
 
   result.r = uint_t<8>::trunc(value >> (8 * 0));
   result.g = uint_t<8>::trunc(value >> (8 * 1));
@@ -72,7 +72,7 @@ static core_t::point_t decode_coord(const core_t &core, int32_t n) {
   return result;
 }
 
-static void get_colors(const core_t &core, uint32_t command, core_t::color_t *colors, int32_t n) {
+static void get_colors(const core_t &core, uint32_t command, color_t *colors, int32_t n) {
   int32_t factor = get_color_factor(command);
 
   for (int32_t i = 0; i < n; i++) {
@@ -137,8 +137,8 @@ static int32_t edge_function(const core_t::point_t &a, const core_t::point_t &b,
     ((a.y - b.y) * (c.x - b.x));
 }
 
-static core_t::color_t color_lerp(const core_t::color_t *c, int32_t w0, int32_t w1, int32_t w2) {
-  core_t::color_t color;
+static color_t color_lerp(const color_t *c, int32_t w0, int32_t w1, int32_t w2) {
+  color_t color;
   color.r = ((w0 * c[0].r) + (w1 * c[1].r) + (w2 * c[2].r)) / (w0 + w1 + w2);
   color.g = ((w0 * c[0].g) + (w1 * c[1].g) + (w2 * c[2].g)) / (w0 + w1 + w2);
   color.b = ((w0 * c[0].b) + (w1 * c[1].b) + (w2 * c[2].b)) / (w0 + w1 + w2);
@@ -156,7 +156,7 @@ static core_t::point_t point_lerp(const core_t::point_t *t, int32_t w0, int32_t 
 
 bool core_t::get_color(
   uint32_t command, const triangle_t &triangle,
-  int32_t w0, int32_t w1, int32_t w2, core_t::color_t *color) {
+  int32_t w0, int32_t w1, int32_t w2, color_t *color) {
   bool shaded = (command & (1 << 26)) == 0;
   bool blended = (command & (1 << 24)) != 0;
 
@@ -236,7 +236,7 @@ void core_t::draw_triangle(uint32_t command, const triangle_t &triangle) {
 
         if (get_color(command, triangle, w0, w1, w2, &color)) {
           if (command & (1 << 25)) {
-            color_t bg = uint16_to_color(vram_read(point.x, point.y));
+            color_t bg = color_t::from_uint16(vram_read(point.x, point.y));
 
             switch (triangle.tev.color_mix_mode) {
               case 0:
@@ -277,7 +277,7 @@ void core_t::draw_triangle(uint32_t command, const triangle_t &triangle) {
 }
 
 static void put_in_clockwise_order(
-  core_t::point_t *points, core_t::color_t *colors,
+  core_t::point_t *points, color_t *colors,
   core_t::point_t *coords, core_t::triangle_t *triangle) {
   int32_t indices[3];
 
