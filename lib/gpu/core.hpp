@@ -176,13 +176,13 @@ class core_t final
 
   // rectangle drawing
 
-  bool get_color(uint32_t command, color_t *color, const tev_t &tev, const texture_coord_t &coord);
+  bool get_color(gp0_command_t command, const color_t &shade, const texture_coord_t &coord, const tev_t &tev, color_t *color);
 
   // triangle drawing
 
-  void draw_triangle(uint32_t command, const triangle_t &triangle);
+  void draw_triangle(gp0_command_t command, const triangle_t &triangle);
 
-  bool get_color(uint32_t command, const triangle_t &triangle,
+  bool get_color(gp0_command_t command, const triangle_t &triangle,
     int32_t w0, int32_t w1, int32_t w2, color_t *color);
 };
 

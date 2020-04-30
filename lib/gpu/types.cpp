@@ -47,8 +47,34 @@ point_t point_t::from_uint24(uint32_t val) {
 
 texture_coord_t texture_coord_t::from_uint16(uint16_t val) {
   texture_coord_t coord;
-  coord.u = uint_t<8>::trunc(val >> 0);
+  coord.u = uint_t<8>::trunc(val);
   coord.v = uint_t<8>::trunc(val >> 8);
 
   return coord;
+}
+
+// gp0_command_t
+
+bool gp0_command_t::is_raw_texture() const {
+  return (command & (1 << 24)) != 0;
+}
+
+bool gp0_command_t::is_semi_transparent() const {
+  return (command & (1 << 25)) != 0;
+}
+
+bool gp0_command_t::is_texture_mapped() const {
+  return (command & (1 << 26)) != 0;
+}
+
+bool gp0_command_t::is_poly_line() const {
+  return (command & (1 << 27)) != 0;
+}
+
+bool gp0_command_t::is_quad_poly() const {
+  return (command & (1 << 27)) != 0;
+}
+
+bool gp0_command_t::is_gouraud_shaded() const {
+  return (command & (1 << 28)) != 0;
 }

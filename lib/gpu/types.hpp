@@ -49,6 +49,36 @@ namespace psx::gpu {
 
     tev_t tev = {};
   };
+
+  class gp0_command_t final {
+    uint32_t command;
+
+  public:
+    gp0_command_t(uint32_t command) : command(command) {}
+
+    /// Returns true if bit 24 of `command` is set, otherwise false.
+    bool is_raw_texture() const;
+
+    /// Returns true if bit 25 of `command` is set, otherwise false.
+    bool is_semi_transparent() const;
+
+    /// Returns true if bit 26 of `command` is set, otherwise false.
+    bool is_texture_mapped() const;
+
+    /// Returns true if bit 27 of `command` is set, otherwise false.
+    bool is_poly_line() const;
+
+    /// Returns true if bit 27 of `command` is set, otherwise false.
+    bool is_quad_poly() const;
+
+    /// Returns true if bit 28 of `command` is set, otherwise false.
+    bool is_gouraud_shaded() const;
+
+    /*
+      27-28 Rect Size   (0=Var, 1=1x1, 2=8x8, 3=16x16) (Rectangle only)
+      29-31 Primitive Type    (1=Polygon, 2=Line, 3=Rectangle)
+    */
+  };
 }
 
 #endif  // GPU_TYPES_HPP_

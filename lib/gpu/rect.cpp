@@ -52,27 +52,22 @@ static int32_t get_y_length(psx::util::fifo_t< uint32_t, 4 > &fifo) {
   }
 }
 
-bool core_t::get_color(uint32_t command, color_t *color, const tev_t &tev, const texture_coord_t &coord) {
-  bool textured = (command & (1 << 26)) != 0;
-  if (!textured) {
-    return true;
+bool core_t::get_color(gp0_command_t command, const color_t &shade, const texture_coord_t &coord, const tev_t &tev, color_t *out_color) {
+  if (command.is_texture_mapped()) {
+    auto color = get_texture_color(tev, coord);
+
+    if (command.is_raw_texture()) {
+      *out_color = color;
+    } else {
+      out_color->r = std::min(255, (color.r * shade.r) / 128);
+      out_color->g = std::min(255, (color.g * shade.g) / 128);
+      out_color->b = std::min(255, (color.b * shade.b) / 128);
+    }
+  } else {
+    *out_color = shade;
   }
 
-  color_t pixel = get_texture_color(tev, coord);
-
-  bool blended = (command & (1 << 24)) != 0;
-  if (blended) {
-    color->r = std::min(255, (pixel.r * color->r) / 2);
-    color->g = std::min(255, (pixel.g * color->g) / 2);
-    color->b = std::min(255, (pixel.b * color->b) / 2);
-  }
-  else {
-    color->r = pixel.r;
-    color->g = pixel.g;
-    color->b = pixel.b;
-  }
-
-  return (color->r | color->g | color->b) > 0;
+  return (out_color->r | out_color->g | out_color->b) > 0;
 }
 
 void core_t::draw_rectangle() {
@@ -83,12 +78,9 @@ void core_t::draw_rectangle() {
   tev.texture_page_y = (status << 4) & 0x100;
   tev.texture_colors = (status >> 7) & 3;
 
-  color_t color;
-  color.r = (fifo.at(0) >> (0 * 8)) & 0xff;
-  color.g = (fifo.at(0) >> (1 * 8)) & 0xff;
-  color.b = (fifo.at(0) >> (2 * 8)) & 0xff;
-
-  auto tex_coord = texture_coord_t::from_uint16(fifo.at(2));
+  auto command = gp0_command_t(fifo.at(0));
+  auto shade = color_t::from_uint24(fifo.at(0));
+  auto coord = texture_coord_t::from_uint16(fifo.at(2));
 
   int32_t xofs = x_offset + int16_t(fifo.at(1));
   int32_t yofs = y_offset + int16_t(fifo.at(1) >> 16);
@@ -98,14 +90,19 @@ void core_t::draw_rectangle() {
 
   for (int32_t y = 0; y < h; y++) {
     for (int32_t x = 0; x < w; x++) {
-      texture_coord_t coord;
-      coord.u = tex_coord.u + x;
-      coord.v = tex_coord.v + y;
+      texture_coord_t this_coord;
+      this_coord.u = coord.u + x;
+      this_coord.v = coord.v + y;
 
-      if (get_color(fifo.at(0), &color, tev, coord)) {
+      color_t color;
+      if (get_color(command, shade, this_coord, tev, &color)) {
         point_t point;
         point.x = xofs + x;
         point.y = yofs + y;
+
+        if (command.is_semi_transparent()) {
+          assert(0 && "Semi-transparency isn't implemented for rectangles yet.");
+        }
 
         draw_point(point, color);
       }

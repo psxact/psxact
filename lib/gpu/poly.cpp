@@ -19,26 +19,26 @@ static const int32_t coord_factor_lut[4] = {
   0, 2, 0, 3
 };
 
-static int32_t get_factor(const int32_t (&lut)[4], uint32_t command) {
-  int32_t bit1 = (command >> 28) & 1;
-  int32_t bit0 = (command >> 26) & 1;
+static int32_t get_factor(const int32_t (&lut)[4], gp0_command_t command) {
+  int32_t bit1 = command.is_gouraud_shaded();
+  int32_t bit0 = command.is_texture_mapped();
 
   return lut[(bit1 << 1) | bit0];
 }
 
-static int32_t get_color_factor(uint32_t command) {
+static int32_t get_color_factor(gp0_command_t command) {
   return get_factor(color_factor_lut, command);
 }
 
-static int32_t get_point_factor(uint32_t command) {
+static int32_t get_point_factor(gp0_command_t command) {
   return get_factor(point_factor_lut, command);
 }
 
-static int32_t get_coord_factor(uint32_t command) {
+static int32_t get_coord_factor(gp0_command_t command) {
   return get_factor(coord_factor_lut, command);
 }
 
-static void get_colors(const core_t &core, uint32_t command, color_t *colors, int32_t n) {
+static void get_colors(const core_t &core, gp0_command_t command, color_t *colors, int32_t n) {
   int32_t factor = get_color_factor(command);
 
   for (int32_t i = 0; i < n; i++) {
@@ -46,7 +46,7 @@ static void get_colors(const core_t &core, uint32_t command, color_t *colors, in
   }
 }
 
-static void get_points(const core_t &core, uint32_t command, point_t *points, int32_t n) {
+static void get_points(const core_t &core, gp0_command_t command, point_t *points, int32_t n) {
   int32_t factor = get_point_factor(command);
 
   for (int32_t i = 0; i < n; i++) {
@@ -56,7 +56,7 @@ static void get_points(const core_t &core, uint32_t command, point_t *points, in
   }
 }
 
-static void get_coords(const core_t &core, uint32_t command, texture_coord_t *coords, int32_t n) {
+static void get_coords(const core_t &core, gp0_command_t command, texture_coord_t *coords, int32_t n) {
   int32_t factor = get_coord_factor(command);
 
   for (int32_t i = 0; i < n; i++) {
@@ -64,7 +64,7 @@ static void get_coords(const core_t &core, uint32_t command, texture_coord_t *co
   }
 }
 
-static tev_t get_tev(const core_t &core, uint32_t command) {
+static tev_t get_tev(const core_t &core, gp0_command_t command) {
   int32_t factor = get_coord_factor(command);
 
   uint32_t palette = core.fifo.at(0 * factor + 2) >> 16;
@@ -80,10 +80,9 @@ static tev_t get_tev(const core_t &core, uint32_t command) {
   result.texture_page_x = (texpage << 6) & 0x3c0;
   result.texture_page_y = (texpage << 4) & 0x100;
 
-  if (command & (1 << 26)) {
+  if (command.is_texture_mapped()) {
     result.color_mix_mode = (texpage >> 5) & 3;
-  }
-  else {
+  } else {
     result.color_mix_mode = (core.get_status() >> 5) & 3;
   }
 
@@ -131,19 +130,17 @@ static texture_coord_t point_lerp(const texture_coord_t *t, int32_t w0, int32_t 
 }
 
 bool core_t::get_color(
-  uint32_t command, const triangle_t &triangle,
+  gp0_command_t command, const triangle_t &triangle,
   int32_t w0, int32_t w1, int32_t w2, color_t *color) {
-  bool shaded = (command & (1 << 26)) == 0;
-  bool blended = (command & (1 << 24)) != 0;
 
-  if (shaded) {
+  if (!command.is_texture_mapped()) {
     *color = color_lerp(triangle.colors, w0, w1, w2);
     return true;
   }
 
   texture_coord_t coord = point_lerp(triangle.coords, w0, w1, w2);
 
-  if (blended) {
+  if (command.is_raw_texture()) {
     *color = get_texture_color(triangle.tev, coord);
   }
   else {
@@ -158,7 +155,7 @@ bool core_t::get_color(
   return (color->r | color->g | color->b) > 0;
 }
 
-void core_t::draw_triangle(uint32_t command, const triangle_t &triangle) {
+void core_t::draw_triangle(gp0_command_t command, const triangle_t &triangle) {
   const point_t *v = triangle.points;
 
   point_t min;
@@ -211,7 +208,7 @@ void core_t::draw_triangle(uint32_t command, const triangle_t &triangle) {
         color_t color;
 
         if (get_color(command, triangle, w0, w1, w2, &color)) {
-          if (command & (1 << 25)) {
+          if (command.is_semi_transparent()) {
             color_t bg = color_t::from_uint16(vram_read(point.x, point.y));
 
             switch (triangle.tev.color_mix_mode) {
@@ -286,10 +283,10 @@ void core_t::draw_polygon() {
   texture_coord_t coords[4];
   point_t points[4];
 
-  uint32_t command = fifo.at(0);
+  auto command = gp0_command_t(fifo.at(0));
 
-  int32_t num_polygons = (command & (1 << 27)) ? 2 : 1;
-  int32_t num_vertices = (command & (1 << 27)) ? 4 : 3;
+  auto num_vertices = command.is_quad_poly() ? 4 : 3;
+  auto num_polygons = command.is_quad_poly() ? 2 : 1;
 
   get_colors(*this, command, colors, num_vertices);
   get_coords(*this, command, coords, num_vertices);
