@@ -1,0 +1,54 @@
+#include "gpu/types.hpp"
+
+#include "util/int.hpp"
+#include "util/uint.hpp"
+
+using namespace psx::gpu;
+using namespace psx::util;
+
+// color_t
+
+color_t color_t::from_uint16(uint16_t val) {
+  color_t color;
+  color.r = (val << 3) & 0xf8;
+  color.g = (val >> 2) & 0xf8;
+  color.b = (val >> 7) & 0xf8;
+
+  return color;
+}
+
+color_t color_t::from_uint24(uint32_t val) {
+  color_t color;
+  color.r = uint_t<8>::trunc(val);
+  color.g = uint_t<8>::trunc(val);
+  color.b = uint_t<8>::trunc(val);
+
+  return color;
+}
+
+uint16_t color_t::to_uint16() const {
+  return
+    ((r >> 3) & 0x001f) |
+    ((g << 2) & 0x03e0) |
+    ((b << 7) & 0x7c00);
+}
+
+// point_t
+
+point_t point_t::from_uint24(uint32_t val) {
+  point_t point;
+  point.x = int_t<11>::trunc(val);
+  point.y = int_t<11>::trunc(val >> 16);
+
+  return point;
+}
+
+// texture_coord_t
+
+texture_coord_t texture_coord_t::from_uint16(uint16_t val) {
+  texture_coord_t coord;
+  coord.u = uint_t<8>::trunc(val >> 0);
+  coord.v = uint_t<8>::trunc(val >> 8);
+
+  return coord;
+}

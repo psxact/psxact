@@ -38,42 +38,21 @@ static int32_t get_coord_factor(uint32_t command) {
   return get_factor(coord_factor_lut, command);
 }
 
-static color_t decode_color(const core_t &core, int32_t n) {
-  uint32_t value = core.fifo.at(n);
-
-  color_t result;
-
-  result.r = uint_t<8>::trunc(value >> (8 * 0));
-  result.g = uint_t<8>::trunc(value >> (8 * 1));
-  result.b = uint_t<8>::trunc(value >> (8 * 2));
-
-  return result;
-}
-
-static core_t::point_t decode_point(const core_t &core, int32_t n) {
-  uint32_t value = core.fifo.at(n);
-
-  core_t::point_t result;
-
-  result.x = core.x_offset + int_t<11>::trunc(value);
-  result.y = core.y_offset + int_t<11>::trunc(value >> 16);
-
-  return result;
-}
-
 static void get_colors(const core_t &core, uint32_t command, color_t *colors, int32_t n) {
   int32_t factor = get_color_factor(command);
 
   for (int32_t i = 0; i < n; i++) {
-    colors[i] = decode_color(core, i * factor + 0);
+    colors[i] = color_t::from_uint24(core.fifo.at(i * factor + 0));
   }
 }
 
-static void get_points(const core_t &core, uint32_t command, core_t::point_t *points, int32_t n) {
+static void get_points(const core_t &core, uint32_t command, point_t *points, int32_t n) {
   int32_t factor = get_point_factor(command);
 
   for (int32_t i = 0; i < n; i++) {
-    points[i] = decode_point(core, i * factor + 1);
+    points[i] = point_t::from_uint24(core.fifo.at(i * factor + 1));
+    points[i].x += core.x_offset;
+    points[i].y += core.y_offset;
   }
 }
 
@@ -85,13 +64,13 @@ static void get_coords(const core_t &core, uint32_t command, texture_coord_t *co
   }
 }
 
-static core_t::tev_t get_tev(const core_t &core, uint32_t command) {
+static tev_t get_tev(const core_t &core, uint32_t command) {
   int32_t factor = get_coord_factor(command);
 
   uint32_t palette = core.fifo.at(0 * factor + 2) >> 16;
   uint32_t texpage = core.fifo.at(1 * factor + 2) >> 16;
 
-  core_t::tev_t result;
+  tev_t result;
 
   //  11    Texture Disable (0=Normal, 1=Disable if GP1(09h).Bit0=1)   ;GPUSTAT.15
 
@@ -111,7 +90,7 @@ static core_t::tev_t get_tev(const core_t &core, uint32_t command) {
   return result;
 }
 
-static bool is_clockwise(const core_t::point_t *p) {
+static bool is_clockwise(const point_t *p) {
   int32_t sum =
     (p[1].x - p[0].x) * (p[1].y + p[0].y) +
     (p[2].x - p[1].x) * (p[2].y + p[1].y) +
@@ -120,7 +99,7 @@ static bool is_clockwise(const core_t::point_t *p) {
   return sum >= 0;
 }
 
-static int32_t edge_function(const core_t::point_t &a, const core_t::point_t &b, const core_t::point_t &c) {
+static int32_t edge_function(const point_t &a, const point_t &b, const point_t &c) {
   return
     ((a.x - b.x) * (c.y - b.y)) -
     ((a.y - b.y) * (c.x - b.x));
@@ -135,8 +114,8 @@ static color_t color_lerp(const color_t *c, int32_t w0, int32_t w1, int32_t w2) 
   return color;
 }
 
-static core_t::point_t point_lerp(const core_t::point_t *t, int32_t w0, int32_t w1, int32_t w2) {
-  core_t::point_t point;
+static point_t point_lerp(const point_t *t, int32_t w0, int32_t w1, int32_t w2) {
+  point_t point;
   point.x = ((w0 * t[0].x) + (w1 * t[1].x) + (w2 * t[2].x)) / (w0 + w1 + w2);
   point.y = ((w0 * t[0].y) + (w1 * t[1].y) + (w2 * t[2].y)) / (w0 + w1 + w2);
 
@@ -274,8 +253,8 @@ void core_t::draw_triangle(uint32_t command, const triangle_t &triangle) {
 }
 
 static void put_in_clockwise_order(
-  core_t::point_t *points, color_t *colors,
-  texture_coord_t *coords, core_t::triangle_t *triangle) {
+  point_t *points, color_t *colors,
+  texture_coord_t *coords, triangle_t *triangle) {
   int32_t indices[3];
 
   if (is_clockwise(points)) {

@@ -1,8 +1,7 @@
 #ifndef GPU_CORE_HPP_
 #define GPU_CORE_HPP_
 
-#include "gpu/color.hpp"
-#include "gpu/texture-coord.hpp"
+#include "gpu/types.hpp"
 #include "util/fifo.hpp"
 #include "addressable.hpp"
 #include "dma-comms.hpp"
@@ -158,23 +157,6 @@ class core_t final
   uint16_t vram_transfer_read();
   void vram_transfer_write(uint16_t data);
 
-  struct point_t {
-    int32_t x = {};
-    int32_t y = {};
-  };
-
-  struct tev_t {
-    // from 'palette'
-    int32_t palette_page_x = {};
-    int32_t palette_page_y = {};
-
-    // from 'texpage'
-    int32_t texture_colors = {};
-    int32_t texture_page_x = {};
-    int32_t texture_page_y = {};
-    int32_t color_mix_mode = {};
-  };
-
   void copy_vram_to_vram();
   void copy_wram_to_vram();
   void copy_vram_to_wram();
@@ -197,14 +179,6 @@ class core_t final
   bool get_color(uint32_t command, color_t *color, const tev_t &tev, const texture_coord_t &coord);
 
   // triangle drawing
-
-  struct triangle_t {
-    color_t colors[3] = {};
-    texture_coord_t coords[3] = {};
-    core_t::point_t points[3] = {};
-
-    core_t::tev_t tev = {};
-  };
 
   void draw_triangle(uint32_t command, const triangle_t &triangle);
 
