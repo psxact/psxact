@@ -3,15 +3,19 @@
 using namespace psx::gpu;
 
 uint32_t core_t::vram_address(int x, int y) {
-  return ((y * 1024) + x) * sizeof(uint16_t);
+  return (2048 * y) + x;
+}
+
+uint8_t core_t::vram_read8(int x, int y) {
+  return vram->io_read_byte(vram_address(x, y));
 }
 
 uint16_t core_t::vram_read(int x, int y) {
-  return vram->io_read_half(vram_address(x, y));
+  return vram->io_read_half(vram_address(x * 2, y));
 }
 
 void core_t::vram_write(int x, int y, uint16_t data) {
-  vram->io_write_half(vram_address(x, y), data);
+  vram->io_write_half(vram_address(x * 2, y), data);
 }
 
 uint16_t core_t::vram_transfer_read() {

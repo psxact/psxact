@@ -66,6 +66,12 @@ void core_t::gp1(uint32_t data) {
         v_resolution = gpu_v_resolution_t::v240;
       }
 
+      if (data & (1 << 4)) {
+        display_depth = gpu_display_depth_t::bpp24;
+      } else {
+        display_depth = gpu_display_depth_t::bpp15;
+      }
+
       status &= ~0x7f4000;
       status |= (data << 17) & 0x7e0000;
       status |= (data << 10) & 0x010000;

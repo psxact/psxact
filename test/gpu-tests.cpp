@@ -77,4 +77,12 @@ TEST_F(GpuTest, Gp1_08_DisplayMode) {
 
   gpu.gp1(0x08000024);
   EXPECT_EQ(gpu.get_v_resolution(), gpu_v_resolution_t::v480);
+
+  // Test setting display depth.
+
+  gpu.gp1(0x08000000);
+  EXPECT_EQ(gpu.get_display_depth(), gpu_display_depth_t::bpp15);
+
+  gpu.gp1(0x08000010);
+  EXPECT_EQ(gpu.get_display_depth(), gpu_display_depth_t::bpp24);
 }

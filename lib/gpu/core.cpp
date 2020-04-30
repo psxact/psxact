@@ -81,11 +81,24 @@ void core_t::render_field_to_buffer() {
   const int width = int(get_h_resolution());
   const int height = 240;
 
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      video_buffer[(y * 2) + target_line][x] = vram_read(
-        display_area_x + x,
-        display_area_y + y);
+  if (get_display_depth() == gpu_display_depth_t::bpp24) {
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        color_t color;
+        color.r = vram_read8(x * 3 + 0, y);
+        color.g = vram_read8(x * 3 + 1, y);
+        color.b = vram_read8(x * 3 + 2, y);
+
+        video_buffer[(y * 2) + target_line][x] = color.to_uint16();
+      }
+    }
+  } else {
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        video_buffer[(y * 2) + target_line][x] = vram_read(
+          display_area_x + x,
+          display_area_y + y);
+      }
     }
   }
 }
@@ -100,6 +113,10 @@ gpu_h_resolution_t core_t::get_h_resolution() const {
 
 gpu_v_resolution_t core_t::get_v_resolution() const {
   return v_resolution;
+}
+
+gpu_display_depth_t core_t::get_display_depth() const {
+  return display_depth;
 }
 
 int core_t::dma_speed() {

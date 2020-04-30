@@ -11,6 +11,11 @@
 
 namespace psx::gpu {
 
+enum class gpu_display_depth_t {
+  bpp15,
+  bpp24
+};
+
 enum class gpu_h_resolution_t {
   h256 = 256,
   h320 = 320,
@@ -43,6 +48,7 @@ class core_t final
 
   gpu_h_resolution_t h_resolution = gpu_h_resolution_t::h256;
   gpu_v_resolution_t v_resolution = gpu_v_resolution_t::v240;
+  gpu_display_depth_t display_depth;
   gpu_field_t field = gpu_field_t::even;
   uint16_t video_buffer[480][640];
 
@@ -126,6 +132,7 @@ class core_t final
   uint32_t get_status() const;
   gpu_h_resolution_t get_h_resolution() const;
   gpu_v_resolution_t get_v_resolution() const;
+  gpu_display_depth_t get_display_depth() const;
 
   int dma_speed() override;
   bool dma_ready() override;
@@ -144,6 +151,7 @@ class core_t final
   void run_command();
 
   uint32_t vram_address(int x, int y);
+  uint8_t vram_read8(int x, int y);
   uint16_t vram_read(int x, int y);
   void vram_write(int x, int y, uint16_t data);
 
