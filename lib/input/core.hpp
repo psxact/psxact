@@ -52,7 +52,7 @@ class core_t final : public addressable_t {
   interruptible_t &irq;
 
  public:
-  explicit core_t(interruptible_t &irq, bool log_enabled);
+  explicit core_t(interruptible_t &irq);
 
   void latch(const host_device_t &device1, const host_device_t &device2);
 

@@ -33,6 +33,10 @@ uint16_t color_t::to_uint16() const {
     ((b << 7) & 0x7c00);
 }
 
+uint32_t color_t::to_uint32() const {
+  return (r << 16) | (g << 8) | b;
+}
+
 // point_t
 
 point_t point_t::from_uint24(uint32_t val) {

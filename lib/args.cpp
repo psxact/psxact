@@ -9,10 +9,11 @@
 using namespace psx;
 
 static const option options[] = {
-  { .name = "bios",     .has_arg = required_argument, .flag = 0, .val = 'b' },
-  { .name = "game",     .has_arg = required_argument, .flag = 0, .val = 'g' },
-  { .name = "log",      .has_arg = required_argument, .flag = 0, .val = 'l' },
-  { .name = "headless", .has_arg =       no_argument, .flag = 0, .val = 'h' },
+  { .name = "bios",             .has_arg = required_argument, .flag = 0, .val = 'b' },
+  { .name = "game",             .has_arg = required_argument, .flag = 0, .val = 'g' },
+  { .name = "log",              .has_arg = required_argument, .flag = 0, .val = 'l' },
+  { .name = "headless",         .has_arg =       no_argument, .flag = 0, .val = 'h' },
+  { .name = "gamma-correction", .has_arg =       no_argument, .flag = 0, .val = 'y' },
   {},
 };
 
@@ -29,9 +30,20 @@ static void fail() {
   exit(1);
 }
 
-args_t::args_t(int argc, char **argv)
-  : bios_file_name("bios.rom")
-  , game_file_name("") {
+const char *args::bios_file_name = "bios.rom";
+const char *args::game_file_name = "";
+bool args::gamma_correction = false;
+bool args::headless = false;
+bool args::log_cpu = false;
+bool args::log_dma = false;
+bool args::log_gpu = false;
+bool args::log_spu = false;
+bool args::log_mdec = false;
+bool args::log_cdrom = false;
+bool args::log_input = false;
+bool args::log_timer = false;
+
+void args::init(int argc, char **argv) {
 
   if (argc == 1) {
     fail();
@@ -42,33 +54,34 @@ args_t::args_t(int argc, char **argv)
 
   while ((c = getopt_long(argc, argv, "b:g:l:", options, &index)) != -1) {
     switch (c) {
-      case 'b': this->bios_file_name = optarg; break;
-      case 'g': this->game_file_name = optarg; break;
-      case 'h': this->headless = true; break;
+      case 'b': args::bios_file_name = optarg; break;
+      case 'g': args::game_file_name = optarg; break;
+      case 'h': args::headless = true; break;
+      case 'y': args::gamma_correction = true; break;
       case 'l':
         if (strcmp(optarg, "cpu") == 0) {
-          this->log_cpu = true;
+          args::log_cpu = true;
         }
         else if (strcmp(optarg, "dma") == 0) {
-          this->log_dma = true;
+          args::log_dma = true;
         }
         else if (strcmp(optarg, "gpu") == 0) {
-          this->log_gpu = true;
+          args::log_gpu = true;
         }
         else if (strcmp(optarg, "spu") == 0) {
-          this->log_spu = true;
+          args::log_spu = true;
         }
         else if (strcmp(optarg, "mdec") == 0) {
-          this->log_mdec = true;
+          args::log_mdec = true;
         }
         else if (strcmp(optarg, "cdrom") == 0) {
-          this->log_cdrom = true;
+          args::log_cdrom = true;
         }
         else if (strcmp(optarg, "input") == 0) {
-          this->log_input = true;
+          args::log_input = true;
         }
         else if (strcmp(optarg, "timer") == 0) {
-          this->log_timer = true;
+          args::log_timer = true;
         }
         else {
           fprintf(stderr, "unrecognized argument to --log: %s\n", optarg);

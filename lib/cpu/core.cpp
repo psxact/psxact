@@ -4,6 +4,7 @@
 #include "cpu/cop2/gte.hpp"
 #include "util/int.hpp"
 #include "util/uint.hpp"
+#include "args.hpp"
 
 using namespace psx::cpu;
 using namespace psx::util;
@@ -46,8 +47,8 @@ core_t::opcode_t core_t::op_table_special[64] = {
   &core_t::op_und,     &core_t::op_und,   &core_t::op_und,  &core_t::op_und
 };
 
-core_t::core_t(addressable_t &memory, bool log_enabled)
-  : addressable_t("cpu", log_enabled)
+core_t::core_t(addressable_t &memory)
+  : addressable_t("cpu", args::log_cpu)
   , memory(memory)
   , dcache("dcache") {
   regs.gp[0] = 0;

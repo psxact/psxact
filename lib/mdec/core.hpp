@@ -57,7 +57,7 @@ class core_t final
   bool enable_data_out = {};
 
  public:
-  core_t(bool log_enabled);
+  core_t();
 
   void send_command(uint32_t data);
   void send_parameter(int n, uint32_t data);

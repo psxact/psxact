@@ -1,12 +1,13 @@
 #include "cdrom/core.hpp"
 
 #include "util/bcd.hpp"
+#include "args.hpp"
 
 using namespace psx::cdrom;
 using namespace psx::util;
 
-core_t::core_t(interruptible_t &irq, const char *game_file_name, bool log_enabled)
-    : addressable_t("cdc", log_enabled)
+core_t::core_t(interruptible_t &irq, const char *game_file_name)
+    : addressable_t("cdc", args::log_cdrom)
     , irq(irq)
     , index()
     , interrupt_enable()

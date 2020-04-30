@@ -49,7 +49,7 @@ class core_t final
   gpu_v_resolution_t v_resolution = gpu_v_resolution_t::v240;
   gpu_display_depth_t display_depth;
   gpu_field_t field = gpu_field_t::even;
-  uint16_t video_buffer[480][640];
+  uint32_t video_buffer[480][640];
 
   uint32_t status = 0x14802000;
 
@@ -108,12 +108,12 @@ class core_t final
     } run = {};
   } gpu_to_cpu_transfer = {};
 
-  core_t(irq_line_t irq, bool log_enabled);
+  core_t(irq_line_t irq);
   ~core_t();
 
   // Interface for external video rendering
 
-  uint16_t *get_video_buffer() const;
+  uint32_t *get_video_buffer() const;
   int32_t get_width() const;
   int32_t get_height() const;
 

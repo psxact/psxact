@@ -29,7 +29,7 @@ sdl2_video_t::sdl2_video_t()
 
   texture = SDL_CreateTexture(
     renderer,
-    SDL_PIXELFORMAT_BGR555,
+    SDL_PIXELFORMAT_RGB888,
     SDL_TEXTUREACCESS_STREAMING,
     window_width,
     window_height);
@@ -44,22 +44,24 @@ sdl2_video_t::~sdl2_video_t() {
 bool sdl2_video_t::render(psx::output_params_video_t &params) {
   resize(params.width, params.height);
 
+  using pixel_type_t = uint32_t;
+
   void *dst_pixels = nullptr;
   int dst_pitch = 0;
   void *src_pixels = params.buffer;
-  int src_pitch = 640 * sizeof(uint16_t);
+  int src_pitch = 640 * sizeof(pixel_type_t);
 
   if (SDL_LockTexture(texture, nullptr, &dst_pixels, &dst_pitch) == 0) {
-    uint16_t *dst = reinterpret_cast<uint16_t *>(dst_pixels);
-    uint16_t *src = reinterpret_cast<uint16_t *>(src_pixels);
+    auto dst = reinterpret_cast<pixel_type_t *>(dst_pixels);
+    auto src = reinterpret_cast<pixel_type_t *>(src_pixels);
 
     for (int py = 0; py < params.height; py++) {
       for (int px = 0; px < params.width; px++) {
         dst[px] = src[px];
       }
 
-      src += src_pitch / sizeof(uint16_t);
-      dst += dst_pitch / sizeof(uint16_t);
+      src += src_pitch / sizeof(pixel_type_t);
+      dst += dst_pitch / sizeof(pixel_type_t);
     }
 
     SDL_UnlockTexture(texture);
@@ -102,7 +104,7 @@ void sdl2_video_t::resize(int w, int h) {
 
   texture = SDL_CreateTexture(
     renderer,
-    SDL_PIXELFORMAT_BGR555,
+    SDL_PIXELFORMAT_RGB888,
     SDL_TEXTUREACCESS_STREAMING,
     w,
     h);

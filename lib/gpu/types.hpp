@@ -14,6 +14,7 @@ namespace psx::gpu {
     static color_t from_uint24(uint32_t val);
 
     uint16_t to_uint16() const;
+    uint32_t to_uint32() const;
   };
 
   struct point_t {

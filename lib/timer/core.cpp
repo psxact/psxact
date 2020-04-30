@@ -1,6 +1,7 @@
 #include "timer/core.hpp"
 
 #include <cassert>
+#include "args.hpp"
 
 // These are not implemented or partially implemented.
 //
@@ -27,8 +28,8 @@
 
 using namespace psx::timer;
 
-core_t::core_t(interruptible_t &irq, bool log_enabled)
-  : addressable_t("timer", log_enabled)
+core_t::core_t(interruptible_t &irq)
+  : addressable_t("timer", args::log_timer)
   , irq(irq) {
 }
 

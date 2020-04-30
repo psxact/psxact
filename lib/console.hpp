@@ -32,7 +32,7 @@ struct output_params_audio_t {
 };
 
 struct output_params_video_t {
-  uint16_t *buffer;
+  uint32_t *buffer;
   int32_t width;
   int32_t height;
 };
@@ -61,13 +61,10 @@ class console_t final
   spu::core_t *spu;
   int cycles;
 
-  const char *bios_file_name;
-  const char *game_file_name;
   bool is_exe;
 
  public:
-  console_t(args_t &args);
-
+  console_t();
   ~console_t();
 
   void interrupt(interrupt_type_t flag);

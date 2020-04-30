@@ -59,7 +59,7 @@ class core_t final : public addressable_t {
   static opcode_t op_table_special[64];
 
  public:
-  explicit core_t(addressable_t &memory, bool log_enabled);
+  explicit core_t(addressable_t &memory);
 
   uint32_t get_code() const;
 

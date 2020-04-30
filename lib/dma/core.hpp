@@ -34,7 +34,7 @@ class core_t final : public addressable_t {
   channel_t channels[7] = {};
 
  public:
-  core_t(interruptible_t &irq, addressable_t &memory, bool log_enabled);
+  core_t(interruptible_t &irq, addressable_t &memory);
 
   void attach(int n, dma_comms_t *comms);
 

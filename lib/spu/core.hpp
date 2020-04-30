@@ -46,7 +46,7 @@ namespace psx::spu {
     int sample_buffer_index;
 
   public:
-    core_t(bool log_enabled);
+    core_t();
     ~core_t();
 
     void run(int amount);

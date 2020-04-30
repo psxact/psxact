@@ -1,11 +1,11 @@
 #include "mdec/core.hpp"
 
-#include <cstdio>
+#include "args.hpp"
 
 using namespace psx::mdec;
 
-core_t::core_t(bool log_enabled)
-  : addressable_t("mdec", log_enabled) {
+core_t::core_t()
+  : addressable_t("mdec", args::log_mdec) {
 }
 
 void core_t::send_command(uint32_t data) {

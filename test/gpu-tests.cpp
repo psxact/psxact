@@ -21,7 +21,7 @@ public:
 class GpuTest : public ::testing::Test {
 public:
   GpuTest()
-    : gpu(irq, false) {
+    : gpu(irq) {
   }
 
   MockIrqLine irq;

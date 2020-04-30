@@ -104,27 +104,23 @@ static int32_t edge_function(const point_t &a, const point_t &b, const point_t &
     ((a.y - b.y) * (c.x - b.x));
 }
 
+static int lerp(int a, int b, int c, int w0, int w1, int w2) {
+  return ((w0 * a) + (w1 * b) + (w2 * c)) / (w0 + w1 + w2);
+}
+
 static color_t color_lerp(const color_t *c, int32_t w0, int32_t w1, int32_t w2) {
   color_t color;
-  color.r = ((w0 * c[0].r) + (w1 * c[1].r) + (w2 * c[2].r)) / (w0 + w1 + w2);
-  color.g = ((w0 * c[0].g) + (w1 * c[1].g) + (w2 * c[2].g)) / (w0 + w1 + w2);
-  color.b = ((w0 * c[0].b) + (w1 * c[1].b) + (w2 * c[2].b)) / (w0 + w1 + w2);
+  color.r = lerp(c[0].r, c[1].r, c[2].r, w0, w1, w2);
+  color.g = lerp(c[0].g, c[1].g, c[2].g, w0, w1, w2);
+  color.b = lerp(c[0].b, c[1].b, c[2].b, w0, w1, w2);
 
   return color;
 }
 
-static point_t point_lerp(const point_t *t, int32_t w0, int32_t w1, int32_t w2) {
-  point_t point;
-  point.x = ((w0 * t[0].x) + (w1 * t[1].x) + (w2 * t[2].x)) / (w0 + w1 + w2);
-  point.y = ((w0 * t[0].y) + (w1 * t[1].y) + (w2 * t[2].y)) / (w0 + w1 + w2);
-
-  return point;
-}
-
 static texture_coord_t point_lerp(const texture_coord_t *t, int32_t w0, int32_t w1, int32_t w2) {
   texture_coord_t point;
-  point.u = ((w0 * t[0].u) + (w1 * t[1].u) + (w2 * t[2].u)) / (w0 + w1 + w2);
-  point.v = ((w0 * t[0].v) + (w1 * t[1].v) + (w2 * t[2].v)) / (w0 + w1 + w2);
+  point.u = lerp(t[0].u, t[1].u, t[2].u, w0, w1, w2);
+  point.v = lerp(t[0].v, t[1].v, t[2].v, w0, w1, w2);
 
   return point;
 }

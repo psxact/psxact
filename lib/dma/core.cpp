@@ -1,6 +1,7 @@
 #include "dma/core.hpp"
 
 #include <cassert>
+#include "args.hpp"
 
 using namespace psx;
 using namespace psx::dma;
@@ -27,8 +28,8 @@ static const uint32_t REG_BIT1[32] = {
   0x00000000, 0x00000000, 0x00000000, 0x00000000, // ctrl
 };
 
-core_t::core_t(interruptible_t &irq, addressable_t &memory, bool log_enabled)
-  : addressable_t("dma", log_enabled)
+core_t::core_t(interruptible_t &irq, addressable_t &memory)
+  : addressable_t("dma", args::log_dma)
   , irq(irq)
   , memory(memory) {
 }

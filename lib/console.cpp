@@ -10,24 +10,22 @@
 using namespace psx;
 using namespace psx::util;
 
-console_t::console_t(args_t &args)
-  : addressable_t("console", false)
-  , bios_file_name(args.bios_file_name)
-  , game_file_name(args.game_file_name) {
+console_t::console_t()
+  : addressable_t("console", false) {
   bios = new memory_t< kib(512) >("bios");
   wram = new memory_t< mib(2) >("wram");
 
-  cdrom = new cdrom::core_t(*this, game_file_name, args.log_cdrom);
-  timer = new timer::core_t(*this, args.log_timer);
-  cpu = new cpu::core_t(*this, args.log_cpu);
-  dma = new dma::core_t(*this, *this, args.log_dma);
+  cdrom = new cdrom::core_t(*this, args::game_file_name);
+  timer = new timer::core_t(*this);
+  cpu = new cpu::core_t(*this);
+  dma = new dma::core_t(*this, *this);
   exp1 = new exp::expansion1_t();
   exp2 = new exp::expansion2_t();
   exp3 = new exp::expansion3_t();
-  gpu = new gpu::core_t(irq_line_t(*this, interrupt_type_t::vblank), args.log_gpu);
-  input = new input::core_t(*this, args.log_input);
-  mdec = new mdec::core_t(args.log_mdec);
-  spu = new spu::core_t(args.log_spu);
+  gpu = new gpu::core_t(irq_line_t(*this, interrupt_type_t::vblank));
+  input = new input::core_t(*this);
+  mdec = new mdec::core_t();
+  spu = new spu::core_t();
 
   dma->attach(0, mdec);
   dma->attach(1, mdec);
@@ -37,14 +35,14 @@ console_t::console_t(args_t &args)
   dma->attach(5, nullptr); // PIO
   dma->attach(6, nullptr); // OTC - special cased in the DMA code.
 
-  bios->load_blob(bios_file_name);
+  bios->load_blob(args::bios_file_name);
   bios->io_write_word(0x6990, 0); // patch the bios to skip the boot-up animation
 
   bios->io_write_word(0x6f0c, 0x34010001); // li $at, 0x1
   bios->io_write_word(0x6f10, 0x0ff019e1); // jal 0xbfc06784
   bios->io_write_word(0x6f14, 0xaf81a9c0); // sw $at -0x5460($gp)
 
-  is_exe = !!(strstr(game_file_name, ".exe") || strstr(game_file_name, ".psexe"));
+  is_exe = !!(strstr(args::game_file_name, ".exe") || strstr(args::game_file_name, ".psexe"));
 }
 
 console_t::~console_t() {
@@ -75,7 +73,7 @@ addressable_t *console_t::decode(uint32_t address) {
   if (between(0x1f801800, 0x1f801803)) {
     if (is_exe) {
       is_exe = false;
-      load_exe(game_file_name);
+      load_exe(args::game_file_name);
     }
 
     return cdrom;

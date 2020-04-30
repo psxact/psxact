@@ -4,51 +4,27 @@
 
 using namespace psx::gpu;
 
-// Rect Commands
-//
-// 25    | Semi Transparency (0=Off, 1=On)
-
 static int32_t get_x_length(psx::util::fifo_t< uint32_t, 4 > &fifo) {
   switch ((fifo.at(0) >> 27) & 3) {
-  case 0:
-    return
-      (fifo.at(0) & (1 << 26))
+  case  1: return 1;
+  case  2: return 8;
+  case  3: return 16;
+  default:
+    return (fifo.at(0) & (1 << 26))
       ? uint16_t(fifo.at(3))
       : uint16_t(fifo.at(2));
-
-  case 1:
-    return 1;
-
-  case 2:
-    return 8;
-
-  case 3:
-    return 16;
-
-  default:
-    return 0;
   }
 }
 
 static int32_t get_y_length(psx::util::fifo_t< uint32_t, 4 > &fifo) {
   switch ((fifo.at(0) >> 27) & 3) {
-  case 0:
-    return
-      (fifo.at(0) & (1 << 26))
-        ? uint16_t(fifo.at(3) >> 16)
-        : uint16_t(fifo.at(2) >> 16);
-
-  case 1:
-    return 1;
-
-  case 2:
-    return 8;
-
-  case 3:
-    return 16;
-
+  case  1: return 1;
+  case  2: return 8;
+  case  3: return 16;
   default:
-    return 0;
+    return (fifo.at(0) & (1 << 26))
+      ? uint16_t(fifo.at(3) >> 16)
+      : uint16_t(fifo.at(2) >> 16);
   }
 }
 

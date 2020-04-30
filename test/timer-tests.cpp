@@ -12,7 +12,7 @@ class TimerTest : public ::testing::Test {
   public:
     TimerTest()
       : interruptible()
-      , timer(interruptible, false) {
+      , timer(interruptible) {
     }
 
   protected:

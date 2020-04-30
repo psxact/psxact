@@ -1,12 +1,14 @@
 #include "gpu/core.hpp"
 
 #include <cassert>
+#include "gpu/gamma.hpp"
+#include "args.hpp"
 #include "timing.hpp"
 
 using namespace psx::gpu;
 
-core_t::core_t(irq_line_t irq, bool log_enabled)
-  : addressable_t("gpu", log_enabled)
+core_t::core_t(irq_line_t irq)
+  : addressable_t("gpu", args::log_gpu)
   , irq(irq)
   , h_resolution(gpu_h_resolution_t::h256)
   , v_resolution(gpu_v_resolution_t::v240) {
@@ -17,8 +19,8 @@ core_t::~core_t() {
   delete vram;
 }
 
-uint16_t *core_t::get_video_buffer() const {
-  return (uint16_t *)video_buffer;
+uint32_t *core_t::get_video_buffer() const {
+  return (uint32_t *)video_buffer;
 }
 
 int32_t core_t::get_width() const {
@@ -89,15 +91,21 @@ void core_t::render_field_to_buffer() {
         color.g = vram_read8(x * 3 + 1, y);
         color.b = vram_read8(x * 3 + 2, y);
 
-        video_buffer[(y * 2) + target_line][x] = color.to_uint16();
+        gamma_t::apply(color);
+
+        video_buffer[(y * 2) + target_line][x] = color.to_uint32();
       }
     }
   } else {
     for (int y = 0; y < height; y++) {
       for (int x = 0; x < width; x++) {
-        video_buffer[(y * 2) + target_line][x] = vram_read(
+        color_t color = color_t::from_uint16(vram_read(
           display_area_x + x,
-          display_area_y + y);
+          display_area_y + y));
+
+        gamma_t::apply(color);
+
+        video_buffer[(y * 2) + target_line][x] = color.to_uint32();
       }
     }
   }

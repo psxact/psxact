@@ -73,7 +73,7 @@ class core_t final
   } mode = {};
 
  public:
-  core_t(interruptible_t &irq, const char *game_file_name, bool log_enabled);
+  core_t(interruptible_t &irq, const char *game_file_name);
 
   int dma_speed();
 

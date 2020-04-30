@@ -27,12 +27,10 @@ int main(int argc, char *argv[]) {
   signal(SIGABRT, signal_handler);
   signal(SIGSEGV, signal_handler);
 
-  SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
+  psx::args::init(argc, argv);
+  psx::console_t *console = new psx::console_t();
 
-  psx::args_t args(argc, argv);
-  psx::console_t *console = new psx::console_t(args);
-
-  if (args.headless) {
+  if (psx::args::headless) {
     run_headless(console);
   }
   else {
@@ -45,6 +43,8 @@ int main(int argc, char *argv[]) {
 }
 
 void run(psx::console_t *console) {
+  SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
+
   psx::sdl2_audio_t audio = psx::sdl2_audio_t();
   psx::sdl2_video_t video = psx::sdl2_video_t();
   psx::sdl2_input_t input = psx::sdl2_input_t();

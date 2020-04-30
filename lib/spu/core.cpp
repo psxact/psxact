@@ -3,13 +3,14 @@
 #include <cassert>
 #include "util/int.hpp"
 #include "util/uint.hpp"
+#include "args.hpp"
 #include "timing.hpp"
 
 using namespace psx::spu;
 using namespace psx::util;
 
-core_t::core_t(bool log_enabled)
-  : addressable_t("spu", log_enabled) {
+core_t::core_t()
+  : addressable_t("spu", args::log_spu) {
 }
 
 core_t::~core_t() {

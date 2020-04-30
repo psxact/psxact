@@ -25,7 +25,7 @@ namespace psx::timer {
     int prescale_system_over_8 = {};
 
   public:
-    explicit core_t(interruptible_t &irq, bool log_enabled);
+    explicit core_t(interruptible_t &irq);
 
     void run(int amount);
 

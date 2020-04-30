@@ -1,23 +1,21 @@
 #ifndef ARGS_HPP_
 #define ARGS_HPP_
 
-namespace psx {
+namespace psx::args {
+  extern const char *bios_file_name;
+  extern const char *game_file_name;
+  extern bool gamma_correction;
+  extern bool headless;
+  extern bool log_cpu;
+  extern bool log_dma;
+  extern bool log_gpu;
+  extern bool log_spu;
+  extern bool log_mdec;
+  extern bool log_cdrom;
+  extern bool log_input;
+  extern bool log_timer;
 
-  struct args_t {
-    const char *bios_file_name = {};
-    const char *game_file_name = {};
-    bool headless = {};
-    bool log_cpu = {};
-    bool log_dma = {};
-    bool log_gpu = {};
-    bool log_spu = {};
-    bool log_mdec = {};
-    bool log_cdrom = {};
-    bool log_input = {};
-    bool log_timer = {};
-
-    args_t(int argc, char **argv);
-  };
-}  // namespace psx
+  void init(int argc, char **argv);
+}  // namespace psx::args
 
 #endif  // ARGS_HPP_
