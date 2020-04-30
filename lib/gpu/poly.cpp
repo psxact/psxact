@@ -61,17 +61,6 @@ static core_t::point_t decode_point(const core_t &core, int32_t n) {
   return result;
 }
 
-static core_t::point_t decode_coord(const core_t &core, int32_t n) {
-  uint32_t value = core.fifo.at(n);
-
-  core_t::point_t result;
-
-  result.x = uint_t<8>::trunc(value >> 0);
-  result.y = uint_t<8>::trunc(value >> 8);
-
-  return result;
-}
-
 static void get_colors(const core_t &core, uint32_t command, color_t *colors, int32_t n) {
   int32_t factor = get_color_factor(command);
 
@@ -88,11 +77,11 @@ static void get_points(const core_t &core, uint32_t command, core_t::point_t *po
   }
 }
 
-static void get_coords(const core_t &core, uint32_t command, core_t::point_t *coords, int32_t n) {
+static void get_coords(const core_t &core, uint32_t command, texture_coord_t *coords, int32_t n) {
   int32_t factor = get_coord_factor(command);
 
   for (int32_t i = 0; i < n; i++) {
-    coords[i] = decode_coord(core, i * factor + 2);
+    coords[i] = texture_coord_t::from_uint16(core.fifo.at(i * factor + 2));
   }
 }
 
@@ -154,6 +143,14 @@ static core_t::point_t point_lerp(const core_t::point_t *t, int32_t w0, int32_t 
   return point;
 }
 
+static texture_coord_t point_lerp(const texture_coord_t *t, int32_t w0, int32_t w1, int32_t w2) {
+  texture_coord_t point;
+  point.u = ((w0 * t[0].u) + (w1 * t[1].u) + (w2 * t[2].u)) / (w0 + w1 + w2);
+  point.v = ((w0 * t[0].v) + (w1 * t[1].v) + (w2 * t[2].v)) / (w0 + w1 + w2);
+
+  return point;
+}
+
 bool core_t::get_color(
   uint32_t command, const triangle_t &triangle,
   int32_t w0, int32_t w1, int32_t w2, color_t *color) {
@@ -165,7 +162,7 @@ bool core_t::get_color(
     return true;
   }
 
-  point_t coord = point_lerp(triangle.coords, w0, w1, w2);
+  texture_coord_t coord = point_lerp(triangle.coords, w0, w1, w2);
 
   if (blended) {
     *color = get_texture_color(triangle.tev, coord);
@@ -278,7 +275,7 @@ void core_t::draw_triangle(uint32_t command, const triangle_t &triangle) {
 
 static void put_in_clockwise_order(
   core_t::point_t *points, color_t *colors,
-  core_t::point_t *coords, core_t::triangle_t *triangle) {
+  texture_coord_t *coords, core_t::triangle_t *triangle) {
   int32_t indices[3];
 
   if (is_clockwise(points)) {
@@ -307,7 +304,7 @@ static void put_in_clockwise_order(
 
 void core_t::draw_polygon() {
   color_t colors[4];
-  point_t coords[4];
+  texture_coord_t coords[4];
   point_t points[4];
 
   uint32_t command = fifo.at(0);

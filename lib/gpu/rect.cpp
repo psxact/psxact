@@ -52,7 +52,7 @@ static int32_t get_y_length(psx::util::fifo_t< uint32_t, 4 > &fifo) {
   }
 }
 
-bool core_t::get_color(uint32_t command, color_t *color, const tev_t &tev, const point_t &coord) {
+bool core_t::get_color(uint32_t command, color_t *color, const tev_t &tev, const texture_coord_t &coord) {
   bool textured = (command & (1 << 26)) != 0;
   if (!textured) {
     return true;
@@ -88,9 +88,7 @@ void core_t::draw_rectangle() {
   color.g = (fifo.at(0) >> (1 * 8)) & 0xff;
   color.b = (fifo.at(0) >> (2 * 8)) & 0xff;
 
-  point_t tex_coord;
-  tex_coord.x = (fifo.at(2) >> 0) & 0xff;
-  tex_coord.y = (fifo.at(2) >> 8) & 0xff;
+  auto tex_coord = texture_coord_t::from_uint16(fifo.at(2));
 
   int32_t xofs = x_offset + int16_t(fifo.at(1));
   int32_t yofs = y_offset + int16_t(fifo.at(1) >> 16);
@@ -100,9 +98,9 @@ void core_t::draw_rectangle() {
 
   for (int32_t y = 0; y < h; y++) {
     for (int32_t x = 0; x < w; x++) {
-      point_t coord;
-      coord.x = tex_coord.x + x;
-      coord.y = tex_coord.y + y;
+      texture_coord_t coord;
+      coord.u = tex_coord.u + x;
+      coord.v = tex_coord.v + y;
 
       if (get_color(fifo.at(0), &color, tev, coord)) {
         point_t point;

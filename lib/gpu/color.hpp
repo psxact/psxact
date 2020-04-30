@@ -16,4 +16,4 @@ namespace psx::gpu {
   };
 }
 
-#endif
+#endif  // GPU_COLOR_HPP_

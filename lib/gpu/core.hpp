@@ -2,6 +2,7 @@
 #define GPU_CORE_HPP_
 
 #include "gpu/color.hpp"
+#include "gpu/texture-coord.hpp"
 #include "util/fifo.hpp"
 #include "addressable.hpp"
 #include "dma-comms.hpp"
@@ -178,20 +179,20 @@ class core_t final
 
   // common functionality
 
-  color_t get_texture_color__4bpp(const tev_t &tev, const point_t &coord);
-  color_t get_texture_color__8bpp(const tev_t &tev, const point_t &coord);
-  color_t get_texture_color_15bpp(const tev_t &tev, const point_t &coord);
-  color_t get_texture_color(const tev_t &tev, const point_t &coord);
+  color_t get_texture_color__4bpp(const tev_t &tev, const texture_coord_t &coord);
+  color_t get_texture_color__8bpp(const tev_t &tev, const texture_coord_t &coord);
+  color_t get_texture_color_15bpp(const tev_t &tev, const texture_coord_t &coord);
+  color_t get_texture_color(const tev_t &tev, const texture_coord_t &coord);
 
   // rectangle drawing
 
-  bool get_color(uint32_t command, color_t *color, const tev_t &tev, const point_t &coord);
+  bool get_color(uint32_t command, color_t *color, const tev_t &tev, const texture_coord_t &coord);
 
   // triangle drawing
 
   struct triangle_t {
     color_t colors[3] = {};
-    core_t::point_t coords[3] = {};
+    texture_coord_t coords[3] = {};
     core_t::point_t points[3] = {};
 
     core_t::tev_t tev = {};

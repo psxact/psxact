@@ -162,12 +162,12 @@ void core_t::io_write_word(uint32_t address, uint32_t data) {
 
 // common functionality
 
-color_t core_t::get_texture_color__4bpp(const tev_t &tev, const point_t &coord) {
+color_t core_t::get_texture_color__4bpp(const tev_t &tev, const texture_coord_t &coord) {
   uint16_t texel = vram_read(
-    tev.texture_page_x + coord.x / 4,
-    tev.texture_page_y + coord.y);
+    tev.texture_page_x + (coord.u / 4),
+    tev.texture_page_y + coord.v);
 
-  texel = (texel >> ((coord.x & 3) * 4)) & 15;
+  texel = (texel >> ((coord.u & 3) * 4)) & 15;
 
   uint16_t pixel = vram_read(
     tev.palette_page_x + texel,
@@ -176,12 +176,12 @@ color_t core_t::get_texture_color__4bpp(const tev_t &tev, const point_t &coord) 
   return color_t::from_uint16(pixel);
 }
 
-color_t core_t::get_texture_color__8bpp(const tev_t &tev, const point_t &coord) {
+color_t core_t::get_texture_color__8bpp(const tev_t &tev, const texture_coord_t &coord) {
   uint16_t texel = vram_read(
-    tev.texture_page_x + coord.x / 2,
-    tev.texture_page_y + coord.y);
+    tev.texture_page_x + (coord.u / 2),
+    tev.texture_page_y + coord.v);
 
-  texel = (texel >> ((coord.x & 1) * 8)) & 255;
+  texel = (texel >> ((coord.u & 1) * 8)) & 255;
 
   uint16_t pixel = vram_read(
     tev.palette_page_x + texel,
@@ -190,15 +190,15 @@ color_t core_t::get_texture_color__8bpp(const tev_t &tev, const point_t &coord) 
   return color_t::from_uint16(pixel);
 }
 
-color_t core_t::get_texture_color_15bpp(const tev_t &tev, const point_t &coord) {
+color_t core_t::get_texture_color_15bpp(const tev_t &tev, const texture_coord_t &coord) {
   uint16_t pixel = vram_read(
-    tev.texture_page_x + coord.x,
-    tev.texture_page_y + coord.y);
+    tev.texture_page_x + coord.u,
+    tev.texture_page_y + coord.v);
 
   return color_t::from_uint16(pixel);
 }
 
-color_t core_t::get_texture_color(const tev_t &tev, const point_t &coord) {
+color_t core_t::get_texture_color(const tev_t &tev, const texture_coord_t &coord) {
   switch (tev.texture_colors) {
   default:
   case 0:
