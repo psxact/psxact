@@ -155,12 +155,12 @@ uint32_t core_t::data() {
 }
 
 uint32_t core_t::stat() {
-  //  19    Vertical Resolution         (0=240, 1=480, when Bit22=1)  ;GP1(08h).2
   //  26    Ready to receive Cmd Word   (0=No, 1=Ready)  ;GP0(...) ;via GP0
-  //  27    Ready to send VRAM to CPU   (0=No, 1=Ready)  ;GP0(C0h) ;via GPUREAD
   //  28    Ready to receive DMA Block  (0=No, 1=Ready)  ;GP0(...) ;via GP0
 
-  return (status & ~0x00080000) | 0x1c002000;
+  return status | 0x14000000
+      | (gpu_to_cpu_transfer.run.active << 27)
+      | (int(field) << 31);
 }
 
 uint32_t core_t::io_read_word(uint32_t address) {

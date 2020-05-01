@@ -11,6 +11,7 @@ void core_t::gp1(uint32_t data) {
   switch ((data >> 24) & 0x3f) {
     case 0x00:
       status = 0x14802000;
+      gpu_to_cpu_transfer.run.active = false;
       textured_rectangle_x_flip = 0;
       textured_rectangle_y_flip = 0;
       break;
@@ -20,7 +21,7 @@ void core_t::gp1(uint32_t data) {
       break;
 
     case 0x02:
-      status &= ~0x01000000;
+      status &= ~(1 << 24);
       break;
 
     case 0x03:
