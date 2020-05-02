@@ -170,6 +170,4 @@ TEST_F(GpuTest, StatusBits) {
   // 29-30 DMA Direction (0=Off, 1=?, 2=CPUtoGP0, 3=GPUREADtoCPU)    ;GP1(04h).0-1
   gpu.gp1(0x04000003);
   ASSERT_EQ(gpu.stat() & 0x60000000, 0x60000000);
-  
-  // 31    Drawing even/odd lines in interlace mode (0=Even or Vblank, 1=Odd)
 }

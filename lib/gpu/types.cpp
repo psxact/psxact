@@ -20,8 +20,8 @@ color_t color_t::from_uint16(uint16_t val) {
 color_t color_t::from_uint24(uint32_t val) {
   color_t color;
   color.r = uint_t<8>::trunc(val);
-  color.g = uint_t<8>::trunc(val);
-  color.b = uint_t<8>::trunc(val);
+  color.g = uint_t<8>::trunc(val >> 8);
+  color.b = uint_t<8>::trunc(val >> 16);
 
   return color;
 }

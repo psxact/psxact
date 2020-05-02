@@ -91,14 +91,15 @@ int core_t::tick() {
   bool irq = (get_cop(0)->read_gpr(12) & get_cop(0)->read_gpr(13) & 0xff00) != 0;
 
   if (iec && irq) {
-    enter_exception(cop0::exception_t::interrupt);
+    enter_exception(cop0::exception_t::interrupt, 0);
   }
   else {
     uint32_t code = (get_code() >> 26) & 63;
-    if (code)
+    if (code) {
       (*this.*op_table[code])();
-    else
+    } else {
       (*this.*op_table_special[get_code() & 63])();
+    }
   }
 
   return 4;
@@ -123,41 +124,38 @@ static inline uint32_t map_address(uint32_t address) {
   return address & segments[get_segment(address)];
 }
 
-void core_t::enter_exception(cop0::exception_t code) {
-  uint32_t status = get_cop(0)->read_gpr(12);
-  status = (status & ~0x3f) | ((status << 2) & 0x3f);
+void core_t::enter_exception(cop0::exception_t code, int cop) {
+  auto cop0 = (cop0::sys_t *) get_cop(0);
 
-  uint32_t cause = get_cop(0)->read_gpr(13);
-  cause = (cause & ~0x7f) | ((static_cast<int>(code) << 2) & 0x7f);
-
-  uint32_t epc;
+  cop0->push_flags();
+  cop0->put_cause_excode(code);
+  cop0->put_cause_ce(cop);
+  cop0->put_cause_bt(is_branch_delay_slot && is_branch_taken);
+  cop0->put_cause_bd(is_branch_delay_slot);
 
   if (is_branch_delay_slot) {
-    epc = regs.this_pc - 4;
-    cause |= 0x80000000;
+    if (is_branch_taken) {
+      cop0->put_tar(branch_target);
+    } else {
+      cop0->put_tar(regs.this_pc + 4);
+    }
+
+    cop0->put_epc(regs.this_pc - 4);
+  } else {
+    cop0->put_epc(regs.this_pc);
   }
-  else {
-    epc = regs.this_pc;
-    cause &= ~0x80000000;
+
+  if (cop0->get_bev()) {
+    set_pc(0xbfc00180);
+  } else {
+    set_pc(0x80000080);
   }
-
-  get_cop(0)->write_gpr(12, status);
-  get_cop(0)->write_gpr(13, cause);
-  get_cop(0)->write_gpr(14, epc);
-
-  regs.pc = (status & (1 << 22))
-    ? 0xbfc00180
-    : 0x80000080;
-
-  regs.next_pc = regs.pc + 4;
 }
 
 void core_t::read_code() {
   if (regs.pc & 3) {
-    return enter_exception(cop0::exception_t::address_error_load);
+    return enter_exception(cop0::exception_t::address_error_load, 0);
   }
-
-  // log_bios_calls();
 
   regs.this_pc = regs.pc;
   regs.pc = regs.next_pc;
@@ -182,7 +180,7 @@ io_target_t core_t::get_target(uint32_t address) const {
   }
 
   if ((address & 0x7ffffc00) == 0x1f800000 && get_segment(address) < KSEG1) {
-    log("data-cache memory access ~%08x", address);
+    log("d-cache memory access ~%08x", address);
     return io_target_t::DCACHE;
   }
 
@@ -258,14 +256,16 @@ void core_t::write_data_word(uint32_t address, uint32_t data) {
 void core_t::update_irq(uint32_t stat, uint32_t mask) {
   log("update irq: stat=0x%08x, mask=0x%08x", stat, mask);
 
+  auto cop0 = (cop0::sys_t *) get_cop(0);
+
   istat = stat;
   imask = mask;
 
-  int flag = (istat & imask)
-    ? get_cop(0)->read_gpr(13) |  (1 << 10)
-    : get_cop(0)->read_gpr(13) & ~(1 << 10);
-
-  get_cop(0)->write_gpr(13, flag);
+  if (istat & imask) {
+    cop0->put_cause_ip(1);
+  } else {
+    cop0->put_cause_ip(0);
+  }
 }
 
 uint32_t core_t::get_imask() const {
@@ -390,6 +390,24 @@ void core_t::set_register(uint32_t index, uint32_t value) {
   regs.gp[index] = value;
 }
 
+void core_t::branch(uint32_t target, bool condition) {
+  is_branch = true;
+  is_branch_taken = condition;
+  branch_target = target;
+
+  if (condition) {
+    regs.next_pc = target;
+  }
+}
+
+uint32_t core_t::branch_abs() {
+  return (regs.pc & 0xf0000000) | ((get_code() << 2) & 0x0ffffffc);
+}
+
+uint32_t core_t::branch_rel() {
+  return regs.pc + (decode_iconst() << 2);
+}
+
 // --============--
 //   Instructions
 // --============--
@@ -400,7 +418,7 @@ void core_t::op_add() {
   uint32_t z = x + y;
 
   if (overflow(x, y, z)) {
-    return enter_exception(cop0::exception_t::overflow);
+    return enter_exception(cop0::exception_t::overflow, 0);
   }
 
   set_rd(z);
@@ -412,7 +430,7 @@ void core_t::op_addi() {
   uint32_t z = x + y;
 
   if (overflow(x, y, z)) {
-    return enter_exception(cop0::exception_t::overflow);
+    return enter_exception(cop0::exception_t::overflow, 0);
   }
 
   set_rt(z);
@@ -435,35 +453,23 @@ void core_t::op_andi() {
 }
 
 void core_t::op_beq() {
-  if (get_rs() == get_rt()) {
-    regs.next_pc = regs.pc + (decode_iconst() << 2);
-    is_branch = true;
-  }
+  branch(branch_rel(), get_rs() == get_rt());
 }
 
 void core_t::op_bgtz() {
-  if (int32_t(get_rs()) > 0) {
-    regs.next_pc = regs.pc + (decode_iconst() << 2);
-    is_branch = true;
-  }
+  branch(branch_rel(), int32_t(get_rs()) > 0);
 }
 
 void core_t::op_blez() {
-  if (int32_t(get_rs()) <= 0) {
-    regs.next_pc = regs.pc + (decode_iconst() << 2);
-    is_branch = true;
-  }
+  branch(branch_rel(), int32_t(get_rs()) <= 0);
 }
 
 void core_t::op_bne() {
-  if (get_rs() != get_rt()) {
-    regs.next_pc = regs.pc + (decode_iconst() << 2);
-    is_branch = true;
-  }
+  branch(branch_rel(), get_rs() != get_rt());
 }
 
 void core_t::op_break() {
-  enter_exception(cop0::exception_t::breakpoint);
+  enter_exception(cop0::exception_t::breakpoint, 0);
 }
 
 void core_t::op_bxx() {
@@ -479,15 +485,12 @@ void core_t::op_bxx() {
     regs.gp[31] = regs.next_pc;
   }
 
-  if (condition) {
-    regs.next_pc = regs.pc + (decode_iconst() << 2);
-    is_branch = true;
-  }
+  branch(branch_rel(), condition);
 }
 
 void core_t::op_cop(int n) {
   if (get_cop_usable(n) == false) {
-    return enter_exception(cop0::exception_t::cop_unusable);
+    return enter_exception(cop0::exception_t::cop_unusable, n);
   }
 
   auto cop = get_cop(n);
@@ -562,28 +565,23 @@ void core_t::op_divu() {
 }
 
 void core_t::op_j() {
-  regs.next_pc = (regs.pc & 0xf0000000) | ((get_code() << 2) & 0x0ffffffc);
-  is_branch = true;
+  branch(branch_abs(), true);
 }
 
 void core_t::op_jal() {
   regs.gp[31] = regs.next_pc;
-  regs.next_pc = (regs.pc & 0xf0000000) | ((get_code() << 2) & 0x0ffffffc);
-  is_branch = true;
+  branch(branch_abs(), true);
 }
 
 void core_t::op_jalr() {
   uint32_t ra = regs.next_pc;
+  branch(get_rs(), true);
 
-  regs.next_pc = get_rs();
   set_rd(ra);
-
-  is_branch = true;
 }
 
 void core_t::op_jr() {
-  regs.next_pc = get_rs();
-  is_branch = true;
+  branch(get_rs(), true);
 }
 
 void core_t::op_lb() {
@@ -605,7 +603,7 @@ void core_t::op_lbu() {
 void core_t::op_lh() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    return enter_exception(cop0::exception_t::address_error_load);
+    return enter_exception(cop0::exception_t::address_error_load, 0);
   }
 
   uint32_t data = read_data_half(address);
@@ -617,7 +615,7 @@ void core_t::op_lh() {
 void core_t::op_lhu() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    return enter_exception(cop0::exception_t::address_error_load);
+    return enter_exception(cop0::exception_t::address_error_load, 0);
   }
 
   uint32_t data = read_data_half(address);
@@ -633,7 +631,7 @@ void core_t::op_lui() {
 void core_t::op_lw() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    return enter_exception(cop0::exception_t::address_error_load);
+    return enter_exception(cop0::exception_t::address_error_load, 0);
   }
 
   uint32_t data = read_data_word(address);
@@ -643,12 +641,12 @@ void core_t::op_lw() {
 
 void core_t::op_lwc(int n) {
   if (get_cop_usable(n) == false) {
-    return enter_exception(cop0::exception_t::cop_unusable);
+    return enter_exception(cop0::exception_t::cop_unusable, n);
   }
 
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    return enter_exception(cop0::exception_t::address_error_load);
+    return enter_exception(cop0::exception_t::address_error_load, 0);
   }
 
   get_cop(n)->write_gpr(decode_rt(), read_data_word(address));
@@ -754,7 +752,7 @@ void core_t::op_sb() {
 void core_t::op_sh() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    return enter_exception(cop0::exception_t::address_error_store);
+    return enter_exception(cop0::exception_t::address_error_store, 0);
   }
 
   write_data_half(address, get_rt());
@@ -806,7 +804,7 @@ void core_t::op_sub() {
   uint32_t z = x - y;
 
   if (overflow(x, ~y, z)) {
-    return enter_exception(cop0::exception_t::overflow);
+    return enter_exception(cop0::exception_t::overflow, 0);
   }
 
   set_rd(z);
@@ -819,7 +817,7 @@ void core_t::op_subu() {
 void core_t::op_sw() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    return enter_exception(cop0::exception_t::address_error_store);
+    return enter_exception(cop0::exception_t::address_error_store, 0);
   }
 
   uint32_t data = get_rt();
@@ -829,12 +827,12 @@ void core_t::op_sw() {
 
 void core_t::op_swc(int n) {
   if (get_cop_usable(n) == false) {
-    return enter_exception(cop0::exception_t::cop_unusable);
+    return enter_exception(cop0::exception_t::cop_unusable, n);
   }
 
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    return enter_exception(cop0::exception_t::address_error_store);
+    return enter_exception(cop0::exception_t::address_error_store, 0);
   }
 
   write_data_word(address, get_cop(n)->read_gpr(decode_rt()));
@@ -885,7 +883,7 @@ void core_t::op_swr() {
 }
 
 void core_t::op_syscall() {
-  enter_exception(cop0::exception_t::syscall);
+  enter_exception(cop0::exception_t::syscall, 0);
 }
 
 void core_t::op_xor() {
@@ -897,5 +895,5 @@ void core_t::op_xori() {
 }
 
 void core_t::op_und() {
-  enter_exception(cop0::exception_t::reserved_instruction);
+  enter_exception(cop0::exception_t::reserved_instruction, 0);
 }

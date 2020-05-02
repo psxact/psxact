@@ -43,6 +43,8 @@ class core_t final : public addressable_t {
 
   bool is_branch = {};
   bool is_branch_delay_slot = {};
+  bool is_branch_taken = {};
+  uint32_t branch_target = {};
 
   bool is_load = {};
   bool is_load_delay_slot = {};
@@ -69,7 +71,7 @@ class core_t final : public addressable_t {
 
   int tick();
 
-  void enter_exception(cop0::exception_t code);
+  void enter_exception(cop0::exception_t code, int cop);
 
   void update_irq(uint32_t stat, uint32_t mask);
 
@@ -78,32 +80,28 @@ class core_t final : public addressable_t {
   io_target_t get_target(uint32_t address) const;
 
   uint32_t read_data_byte(uint32_t address);
-
   uint32_t read_data_half(uint32_t address);
-
   uint32_t read_data_word(uint32_t address);
 
   void write_data_byte(uint32_t address, uint32_t data);
-
   void write_data_half(uint32_t address, uint32_t data);
-
   void write_data_word(uint32_t address, uint32_t data);
 
   uint32_t get_imask() const;
-
   void set_imask(uint32_t value);
 
   uint32_t get_istat() const;
-
   void set_istat(uint32_t value);
 
   uint16_t io_read_half(uint32_t address);
-
   uint32_t io_read_word(uint32_t address);
 
   void io_write_half(uint32_t address, uint16_t data);
-
   void io_write_word(uint32_t address, uint32_t data);
+
+  void branch(uint32_t target, bool condition);
+  uint32_t branch_abs();
+  uint32_t branch_rel();
 
   // -============-
   //  Instructions
