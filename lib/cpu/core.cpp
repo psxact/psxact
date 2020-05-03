@@ -51,7 +51,6 @@ core_t::core_t(addressable_t &memory)
   : addressable_t("cpu", args::log_cpu)
   , memory(memory)
   , dcache("dcache") {
-  regs.gp[0] = 0;
   regs.pc = 0xbfc00000;
   regs.next_pc = regs.pc + 4;
 
@@ -89,8 +88,9 @@ int core_t::tick() {
 
   bool iec = (get_cop(0)->read_gpr(12) & 1) != 0;
   bool irq = (get_cop(0)->read_gpr(12) & get_cop(0)->read_gpr(13) & 0xff00) != 0;
+  bool gte = (code & 0xfe000000) == 0x4a000000;
 
-  if (iec && irq) {
+  if (iec && irq && !gte) {
     enter_exception(cop0::exception_t::interrupt, 0);
   }
   else {
@@ -347,12 +347,12 @@ uint32_t core_t::get_register(uint32_t index) const {
     return load_value;
   }
   else {
-    return regs.gp[index];
+    return rf.get(index);
   }
 }
 
 uint32_t core_t::get_register_forwarded(uint32_t index) const {
-  return regs.gp[index];
+  return rf.get(index);
 }
 
 void core_t::set_pc(uint32_t value) {
@@ -362,32 +362,29 @@ void core_t::set_pc(uint32_t value) {
 }
 
 void core_t::set_rd(uint32_t value) {
-  regs.gp[decode_rd()] = value;
-  regs.gp[0] = 0;
+  rf.put(decode_rd(), value);
 }
 
 void core_t::set_rt(uint32_t value) {
-  regs.gp[decode_rt()] = value;
-  regs.gp[0] = 0;
+  rf.put(decode_rt(), value);
 }
 
 void core_t::set_rt_load(uint32_t value) {
   uint32_t t = decode_rt();
 
   if (is_load_delay_slot && load_index == t) {
-    regs.gp[t] = load_value;
+    rf.put(t, load_value);
   }
 
   is_load = true;
   load_index = t;
-  load_value = regs.gp[t];
+  load_value = rf.get(t);
 
-  regs.gp[t] = value;
-  regs.gp[0] = 0;
+  rf.put(t, value);
 }
 
 void core_t::set_register(uint32_t index, uint32_t value) {
-  regs.gp[index] = value;
+  rf.put(index, value);
 }
 
 void core_t::branch(uint32_t target, bool condition) {
@@ -482,7 +479,7 @@ void core_t::op_bxx() {
     : int32_t(get_rs()) <  0;
 
   if ((get_code() & 0x1e0000) == 0x100000) {
-    regs.gp[31] = regs.next_pc;
+    rf.put(31, regs.next_pc);
   }
 
   branch(branch_rel(), condition);
@@ -569,7 +566,7 @@ void core_t::op_j() {
 }
 
 void core_t::op_jal() {
-  regs.gp[31] = regs.next_pc;
+  rf.put(31, regs.next_pc);
   branch(branch_abs(), true);
 }
 
