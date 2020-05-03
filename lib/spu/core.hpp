@@ -12,6 +12,8 @@ namespace psx::spu {
   enum class register_t {
     kon_lo       = 0x1f801d88,
     kon_hi       = 0x1f801d8a,
+    koff_lo      = 0x1f801d8c,
+    koff_hi      = 0x1f801d8e,
     pmon_lo      = 0x1f801d90,
     pmon_hi      = 0x1f801d92,
     endx_lo      = 0x1f801d9c,
@@ -37,6 +39,7 @@ namespace psx::spu {
 
     voice_t voices[24];
     uint32_t key_on;
+    uint32_t key_off;
     uint32_t pmon;
     uint32_t endx;
 

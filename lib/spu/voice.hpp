@@ -2,6 +2,7 @@
 #define SPU_VOICE_HPP_
 
 #include "spu/adpcm.hpp"
+#include "spu/adsr.hpp"
 #include "spu/volume.hpp"
 #include "util/fifo.hpp"
 #include "util/int.hpp"
@@ -12,6 +13,7 @@
 namespace psx::spu {
 
   struct voice_t {
+    adsr_t adsr;
     volume_t volume_left;
     volume_t volume_right;
 
@@ -24,7 +26,6 @@ namespace psx::spu {
     uint32_t start_address;
     int16_t last_samples[2];
 
-    uint16_t adsr_volume;
     uint32_t start_delay;
 
     adpcm_header_t header;
@@ -33,6 +34,7 @@ namespace psx::spu {
     void put_sample(uint16_t val);
 
     int32_t raw_sample();
+    int32_t apply_envelope(int32_t raw);
 
     void counter_step();
   };

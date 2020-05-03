@@ -25,6 +25,21 @@ void core_t::dma_write(uint32_t val) {
 }
 
 uint16_t core_t::io_read_half(uint32_t address) {
+  if (address >= 0x1f801c00 && address <= 0x1f801d7f) {
+    auto &v = voices[(address >> 4) & 31];
+
+    switch (address & 15) {
+      case 0x0: break;
+      case 0x2: break;
+      case 0x4: break;
+      case 0x6: break;
+      case 0x8: break;
+      case 0xA: break;
+      case 0xC: return v.adsr.get_level();
+      case 0xE: return v.loop_address;
+    }
+  }
+
   return get_register(register_t(address));
 }
 
@@ -35,13 +50,13 @@ void core_t::io_write_half(uint32_t address, uint16_t data) {
     auto &v = voices[(address >> 4) & 31];
 
     switch (address & 15) {
-      case 0x0: v.volume_left = volume_t::create(data); return;
-      case 0x2: v.volume_right = volume_t::create(data); return;
+      case 0x0: v.volume_left.put_level(data); return;
+      case 0x2: v.volume_right.put_level(data); return;
       case 0x4: v.pitch = data; return;
       case 0x6: v.start_address = sound_ram_address_t::create(data & ~1); return;
-      case 0x8: return;
-      case 0xA: return;
-      case 0xC: return;
+      case 0x8: v.adsr.put_config_lo(data); return;
+      case 0xA: v.adsr.put_config_hi(data); return;
+      case 0xC: v.adsr.put_level(int16_t(data)); return;
       case 0xE: v.loop_address = sound_ram_address_t::create(data & ~1); return;
     }
     return;
@@ -56,6 +71,16 @@ void core_t::io_write_half(uint32_t address, uint16_t data) {
     case register_t::kon_hi:
       key_on &= 0x00ffff;
       key_on |= data << 16;
+      break;
+
+    case register_t::koff_lo:
+      key_off &= 0xff0000;
+      key_off |= data;
+      break;
+
+    case register_t::koff_hi:
+      key_off &= 0x00ffff;
+      key_off |= data << 16;
       break;
 
     case register_t::pmon_lo:

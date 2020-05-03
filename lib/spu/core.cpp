@@ -43,8 +43,6 @@ void core_t::run(int amount) {
 }
 
 void core_t::tick() {
-  put_status_register();
-
   int lsample = 0;
   int rsample = 0;
 
@@ -58,6 +56,7 @@ void core_t::tick() {
   }
 
   key_on = 0;
+  key_off = 0;
 
   sample_buffer[sample_buffer_index & 0x7ff] = int_t<16>::clamp(lsample);
   sample_buffer_index++;
@@ -66,22 +65,17 @@ void core_t::tick() {
 
   capture_address = (capture_address + 1) & 0x1ff;
 
-  // update ENDX
+  // Update registers
+  put_status_register();
   put_register(register_t::endx_lo, uint16_t(endx >> 0));
   put_register(register_t::endx_hi, uint16_t(endx >> 16));
 }
 
 void core_t::voice_tick(int v, int32_t *l, int32_t *r) {
   auto &voice = voices[v];
-  if (voice.start_delay > 0) {
-    voice.start_delay--;
-    return;
-  }
-
   voice_decoder_tick(v);
 
-  int32_t raw = voice.raw_sample();
-  int32_t sample = raw; // TODO: apply ADSR
+  int32_t sample = voice.apply_envelope(voice.raw_sample());
 
   if (v == 1) {
     ram.write(0x400 | capture_address, sample);
@@ -91,13 +85,27 @@ void core_t::voice_tick(int v, int32_t *l, int32_t *r) {
     ram.write(0x600 | capture_address, sample);
   }
 
-  int32_t left = voice.volume_left.apply(sample);
-  int32_t right = voice.volume_right.apply(sample);
+  *l = (sample * voice.volume_left.get_level()) >> 15;
+  *r = (sample * voice.volume_right.get_level()) >> 15;
 
-  voice.counter_step();
+  if (voice.start_delay > 0) {
+    voice.start_delay--;
+  } else {
+    voice.adsr.step();
+    voice.counter_step();
+  }
 
-  if (key_on & (1 << v)) {
-    endx &= ~(1 << v);
+  int32_t mask = 1 << v;
+
+  if (key_off & mask) {
+    key_off &= ~mask;
+    voice.adsr.key_off();
+  }
+
+  if (key_on & mask) {
+    key_on &= ~mask;
+    endx &= ~mask;
+    voice.adsr.key_on();
     voice.start_delay = 4;
     voice.phase = 0;
     voice.header = adpcm_header_t::create(0);
@@ -106,9 +114,6 @@ void core_t::voice_tick(int v, int32_t *l, int32_t *r) {
     voice.last_samples[1] = 0;
     voice.current_address = voice.start_address & ~7;
   }
-
-  *l = left;
-  *r = right;
 }
 
 void core_t::voice_decoder_tick(int v) {
@@ -122,6 +127,11 @@ void core_t::voice_decoder_tick(int v) {
     if (voice.header.loop_end) {
       voice.current_address = voice.loop_address & ~7;
       endx |= (1 << v);
+
+      if (!voice.header.loop_repeat) {
+        voice.adsr.key_off();
+        voice.adsr.put_level(0);
+      }
     }
 
     voice.put_header(ram.read(voice.current_address));

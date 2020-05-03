@@ -63,6 +63,12 @@ int32_t voice_t::raw_sample() {
     decoder_fifo.at(3));
 }
 
+int32_t voice_t::apply_envelope(int32_t raw) {
+  int32_t level = int32_t(adsr.get_level());
+
+  return (level * raw) >> 15;
+}
+
 void voice_t::counter_step() {
   uint16_t r = pitch;
 
