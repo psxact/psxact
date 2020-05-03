@@ -61,30 +61,65 @@ bool core_t::tick(int amount) {
   }
 
   if (next >= VBLANK_END) {
-    render_field_to_buffer();
+    if (get_v_resolution() == gpu_v_resolution_t::v480) {
+      render_field_480i();
+      field = field == gpu_field_t::even ? gpu_field_t::odd : gpu_field_t::even;
+    } else {
+      render_field_240p();
+      field = gpu_field_t::odd;
+    }
     return true;
   }
 
   return false;
 }
 
-void core_t::render_field_to_buffer() {
-  int target_line = 0;
-
-  if (get_v_resolution() == gpu_v_resolution_t::v480) {
-    // 480i, draw the line specified by the line field flag
-    target_line = int(field);
-    field = field == gpu_field_t::even ? gpu_field_t::odd : gpu_field_t::even;
-  } else {
-    // 240p, always draw even lines
-    target_line = 0;
-  }
-
+void core_t::render_field_240p() {
   const int width = int(get_h_resolution());
-  const int height = 240;
+  const int height = 480;
+
+  const int vscale = get_v_resolution() == gpu_v_resolution_t::v480 ? 1 : 2;
 
   if (get_display_depth() == gpu_display_depth_t::bpp24) {
-    for (int y = 0; y < height; y++) {
+    for (int y = 1; y < height; y += 2) {
+      for (int x = 0; x < width; x++) {
+        color_t color;
+        color.r = vram_read8(x * 3 + 0, y / vscale);
+        color.g = vram_read8(x * 3 + 1, y / vscale);
+        color.b = vram_read8(x * 3 + 2, y / vscale);
+
+        gamma_t::apply(color);
+
+        video_buffer[y - 1][x] = 0;
+        video_buffer[y - 0][x] = color.to_uint32();
+      }
+    }
+  } else {
+    for (int y = 1; y < height; y += 2) {
+      for (int x = 0; x < width; x++) {
+        uint16_t pixel = vram_read(
+          display_area_x + x,
+          display_area_y + (y / vscale));
+
+        color_t color = color_t::from_uint16(pixel);
+
+        gamma_t::apply(color);
+
+        video_buffer[y - 1][x] = 0;
+        video_buffer[y - 0][x] = color.to_uint32();
+      }
+    }
+  }
+}
+
+void core_t::render_field_480i() {
+  const int width = int(get_h_resolution());
+  const int height = 480;
+
+  const int field = int(this->field);
+
+  if (get_display_depth() == gpu_display_depth_t::bpp24) {
+    for (int y = field; y < height; y += 2) {
       for (int x = 0; x < width; x++) {
         color_t color;
         color.r = vram_read8(x * 3 + 0, y);
@@ -93,19 +128,21 @@ void core_t::render_field_to_buffer() {
 
         gamma_t::apply(color);
 
-        video_buffer[(y * 2) + target_line][x] = color.to_uint32();
+        video_buffer[y][x] = color.to_uint32();
       }
     }
   } else {
-    for (int y = 0; y < height; y++) {
+    for (int y = field; y < height; y += 2) {
       for (int x = 0; x < width; x++) {
-        color_t color = color_t::from_uint16(vram_read(
+        uint16_t pixel = vram_read(
           display_area_x + x,
-          display_area_y + y));
+          display_area_y + y);
+
+        color_t color = color_t::from_uint16(pixel);
 
         gamma_t::apply(color);
 
-        video_buffer[(y * 2) + target_line][x] = color.to_uint32();
+        video_buffer[y][x] = color.to_uint32();
       }
     }
   }
@@ -155,12 +192,16 @@ uint32_t core_t::data() {
 }
 
 uint32_t core_t::stat() {
+  auto bit31 = int(field);
+  auto bit13 = int(field);
+
   //  26    Ready to receive Cmd Word   (0=No, 1=Ready)  ;GP0(...) ;via GP0
   //  28    Ready to receive DMA Block  (0=No, 1=Ready)  ;GP0(...) ;via GP0
 
   return status | 0x14000000
       | (gpu_to_cpu_transfer.run.active << 27)
-      | (int(field) << 31);
+      | (bit31 << 31)
+      | (bit13 << 13);
 }
 
 uint32_t core_t::io_read_word(uint32_t address) {

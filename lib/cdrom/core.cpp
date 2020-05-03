@@ -214,6 +214,29 @@ void core_t::command_seek_data_mode() {
   drive_transition(&core_t::drive_int2, 40000);
 }
 
+void core_t::command_get_loc_p() {
+  // No status byte written for this command?
+  logic.interrupt_request = 3;
+
+  // track,index,mm,ss,sect,amm,ass,asect
+
+  logic.response_fifo.write(1); // FIXME: These should be read from the cue sheet.
+  logic.response_fifo.write(1);
+  logic.response_fifo.write(read_timecode.minute); // FIXME: Relative to start of track?
+  logic.response_fifo.write(read_timecode.second);
+  logic.response_fifo.write(read_timecode.sector);
+  logic.response_fifo.write(read_timecode.minute); // FIXME: Relative to start of disc?
+  logic.response_fifo.write(read_timecode.second);
+  logic.response_fifo.write(read_timecode.sector);
+}
+
+void core_t::command_set_filter(uint8_t file, uint8_t channel) {
+  logic.response_fifo.write(get_status_byte());
+  logic.interrupt_request = 3;
+
+  log("TODO: command_set_filter(0x%02x, 0x%02x)", file, channel);
+}
+
 void core_t::command_set_mode(uint8_t value) {
   logic.response_fifo.write(get_status_byte());
   logic.interrupt_request = 3;
@@ -300,9 +323,7 @@ void core_t::logic_executing_command() {
   log("logic_executing_command(0x%02x)", logic.command);
 
   switch (logic.command) {
-  case 0x01:
-    command_get_status();
-    break;
+  case 0x01: command_get_status(); break;
 
   case 0x02: {
     uint8_t minute = bcd::to_dec(get_param());
@@ -329,12 +350,20 @@ void core_t::logic_executing_command() {
     command_unmute();
     break;
 
+  case 0x0d:
+    command_set_filter(get_param(), get_param());
+    break;
+
   case 0x0e: {
     uint8_t mode = get_param();
 
     command_set_mode(mode);
     break;
   }
+
+  case 0x11:
+    command_get_loc_p();
+    break;
 
   case 0x15:
     command_seek_data_mode();
@@ -351,13 +380,17 @@ void core_t::logic_executing_command() {
     command_get_id();
     break;
 
+  case 0x1b: // TODO: seems ReadS is the same as ReadN?
+    command_read_n();
+    break;
+
   case 0x1e:
     command_read_table_of_contents();
     break;
 
   default:
-    log("unknown command `0x%02x'", command);
-    return;
+    printf("Unhandled CD-ROM command. (%02x)\n", command);
+    assert(0);
   }
 
   logic_transition(&core_t::logic_clearing_response, 1000);

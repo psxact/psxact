@@ -126,7 +126,10 @@ class core_t final
   bool tick(int amount);
 
   /// Called at the end of a field to draw the field into the video buffer.
-  void render_field_to_buffer();
+  void render_field_240p();
+
+  /// Called at the end of a field to draw the field into the video buffer.
+  void render_field_480i();
 
   uint32_t get_status() const;
   gpu_h_resolution_t get_h_resolution() const;
