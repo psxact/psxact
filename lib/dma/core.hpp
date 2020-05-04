@@ -3,7 +3,7 @@
 
 #include "addressable.hpp"
 #include "dma-comms.hpp"
-#include "interruptible.hpp"
+#include "irq-line.hpp"
 
 namespace psx::dma {
 
@@ -15,7 +15,7 @@ struct channel_t {
 };
 
 class core_t final : public addressable_t {
-  interruptible_t &irq;
+  irq_line_t irq;
   addressable_t &memory;
 
   /// The number of channels in `priority_lut'
@@ -34,7 +34,7 @@ class core_t final : public addressable_t {
   channel_t channels[7] = {};
 
  public:
-  core_t(interruptible_t &irq, addressable_t &memory);
+  core_t(irq_line_t irq, addressable_t &memory);
 
   void attach(int n, dma_comms_t *comms);
 

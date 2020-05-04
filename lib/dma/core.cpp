@@ -28,7 +28,7 @@ static const uint32_t REG_BIT1[32] = {
   0x00000000, 0x00000000, 0x00000000, 0x00000000, // ctrl
 };
 
-core_t::core_t(interruptible_t &irq, addressable_t &memory)
+core_t::core_t(irq_line_t irq, addressable_t &memory)
   : addressable_t("dma", args::log_dma)
   , irq(irq)
   , memory(memory) {
@@ -239,15 +239,12 @@ void core_t::update_irq_active_flag() {
   bool active = forced || (master && signal);
 
   if (active) {
-    if ((icr & 0x80000000) == 0) {
-      log("sending interrupt");
-      irq.interrupt(interrupt_type_t::dma);
-    }
-
     icr |= 0x80000000;
+    irq(irq_line_state_t::active);
   }
   else {
     icr &= ~0x80000000;
+    irq(irq_line_state_t::clear);
   }
 }
 

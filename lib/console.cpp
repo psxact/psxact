@@ -18,7 +18,7 @@ console_t::console_t()
   cdrom = new cdrom::core_t(*this, args::game_file_name);
   timer = new timer::core_t(*this);
   cpu = new cpu::core_t(*this);
-  dma = new dma::core_t(*this, *this);
+  dma = new dma::core_t(irq_line_t(*this, interrupt_type_t::dma), *this);
   exp1 = new exp::expansion1_t();
   exp2 = new exp::expansion2_t();
   exp3 = new exp::expansion3_t();
