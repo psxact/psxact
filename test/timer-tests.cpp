@@ -1,18 +1,29 @@
 #include <gtest/gtest.h>
-#include <timer/core.hpp>
+#include "timer/core.hpp"
 
-class MockInterruptible;
-class MockInterruptible : public ::psx::interruptible_t {
+using namespace psx;
+using namespace psx::timer;
+
+class MockInterruptible : public interruptible_t {
   public:
-    void interrupt(psx::interrupt_type_t) override {
+    void interrupt(interrupt_type_t) override {
     }
+};
+
+class MockIrqLine : public irq_line_t {
+public:
+  MockIrqLine()
+    : irq_line_t(interruptible, interrupt_type_t::gpu) {
+  }
+
+  MockInterruptible interruptible;
 };
 
 class TimerTest : public ::testing::Test {
   public:
     TimerTest()
       : interruptible()
-      , timer(interruptible) {
+      , timer(MockIrqLine(), MockIrqLine(), MockIrqLine()) {
     }
 
   protected:

@@ -16,7 +16,10 @@ console_t::console_t()
   wram = new memory_t< mib(2) >("wram");
 
   cdrom = new cdrom::core_t(*this, args::game_file_name);
-  timer = new timer::core_t(*this);
+  timer = new timer::core_t(
+    irq_line_t(*this, interrupt_type_t::timer0),
+    irq_line_t(*this, interrupt_type_t::timer1),
+    irq_line_t(*this, interrupt_type_t::timer2));
   cpu = new cpu::core_t(*this);
   dma = new dma::core_t(irq_line_t(*this, interrupt_type_t::dma), *this);
   exp1 = new exp::expansion1_t();

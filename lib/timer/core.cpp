@@ -28,9 +28,9 @@
 
 using namespace psx::timer;
 
-core_t::core_t(interruptible_t &irq)
+core_t::core_t(irq_line_t irq0, irq_line_t irq1, irq_line_t irq2)
   : addressable_t("timer", args::log_timer)
-  , irq(irq) {
+  , timers({ timer_t(irq0), timer_t(irq1), timer_t(irq2) }) {
 }
 
 void core_t::run(int amount) {
@@ -95,35 +95,30 @@ void core_t::timer_run(int n, int system, int system_over_8) {
 }
 
 void core_t::timer_irq(int n) {
-  auto &timer = timers[n];
-
-  bool repeat = (timer.control & (1 <<  6)) != 0;
-  bool toggle = (timer.control & (1 <<  7)) != 0;
-  auto old_10 = (timer.control & (1 << 10)) != 0;
-  auto new_10 = old_10;
+  bool repeat = (timers[n].control & (1 <<  6)) != 0;
+  bool toggle = (timers[n].control & (1 <<  7)) != 0;
+  auto bit_10 = (timers[n].control & (1 << 10)) != 0;
 
   // Either toggle bit10 or clear it.
   if (toggle && repeat) {
-    new_10 = !old_10;
+    timer_irq_flag(n, !bit_10);
   } else {
-    new_10 = false;
-  }
-
-  if (old_10 && !new_10) {
-    // Interrupts are enabled, and we had a falling-edge of bit10.
-    switch (n) {
-      case 0: irq.interrupt(interrupt_type_t::timer0); break;
-      case 1: irq.interrupt(interrupt_type_t::timer1); break;
-      case 2: irq.interrupt(interrupt_type_t::timer2); break;
-    }
+    timer_irq_flag(n, 0);
   }
 
   if (!toggle && repeat) { // pulse mode, repeat
-    new_10 = true;
+    timer_irq_flag(n, 1);
   }
+}
 
-  timers[n].control &= ~(1 << 10);
-  timers[n].control |=  (1 << 10);
+void core_t::timer_irq_flag(int n, bool val) {
+  if (val) {
+    timers[n].irq(irq_line_state_t::clear);
+    timers[n].control |= (1 << 10);
+  } else {
+    timers[n].irq(irq_line_state_t::active);
+    timers[n].control &= ~(1 << 10);
+  }
 }
 
 timer_source_t core_t::timer_source(int n) {
@@ -160,7 +155,7 @@ void core_t::timer_put_counter(int n, uint16_t val) {
 void core_t::timer_put_control(int n, uint16_t val) {
   timers[n].control &= 0x1800;
   timers[n].control |= val & 0x3ff;
-  timers[n].control |= 0x400;
+  timer_irq_flag(n, 1);
 }
 
 void core_t::timer_put_counter_target(int n, uint16_t val) {
