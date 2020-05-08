@@ -63,135 +63,119 @@ void core_t::tick(int amount) {
   }
 }
 
-uint8_t core_t::io_read_byte(uint32_t address) {
-  switch (address) {
-    case 0x1f801040:
-      uint8_t data = rx.fifo.is_empty()
-        ? 0xff
-        : rx.fifo.read();
+uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+  if (width == address_width_t::byte && address == 0x1f801040) {
+    uint8_t data = rx.fifo.is_empty() ? 0xff : rx.fifo.read();
 
-      log("1040: rx '%02x'", data);
+    log("1040: rx '%02x'", data);
 
-      return data;
+    return data;
   }
 
-  return addressable_t::io_read_byte(address);
-}
+  if (width == address_width_t::word || width == address_width_t::half) {
+    switch (address) {
+      case 0x1f801044: {
+        uint16_t data =
+          (tx.pending ? 0 : 1) | //   0     TX Ready Flag 1   (1=Ready/Started)
+          (!rx.fifo.is_empty() << 1) |
+          (1 << 2) | //   2     TX Ready Flag 2   (1=Ready/Finished)
+          (0 << 3) | //   3     RX Parity Error   (0=No, 1=Error; Wrong Parity, when enabled)  (sticky)
+          (int(dsr.level) << 7) |
+          (interrupt << 9) |
+          (baud.counter << 11);
 
-uint16_t core_t::io_read_half(uint32_t address) {
-  switch (address) {
-    case 0x1f801044: {
-      uint16_t data =
-        (tx.pending ? 0 : 1) | //   0     TX Ready Flag 1   (1=Ready/Started)
-        (!rx.fifo.is_empty() << 1) |
-        (1 << 2) | //   2     TX Ready Flag 2   (1=Ready/Finished)
-        (0 << 3) | //   3     RX Parity Error   (0=No, 1=Error; Wrong Parity, when enabled)  (sticky)
-        (int(dsr.level) << 7) |
-        (interrupt << 9) |
-        (baud.counter << 11);
+        log("1044: returning '%04x'", data);
 
-      log("1044: returning '%04x'", data);
-
-      return data;
-    }
-
-    case 0x1f80104a: {
-      uint16_t data =
-        (tx.enable << 0) |
-        (port.output << 1) |
-        (rx.enable << 2) |
-        (rx.interrupt_mode << 8) |
-        (tx.interrupt_enable << 10) |
-        (rx.interrupt_enable << 11) |
-        (dsr.interrupt_enable << 12) |
-        (port.select << 13);
-
-      log("104a: returning '%04x'", data);
-
-      return data;
-    }
-
-    case 0x1f80104e:
-      return baud.reload;
-  }
-
-  return addressable_t::io_read_half(address);
-}
-
-uint32_t core_t::io_read_word(uint32_t address) {
-  return addressable_t::io_read_word(address);
-}
-
-void core_t::io_write_byte(uint32_t address, uint8_t data) {
-  switch (address) {
-    case 0x1f801040:
-      tx.buffer = data & 0xff;
-      tx.pending = true;
-
-      log("1040: tx '%02x'", tx.buffer);
-      return;
-  }
-
-  return addressable_t::io_write_byte(address, data);
-}
-
-void core_t::io_write_half(uint32_t address, uint16_t data) {
-  switch (address) {
-    case 0x1f801048:
-      // 1F801048h JOY_MODE (R/W) (usually 000Dh, ie. 8bit, no parity, MUL1)
-      //
-      //   0-1   Baudrate Reload Factor (1=MUL1, 2=MUL16, 3=MUL64) (or 0=MUL1, too)
-      //   2-3   Character Length       (0=5bits, 1=6bits, 2=7bits, 3=8bits)
-      //   4     Parity Enable          (0=No, 1=Enable)
-      //   5     Parity Type            (0=Even, 1=Odd) (seems to be vice-versa...?)
-      //   6-7   Unknown (always zero)
-      //   8     CLK Output Polarity    (0=Normal:High=Idle, 1=Inverse:Low=Idle)
-      //   9-15  Unknown (always zero)
-
-      if (data != 0x000d) {
-        log("1048 - non-standard value: %04x", data);
+        return data;
       }
-      return;
 
-    case 0x1f80104a:
-      if (data & 0x40) {
-        log("resetting input");
-        interrupt = 0;
-        port.output = 0;
-        port.select = 0;
-        rx.fifo.clear();
+      case 0x1f80104a: {
+        uint16_t data =
+          (tx.enable << 0) |
+          (port.output << 1) |
+          (rx.enable << 2) |
+          (rx.interrupt_mode << 8) |
+          (tx.interrupt_enable << 10) |
+          (rx.interrupt_enable << 11) |
+          (dsr.interrupt_enable << 12) |
+          (port.select << 13);
+
+        log("104a: returning '%04x'", data);
+
+        return data;
       }
-      else {
-        if (data & 0x10) {
-          interrupt = 0;
+
+      case 0x1f80104e:
+        return baud.reload;
+    }
+  }
+
+  return addressable_t::io_read(width, address);
+}
+
+void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+  if (width == address_width_t::byte && address == 0x1f801040) {
+    tx.buffer = data & 0xff;
+    tx.pending = true;
+
+    log("1040: tx '%02x'", tx.buffer);
+    return;
+  }
+
+  if (width == address_width_t::word || width == address_width_t::half) {
+    switch (address) {
+      case 0x1f801048:
+        // 1F801048h JOY_MODE (R/W) (usually 000Dh, ie. 8bit, no parity, MUL1)
+        //
+        //   0-1   Baudrate Reload Factor (1=MUL1, 2=MUL16, 3=MUL64) (or 0=MUL1, too)
+        //   2-3   Character Length       (0=5bits, 1=6bits, 2=7bits, 3=8bits)
+        //   4     Parity Enable          (0=No, 1=Enable)
+        //   5     Parity Type            (0=Even, 1=Odd) (seems to be vice-versa...?)
+        //   6-7   Unknown (always zero)
+        //   8     CLK Output Polarity    (0=Normal:High=Idle, 1=Inverse:Low=Idle)
+        //   9-15  Unknown (always zero)
+
+        if (data != 0x000d) {
+          log("1048 - non-standard value: %04x", data);
         }
+        return;
 
-        tx.enable = (data >> 0) & 1;
-        port.output = (data >> 1) & 1;
-        rx.enable = (data >> 2) & 1;
-        rx.interrupt_mode = (data >> 8) & 3;
-        tx.interrupt_enable = (data >> 10) & 1;
-        rx.interrupt_enable = (data >> 11) & 1;
-        dsr.interrupt_enable = (data >> 12) & 1;
-        port.select = (data >> 13) & 1;
+      case 0x1f80104a:
+        if (data & 0x40) {
+          log("resetting input");
+          interrupt = 0;
+          port.output = 0;
+          port.select = 0;
+          rx.fifo.clear();
+        }
+        else {
+          if (data & 0x10) {
+            interrupt = 0;
+          }
 
-        port.control[0]->set_dtr(port.output == 1 && port.select == 0);
-        port.memcard[0]->set_dtr(port.output == 1 && port.select == 0);
-        port.control[1]->set_dtr(port.output == 1 && port.select == 1);
-        port.memcard[1]->set_dtr(port.output == 1 && port.select == 1);
-      }
-      return;
+          tx.enable = (data >> 0) & 1;
+          port.output = (data >> 1) & 1;
+          rx.enable = (data >> 2) & 1;
+          rx.interrupt_mode = (data >> 8) & 3;
+          tx.interrupt_enable = (data >> 10) & 1;
+          rx.interrupt_enable = (data >> 11) & 1;
+          dsr.interrupt_enable = (data >> 12) & 1;
+          port.select = (data >> 13) & 1;
 
-    case 0x1f80104e:
-      baud.reload = data & 0xffff;
-      return;
+          port.control[0]->set_dtr(port.output == 1 && port.select == 0);
+          port.memcard[0]->set_dtr(port.output == 1 && port.select == 0);
+          port.control[1]->set_dtr(port.output == 1 && port.select == 1);
+          port.memcard[1]->set_dtr(port.output == 1 && port.select == 1);
+        }
+        return;
+
+      case 0x1f80104e:
+        baud.reload = data & 0xffff;
+        return;
+    }
   }
 
-  return addressable_t::io_write_half(address, data);
-}
-
-void core_t::io_write_word(uint32_t address, uint32_t data) {
-  return addressable_t::io_write_word(address, data);
+  return addressable_t::io_write(width, address, data);
 }
 
 void core_t::write_rx(uint8_t data) {

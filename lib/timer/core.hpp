@@ -13,10 +13,20 @@ namespace psx::timer {
     dotclock
   };
 
+  enum class timer_sync_mode_t {
+    none,
+    sync_mode_0,
+    sync_mode_1,
+    sync_mode_2,
+    sync_mode_3
+  };
+
   struct timer_t final {
-    uint16_t counter { 0 };
-    uint16_t control { 0 };
-    uint16_t counter_target { 0 };
+    uint16_t counter = {};
+    uint16_t control = {};
+    uint16_t counter_target = {};
+    bool running = {};
+
     irq_line_t irq;
 
     timer_t(irq_line_t irq) : irq(irq) {}
@@ -24,19 +34,26 @@ namespace psx::timer {
 
   class core_t final : public addressable_t {
     timer_t timers[3];
-    int prescale_system_over_8 = {};
+    int system_over_8_prescale = {};
+    bool in_hblank = {};
+    bool in_vblank = {};
 
   public:
     explicit core_t(irq_line_t irq0, irq_line_t irq1, irq_line_t irq2);
 
     void run(int amount);
 
-    uint16_t io_read_half(uint32_t address);
-    uint32_t io_read_word(uint32_t address);
-    void io_write_half(uint32_t address, uint16_t data);
+    uint32_t io_read(address_width_t width, uint32_t address);
+    void io_write(address_width_t width, uint32_t address, uint32_t data);
+
+    void enter_hblank();
+    void leave_hblank();
+
+    void enter_vblank();
+    void leave_vblank();
 
   private:
-    void timer_run(int n, int system, int system_over_8);
+    void timer_run(int n, int amount);
     void timer_irq(int n);
     void timer_irq_flag(int n, bool val);
 
@@ -49,6 +66,8 @@ namespace psx::timer {
     void timer_put_counter_target(int n, uint16_t val);
 
     timer_source_t timer_source(int n);
+    timer_sync_mode_t timer_sync_mode(int n);
+    void timer_blanking_sync(int n, bool active);
   };
 }  // namespace psx::timer
 

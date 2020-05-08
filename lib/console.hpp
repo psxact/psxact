@@ -18,6 +18,7 @@
 #include "args.hpp"
 #include "interruptible.hpp"
 #include "memory.hpp"
+#include "memory-control.hpp"
 
 namespace psx {
 
@@ -59,6 +60,7 @@ class console_t final
   input::core_t *input;
   mdec::core_t *mdec;
   spu::core_t *spu;
+  memory_control_t *mem;
   int cycles;
 
   bool is_exe;
@@ -69,23 +71,16 @@ class console_t final
 
   void interrupt(interrupt_type_t flag);
 
-  uint8_t io_read_byte(uint32_t address);
-  uint16_t io_read_half(uint32_t address);
-  uint32_t io_read_word(uint32_t address);
-
-  void io_write_byte(uint32_t address, uint8_t data);
-  void io_write_half(uint32_t address, uint16_t data);
-  void io_write_word(uint32_t address, uint32_t data);
+  uint32_t io_read(address_width_t width, uint32_t address);
+  void io_write(address_width_t width, uint32_t address, uint32_t data);
 
   void run_for_one_frame(input_params_t &input, output_params_t &output);
 
  private:
+  addressable_t &decode(uint32_t address);
+
   void get_audio_params(output_params_audio_t &params);
   void get_video_params(output_params_video_t &params);
-
-  addressable_t *decode(uint32_t address);
-  uint32_t read_memory_control(int size, uint32_t address);
-  void write_memory_control(int size, uint32_t address, uint32_t data);
 
   void load_exe(const char *game_file_name);
 };

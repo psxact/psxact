@@ -68,9 +68,8 @@ namespace psx::spu {
     uint32_t dma_read();
     void dma_write(uint32_t val);
 
-    uint16_t io_read_half(uint32_t address);
-    void io_write_half(uint32_t address, uint16_t data);
-    void io_write_word(uint32_t address, uint32_t data);
+    uint32_t io_read(address_width_t width, uint32_t address);
+    void io_write(address_width_t width, uint32_t address, uint32_t data);
 
     // voice functions
 

@@ -7,15 +7,15 @@ uint32_t core_t::vram_address(int x, int y) {
 }
 
 uint8_t core_t::vram_read8(int x, int y) {
-  return vram->io_read_byte(vram_address(x, y));
+  return vram->io_read(address_width_t::byte, vram_address(x, y));
 }
 
 uint16_t core_t::vram_read(int x, int y) {
-  return vram->io_read_half(vram_address(x * 2, y));
+  return vram->io_read(address_width_t::half, vram_address(x * 2, y));
 }
 
 void core_t::vram_write(int x, int y, uint16_t data) {
-  vram->io_write_half(vram_address(x * 2, y), data);
+  vram->io_write(address_width_t::half, vram_address(x * 2, y), data);
 }
 
 uint16_t core_t::vram_transfer_read() {

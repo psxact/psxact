@@ -163,7 +163,7 @@ void core_t::read_code() {
 
   // TODO: read i-cache
 
-  code = memory.io_read_word(map_address(regs.this_pc));
+  code = memory.io_read(address_width_t::word, map_address(regs.this_pc));
 }
 
 io_target_t core_t::get_target(uint32_t address) const {
@@ -192,8 +192,8 @@ uint32_t core_t::read_data_byte(uint32_t address) {
 
   switch (get_target(address)) {
     case io_target_t::ICACHE: return 0;
-    case io_target_t::DCACHE: return dcache.io_read_byte(address);
-    case io_target_t::MEMORY: return memory.io_read_byte(address);
+    case io_target_t::DCACHE: return dcache.io_read(address_width_t::byte, address);
+    case io_target_t::MEMORY: return memory.io_read(address_width_t::byte, address);
   }
 
   return 0;
@@ -204,8 +204,8 @@ uint32_t core_t::read_data_half(uint32_t address) {
 
   switch (get_target(address)) {
     case io_target_t::ICACHE: return 0;
-    case io_target_t::DCACHE: return dcache.io_read_half(address);
-    case io_target_t::MEMORY: return memory.io_read_half(address);
+    case io_target_t::DCACHE: return dcache.io_read(address_width_t::half, address);
+    case io_target_t::MEMORY: return memory.io_read(address_width_t::half, address);
   }
 
   return 0;
@@ -216,8 +216,8 @@ uint32_t core_t::read_data_word(uint32_t address) {
 
   switch (get_target(address)) {
     case io_target_t::ICACHE: return 0;
-    case io_target_t::DCACHE: return dcache.io_read_word(address);
-    case io_target_t::MEMORY: return memory.io_read_word(address);
+    case io_target_t::DCACHE: return dcache.io_read(address_width_t::word, address);
+    case io_target_t::MEMORY: return memory.io_read(address_width_t::word, address);
   }
 
   return 0;
@@ -228,8 +228,8 @@ void core_t::write_data_byte(uint32_t address, uint32_t data) {
 
   switch (get_target(address)) {
     case io_target_t::ICACHE: break;
-    case io_target_t::DCACHE: dcache.io_write_byte(address, data); break;
-    case io_target_t::MEMORY: memory.io_write_byte(address, data); break;
+    case io_target_t::DCACHE: dcache.io_write(address_width_t::byte, address, data); break;
+    case io_target_t::MEMORY: memory.io_write(address_width_t::byte, address, data); break;
   }
 }
 
@@ -238,8 +238,8 @@ void core_t::write_data_half(uint32_t address, uint32_t data) {
 
   switch (get_target(address)) {
     case io_target_t::ICACHE: break;
-    case io_target_t::DCACHE: dcache.io_write_half(address, data); break;
-    case io_target_t::MEMORY: memory.io_write_half(address, data); break;
+    case io_target_t::DCACHE: dcache.io_write(address_width_t::half, address, data); break;
+    case io_target_t::MEMORY: memory.io_write(address_width_t::half, address, data); break;
   }
 }
 
@@ -248,8 +248,8 @@ void core_t::write_data_word(uint32_t address, uint32_t data) {
 
   switch (get_target(address)) {
     case io_target_t::ICACHE: break;
-    case io_target_t::DCACHE: dcache.io_write_word(address, data); break;
-    case io_target_t::MEMORY: memory.io_write_word(address, data); break;
+    case io_target_t::DCACHE: dcache.io_write(address_width_t::word, address, data); break;
+    case io_target_t::MEMORY: memory.io_write(address_width_t::word, address, data); break;
   }
 }
 
@@ -284,34 +284,32 @@ void core_t::set_istat(uint32_t value) {
   update_irq(value, get_imask());
 }
 
-uint16_t core_t::io_read_half(uint32_t address) {
-  switch (address) {
-    case 0x1f801070:
-      return get_istat();
+uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+  if (width == address_width_t::word || width == address_width_t::half) {
+    switch (address) {
+      case 0x1f801070:
+        return get_istat();
 
-    case 0x1f801074:
-      return get_imask();
+      case 0x1f801074:
+        return get_imask();
+    }
   }
 
-  return 0;
+  return addressable_t::io_read(width, address);
 }
 
-uint32_t core_t::io_read_word(uint32_t address) {
-  return io_read_half(address);
-}
+void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+  if (width == address_width_t::word || width == address_width_t::half) {
+    switch (address) {
+      case 0x1f801070:
+        return set_istat(data & istat);
 
-void core_t::io_write_half(uint32_t address, uint16_t data) {
-  switch (address) {
-    case 0x1f801070:
-      return set_istat(data & istat);
-
-    case 0x1f801074:
-      return set_imask(data & 0x7ff);
+      case 0x1f801074:
+        return set_imask(data & 0x7ff);
+    }
   }
-}
 
-void core_t::io_write_word(uint32_t address, uint32_t data) {
-  io_write_half(address, data);
+  return addressable_t::io_write(width, address, data);
 }
 
 // --========--

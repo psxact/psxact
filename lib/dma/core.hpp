@@ -50,11 +50,8 @@ class core_t final : public addressable_t {
   void put_icr(uint32_t val);
   void put_pcr(uint32_t val);
 
-  uint8_t io_read_byte(uint32_t address);
-  uint16_t io_read_half(uint32_t address);
-  uint32_t io_read_word(uint32_t address);
-
-  void io_write_word(uint32_t address, uint32_t data);
+  uint32_t io_read(address_width_t width, uint32_t address);
+  void io_write(address_width_t width, uint32_t address, uint32_t data);
 
   uint32_t get32(uint32_t address);
 

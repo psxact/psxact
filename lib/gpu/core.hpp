@@ -141,8 +141,8 @@ class core_t final
   uint32_t dma_read() override;
   void dma_write(uint32_t val) override;
 
-  uint32_t io_read_word(uint32_t address) override;
-  void io_write_word(uint32_t address, uint32_t data) override;
+  uint32_t io_read(address_width_t width, uint32_t address) override;
+  void io_write(address_width_t width, uint32_t address, uint32_t data) override;
 
   uint32_t data();
   uint32_t stat();

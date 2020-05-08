@@ -33,61 +33,73 @@ core_t::core_t(irq_line_t irq0, irq_line_t irq1, irq_line_t irq2)
   , timers({ timer_t(irq0), timer_t(irq1), timer_t(irq2) }) {
 }
 
-void core_t::run(int amount) {
-  prescale_system_over_8 += amount;
-  int system_over_8 = prescale_system_over_8 / 8;
-  prescale_system_over_8 &= 7;
+void core_t::run(int system) {
+  system_over_8_prescale += system;
+  int system_over_8 = system_over_8_prescale / 8;
+  system_over_8_prescale &= 7;
 
-  timer_run(0, amount, system_over_8);
-  timer_run(1, amount, system_over_8);
-  timer_run(2, amount, system_over_8);
+  if (timer_source(0) == timer_source_t::system) {
+    timer_run(0, system);
+  }
+
+  if (timer_source(1) == timer_source_t::system) {
+    timer_run(1, system);
+  }
+
+  if (timer_source(2) == timer_source_t::system) {
+    timer_run(2, system);
+  } else if (timer_source(2) == timer_source_t::system_over_8) {
+    timer_run(2, system_over_8);
+  }
 }
 
-void core_t::timer_run(int n, int system, int system_over_8) {
+void core_t::enter_hblank() {
+  in_hblank = true;
+  timer_blanking_sync(0, in_hblank);
+
+  if (timer_source(1) == timer_source_t::hblank) {
+    timer_run(1, 1);
+  }
+}
+
+void core_t::leave_hblank() {
+  in_hblank = false;
+  timer_blanking_sync(0, in_hblank);
+}
+
+void core_t::enter_vblank() {
+  in_vblank = true;
+  timer_blanking_sync(1, in_vblank);
+}
+
+void core_t::leave_vblank() {
+  in_vblank = false;
+  timer_blanking_sync(1, in_vblank);
+}
+
+void core_t::timer_run(int n, int amount) {
   auto &timer = timers[n];
 
-  uint32_t control = uint32_t(timer.control);
-  if (control & 1) {
-    // 0     Synchronization Enable (0=Free Run, 1=Synchronize via Bit1-2)
-    // 1-2   Synchronization Mode   (0-3, see lists below)
-    assert(0 && "Sync modes aren't supported yet.");
+  if (!timer.running) {
+    return;
   }
 
-  uint32_t counter = timer.counter;
-
-  switch (timer_source(n)) {
-    case timer_source_t::system:
-      counter += system;
-      break;
-
-    case timer_source_t::system_over_8:
-      counter += system_over_8;
-      break;
-
-    case timer_source_t::hblank:
-      assert(0 && "HBlank isn't supported yet.");
-      break;
-
-    case timer_source_t::dotclock:
-      assert(0 && "Dotclock isn't supported yet.");
-      break;
-  }
-
+  uint32_t counter = timer.counter + amount;
   uint32_t target;
 
-  target = timer.counter_target;
+  target = timer.counter_target + 1;
 
   if (timer.counter < target && counter >= target) {
     if ((timer.control & (1 << 3)) != 0) counter %= target;
-    if ((timer.control & (1 << 4)) != 0) timer_irq(n); // 4     IRQ when Counter=Target (0=Disable, 1=Enable)
+    if ((timer.control & (1 << 4)) != 0) timer_irq(n);
     timer.control |= (1 << 11);
   }
 
-  target = 0x10000;
+  target = 0xffff + 1;
 
   if (timer.counter < target && counter > target) {
     if ((timer.control & (1 << 3)) == 0) counter %= target;
-    if ((timer.control & (1 << 5)) != 0) timer_irq(n); // 5     IRQ when Counter=FFFFh  (0=Disable, 1=Enable)
+    if ((timer.control & (1 << 5)) != 0) timer_irq(n);
     timer.control |= (1 << 12);
   }
 
@@ -131,6 +143,50 @@ timer_source_t core_t::timer_source(int n) {
   assert(0 && "Invalid value for parameter `n'");
 }
 
+timer_sync_mode_t core_t::timer_sync_mode(int n) {
+  if (timers[n].control & 1) {
+    switch ((timers[n].control >> 1) & 3) {
+      case  0: return timer_sync_mode_t::sync_mode_0;
+      case  1: return timer_sync_mode_t::sync_mode_1;
+      case  2: return timer_sync_mode_t::sync_mode_2;
+      default: return timer_sync_mode_t::sync_mode_3;
+    }
+  } else {
+    return timer_sync_mode_t::none;
+  }
+}
+
+void core_t::timer_blanking_sync(int n, bool active) {
+  switch (timer_sync_mode(n)) {
+    case timer_sync_mode_t::none:
+      break;
+
+    case timer_sync_mode_t::sync_mode_0: // 0 = Pause counter during blank(s)
+      timers[n].running = !active;
+      break;
+
+    case timer_sync_mode_t::sync_mode_1: // 1 = Reset counter to 0000h at blank(s)
+      if (active) {
+        timers[n].counter = 0;
+      }
+      break;
+
+    case timer_sync_mode_t::sync_mode_2: // 2 = Reset counter to 0000h at blank(s) and pause outside of blank
+      timers[n].running = active;
+
+      if (active) {
+        timers[n].counter = 0;
+      }
+      break;
+
+    case timer_sync_mode_t::sync_mode_3: // 3 = Pause until blank occurs once, then switch to Free Run
+      if (active) {
+        timers[n].running = true;
+      }
+      break;
+  }
+}
+
 uint16_t core_t::timer_get_counter(int n) {
   return timers[n].counter;
 }
@@ -153,39 +209,67 @@ void core_t::timer_put_counter(int n, uint16_t val) {
 }
 
 void core_t::timer_put_control(int n, uint16_t val) {
+  timers[n].running  = true;
   timers[n].control &= 0x1800;
   timers[n].control |= val & 0x3ff;
   timer_irq_flag(n, 1);
+
+  if ((timers[n].control & 1) == 1) {
+    uint32_t sync_mode = (timers[n].control >> 1) & 3;
+    if (n == 0) {
+      // TODO: do these sync modes take effect immediately, or on the next /HBL pulse?
+      switch (sync_mode) {
+        case 0: timers[0].running = !in_hblank; break; // 0 = Pause counter during Hblank(s)
+        case 1: break; // 1 = Reset counter to 0000h at Hblank(s)
+        case 2: timers[0].running = in_hblank; break; // 2 = Reset counter to 0000h at Hblank(s) and pause outside of Hblank
+        case 3: timers[0].running = false; break; // 3 = Pause until Hblank occurs once, then switch to Free Run
+      }
+    }
+
+    if (n == 1) {
+      // TODO: do these sync modes take effect immediately, or on the next /VBL pulse?
+      switch (sync_mode) {
+        case 0: timers[1].running = !in_vblank; break; // 0 = Pause counter during Vblank(s)
+        case 1: break; // 1 = Reset counter to 0000h at Vblank(s)
+        case 2: timers[1].running = in_vblank; break; // 2 = Reset counter to 0000h at Vblank(s) and pause outside of Vblank
+        case 3: timers[1].running = false; break; // 3 = Pause until Vblank occurs once, then switch to Free Run
+      }
+    }
+
+    if (n == 2 && (sync_mode == 0 || sync_mode == 3)) {
+      timers[n].running = false;
+    }
+  }
 }
 
 void core_t::timer_put_counter_target(int n, uint16_t val) {
   timers[n].counter_target = val;
 }
 
-uint16_t core_t::io_read_half(uint32_t address) {
-  int n = (address >> 4) & 3;
+uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+  if (width == address_width_t::word) {
+    int n = (address >> 4) & 3;
 
-  switch (address & 0x1F80110F) {
-    case 0x1F801100: return timer_get_counter(n);
-    case 0x1F801104: return timer_get_control(n);
-    case 0x1F801108: return timer_get_counter_target(n);
+    switch (address & 0x1F80110F) {
+      case 0x1F801100: return timer_get_counter(n);
+      case 0x1F801104: return timer_get_control(n);
+      case 0x1F801108: return timer_get_counter_target(n);
+    }
   }
 
-  assert(0 && "Unhandled timer address");
+  return addressable_t::io_read(width, address);
 }
 
-uint32_t core_t::io_read_word(uint32_t address) {
-  return io_read_half(address);
-}
+void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+  if (width == address_width_t::word || width == address_width_t::half) {
+    int n = (address >> 4) & 3;
 
-void core_t::io_write_half(uint32_t address, uint16_t data) {
-  int n = (address >> 4) & 3;
-
-  switch (address & 0x1F80110F) {
-    case 0x1F801100: return timer_put_counter(n, data);
-    case 0x1F801104: return timer_put_control(n, data);
-    case 0x1F801108: return timer_put_counter_target(n, data);
+    switch (address & 0x1F80110F) {
+      case 0x1F801100: return timer_put_counter(n, data);
+      case 0x1F801104: return timer_put_control(n, data);
+      case 0x1F801108: return timer_put_counter_target(n, data);
+    }
   }
 
-  assert(0 && "Unhandled timer address");
+  return addressable_t::io_write(width, address, data);
 }

@@ -96,11 +96,8 @@ class core_t final : public addressable_t {
   uint32_t get_istat() const;
   void set_istat(uint32_t value);
 
-  uint16_t io_read_half(uint32_t address);
-  uint32_t io_read_word(uint32_t address);
-
-  void io_write_half(uint32_t address, uint16_t data);
-  void io_write_word(uint32_t address, uint32_t data);
+  uint32_t io_read(address_width_t width, uint32_t address);
+  void io_write(address_width_t width, uint32_t address, uint32_t data);
 
   void branch(uint32_t target, bool condition);
   uint32_t branch_abs();

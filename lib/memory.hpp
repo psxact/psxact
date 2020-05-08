@@ -31,28 +31,24 @@ struct memory_t : public addressable_t {
     return &b[address];
   }
 
-  uint8_t io_read_byte(uint32_t address) {
-    return b[(address & kMask) / 1];
+  uint32_t io_read(address_width_t width, uint32_t address) {
+    switch (width) {
+      case address_width_t::byte: return b[(address & kMask) / 1];
+      case address_width_t::half: return h[(address & kMask) / 2];
+      case address_width_t::word: return w[(address & kMask) / 4];
+    }
+
+    return addressable_t::io_read(width, address);
   }
 
-  uint16_t io_read_half(uint32_t address) {
-    return h[(address & kMask) / 2];
-  }
+  void io_write(address_width_t width, uint32_t address, uint32_t data) {
+    switch (width) {
+      case address_width_t::byte: b[(address & kMask) / 1] = uint8_t(data); return;
+      case address_width_t::half: h[(address & kMask) / 2] = uint16_t(data); return;
+      case address_width_t::word: w[(address & kMask) / 4] = data; return;
+    }
 
-  uint32_t io_read_word(uint32_t address) {
-    return w[(address & kMask) / 4];
-  }
-
-  void io_write_byte(uint32_t address, uint8_t data) {
-    b[(address & kMask) / 1] = uint8_t(data);
-  }
-
-  void io_write_half(uint32_t address, uint16_t data) {
-    h[(address & kMask) / 2] = uint16_t(data);
-  }
-
-  void io_write_word(uint32_t address, uint32_t data) {
-    w[(address & kMask) / 4] = data;
+    return addressable_t::io_write(width, address, data);
   }
 
   bool load_blob(const char *filename) {

@@ -86,8 +86,8 @@ class core_t final
   uint32_t dma_read();
   void dma_write(uint32_t val);
 
-  uint8_t io_read_byte(uint32_t address);
-  void io_write_byte(uint32_t address, uint8_t data);
+  uint32_t io_read(address_width_t width, uint32_t address);
+  void io_write(address_width_t width, uint32_t address, uint32_t data);
 
   void io_write_port_0_n(uint8_t data);
   void io_write_port_1_0(uint8_t data);

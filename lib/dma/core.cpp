@@ -114,11 +114,11 @@ int core_t::tick_sync_mode_otc() {
   auto time = bc;
 
   while (--bc) {
-    memory.io_write_word(address, address - 4);
+    memory.io_write(address_width_t::word, address, address - 4);
     address -= 4;
   }
 
-  memory.io_write_word(address, 0x00ffffff);
+  memory.io_write(address_width_t::word, address, 0x00ffffff);
 
   channel.control &= ~(1 << 24);
   irq_channel(6);
@@ -136,7 +136,7 @@ int core_t::tick_sync_mode_0(int n) {
 
   if (channels[n].control & 1) {
     do {
-      uint32_t word = memory.io_read_word(address);
+      uint32_t word = memory.io_read(address_width_t::word, address);
       address += address_step;
 
       channels[n].comms->dma_write(word);
@@ -145,7 +145,7 @@ int core_t::tick_sync_mode_0(int n) {
     do {
       uint32_t word = channels[n].comms->dma_read();
 
-      memory.io_write_word(address, word);
+      memory.io_write(address_width_t::word, address, word);
       address += address_step;
     } while (--bc);
   }
@@ -169,7 +169,7 @@ int core_t::tick_sync_mode_1(int n) {
       uint16_t bc = bs;
 
       do {
-        uint32_t word = memory.io_read_word(address);
+        uint32_t word = memory.io_read(address_width_t::word, address);
         address += address_step;
 
         channels[n].comms->dma_write(word);
@@ -182,7 +182,7 @@ int core_t::tick_sync_mode_1(int n) {
       do {
         uint32_t word = channels[n].comms->dma_read();
 
-        memory.io_write_word(address, word);
+        memory.io_write(address_width_t::word, address, word);
         address += address_step;
       } while (--bc);
     } while (--ba);
@@ -199,7 +199,7 @@ int core_t::tick_sync_mode_2(int n) {
   int time = 0;
 
   do {
-    uint32_t header = memory.io_read_word(channels[n].address);
+    uint32_t header = memory.io_read(address_width_t::word, channels[n].address);
     uint32_t length = (header >> 24) & 0xff;
 
     time += channels[n].comms->dma_speed() * (length + 1);
@@ -207,7 +207,7 @@ int core_t::tick_sync_mode_2(int n) {
     while (length--) {
       channels[n].address += 4;
 
-      uint32_t data = memory.io_read_word(channels[n].address);
+      uint32_t data = memory.io_read(address_width_t::word, channels[n].address);
       channels[n].comms->dma_write(data);
     }
 
@@ -276,29 +276,20 @@ void core_t::put_icr(uint32_t val) {
   update_irq_active_flag();
 }
 
-uint8_t core_t::io_read_byte(uint32_t address) {
-  auto shift = 8 * (address & 3);
-  auto value = uint8_t(io_read_word(address) >> shift);
-  log("io_read_byte(0x%08x) = 0x%02x", address, value);
+uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+  if (width == address_width_t::byte) {
+    auto shift = 8 * (address & 3);
+    return uint8_t(io_read(address_width_t::word, address) >> shift);
+  }
 
-  return value;
-}
+  if (width == address_width_t::half) {
+    auto shift = 8 * (address & 2);
+    return uint16_t(io_read(address_width_t::word, address) >> shift);
+  }
 
-uint16_t core_t::io_read_half(uint32_t address) {
-  auto shift = 8 * (address & 2);
-  auto value = uint16_t(io_read_word(address) >> shift);
-  log("io_read_half(0x%08x) = 0x%04x", address, value);
-
-  return value;
-}
-
-uint32_t core_t::io_read_word(uint32_t address) {
   uint32_t bit0 = REG_BIT0[(address / 4) & 31];
   uint32_t bit1 = REG_BIT1[(address / 4) & 31];
-  auto value = (get32(address) & ~bit0) | bit1;
-  log("io_read_word(0x%08x) = 0x%08x", address, value);
-
-  return value;
+  return (get32(address) & ~bit0) | bit1;
 }
 
 static uint32_t get_channel_index(uint32_t address) {
@@ -329,23 +320,29 @@ uint32_t core_t::get32(uint32_t address) {
   }
 }
 
-void core_t::io_write_word(uint32_t address, uint32_t data) {
-  log("io_write_word(0x%08x, 0x%08x)", address, data);
+void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+  if (width == address_width_t::byte && address == 0x1f8010f6) {
+    return io_write(address_width_t::word, 0x1f8010f4, data << 16);
+  }
 
-  uint32_t channel = get_channel_index(address);
-  if (channel == 7) {
-    switch (get_register_index(address)) {
-      case 0: put_pcr(data); break;
-      case 1: put_icr(data); break;
-      case 2: break;
-      case 3: break;
+  if (width == address_width_t::word) {
+    uint32_t channel = get_channel_index(address);
+    if (channel == 7) {
+      switch (get_register_index(address)) {
+        case 0: return put_pcr(data);
+        case 1: return put_icr(data);
+      //case 2: return;
+      //case 3: return;
+      }
+    }
+    else {
+      switch (get_register_index(address)) {
+        case 0: channels[channel].address = data & 0xffffff; return;
+        case 1: channels[channel].counter = data; return;
+        case 2: channels[channel].control = data; return;
+      }
     }
   }
-  else {
-    switch (get_register_index(address)) {
-      case 0: channels[channel].address = data & 0xffffff; break;
-      case 1: channels[channel].counter = data; break;
-      case 2: channels[channel].control = data; break;
-    }
-  }
+
+  return addressable_t::io_write(width, address, data);
 }

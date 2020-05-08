@@ -7,73 +7,51 @@
 
 namespace psx::mdec {
 
-enum {
-  MDEC_DATA = 0x1f801820,
-  MDEC_STAT = 0x1f801824,
-  MDEC_COMMAND = 0x1f801820,
-  MDEC_CONTROL = 0x1f801824
-};
+  class core_t final
+      : public addressable_t
+      , public dma_comms_t {
+  private:
+    uint32_t status;
+    bool dma_0_enabled;
+    bool dma_1_enabled;
 
-enum class block_t {
-  y1 = 0,
-  y2 = 1,
-  y3 = 2,
-  y4 = 3,
-  cr = 4,
-  cb = 5
-};
+    struct {
+      uint32_t val;
+      uint32_t out;
+      uint16_t len;
+      bool run;
+    } cmd;
 
-enum class command_t {
-  decode_mb = 1,
-  set_iqtab = 2,
-  set_scale = 3
-};
+    util::fifo_t< uint32_t, 5 > data_in;
+    util::fifo_t< uint32_t, 5 > data_out;
 
-class core_t final
-    : public addressable_t
-    , public dma_comms_t {
- private:
-  block_t block;
-  command_t command;
+    uint8_t color_table[64];
+    uint8_t light_table[64];
+    int16_t scale_table[64];
 
-  util::fifo_t<uint8_t, 6> data_in = {};
-  util::fifo_t<uint8_t, 6> data_out = {};
+  public:
+    core_t();
 
-  uint32_t output_depth = {};
-  bool output_signed = {};
-  bool output_bit15 = {};
+    uint32_t get_status() const;
 
-  struct {
-    uint32_t index = {};
-    uint32_t total = {};
-  } parameter = {};
+    void put_command(uint32_t val);
+    void put_control(uint32_t val);
+    void put_parameter(uint32_t val);
 
-  uint8_t light_tab[64] = {};
-  uint8_t color_tab[64] = {};
-  int16_t scale_tab[64] = {};
+    void run_command();
 
-  bool command_busy = {};
-  bool enable_data_in = {};
-  bool enable_data_out = {};
+    void fill_color_table();
+    void fill_light_table();
+    void fill_scale_table();
 
- public:
-  core_t();
+    uint32_t io_read(address_width_t width, uint32_t address) override;
+    void io_write(address_width_t width, uint32_t address, uint32_t data) override;
 
-  void send_command(uint32_t data);
-  void send_parameter(int n, uint32_t data);
-  void send_color_tab(int n, uint32_t data);
-  void send_light_tab(int n, uint32_t data);
-  void send_scale_tab(int n, uint32_t data);
-
-  uint32_t io_read_word(uint32_t address) override;
-  void io_write_word(uint32_t address, uint32_t data) override;
-
-  int dma_speed() override;
-  bool dma_ready() override;
-  uint32_t dma_read() override;
-  void dma_write(uint32_t val) override;
-};
-
+    int dma_speed() override;
+    bool dma_ready() override;
+    uint32_t dma_read() override;
+    void dma_write(uint32_t val) override;
+  };
 }  // namespace psx::mdec
 
 #endif  // MDEC_CORE_HPP_

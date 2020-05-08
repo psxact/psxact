@@ -204,26 +204,32 @@ uint32_t core_t::stat() {
       | (bit13 << 13);
 }
 
-uint32_t core_t::io_read_word(uint32_t address) {
-  switch (address) {
-    case GPU_READ:
-      return data();
+uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+  if (width == address_width_t::word) {
+    switch (address) {
+      case GPU_READ:
+        return data();
 
-    case GPU_STAT:
-      return stat();
+      case GPU_STAT:
+        return stat();
+    }
   }
 
-  return 0;
+  return addressable_t::io_read(width, address);
 }
 
-void core_t::io_write_word(uint32_t address, uint32_t data) {
-  switch (address) {
-    case GPU_GP0:
-      return gp0(data);
+void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+  if (width == address_width_t::word) {
+    switch (address) {
+      case GPU_GP0:
+        return gp0(data);
 
-    case GPU_GP1:
-      return gp1(data);
+      case GPU_GP1:
+        return gp1(data);
+    }
   }
+
+  return addressable_t::io_write(width, address, data);
 }
 
 // common functionality
