@@ -6,6 +6,8 @@
 namespace psx {
 
   class memory_control_t : public addressable_t {
+    uint32_t biu;
+
   public:
     memory_control_t();
     ~memory_control_t() {}

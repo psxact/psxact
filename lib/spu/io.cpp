@@ -6,7 +6,11 @@ int core_t::dma_speed() {
   return 4;
 }
 
-bool core_t::dma_ready() {
+bool core_t::dma_read_ready() {
+  return true;
+}
+
+bool core_t::dma_write_ready() {
   return true;
 }
 

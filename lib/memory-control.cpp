@@ -24,7 +24,7 @@ uint32_t memory_control_t::io_read(address_width_t width, uint32_t address) {
   }
 
   if (address == 0xfffe0130) {
-    return 0;
+    return biu;
   }
 
   return addressable_t::io_read(width, address);
@@ -33,34 +33,49 @@ uint32_t memory_control_t::io_read(address_width_t width, uint32_t address) {
 void memory_control_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
   switch (address) {
     case 0x1f801000:
-      return assert(data == 0x1f000000);
+      if (data == 0x1f000000) return;
+      break;
 
     case 0x1f801004:
-      return assert(data == 0x1f802000);
+      if (data == 0x1f802000) return;
+      break;
 
     case 0x1f801008:
-      return assert(data == 0x0013243f);
+      if (data == 0x0013243f) return;
+      break;
 
     case 0x1f80100c:
-      return assert(data == 0x00003022);
+      if (data == 0x00003022) return;
+      break;
 
     case 0x1f801010:
-      return assert(data == 0x0013243f);
+      if (data == 0x0013243f) return;
+      break;
 
     case 0x1f801014:
-      return assert(data == 0x200931e1);
+      if (data == 0x200931e1) return;
+      if (data == 0x220931e1) return;
+      break;
 
     case 0x1f801018:
-      return assert(data == 0x00020843 || data == 0x00020943);
+      if (data == 0x00020843) return;
+      if (data == 0x00020943) return;
+      break;
 
     case 0x1f80101c:
-      return assert(data == 0x00070777);
+      if (data == 0x00070777) return;
+      break;
 
     case 0x1f801020:
-      return assert(data == 0x00031125 || data == 0x0000132c || data == 0x00001323 || data == 0x00001325);
+      if (data == 0x00031125) return;
+      if (data == 0x0000132c) return;
+      if (data == 0x00001323) return;
+      if (data == 0x00001325) return;
+      break;
 
     case 0x1f801060:
-      return assert(data == 0x00000b88);
+      if (data == 0x00000b88) return;
+      break;
   }
 
   if (address == 0xfffe0130) {
@@ -84,6 +99,8 @@ void memory_control_t::io_write(address_width_t width, uint32_t address, uint32_
     //      1 :: inv    - Invalidate Mode
     //      0 :: lock   - Lock Mode
 
+    log("biu=%08x", data);
+    biu = data;
     return;
   }
 

@@ -81,6 +81,13 @@ void core_t::put_control(uint32_t val) {
 }
 
 void core_t::run_command() {
+  if (cmd.val == 1) {
+    log("running command 1");
+
+    assert(data_in.size() == 32);
+    data_in.clear();
+  }
+
   if (cmd.val == 2) {
     log("running command 2");
 
@@ -176,7 +183,11 @@ int core_t::dma_speed() {
   return 1;
 }
 
-bool core_t::dma_ready() {
+bool core_t::dma_read_ready() {
+  return true;
+}
+
+bool core_t::dma_write_ready() {
   return true;
 }
 
@@ -185,4 +196,5 @@ uint32_t core_t::dma_read() {
 }
 
 void core_t::dma_write(uint32_t val) {
+  io_write(address_width_t::word, 0x1f801820, val);
 }

@@ -247,7 +247,7 @@ void core_t::timer_put_counter_target(int n, uint16_t val) {
 }
 
 uint32_t core_t::io_read(address_width_t width, uint32_t address) {
-  if (width == address_width_t::word) {
+  if (width == address_width_t::word || width == address_width_t::half) {
     int n = (address >> 4) & 3;
 
     switch (address & 0x1F80110F) {

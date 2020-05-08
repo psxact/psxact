@@ -63,10 +63,11 @@ namespace psx::spu {
     void put_register(register_t reg, uint16_t value);
     void put_status_register();
 
-    int dma_speed();
-    bool dma_ready();
-    uint32_t dma_read();
-    void dma_write(uint32_t val);
+    int dma_speed() override;
+    bool dma_read_ready() override;
+    bool dma_write_ready() override;
+    uint32_t dma_read() override;
+    void dma_write(uint32_t val) override;
 
     uint32_t io_read(address_width_t width, uint32_t address);
     void io_write(address_width_t width, uint32_t address, uint32_t data);

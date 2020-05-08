@@ -137,7 +137,8 @@ class core_t final
   gpu_display_depth_t get_display_depth() const;
 
   int dma_speed() override;
-  bool dma_ready() override;
+  bool dma_read_ready() override;
+  bool dma_write_ready() override;
   uint32_t dma_read() override;
   void dma_write(uint32_t val) override;
 
