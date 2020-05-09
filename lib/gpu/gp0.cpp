@@ -140,6 +140,7 @@ void core_t::run_command() {
       return fill_rectangle();
 
     case 0x1F:
+      irq(wire_state_t::on);
       status |= (1 << 24);
       return;
 

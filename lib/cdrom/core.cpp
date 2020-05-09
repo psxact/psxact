@@ -178,6 +178,13 @@ void core_t::command_init() {
   drive_transition(&core_t::drive_int2, 1000);
 }
 
+void core_t::command_mute() {
+  logic.response_fifo.write(get_status_byte());
+  logic.interrupt_request = 3;
+
+  drive_transition(&core_t::drive_int2, 1);
+}
+
 void core_t::command_pause() {
   logic.response_fifo.write(get_status_byte());
   logic.interrupt_request = 3;
@@ -344,6 +351,10 @@ void core_t::logic_executing_command() {
 
   case 0x0a:
     command_init();
+    break;
+
+  case 0x0b:
+    command_mute();
     break;
 
   case 0x0c:

@@ -5,7 +5,7 @@
 #include <exception>
 #include "util/blob.hpp"
 #include "util/range.hpp"
-#include "irq-line.hpp"
+#include "util/wire.hpp"
 
 using namespace psx;
 using namespace psx::util;
@@ -15,18 +15,39 @@ console_t::console_t()
   bios = new memory_t< kib(512) >("bios");
   wram = new memory_t< mib(2) >("wram");
 
-  cdrom = new cdrom::core_t(*this, args::game_file_name);
-  timer = new timer::core_t(
-    irq_line_t(*this, interrupt_type_t::timer0),
-    irq_line_t(*this, interrupt_type_t::timer1),
-    irq_line_t(*this, interrupt_type_t::timer2));
+  wire_t irq1;
+  irq1.recv_rise([&]() { cpu->interrupt(interrupt_type_t::gpu); });
+
+  wire_t irq3;
+  irq3.recv_rise([&]() { cpu->interrupt(interrupt_type_t::dma); });
+
+  wire_t irq4;
+  irq4.recv_rise([&]() { cpu->interrupt(interrupt_type_t::timer0); });
+
+  wire_t irq5;
+  irq5.recv_rise([&]() { cpu->interrupt(interrupt_type_t::timer1); });
+
+  wire_t irq6;
+  irq6.recv_rise([&]() { cpu->interrupt(interrupt_type_t::timer2); });
+
+  wire_t gpu_hblank;
+  gpu_hblank.recv_rise([&]() { timer->enter_hblank(); });
+  gpu_hblank.recv_fall([&]() { timer->leave_hblank(); });
+
+  wire_t gpu_vblank;
+  gpu_vblank.recv_rise([&]() { cpu->interrupt(interrupt_type_t::vblank); });
+  gpu_vblank.recv_rise([&]() { timer->enter_vblank(); });
+  gpu_vblank.recv_fall([&]() { timer->leave_vblank(); });
+
+  timer = new timer::core_t(irq4, irq5, irq6);
   cpu = new cpu::core_t(*this);
-  dma = new dma::core_t(irq_line_t(*this, interrupt_type_t::dma), *this);
+  dma = new dma::core_t(irq3, *this);
   exp1 = new exp::expansion1_t();
   exp2 = new exp::expansion2_t();
   exp3 = new exp::expansion3_t();
-  gpu = new gpu::core_t(irq_line_t(*this, interrupt_type_t::vblank));
-  input = new input::core_t(*this);
+  gpu = new gpu::core_t(irq1, gpu_hblank, gpu_vblank);
+  cdrom = new cdrom::core_t(*cpu, args::game_file_name);
+  input = new input::core_t(*cpu);
   mdec = new mdec::core_t();
   spu = new spu::core_t();
   mem = new memory_control_t();
@@ -64,11 +85,6 @@ console_t::~console_t() {
   delete mdec;
   delete spu;
   delete mem;
-}
-
-void console_t::interrupt(interrupt_type_t flag) {
-  int istat = cpu->get_istat() | static_cast<int>(flag);
-  cpu->set_istat(istat);
 }
 
 addressable_t &console_t::decode(uint32_t address) {

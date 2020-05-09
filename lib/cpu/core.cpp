@@ -6,6 +6,7 @@
 #include "util/uint.hpp"
 #include "args.hpp"
 
+using namespace psx;
 using namespace psx::cpu;
 using namespace psx::util;
 
@@ -58,6 +59,11 @@ core_t::core_t(addressable_t &memory)
   cop[2] = new cop2::gte_t();
 
   cop[0]->write_gpr(12, 0x00000000);
+}
+
+void core_t::interrupt(interrupt_type_t type) {
+  int istat = get_istat() | static_cast<int>(type);
+  set_istat(istat);
 }
 
 cop_t *core_t::get_cop(int n) const {

@@ -3,31 +3,15 @@
 
 using namespace psx;
 using namespace psx::timer;
-
-class MockInterruptible : public interruptible_t {
-  public:
-    void interrupt(interrupt_type_t) override {
-    }
-};
-
-class MockIrqLine : public irq_line_t {
-public:
-  MockIrqLine()
-    : irq_line_t(interruptible, interrupt_type_t::gpu) {
-  }
-
-  MockInterruptible interruptible;
-};
+using namespace psx::util;
 
 class TimerTest : public ::testing::Test {
   public:
     TimerTest()
-      : interruptible()
-      , timer(MockIrqLine(), MockIrqLine(), MockIrqLine()) {
+      : timer(wire_t(), wire_t(), wire_t()) {
     }
 
   protected:
-    MockInterruptible interruptible;
     psx::timer::core_t timer;
 };
 

@@ -7,6 +7,7 @@
 #include "cpu/cop2/gte.hpp"
 #include "cpu/register-file.hpp"
 #include "addressable.hpp"
+#include "interruptible.hpp"
 #include "memory.hpp"
 
 namespace psx::cpu {
@@ -24,7 +25,9 @@ enum segment_t {
   KSEG2 = 6
 };
 
-class core_t final : public addressable_t {
+class core_t final
+    : public addressable_t
+    , public interruptible_t {
   addressable_t &memory;
 
   cop_t *cop[4] = {};
@@ -65,6 +68,8 @@ class core_t final : public addressable_t {
 
  public:
   explicit core_t(addressable_t &memory);
+
+  void interrupt(psx::interrupt_type_t type);
 
   uint32_t get_code() const;
 

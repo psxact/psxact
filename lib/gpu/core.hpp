@@ -3,9 +3,9 @@
 
 #include "gpu/types.hpp"
 #include "util/fifo.hpp"
+#include "util/wire.hpp"
 #include "addressable.hpp"
 #include "dma-comms.hpp"
-#include "irq-line.hpp"
 #include "memory.hpp"
 
 namespace psx::gpu {
@@ -41,7 +41,16 @@ constexpr int GPU_STAT = 0x1f801814;
 class core_t final
     : public addressable_t
     , public dma_comms_t {
-  irq_line_t irq;
+
+  /// Used to send IRQ(1) signals to the CPU.
+  util::wire_t irq;
+
+  /// Used to send HBlank signals to the timers.
+  util::wire_t hbl;
+
+  /// Used to send VBlank signals to the timers, and IRQ(0) signals to the CPU.
+  util::wire_t vbl;
+
   int prescaler = {};
   int counter = {};
 
@@ -108,7 +117,7 @@ class core_t final
     } run = {};
   } gpu_to_cpu_transfer = {};
 
-  core_t(irq_line_t irq);
+  core_t(util::wire_t irq, util::wire_t hbl, util::wire_t vbl);
   ~core_t();
 
   // Interface for external video rendering

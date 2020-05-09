@@ -6,10 +6,13 @@
 #include "timing.hpp"
 
 using namespace psx::gpu;
+using namespace psx::util;
 
-core_t::core_t(irq_line_t irq)
+core_t::core_t(wire_t irq, wire_t hbl, wire_t vbl)
   : addressable_t("gpu", args::log_gpu)
   , irq(irq)
+  , hbl(hbl)
+  , vbl(vbl)
   , h_resolution(gpu_h_resolution_t::h256)
   , v_resolution(gpu_v_resolution_t::v240) {
   vram = new memory_t< mib(1) >("vram");
@@ -53,11 +56,11 @@ bool core_t::tick(int amount) {
   counter = next % VBLANK_END;
 
   if (prev < VBLANK_START && next >= VBLANK_START) {
-    irq(irq_line_state_t::active);
+    vbl(wire_state_t::on);
   }
 
   if (prev < VBLANK_END && next >= VBLANK_END) {
-    irq(irq_line_state_t::clear);
+    vbl(wire_state_t::off);
   }
 
   if (next >= VBLANK_END) {

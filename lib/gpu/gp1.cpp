@@ -21,6 +21,7 @@ void core_t::gp1(uint32_t data) {
       break;
 
     case 0x02:
+      irq(wire_state_t::off);
       status &= ~(1 << 24);
       break;
 

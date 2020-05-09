@@ -1,8 +1,8 @@
 #ifndef TIMER_CORE_HPP_
 #define TIMER_CORE_HPP_
 
+#include "util/wire.hpp"
 #include "addressable.hpp"
-#include "irq-line.hpp"
 
 namespace psx::timer {
 
@@ -27,9 +27,9 @@ namespace psx::timer {
     uint16_t counter_target = {};
     bool running = {};
 
-    irq_line_t irq;
+    util::wire_t irq;
 
-    timer_t(irq_line_t irq) : irq(irq) {}
+    timer_t(util::wire_t irq) : irq(irq) {}
   };
 
   class core_t final : public addressable_t {
@@ -39,7 +39,7 @@ namespace psx::timer {
     bool in_vblank = {};
 
   public:
-    explicit core_t(irq_line_t irq0, irq_line_t irq1, irq_line_t irq2);
+    explicit core_t(util::wire_t irq0, util::wire_t irq1, util::wire_t irq2);
 
     void run(int amount);
 

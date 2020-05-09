@@ -118,6 +118,7 @@ class core_t final
   void command_get_loc_p();
   void command_get_status();
   void command_init();
+  void command_mute();
   void command_pause();
   void command_read_n();
   void command_read_table_of_contents();

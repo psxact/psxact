@@ -27,8 +27,9 @@
 // PSX.640-pix Dotclock = CPU_FREQ * 11 / 28
 
 using namespace psx::timer;
+using namespace psx::util;
 
-core_t::core_t(irq_line_t irq0, irq_line_t irq1, irq_line_t irq2)
+core_t::core_t(wire_t irq0, wire_t irq1, wire_t irq2)
   : addressable_t("timer", args::log_timer)
   , timers({ timer_t(irq0), timer_t(irq1), timer_t(irq2) }) {
 }
@@ -125,10 +126,10 @@ void core_t::timer_irq(int n) {
 
 void core_t::timer_irq_flag(int n, bool val) {
   if (val) {
-    timers[n].irq(irq_line_state_t::clear);
+    timers[n].irq(wire_state_t::off);
     timers[n].control |= (1 << 10);
   } else {
-    timers[n].irq(irq_line_state_t::active);
+    timers[n].irq(wire_state_t::on);
     timers[n].control &= ~(1 << 10);
   }
 }

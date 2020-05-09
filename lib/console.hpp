@@ -44,8 +44,7 @@ struct output_params_t {
 };
 
 class console_t final
-  : public addressable_t
-  , public interruptible_t {
+  : public addressable_t {
   memory_t< kib(512) > *bios;
   memory_t< mib(2) > *wram;
 
@@ -68,8 +67,6 @@ class console_t final
  public:
   console_t();
   ~console_t();
-
-  void interrupt(interrupt_type_t flag);
 
   uint32_t io_read(address_width_t width, uint32_t address);
   void io_write(address_width_t width, uint32_t address, uint32_t data);

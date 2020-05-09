@@ -1,30 +1,15 @@
 #include <gtest/gtest.h>
 #include "gpu/core.hpp"
 
-using namespace psx;
 using namespace psx::gpu;
-
-class MockInterruptible : public interruptible_t {
-  void interrupt(interrupt_type_t) override {
-  }
-};
-
-class MockIrqLine : public irq_line_t {
-public:
-  MockIrqLine()
-    : irq_line_t(interruptible, interrupt_type_t::gpu) {
-  }
-
-  MockInterruptible interruptible;
-};
+using namespace psx::util;
 
 class GpuTest : public ::testing::Test {
 public:
   GpuTest()
-    : gpu(irq) {
+    : gpu(wire_t(), wire_t(), wire_t()) {
   }
 
-  MockIrqLine irq;
   core_t gpu;
 };
 
