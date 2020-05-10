@@ -178,25 +178,21 @@ class core_t final
   void draw_line();
   void draw_polygon();
   void draw_rectangle();
+  void draw_triangle(gp0_command_t command, const triangle_t &triangle);
   void fill_rectangle();
 
   // common functionality
 
-  color_t get_texture_color__4bpp(const tev_t &tev, const texture_coord_t &coord);
-  color_t get_texture_color__8bpp(const tev_t &tev, const texture_coord_t &coord);
-  color_t get_texture_color_15bpp(const tev_t &tev, const texture_coord_t &coord);
-  color_t get_texture_color(const tev_t &tev, const texture_coord_t &coord);
+  texture_color_t get_texture_color__4bpp(const tev_t &tev, const texture_coord_t &coord);
+  texture_color_t get_texture_color__8bpp(const tev_t &tev, const texture_coord_t &coord);
+  texture_color_t get_texture_color_15bpp(const tev_t &tev, const texture_coord_t &coord);
+  texture_color_t get_texture_color(const tev_t &tev, const texture_coord_t &coord);
 
-  // rectangle drawing
-
-  bool get_color(gp0_command_t command, const color_t &shade, const texture_coord_t &coord, const tev_t &tev, color_t *color);
-
-  // triangle drawing
-
-  void draw_triangle(gp0_command_t command, const triangle_t &triangle);
-
-  bool get_color(gp0_command_t command, const triangle_t &triangle,
-    int32_t w0, int32_t w1, int32_t w2, color_t *color);
+  void draw_color(gp0_command_t command,
+      const color_t &color,
+      const point_t &point,
+      const texture_coord_t &coord,
+      const tev_t &tev);
 };
 
 }  // namespace psx::gpu

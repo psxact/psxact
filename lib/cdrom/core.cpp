@@ -171,6 +171,13 @@ void core_t::command_get_status() {
   logic.interrupt_request = 3;
 }
 
+void core_t::command_get_tn() {
+  logic.response_fifo.write(get_status_byte());
+  logic.response_fifo.write(0x01);
+  logic.response_fifo.write(0x01);
+  logic.interrupt_request = 3;
+}
+
 void core_t::command_init() {
   logic.response_fifo.write(get_status_byte());
   logic.interrupt_request = 3;
@@ -181,8 +188,6 @@ void core_t::command_init() {
 void core_t::command_mute() {
   logic.response_fifo.write(get_status_byte());
   logic.interrupt_request = 3;
-
-  drive_transition(&core_t::drive_int2, 1);
 }
 
 void core_t::command_pause() {
@@ -191,7 +196,7 @@ void core_t::command_pause() {
 
   is_reading = 0;
 
-  drive_transition(&core_t::drive_int2, 1);
+  drive_transition(&core_t::drive_int2, 10);
 }
 
 void core_t::command_read_n() {
@@ -374,6 +379,10 @@ void core_t::logic_executing_command() {
 
   case 0x11:
     command_get_loc_p();
+    break;
+
+  case 0x13:
+    command_get_tn();
     break;
 
   case 0x15:

@@ -6,6 +6,20 @@
 using namespace psx::gpu;
 using namespace psx::util;
 
+// texture_color_t
+
+color_t texture_color_t::to_color() const {
+  return color_t::from_uint16(value);
+}
+
+bool texture_color_t::is_semi_transparent() const {
+  return (value & 0x8000) != 0;
+}
+
+bool texture_color_t::is_full_transparent() const {
+  return value == 0;
+}
+
 // color_t
 
 color_t color_t::from_uint16(uint16_t val) {

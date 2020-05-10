@@ -125,32 +125,6 @@ static texture_coord_t point_lerp(const texture_coord_t *t, int32_t w0, int32_t 
   return point;
 }
 
-bool core_t::get_color(
-  gp0_command_t command, const triangle_t &triangle,
-  int32_t w0, int32_t w1, int32_t w2, color_t *color) {
-
-  if (!command.is_texture_mapped()) {
-    *color = color_lerp(triangle.colors, w0, w1, w2);
-    return true;
-  }
-
-  texture_coord_t coord = point_lerp(triangle.coords, w0, w1, w2);
-
-  if (command.is_raw_texture()) {
-    *color = get_texture_color(triangle.tev, coord);
-  }
-  else {
-    color_t color1 = get_texture_color(triangle.tev, coord);
-    color_t color2 = color_lerp(triangle.colors, w0, w1, w2);
-
-    color->r = std::min(255, (color1.r * color2.r) / 128);
-    color->g = std::min(255, (color1.g * color2.g) / 128);
-    color->b = std::min(255, (color1.b * color2.b) / 128);
-  }
-
-  return (color->r | color->g | color->b) > 0;
-}
-
 void core_t::draw_triangle(gp0_command_t command, const triangle_t &triangle) {
   const point_t *v = triangle.points;
 
@@ -201,41 +175,10 @@ void core_t::draw_triangle(gp0_command_t command, const triangle_t &triangle) {
 
     for (point.x = min.x; point.x <= max.x; point.x++) {
       if (w0 > c[0] && w1 > c[1] && w2 > c[2]) {
-        color_t color;
-
-        if (get_color(command, triangle, w0, w1, w2, &color)) {
-          if (command.is_semi_transparent()) {
-            color_t bg = color_t::from_uint16(vram_read(point.x, point.y));
-
-            switch (triangle.tev.color_mix_mode) {
-              case 0:
-                color.r = (bg.r + color.r) / 2;
-                color.g = (bg.g + color.g) / 2;
-                color.b = (bg.b + color.b) / 2;
-                break;
-
-              case 1:
-                color.r = std::min(255, bg.r + color.r);
-                color.g = std::min(255, bg.g + color.g);
-                color.b = std::min(255, bg.b + color.b);
-                break;
-
-              case 2:
-                color.r = std::max(0, bg.r - color.r);
-                color.g = std::max(0, bg.g - color.g);
-                color.b = std::max(0, bg.b - color.b);
-                break;
-
-              case 3:
-                color.r = std::min(255, bg.r + color.r / 4);
-                color.g = std::min(255, bg.g + color.g / 4);
-                color.b = std::min(255, bg.b + color.b / 4);
-                break;
-            }
-          }
-
-          draw_point(point, color);
-        }
+        auto color = color_lerp(triangle.colors, w0, w1, w2);
+        auto coord = point_lerp(triangle.coords, w0, w1, w2);
+        
+        draw_color(command, color, point, coord, triangle.tev);
       }
 
       w0 += dx[0];

@@ -60,6 +60,7 @@ void memory_control_t::io_write(address_width_t width, uint32_t address, uint32_
     case 0x1f801018:
       if (data == 0x00020843) return;
       if (data == 0x00020943) return;
+      if (data == 0x21020843) return; // Oddworld - Abe's Oddysee
       break;
 
     case 0x1f80101c:

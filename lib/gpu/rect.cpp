@@ -1,8 +1,10 @@
 #include "gpu/core.hpp"
 
-#include <algorithm>
+#include "util/int.hpp"
+#include "util/uint.hpp"
 
 using namespace psx::gpu;
+using namespace psx::util;
 
 static int32_t get_x_length(psx::util::fifo_t< uint32_t, 4 > &fifo) {
   switch ((fifo.at(0) >> 27) & 3) {
@@ -28,22 +30,60 @@ static int32_t get_y_length(psx::util::fifo_t< uint32_t, 4 > &fifo) {
   }
 }
 
-bool core_t::get_color(gp0_command_t command, const color_t &shade, const texture_coord_t &coord, const tev_t &tev, color_t *out_color) {
-  if (command.is_texture_mapped()) {
-    auto color = get_texture_color(tev, coord);
+void core_t::draw_color(gp0_command_t command, const color_t &shade, const point_t &point, const texture_coord_t &coord, const tev_t &tev) {
+  color_t color;
+  bool blend;
 
-    if (command.is_raw_texture()) {
-      *out_color = color;
-    } else {
-      out_color->r = std::min(255, (color.r * shade.r) / 128);
-      out_color->g = std::min(255, (color.g * shade.g) / 128);
-      out_color->b = std::min(255, (color.b * shade.b) / 128);
-    }
+  if (!command.is_texture_mapped()) {
+    color = shade;
+    blend = command.is_semi_transparent();
   } else {
-    *out_color = shade;
+    auto tex_color = get_texture_color(tev, coord);
+    if (tex_color.is_full_transparent()) {
+      return;
+    }
+
+    color = tex_color.to_color();
+    blend = command.is_semi_transparent() && tex_color.is_semi_transparent();
+
+    if (!command.is_raw_texture()) {
+      color.r = std::min(0xff, (color.r * shade.r) / 0x80);
+      color.g = std::min(0xff, (color.g * shade.g) / 0x80);
+      color.b = std::min(0xff, (color.b * shade.b) / 0x80);
+    }
   }
 
-  return (out_color->r | out_color->g | out_color->b) > 0;
+  if (blend) {
+    auto cur_color = color_t::from_uint16(vram_read(point.x, point.y));
+
+    switch (tev.color_mix_mode) {
+      case 0:
+        color.r = (cur_color.r + color.r) / 2;
+        color.g = (cur_color.g + color.g) / 2;
+        color.b = (cur_color.b + color.b) / 2;
+        break;
+
+      case 1:
+        color.r = uint_t<8>::clamp(cur_color.r + color.r);
+        color.g = uint_t<8>::clamp(cur_color.g + color.g);
+        color.b = uint_t<8>::clamp(cur_color.b + color.b);
+        break;
+
+      case 2:
+        color.r = uint_t<8>::clamp(cur_color.r - color.r);
+        color.g = uint_t<8>::clamp(cur_color.g - color.g);
+        color.b = uint_t<8>::clamp(cur_color.b - color.b);
+        break;
+
+      case 3:
+        color.r = uint_t<8>::clamp(cur_color.r + (color.r / 4));
+        color.g = uint_t<8>::clamp(cur_color.g + (color.g / 4));
+        color.b = uint_t<8>::clamp(cur_color.b + (color.b / 4));
+        break;
+    }
+  }
+
+  draw_point(point, color);
 }
 
 void core_t::draw_rectangle() {
@@ -53,13 +93,14 @@ void core_t::draw_rectangle() {
   tev.texture_page_x = (status << 6) & 0x3c0;
   tev.texture_page_y = (status << 4) & 0x100;
   tev.texture_colors = (status >> 7) & 3;
+  tev.color_mix_mode = (status >> 5) & 3;
 
   auto command = gp0_command_t(fifo.at(0));
   auto shade = color_t::from_uint24(fifo.at(0));
   auto coord = texture_coord_t::from_uint16(fifo.at(2));
 
-  int32_t xofs = x_offset + int16_t(fifo.at(1));
-  int32_t yofs = y_offset + int16_t(fifo.at(1) >> 16);
+  int32_t xofs = x_offset + int_t<11>::trunc(fifo.at(1));
+  int32_t yofs = y_offset + int_t<11>::trunc(fifo.at(1) >> 16);
 
   int32_t w = get_x_length(fifo);
   int32_t h = get_y_length(fifo);
@@ -70,18 +111,11 @@ void core_t::draw_rectangle() {
       this_coord.u = coord.u + x;
       this_coord.v = coord.v + y;
 
-      color_t color;
-      if (get_color(command, shade, this_coord, tev, &color)) {
-        point_t point;
-        point.x = xofs + x;
-        point.y = yofs + y;
+      point_t point;
+      point.x = xofs + x;
+      point.y = yofs + y;
 
-        if (command.is_semi_transparent()) {
-          assert(0 && "Semi-transparency isn't implemented for rectangles yet.");
-        }
-
-        draw_point(point, color);
-      }
+      draw_color(command, shade, point, this_coord, tev);
     }
   }
 }

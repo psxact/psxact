@@ -241,7 +241,7 @@ void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
 
 // common functionality
 
-color_t core_t::get_texture_color__4bpp(const tev_t &tev, const texture_coord_t &coord) {
+texture_color_t core_t::get_texture_color__4bpp(const tev_t &tev, const texture_coord_t &coord) {
   uint16_t texel = vram_read(
     tev.texture_page_x + (coord.u / 4),
     tev.texture_page_y + coord.v);
@@ -252,10 +252,10 @@ color_t core_t::get_texture_color__4bpp(const tev_t &tev, const texture_coord_t 
     tev.palette_page_x + texel,
     tev.palette_page_y);
 
-  return color_t::from_uint16(pixel);
+  return { pixel };
 }
 
-color_t core_t::get_texture_color__8bpp(const tev_t &tev, const texture_coord_t &coord) {
+texture_color_t core_t::get_texture_color__8bpp(const tev_t &tev, const texture_coord_t &coord) {
   uint16_t texel = vram_read(
     tev.texture_page_x + (coord.u / 2),
     tev.texture_page_y + coord.v);
@@ -266,30 +266,21 @@ color_t core_t::get_texture_color__8bpp(const tev_t &tev, const texture_coord_t 
     tev.palette_page_x + texel,
     tev.palette_page_y);
 
-  return color_t::from_uint16(pixel);
+  return { pixel };
 }
 
-color_t core_t::get_texture_color_15bpp(const tev_t &tev, const texture_coord_t &coord) {
+texture_color_t core_t::get_texture_color_15bpp(const tev_t &tev, const texture_coord_t &coord) {
   uint16_t pixel = vram_read(
     tev.texture_page_x + coord.u,
     tev.texture_page_y + coord.v);
 
-  return color_t::from_uint16(pixel);
+  return { pixel };
 }
 
-color_t core_t::get_texture_color(const tev_t &tev, const texture_coord_t &coord) {
+texture_color_t core_t::get_texture_color(const tev_t &tev, const texture_coord_t &coord) {
   switch (tev.texture_colors) {
-  default:
-  case 0:
-    return get_texture_color__4bpp(tev, coord);
-
-  case 1:
-    return get_texture_color__8bpp(tev, coord);
-
-  case 2:
-    return get_texture_color_15bpp(tev, coord);
-
-  case 3:
-    return get_texture_color_15bpp(tev, coord);
+  case  0: return get_texture_color__4bpp(tev, coord);
+  case  1: return get_texture_color__8bpp(tev, coord);
+  default: return get_texture_color_15bpp(tev, coord);
   }
 }

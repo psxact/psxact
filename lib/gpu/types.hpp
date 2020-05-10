@@ -17,6 +17,15 @@ namespace psx::gpu {
     uint32_t to_uint32() const;
   };
 
+  /// Used to represent a color that has come from a texture.
+  struct texture_color_t {
+    uint16_t value;
+
+    color_t to_color() const;
+    bool is_semi_transparent() const;
+    bool is_full_transparent() const;
+  };
+
   struct point_t {
     int32_t x = {};
     int32_t y = {};
