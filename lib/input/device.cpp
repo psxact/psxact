@@ -26,9 +26,8 @@ device_dsr_t device_t::tick(int amount, device_dsr_t dsr) {
 
     if (dsr_cycles >= (DSR_DELAY_PERIOD + DSR_PULSE_PERIOD)) {
       dsr_pending = false;
-    }
-    else if (dsr_cycles >= DSR_DELAY_PERIOD) {
-      return device_dsr_t::LOW;
+    } else if (dsr_cycles >= DSR_DELAY_PERIOD) {
+      return device_dsr_t::low;
     }
   }
 

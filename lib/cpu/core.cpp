@@ -98,8 +98,7 @@ int core_t::tick() {
 
   if (iec && irq && !gte) {
     enter_exception(cop0::exception_t::interrupt, 0);
-  }
-  else {
+  } else {
     uint32_t code = (get_code() >> 26) & 63;
     if (code) {
       (*this.*op_table[code])();
@@ -178,8 +177,7 @@ io_target_t core_t::get_target(uint32_t address) const {
     if (cop0r12 & cop0::SWC) {
       log("i-cache isolated access ~%08x", address);
       return io_target_t::ICACHE;
-    }
-    else {
+    } else {
       log("d-cache isolated access ~%08x", address);
       return io_target_t::DCACHE;
     }
@@ -349,8 +347,7 @@ uint32_t core_t::get_rs() const {
 uint32_t core_t::get_register(uint32_t index) const {
   if (is_load_delay_slot && load_index == index) {
     return load_value;
-  }
-  else {
+  } else {
     return rf.get(index);
   }
 }
@@ -536,16 +533,13 @@ void core_t::op_div() {
   if (dividend == int32_t(0x80000000) && divisor == int32_t(0xffffffff)) {
     regs.lo = 0x80000000;
     regs.hi = 0;
-  }
-  else if (dividend >= 0 && divisor == 0) {
+  } else if (dividend >= 0 && divisor == 0) {
     regs.lo = uint32_t(0xffffffff);
     regs.hi = uint32_t(dividend);
-  }
-  else if (dividend <= 0 && divisor == 0) {
+  } else if (dividend <= 0 && divisor == 0) {
     regs.lo = uint32_t(0x00000001);
     regs.hi = uint32_t(dividend);
-  }
-  else {
+  } else {
     regs.lo = uint32_t(dividend / divisor);
     regs.hi = uint32_t(dividend % divisor);
   }
@@ -558,8 +552,7 @@ void core_t::op_divu() {
   if (divisor) {
     regs.lo = dividend / divisor;
     regs.hi = dividend % divisor;
-  }
-  else {
+  } else {
     regs.lo = 0xffffffff;
     regs.hi = dividend;
   }

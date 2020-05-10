@@ -32,8 +32,7 @@ int main(int argc, char *argv[]) {
 
   if (psx::args::headless) {
     run_headless(console);
-  }
-  else {
+  } else {
     run(console);
   }
 

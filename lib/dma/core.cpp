@@ -241,8 +241,7 @@ void core_t::update_irq_active_flag() {
   if (active) {
     icr |= 0x80000000;
     irq(wire_state_t::on);
-  }
-  else {
+  } else {
     icr &= ~0x80000000;
     irq(wire_state_t::off);
   }
@@ -309,8 +308,7 @@ uint32_t core_t::get32(uint32_t address) {
       case  2: return 0x6ffac611; // These values are junk, just what my
       default: return 0x00ffffff; // console happened to give last time.
     }
-  }
-  else {
+  } else {
     switch (get_register_index(address)) {
       case  0: return channels[channel].address;
       case  1: return channels[channel].counter;
@@ -334,8 +332,7 @@ void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
       //case 2: return;
       //case 3: return;
       }
-    }
-    else {
+    } else {
       switch (get_register_index(address)) {
         case 0: channels[channel].address = data & 0xffffff; return;
         case 1: channels[channel].counter = data; return;

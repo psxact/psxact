@@ -6,13 +6,14 @@
 #include "util/blob.hpp"
 #include "util/range.hpp"
 #include "util/wire.hpp"
+#include "args.hpp"
 
 using namespace psx;
 using namespace psx::util;
 
 console_t::console_t()
   : addressable_t("console", false) {
-  bios = new memory_t< kib(512) >("bios");
+  bios = new bios_t();
   wram = new memory_t< mib(2) >("wram");
 
   wire_t irq1;
@@ -59,13 +60,6 @@ console_t::console_t()
   dma->attach(4, spu);
   dma->attach(5, nullptr); // PIO
   dma->attach(6, nullptr); // OTC - special cased in the DMA code.
-
-  bios->load_blob(args::bios_file_name);
-  bios->io_write(address_width_t::word, 0x6990, 0); // patch the bios to skip the boot-up animation
-
-  bios->io_write(address_width_t::word, 0x6f0c, 0x34010001); // li $at, 0x1
-  bios->io_write(address_width_t::word, 0x6f10, 0x0ff019e1); // jal 0xbfc06784
-  bios->io_write(address_width_t::word, 0x6f14, 0xaf81a9c0); // sw $at -0x5460($gp)
 
   is_exe = !!(strstr(args::game_file_name, ".exe") || strstr(args::game_file_name, ".psexe"));
 }

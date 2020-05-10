@@ -5,11 +5,10 @@
 
 namespace psx::exp {
 
-class expansion3_t final : public addressable_t {
- public:
-  expansion3_t();
-};
-
+  class expansion3_t final : public addressable_t {
+  public:
+    expansion3_t();
+  };
 }  // namespace psx::exp
 
 #endif  // EXP_EXPANSION3_HPP_

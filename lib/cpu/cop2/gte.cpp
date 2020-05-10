@@ -92,16 +92,16 @@ static inline int32_t get_sf(uint32_t code) {
   return (code & (1 << 19)) ? 12 : 0;
 }
 
-gte_t::matrix_t gte_t::get_mx(uint32_t code) {
-  return gte_t::matrix_t((code >> 17) & 3);
+matrix_t gte_t::get_mx(uint32_t code) {
+  return matrix_t((code >> 17) & 3);
 }
 
 static inline int32_t get_v(uint32_t code) {
   return (code >> 15) & 3;
 }
 
-gte_t::vector_t gte_t::get_cv(uint32_t code) {
-  return gte_t::vector_t((code >> 13) & 3);
+vector_t gte_t::get_cv(uint32_t code) {
+  return vector_t((code >> 13) & 3);
 }
 
 void gte_t::mac_to_ir(uint32_t code) {
@@ -199,8 +199,7 @@ int64_t gte_t::transform_buggy(uint32_t code, matrix_t mx, vector_t cv, int32_t 
         mulr[0] = -((gpr.rgbc.r << 4) * vector[0]);
         mulr[1] = (gpr.rgbc.r << 4) * vector[1];
         mulr[2] = gpr.ir0 * vector[2];
-      }
-      else {
+      } else {
         int32_t cr =
           i == 1
             ? ccr.matrix[static_cast<int>(matrix_t::rot)][0][2]
@@ -210,8 +209,7 @@ int64_t gte_t::transform_buggy(uint32_t code, matrix_t mx, vector_t cv, int32_t 
         mulr[1] = cr * vector[1];
         mulr[2] = cr * vector[2];
       }
-    }
-    else {
+    } else {
       mulr[0] = matrix[i][0] * vector[0];
       mulr[1] = matrix[i][1] * vector[1];
       mulr[2] = matrix[i][2] * vector[2];

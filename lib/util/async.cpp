@@ -2,37 +2,35 @@
 
 using namespace psx::util;
 
-auto async::delay(int t) -> async_t {
-  return async::wait(t, &async::done);
+async_t::async_t()
+  : type(async_type_t::exit)
+  , wait() {
 }
 
-auto async::done() -> async_t {
-  return async_t();
+async_t::async_t(int time, typename async_wait_t::K cont)
+  : type(async_type_t::wait)
+  , wait({ time, cont }) {
 }
 
-auto async::wait(int time, typename async_wait_t::K cont) -> async_t {
-  async_wait_t wait;
-  wait.time = time;
-  wait.cont = cont;
-
-  return async_t(wait);
-}
-
-auto async::tick(int time, async_t async) -> async_t {
-  if (async.type == async_type_t::exit) {
-    return async;
+auto async_t::then(std::function<async_t()> f) -> async_t {
+  if (type == async_type_t::exit) {
+    return f();
   }
 
-  if (async.wait.time == time) {
-    return async.wait.cont();
+  return async_t(wait.time, [&]() {
+    return wait.cont().then(f);
+  });
+}
+
+auto async_t::tick(int time) -> async_t {
+  if (type == async_type_t::exit) {
+    return *this;
   }
-  else {
-    if (async.wait.time > time) {
-      async.wait.time -= time;
-      return async;
-    }
-    else {
-      return tick(time - async.wait.time, async.wait.cont());
-    }
+
+  if (wait.time > time) {
+    wait.time -= time;
+    return *this;
+  } else {
+    return wait.cont().tick(time - wait.time);
   }
 }

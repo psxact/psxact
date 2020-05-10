@@ -53,12 +53,12 @@ void core_t::tick(int amount) {
     }
   }
 
-  dsr.level = port.control[0]->tick(amount, device_dsr_t::HIGH);
+  dsr.level = port.control[0]->tick(amount, device_dsr_t::high);
   dsr.level = port.memcard[0]->tick(amount, dsr.level);
   dsr.level = port.control[1]->tick(amount, dsr.level);
   dsr.level = port.memcard[1]->tick(amount, dsr.level);
 
-  if (dsr.level == device_dsr_t::LOW) {
+  if (dsr.level == device_dsr_t::low) {
     send_interrupt();
   }
 }
@@ -147,8 +147,7 @@ void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
           port.output = 0;
           port.select = 0;
           rx.fifo.clear();
-        }
-        else {
+        } else {
           if (data & 0x10) {
             interrupt = 0;
           }

@@ -14,6 +14,8 @@ namespace psx::args {
   extern bool log_cdrom;
   extern bool log_input;
   extern bool log_timer;
+  extern bool bios_patch_skip_intro;
+  extern bool bios_patch_debug_tty;
 
   void init(int argc, char **argv);
 }  // namespace psx::args

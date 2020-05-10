@@ -197,8 +197,7 @@ static void put_in_clockwise_order(
     indices[0] = 0;
     indices[1] = 1;
     indices[2] = 2;
-  }
-  else {
+  } else {
     indices[0] = 0;
     indices[1] = 2;
     indices[2] = 1;
