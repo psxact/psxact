@@ -8,17 +8,13 @@
 
 ## Current Status
 
-Currently, the emulator is capable of booting a small amount of commercial
-games.
-
-![Current status](images/current.png)
+Currently, the emulator is capable of booting a small amount of commercial games.
 
 ## Usage
 
 The emulator requires a BIOS file, which can be dumped from a physical console.
 
-Once you have a BIOS file, PSXACT can be invoked via command line, using the
-following simple interface:
+Once you have a BIOS file, PSXACT can be invoked via command line, using the following simple interface:
 
 ```
 $ psxact -b <bios file here> -g <game file here>
@@ -26,14 +22,11 @@ $ psxact -b <bios file here> -g <game file here>
 
 ## Building
 
-This project uses [SCons][scons] for building, and relies on [SDL2][sdl2] for
-multimedia. At the very simplest, building is accomplished by invoking `scons`
-from the root of the project.
+This project uses [SCons][scons] for building, and relies on [SDL2][sdl2] for multimedia. At the very simplest, building is accomplished by invoking `scons` from the root of the project.
 
 ## Contributing
 
-If you'd like to contribute, please create a fork and issue pull requests!
-Newcomers and experts alike are welcome to contribute.
+If you'd like to contribute, please create a fork and issue pull requests! Newcomers and experts alike are welcome to contribute.
 
 ## Communication
 
