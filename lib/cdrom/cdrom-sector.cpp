@@ -6,32 +6,60 @@
 using namespace psx::cdrom;
 using namespace psx::util;
 
+enum {
+  MINUTE_OFFSET = 12,
+  SECOND_OFFSET = 13,
+  SECTOR_OFFSET = 14,
+  MODE_OFFSET = 15,
+  XA_FILE_OFFSET = 16,
+  XA_CHANNEL_OFFSET = 17,
+  XA_SUB_MODE_OFFSET = 18,
+  XA_CODING_INFO_OFFSET = 19
+};
+
 uint8_t cdrom_sector_t::get_minute() const {
-  return buffer[12];
+  return buffer[MINUTE_OFFSET];
 }
 
 uint8_t cdrom_sector_t::get_second() const {
-  return buffer[13];
+  return buffer[SECOND_OFFSET];
 }
 
 uint8_t cdrom_sector_t::get_sector() const {
-  return buffer[14];
+  return buffer[SECTOR_OFFSET];
 }
 
-bool cdrom_sector_t::is_mode_0() const {
-  return buffer[15] == 0;
+uint8_t cdrom_sector_t::get_mode() const {
+  return buffer[MODE_OFFSET];
 }
 
-bool cdrom_sector_t::is_mode_1() const {
-  return buffer[15] == 1;
+uint8_t cdrom_sector_t::get_xa_file() const {
+  return buffer[XA_FILE_OFFSET];
 }
 
-bool cdrom_sector_t::is_mode_2_form_1() const {
-  return buffer[15] == 2 && (buffer[18] & 0x20) == 0;
+uint8_t cdrom_sector_t::get_xa_channel() const {
+  return buffer[XA_CHANNEL_OFFSET];
 }
 
-bool cdrom_sector_t::is_mode_2_form_2() const {
-  return buffer[15] == 2 && (buffer[18] & 0x20) != 0;
+uint8_t cdrom_sector_t::get_xa_sub_mode() const {
+  return buffer[XA_SUB_MODE_OFFSET];
+}
+
+uint8_t cdrom_sector_t::get_xa_coding_info() const {
+  return buffer[XA_CODING_INFO_OFFSET];
+}
+
+cdrom_sector_type_t cdrom_sector_t::get_type() const {
+  switch (get_mode()) {
+    case 0: return cdrom_sector_type_t::mode0;
+    case 1: return cdrom_sector_type_t::mode1;
+    case 2:
+      return (get_xa_sub_mode() & 0x20)
+          ? cdrom_sector_type_t::mode2_form2
+          : cdrom_sector_type_t::mode2_form1;
+  }
+
+  return cdrom_sector_type_t::unknown;
 }
 
 void cdrom_sector_t::fill_from(FILE *file, cdrom_timecode_t timecode) {
@@ -44,15 +72,15 @@ void cdrom_sector_t::fill_from(FILE *file, cdrom_timecode_t timecode) {
       (timecode.minute * sectors_per_minute) +
       (timecode.second * sectors_per_second) + timecode.sector;
 
-  fseek(file, (sector - leadin) * CDROM_SECTOR_SIZE, SEEK_SET);
-  fread(buffer, sizeof(uint8_t), CDROM_SECTOR_SIZE, file);
+  assert(fseek(file, (sector - leadin) * CDROM_SECTOR_SIZE, SEEK_SET) == 0);
+  assert(fread(buffer, sizeof(uint8_t), CDROM_SECTOR_SIZE, file) == CDROM_SECTOR_SIZE);
 
   // Sanity check to make sure we've read the correct sector.
 
   assert(
-    bcd::to_dec(buffer[12]) == timecode.minute &&
-    bcd::to_dec(buffer[13]) == timecode.second &&
-    bcd::to_dec(buffer[14]) == timecode.sector);
+    bcd::to_dec(get_minute()) == timecode.minute &&
+    bcd::to_dec(get_second()) == timecode.second &&
+    bcd::to_dec(get_sector()) == timecode.sector);
 }
 
 uint8_t cdrom_sector_t::get(int index) const {

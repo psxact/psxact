@@ -161,10 +161,8 @@ void core_t::tick(int amount) {
         case 0x0d: {
           log("Processing 'SetFilter' command.");
 
-          uint8_t file = get_parameter();
-          uint8_t channel = get_parameter();
-
-          log("File=%d, Channel=%d", file, channel);
+          filter.put_file(get_parameter());
+          filter.put_channel(get_parameter());
 
           put_response(get_drive_status());
           put_irq_flag(3);
@@ -174,7 +172,7 @@ void core_t::tick(int amount) {
         case 0x0e: {
           log("Processing 'SetMode' command.");
 
-          mode = get_parameter();
+          mode = cdrom_mode_t { get_parameter() };
 
           put_response(get_drive_status());
           put_irq_flag(3);
@@ -184,9 +182,15 @@ void core_t::tick(int amount) {
         case 0x10: {
           log("Processing 'GetLocL' command.");
 
-          for (int i = 12; i < 20; i++) {
-            put_response(sector.get(i));
-          }
+          put_response(sector.get_minute());
+          put_response(sector.get_second());
+          put_response(sector.get_second());
+          put_response(sector.get_mode());
+          put_response(sector.get_xa_file());
+          put_response(sector.get_xa_channel());
+          put_response(sector.get_xa_sub_mode());
+          put_response(sector.get_xa_coding_info());
+          put_irq_flag(3);
           break;
         }
 
@@ -198,7 +202,7 @@ void core_t::tick(int amount) {
           put_response(sector.get_minute()); // Track-relative
           put_response(sector.get_second());
           put_response(sector.get_sector());
-          put_response(sector.get_minute()); // Disc-relative
+          put_response(sector.get_minute()); // Absolute
           put_response(sector.get_second());
           put_response(sector.get_sector());
           put_irq_flag(3);
@@ -330,7 +334,7 @@ void core_t::tick(int amount) {
 }
 
 int core_t::get_read_time() const {
-  if (mode & 0x80) {
+  if (mode.double_speed()) {
     return CPU_FREQ / 150;
   } else {
     return CPU_FREQ / 75;
@@ -497,6 +501,66 @@ void core_t::put_response(uint8_t val) {
   response.write(val);
 }
 
+bool core_t::try_deliver_sector_as_adpcm() {
+  if (sector.get_type() != cdrom_sector_type_t::mode2_form1 ||
+      sector.get_type() != cdrom_sector_type_t::mode2_form2) {
+    return false;
+  }
+
+  if (!mode.send_xa_adpcm_to_spu()) {
+    return false;
+  }
+
+  if (mode.filter_xa_adpcm() && !filter.match(sector)) {
+    return false;
+  }
+
+  if ((sector.get_xa_sub_mode() & 0x44) != 0x44) {
+    return false;
+  }
+
+  // TODO: send sector to xa-adpcm decoder
+
+  return true;
+}
+
+bool core_t::try_deliver_sector_as_data() {
+  auto type = sector.get_type();
+  if (type == cdrom_sector_type_t::mode2_form1 || type == cdrom_sector_type_t::mode2_form2) {
+    if (mode.filter_xa_adpcm() && (sector.get_xa_sub_mode() & 0x44) == 0x44) {
+      return false;
+    }
+  }
+
+  if (mode.read_whole_sector()) {
+    log("Full sector");
+    sector_read_offset = 12;
+    sector_read_length = CDROM_SECTOR_SIZE - 12;
+  } else {
+    switch (type) {
+      case cdrom_sector_type_t::mode0:
+        break;
+
+      case cdrom_sector_type_t::mode1:
+        log("Mode 1 sector");
+        sector_read_offset = 16;
+        sector_read_length = 2048;
+        break;
+
+      case cdrom_sector_type_t::mode2_form1:
+        log("Mode 2 form 1 sector");
+        sector_read_offset = 24;
+        sector_read_length = 2048;
+        break;
+
+      case cdrom_sector_type_t::mode2_form2:
+        break;
+    }
+  }
+
+  return true;
+}
+
 void core_t::int1_read_n() {
   log("Delivering sector data. (%02d:%02d:%02d)",
     read_timecode.minute,
@@ -518,28 +582,18 @@ void core_t::int1_read_n() {
     }
   }
 
-  if (mode & (1 << 5)) {
-    log("Full sector");
-    sector_read_offset = 12;
-    sector_read_length = CDROM_SECTOR_SIZE - 12;
-  } else {
-    if (sector.is_mode_1()) {
-      log("Mode 1 sector");
-      sector_read_offset = 16;
-      sector_read_length = 2048;
-    } else if (sector.is_mode_2_form_1()) {
-      log("Mode 2 form 1 sector");
-      sector_read_offset = 24;
-      sector_read_length = 2048;
-    } else if (sector.is_mode_2_form_2()) {
-      log("Mode 2 form 2 sector");
-      sector_read_offset = 24;
-      sector_read_length = 2324;
-    }
+  if (try_deliver_sector_as_adpcm()) {
+    // TODO: Send INT1?
+    return;
   }
 
-  put_response(get_drive_status());
-  put_irq_flag(1);
+  if (try_deliver_sector_as_data()) {
+    put_response(get_drive_status());
+    put_irq_flag(1);
+    return;
+  }
+
+  // Sectors silently drop out here if they can't be delivered.
 }
 
 void core_t::int2_get_id() {
@@ -576,7 +630,7 @@ void core_t::int2_init() {
   log("Delivering 'Init' second response.");
 
   drive_state = cdrom_drive_state_t::idle;
-  mode = 0;
+  mode = cdrom_mode_t { 0 };
 
   put_response(get_drive_status());
   put_irq_flag(2);

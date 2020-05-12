@@ -3,7 +3,9 @@
 
 #include <cstdint>
 #include <optional>
+#include "cdrom/cdrom-mode.hpp"
 #include "cdrom/cdrom-sector.hpp"
+#include "cdrom/cdrom-sector-filter.hpp"
 #include "util/fifo.hpp"
 #include "util/wire.hpp"
 #include "addressable.hpp"
@@ -24,6 +26,8 @@ namespace psx::cdrom {
     util::wire_t irq;
 
     cdrom_drive_state_t drive_state {};
+    cdrom_mode_t mode { 0 };
+    cdrom_sector_filter_t filter;
     cdrom_sector_t sector {};
     int32_t sector_read_cursor {};
     int32_t sector_read_offset {};
@@ -40,7 +44,6 @@ namespace psx::cdrom {
     uint8_t index {};
     uint8_t irq_flag {};
     uint8_t irq_mask {};
-    uint8_t mode {};
     int timer {};
 
     int int1_timer;
@@ -103,6 +106,12 @@ namespace psx::cdrom {
 
     /// Called internally to deliver responses.
     void put_response(uint8_t val);
+
+    /// Called internally to attempt delivering a sector as XA-ADPCM.
+    bool try_deliver_sector_as_adpcm();
+
+    /// Called internally to attempt delivering a sector as data.
+    bool try_deliver_sector_as_data();
 
     /// Called continuously after processing a 'ReadN' command, to deliver sectors.
     void int1_read_n();
