@@ -2,513 +2,702 @@
 
 #include "util/bcd.hpp"
 #include "args.hpp"
+#include "timing.hpp"
 
 using namespace psx::cdrom;
 using namespace psx::util;
 
-core_t::core_t(interruptible_t &irq, const char *game_file_name)
-    : addressable_t("cdc", args::log_cdrom)
-    , irq(irq)
-    , index()
-    , interrupt_enable()
-    , interrupt_request()
-    , interrupt_timer()
-    , seek_timecode()
-    , read_timecode()
-    , seek_unprocessed()
-    , parameter_fifo()
-    , response_fifo()
-    , rx_buffer() // TODO: Replace with heap-allocation
-    , rx_index()
-    , rx_active()
-    , command()
-    , command_unprocessed()
-    , busy()
-    , is_seeking()
-    , is_reading()
-    , game_file_name(game_file_name)
-    , game_file()
-    , logic()
-    , drive()
-    , mode() {
-  game_file = fopen(game_file_name, "rb+");
+constexpr int int2_get_id_timing = 19'000;
+constexpr int int2_init_timing = 900'000;
+constexpr int int2_pause_timing = 1'800; // TODO: This can take much longer?
+constexpr int int2_read_toc_timing = 16'000'000;
+constexpr int int2_seek_l_timing = 1'800;
 
-  logic_transition(&core_t::logic_idling, 1000);
-  drive_transition(&core_t::drive_idling, 1000);
+core_t::core_t(wire_t irq, const char *game_file_name)
+    : addressable_t("cdc", args::log_cdrom)
+    , irq(irq) {
+
+  if (game_file_name) {
+    disc_file.emplace(fopen(game_file_name, "rb"));
+  } else {
+    disc_file.reset();
+  }
 }
 
 void core_t::tick(int amount) {
-  while (amount) {
-    amount--;
+  int1_timer = std::max(0, int1_timer - amount);
+  int2_timer = std::max(0, int2_timer - amount);
 
-    drive.timer--;
+  timer -= amount;
 
-    if (drive.timer == 0) {
-      (*this.*drive.stage)();
+  while (timer < 0) {
+    timer += 3000;
+
+    // Do nothing if there is an un-acked IRQ.
+    if (irq_flag != 0) {
+      continue;
     }
 
-    logic.timer--;
-
-    if (logic.timer == 0) {
-      (*this.*logic.stage)();
+    // Process a pending INT1.
+    if (int1 && int1_timer == 0) {
+      (*this.*int1)();
+      int1_timer = get_read_time();
+      continue;
     }
 
-    if (interrupt_timer) {
-      interrupt_timer--;
+    // Process a pending INT2.
+    if (int2 && int2_timer == 0) {
+      (*this.*int2)();
+      int2 = nullptr;
+      continue;
+    }
 
-      if (interrupt_timer == 0 && interrupt_request) {
-        int32_t signal = interrupt_request & interrupt_enable;
-        if (signal == interrupt_request) {
-          log("delivering interrupt: %d", interrupt_request);
-          irq.interrupt(interrupt_type_t::cdrom);
+    // Process a pending command.
+    if (command.has_value()) {
+      auto cmd = command.value();
+      command.reset();
+      response.clear();
+
+      switch (cmd) {
+        case 0x01: {
+          log("Processing 'GetStat' command.");
+
+          put_response(get_drive_status());
+          put_irq_flag(3);
+          break;
         }
+
+        case 0x02: {
+          log("Processing 'SetLoc' command.");
+
+          seek_timecode.minute = bcd::to_dec(get_parameter());
+          seek_timecode.second = bcd::to_dec(get_parameter());
+          seek_timecode.sector = bcd::to_dec(get_parameter());
+          seek_pending = true;
+
+          put_response(get_drive_status());
+          put_irq_flag(3);
+          break;
+        }
+
+        case 0x03: {
+          log("Processing 'Play' command.");
+
+          parameter.clear();
+
+          put_response(get_drive_status());
+          put_irq_flag(3);
+          break;
+        }
+
+        case 0x1b:
+        case 0x06: {
+          log("Processing 'ReadN' command.");
+
+          drive_state = cdrom_drive_state_t::reading;
+
+          put_response(get_drive_status());
+          put_irq_flag(3);
+
+          int1 = &core_t::int1_read_n;
+          int1_timer = get_read_time();
+
+          if (seek_pending) {
+            seek_pending = false;
+            read_timecode = seek_timecode;
+            int1_timer += get_seek_time();
+          }
+          break;
+        }
+
+        case 0x09: {
+          log("Processing 'Pause' command.");
+
+          put_response(get_drive_status());
+          put_irq_flag(3);
+
+          int1 = nullptr;
+          int1_timer = 0;
+
+          int2 = &core_t::int2_pause;
+          int2_timer = int2_pause_timing;
+
+          log("Processing complete, delaying second response for %d cycles.", int2_timer);
+          break;
+        }
+
+        case 0x0a: {
+          log("Processing 'Init' command.");
+
+          put_response(get_drive_status());
+          put_irq_flag(3);
+
+          int1 = nullptr;
+          int1_timer = 0;
+
+          int2 = &core_t::int2_init;
+          int2_timer = int2_init_timing;
+
+          log("Processing complete, delaying second response for %d cycles.", int2_timer);
+          break;
+        }
+
+        case 0x0b: {
+          log("Processing 'Mute' command.");
+
+          put_response(get_drive_status());
+          put_irq_flag(3);
+          break;
+        }
+
+        case 0x0c: {
+          log("Processing 'Un-mute' command.");
+
+          put_response(get_drive_status());
+          put_irq_flag(3);
+          break;
+        }
+
+        case 0x0d: {
+          log("Processing 'SetFilter' command.");
+
+          uint8_t file = get_parameter();
+          uint8_t channel = get_parameter();
+
+          log("File=%d, Channel=%d", file, channel);
+
+          put_response(get_drive_status());
+          put_irq_flag(3);
+          break;
+        }
+
+        case 0x0e: {
+          log("Processing 'SetMode' command.");
+
+          mode = get_parameter();
+
+          put_response(get_drive_status());
+          put_irq_flag(3);
+          break;
+        }
+
+        case 0x10: {
+          log("Processing 'GetLocL' command.");
+
+          for (int i = 12; i < 20; i++) {
+            put_response(sector.get(i));
+          }
+          break;
+        }
+
+        case 0x11: {
+          log("Processing 'GetLocP' command.");
+
+          put_response(0x01); // Track
+          put_response(0x01); // Index
+          put_response(sector.get_minute()); // Track-relative
+          put_response(sector.get_second());
+          put_response(sector.get_sector());
+          put_response(sector.get_minute()); // Disc-relative
+          put_response(sector.get_second());
+          put_response(sector.get_sector());
+          put_irq_flag(3);
+          break;
+        }
+
+        case 0x13: {
+          log("Processing 'GetTN' command.");
+
+          put_response(get_drive_status());
+          put_response(0x01);
+          put_response(0x01);
+          put_irq_flag(3);
+          break;
+        }
+
+        case 0x14: {
+          log("Processing 'GetTD' command.");
+
+          auto track = get_parameter();
+
+          log("Track=%d", track);
+
+          put_response(get_drive_status());
+          put_response(0x00);
+          put_response(0x00);
+          put_irq_flag(3);
+          break;
+        }
+
+        case 0x15:
+        case 0x16: {
+          log("Processing 'SeekL' command.");
+
+          drive_state = cdrom_drive_state_t::seeking;
+
+          put_response(get_drive_status());
+          put_irq_flag(3);
+
+          // Cancel any on-going read/play operations.
+          int1 = nullptr;
+          int1_timer = 0;
+
+          int2 = &core_t::int2_seek_l;
+          int2_timer = get_seek_time() + int2_seek_l_timing;
+
+          log("Processing complete, delaying second response for %d cycles.", int2_timer);
+          break;
+        }
+
+        case 0x19: {
+          log("Processing 'Test' command.");
+
+          auto sub_cmd = get_parameter();
+          switch (sub_cmd) {
+            case 0x04:
+              put_response(get_drive_status());
+              put_irq_flag(3);
+              break;
+
+            case 0x05:
+              parameter.clear();
+              put_response(0);
+              put_response(0);
+              put_irq_flag(3);
+              break;
+
+            case 0x20:
+              put_response(0x98);
+              put_response(0x06);
+              put_response(0x10);
+              put_response(0xc3);
+              put_irq_flag(3);
+              break;
+
+            default:
+              log("Unhandled sub-command: %02x", sub_cmd);
+              assert(0);
+              break;
+          }
+          break;
+        }
+
+        case 0x1a: {
+          log("Processing 'GetID' command.");
+
+          drive_state = cdrom_drive_state_t::reading;
+
+          put_response(get_drive_status());
+          put_irq_flag(3);
+
+          int1 = nullptr;
+          int1_timer = 0;
+
+          int2 = &core_t::int2_get_id;
+          int2_timer = int2_get_id_timing;
+
+          log("Processing complete, delaying second response for %d cycles.", int2_timer);
+          break;
+        }
+
+        case 0x1e: {
+          log("Processing 'ReadTOC' command.");
+
+          drive_state = cdrom_drive_state_t::reading;
+
+          put_response(get_drive_status());
+          put_irq_flag(3);
+
+          int1 = nullptr;
+          int1_timer = 0;
+
+          int2 = &core_t::int2_read_toc;
+          int2_timer = int2_read_toc_timing;
+
+          log("Processing complete, delaying second response for %d cycles.", int2_timer);
+          break;
+        }
+
+        default:
+          log("Unhandled command: %02x", cmd);
+          assert(0);
+          break;
       }
+
+      assert(parameter.is_empty());
     }
   }
 }
 
-uint8_t core_t::get_status_byte() {
-  uint8_t result = 0x02;
-
-  if (is_seeking) {
-    result |= 0x40;
-  }
-
-  if (is_reading) {
-    result |= 0x20;
-  }
-
-  return result;
-}
-
-int core_t::get_cycles_per_sector() {
-  if (mode.double_speed) {
-    return (33868800 * 2) / 150;
+int core_t::get_read_time() const {
+  if (mode & 0x80) {
+    return CPU_FREQ / 150;
   } else {
-    return (33868800 * 2) / 75;
+    return CPU_FREQ / 75;
   }
 }
 
-int32_t core_t::get_read_cursor() {
-  constexpr int sectors_per_second = 75;
-  constexpr int seconds_per_minute = 60;
-  constexpr int sectors_per_minute = seconds_per_minute * sectors_per_second;
-  constexpr int bytes_per_sector = 2352;
-  constexpr int lead_in_duration = 2 * sectors_per_second;
+int core_t::get_seek_time() const {
+  int minute_diff = std::abs(seek_timecode.minute - read_timecode.minute);
+  int second_diff = std::abs(seek_timecode.second - read_timecode.second);
+  int sector_diff = std::abs(seek_timecode.sector - read_timecode.sector);
 
-  int cursor =
-    (read_timecode.minute * sectors_per_minute) +
-    (read_timecode.second * sectors_per_second) +
-    (read_timecode.sector);
+  // For now, we'll assume 100 cycles per sector to seek.
+  // I've just pulled this number out of thin air, because why not?
 
-  return bytes_per_sector * (cursor - lead_in_duration);
+  return 100 * ((minute_diff * 60) + (second_diff * 75) + sector_diff);
 }
 
-void core_t::read_sector() {
-  log("read_sector(\"%02d:%02d:%02d\")",
+uint8_t core_t::get_data() {
+  assert(sector_read_active && "Sector read while not active.");
+
+  if (sector_read_active) {
+    assert(sector_read_cursor < sector_read_length);
+
+    uint8_t result = sector.get(sector_read_cursor + sector_read_offset);
+    sector_read_cursor++;
+
+    if (sector_read_cursor == sector_read_length) {
+      sector_read_active = false;
+    }
+
+    return result;
+  }
+
+  return sector.get((sector_read_cursor + sector_read_offset) & ~7);
+}
+
+uint8_t core_t::get_drive_status() {
+  uint8_t response = 0;
+
+  switch (drive_state) {
+    case cdrom_drive_state_t::idle: break;
+    case cdrom_drive_state_t::reading: response |= (1 << 5); break;
+    case cdrom_drive_state_t::seeking: response |= (1 << 6); break;
+    case cdrom_drive_state_t::playing: response |= (1 << 7); break;
+  }
+
+  // 0  Error         Invalid Command/parameters (followed by Error Byte)
+  // 1  Spindle Motor (0=Motor off, or in spin-up phase, 1=Motor on)
+  // 2  SeekError     (0=Okay, 1=Seek error)     (followed by Error Byte)
+  // 3  IdError       (0=Okay, 1=GetID denied) (also set when Setmode.Bit4=1)
+  // 4  ShellOpen     Once shell open (0=Closed, 1=Is/was Open)
+
+  response |= (1 << 1);
+
+  log("Get drive status: %02x", response);
+
+  return response;
+}
+
+uint8_t core_t::get_irq_flag() const {
+  return 0xe0 | irq_flag;
+}
+
+uint8_t core_t::get_irq_mask() const {
+  return 0xe0 | irq_mask;
+}
+
+uint8_t core_t::get_parameter() {
+  auto data = parameter.read();
+
+  log("Get parameter: %02x", data);
+
+  return data;
+}
+
+uint8_t core_t::get_response() {
+  auto data = response.read();
+
+  log("Get response: %02x", data);
+
+  return data;
+}
+
+uint8_t core_t::get_status() {
+  auto bit2 = 0; // 2   ADPBUSY XA-ADPCM fifo empty  (0=Empty) ;set when playing XA-ADPCM sound
+  auto bit3 = parameter.is_empty();
+  auto bit4 = !parameter.is_full();
+  auto bit5 = !response.is_empty();
+  auto bit6 = sector_read_cursor < sector_read_length;
+  auto bit7 = 0; // 7   BUSYSTS Command/parameter transmission busy  (1=Busy)
+
+  auto stat = index
+    | (bit2 << 2)
+    | (bit3 << 3)
+    | (bit4 << 4)
+    | (bit5 << 5)
+    | (bit6 << 6)
+    | (bit7 << 7);
+
+  log("Get status: %02x", stat);
+
+  return stat;
+}
+
+void core_t::ack_irq_flag(uint8_t val) {
+  log("Ack IRQ flag: %02x", val);
+
+  if (val & 0x40) {
+    parameter.clear();
+  }
+
+  put_irq_flag(irq_flag & ~(val & 31));
+}
+
+void core_t::put_command(uint8_t val) {
+  log("Put command: %02x", val);
+
+  if (command.has_value()) {
+    assert(0 && "Command written before previous command was started.");
+  }
+
+  command.emplace(val);
+}
+
+void core_t::put_host_control(uint8_t val) {
+  log("Put host control: %02x", val);
+
+  if (sector_read_active == 0 && (val & 0x80)) {
+    sector_read_cursor = 0;
+  }
+
+  sector_read_active = !!(val & 0x80);
+}
+
+void core_t::put_irq_flag(uint8_t val) {
+  log("Put IRQ flag: %02x", val);
+
+  irq_flag = val & 31;
+
+  if (irq_flag != 0 && (irq_flag & irq_mask) == irq_flag) {
+    log("IRQ wire: 1");
+    irq(wire_state_t::on);
+  } else {
+    log("IRQ wire: 0");
+    irq(wire_state_t::off);
+  }
+}
+
+void core_t::put_irq_mask(uint8_t val) {
+  log("Put IRQ mask: %02x", val);
+
+  irq_mask = val & 31;
+}
+
+void core_t::put_parameter(uint8_t val) {
+  log("Put parameter: %02x", val);
+
+  parameter.write(val);
+}
+
+void core_t::put_response(uint8_t val) {
+  log("Put response: %02x", val);
+
+  response.write(val);
+}
+
+void core_t::int1_read_n() {
+  log("Delivering sector data. (%02d:%02d:%02d)",
     read_timecode.minute,
     read_timecode.second,
     read_timecode.sector);
 
-  if (mode.read_whole_sector) {
-    rx_index = 12;
-    rx_len = 0x930;
-  } else {
-    rx_index = 24;
-    rx_len = 0x818;
-  }
+  assert(disc_file.has_value() && "Reading non-existant disc.");
 
-  is_reading = 1;
-
-  int32_t cursor = get_read_cursor();
-
-  fseek(game_file, cursor, SEEK_SET);
-  fread(rx_buffer, sizeof(uint8_t), 0x930, game_file);
-
-  auto minute = bcd::to_dec(rx_buffer[12]);
-  auto second = bcd::to_dec(rx_buffer[13]);
-  auto sector = bcd::to_dec(rx_buffer[14]);
-
-  if (
-    minute != read_timecode.minute ||
-    second != read_timecode.second ||
-    sector != read_timecode.sector) {
-    log("expecting \"%02d:%02d:%02d\", but got \"%02d:%02d:%02d\" at 0x%08x",
-      read_timecode.minute,
-      read_timecode.second,
-      read_timecode.sector,
-      minute,
-      second,
-      sector,
-      cursor);
-  }
-}
-
-// -========-
-//  Commands
-// -========-
-
-void core_t::do_seek() {
-  if (seek_unprocessed) {
-    seek_unprocessed = 0;
-    read_timecode.minute = seek_timecode.minute;
-    read_timecode.second = seek_timecode.second;
-    read_timecode.sector = seek_timecode.sector;
-  }
-}
-
-void core_t::command_get_id() {
-  logic.response_fifo.write(get_status_byte());
-  logic.interrupt_request = 3;
-
-  drive_transition(&core_t::drive_getting_id, 40000);
-}
-
-void core_t::command_get_status() {
-  logic.response_fifo.write(get_status_byte());
-  logic.interrupt_request = 3;
-}
-
-void core_t::command_get_tn() {
-  logic.response_fifo.write(get_status_byte());
-  logic.response_fifo.write(0x01);
-  logic.response_fifo.write(0x01);
-  logic.interrupt_request = 3;
-}
-
-void core_t::command_init() {
-  logic.response_fifo.write(get_status_byte());
-  logic.interrupt_request = 3;
-
-  drive_transition(&core_t::drive_int2, 1000);
-}
-
-void core_t::command_mute() {
-  logic.response_fifo.write(get_status_byte());
-  logic.interrupt_request = 3;
-}
-
-void core_t::command_pause() {
-  logic.response_fifo.write(get_status_byte());
-  logic.interrupt_request = 3;
-
-  is_reading = 0;
-
-  drive_transition(&core_t::drive_int2, 10);
-}
-
-void core_t::command_read_n() {
-  logic.response_fifo.write(get_status_byte());
-  logic.interrupt_request = 3;
-
-  do_seek();
-
-  int cycles = get_cycles_per_sector();
-
-  drive_transition(&core_t::drive_reading, cycles);
-}
-
-void core_t::command_read_table_of_contents() {
-  logic.response_fifo.write(get_status_byte());
-  logic.interrupt_request = 3;
-
-  drive_transition(&core_t::drive_int2, 40000);
-}
-
-void core_t::command_seek_data_mode() {
-  logic.response_fifo.write(get_status_byte());
-  logic.interrupt_request = 3;
-
-  do_seek();
-
-  drive_transition(&core_t::drive_int2, 40000);
-}
-
-void core_t::command_get_loc_p() {
-  // No status byte written for this command?
-  logic.interrupt_request = 3;
-
-  // track,index,mm,ss,sect,amm,ass,asect
-
-  logic.response_fifo.write(1); // FIXME: These should be read from the cue sheet.
-  logic.response_fifo.write(1);
-  logic.response_fifo.write(read_timecode.minute); // FIXME: Relative to start of track?
-  logic.response_fifo.write(read_timecode.second);
-  logic.response_fifo.write(read_timecode.sector);
-  logic.response_fifo.write(read_timecode.minute); // FIXME: Relative to start of disc?
-  logic.response_fifo.write(read_timecode.second);
-  logic.response_fifo.write(read_timecode.sector);
-}
-
-void core_t::command_set_filter(uint8_t file, uint8_t channel) {
-  logic.response_fifo.write(get_status_byte());
-  logic.interrupt_request = 3;
-
-  log("TODO: command_set_filter(0x%02x, 0x%02x)", file, channel);
-}
-
-void core_t::command_set_mode(uint8_t value) {
-  logic.response_fifo.write(get_status_byte());
-  logic.interrupt_request = 3;
-
-  mode.double_speed = (value & 0x80) != 0;
-  mode.read_whole_sector = (value & 0x20) != 0;
-}
-
-void core_t::command_set_seek_target(uint8_t minute, uint8_t second, uint8_t sector) {
-  logic.response_fifo.write(get_status_byte());
-  logic.interrupt_request = 3;
-
-  seek_timecode.minute = minute;
-  seek_timecode.second = second;
-  seek_timecode.sector = sector;
-  seek_unprocessed = 1;
-}
-
-void core_t::command_test(uint8_t function) {
-  log("command_test(0x%02x)", function);
-
-  switch (function) {
-  case 0x20:
-    logic.response_fifo.write(0x98);
-    logic.response_fifo.write(0x06);
-    logic.response_fifo.write(0x10);
-    logic.response_fifo.write(0xc3);
-    logic.interrupt_request = 3;
-    break;
-  }
-}
-
-void core_t::command_unmute() {
-  logic.response_fifo.write(get_status_byte());
-  logic.interrupt_request = 3;
-}
-
-// -=====-
-//  Logic
-// -=====-
-
-void core_t::logic_transition(stage_t stage, int timer) {
-  logic.stage = stage;
-  logic.timer = timer;
-}
-
-void core_t::logic_idling() {
-  if (command_unprocessed) {
-    command_unprocessed = 0;
-
-    if (parameter_fifo.is_empty()) {
-      logic_transition(&core_t::logic_transferring_command, 1000);
-    } else {
-      logic_transition(&core_t::logic_transferring_parameters, 1000);
-    }
-  } else {
-    logic_transition(&core_t::logic_idling, 1000);
-  }
-}
-
-void core_t::logic_transferring_parameters() {
-  logic.parameter_fifo.write(parameter_fifo.read());
-
-  if (parameter_fifo.is_empty()) {
-    logic_transition(&core_t::logic_transferring_command, 1000);
-  } else {
-    logic_transition(&core_t::logic_transferring_parameters, 1000);
-  }
-}
-
-void core_t::logic_transferring_command() {
-  logic.command = command;
-
-  logic_transition(&core_t::logic_executing_command, 1000);
-}
-
-void core_t::logic_executing_command() {
-#define get_param() \
-  logic.parameter_fifo.read()
-
-  log("logic_executing_command(0x%02x)", logic.command);
-
-  switch (logic.command) {
-  case 0x01: command_get_status(); break;
-
-  case 0x02: {
-    uint8_t minute = bcd::to_dec(get_param());
-    uint8_t second = bcd::to_dec(get_param());
-    uint8_t sector = bcd::to_dec(get_param());
-
-    command_set_seek_target(minute, second, sector);
-    break;
-  }
-
-  case 0x06:
-    command_read_n();
-    break;
-
-  case 0x09:
-    command_pause();
-    break;
-
-  case 0x0a:
-    command_init();
-    break;
-
-  case 0x0b:
-    command_mute();
-    break;
-
-  case 0x0c:
-    command_unmute();
-    break;
-
-  case 0x0d:
-    command_set_filter(get_param(), get_param());
-    break;
-
-  case 0x0e: {
-    uint8_t mode = get_param();
-
-    command_set_mode(mode);
-    break;
-  }
-
-  case 0x11:
-    command_get_loc_p();
-    break;
-
-  case 0x13:
-    command_get_tn();
-    break;
-
-  case 0x15:
-    command_seek_data_mode();
-    break;
-
-  case 0x19: {
-    uint8_t function = get_param();
-
-    command_test(function);
-    break;
-  }
-
-  case 0x1a:
-    command_get_id();
-    break;
-
-  case 0x1b: // TODO: seems ReadS is the same as ReadN?
-    command_read_n();
-    break;
-
-  case 0x1e:
-    command_read_table_of_contents();
-    break;
-
-  default:
-    printf("Unhandled CD-ROM command. (%02x)\n", command);
-    assert(0);
-  }
-
-  logic_transition(&core_t::logic_clearing_response, 1000);
-
-#undef get_param
-}
-
-void core_t::logic_clearing_response() {
-  response_fifo.clear();
-
-  logic_transition(&core_t::logic_transferring_response, 1000);
-}
-
-void core_t::logic_transferring_response() {
-  response_fifo.write(logic.response_fifo.read());
-
-  if (logic.response_fifo.is_empty()) {
-    logic_transition(&core_t::logic_deliver_interrupt, 1000);
-  } else {
-    logic_transition(&core_t::logic_transferring_response, 1000);
-  }
-}
-
-void core_t::logic_deliver_interrupt() {
-  if (interrupt_request == 0) {
-    interrupt_timer = 500;
-    interrupt_request = logic.interrupt_request;
-
-    logic_transition(&core_t::logic_idling, 1);
-  } else {
-    logic_transition(&core_t::logic_deliver_interrupt, 1);
-  }
-}
-
-// -=====-
-//  Drive
-// -=====-
-
-void core_t::drive_transition(stage_t stage, int timer) {
-  drive.stage = stage;
-  drive.timer = timer;
-}
-
-void core_t::drive_idling() {
-}
-
-void core_t::drive_getting_id() {
-  if (interrupt_request == 0) {
-    // INT2(02h,00h, 20h,00h, 53h,43h,45h,4xh)
-
-    logic.response_fifo.write(0x02);
-    logic.response_fifo.write(0x00);
-
-    logic.response_fifo.write(0x20);
-    logic.response_fifo.write(0x00);
-
-    logic.response_fifo.write('S');
-    logic.response_fifo.write('C');
-    logic.response_fifo.write('E');
-    logic.response_fifo.write('A');
-    logic.interrupt_request = 2;
-
-    drive_transition(&core_t::drive_idling, 1000);
-    logic_transition(&core_t::logic_clearing_response, 1000);
-  } else {
-    drive_transition(&core_t::drive_getting_id, 1000);
-  }
-}
-
-void core_t::drive_int2() {
-  if (interrupt_request == 0) {
-    logic.response_fifo.write(get_status_byte());
-    logic.interrupt_request = 2;
-
-    drive_transition(&core_t::drive_idling, 1000);
-    logic_transition(&core_t::logic_clearing_response, 1000);
-  } else {
-    drive_transition(&core_t::drive_int2, 1000);
-  }
-}
-
-void core_t::drive_reading() {
-  logic.response_fifo.write(get_status_byte());
-  logic.interrupt_request = 1;
-
-  read_sector();
+  sector.fill_from(*disc_file, read_timecode);
 
   read_timecode.sector++;
-
   if (read_timecode.sector == 75) {
     read_timecode.sector = 0;
     read_timecode.second++;
-
     if (read_timecode.second == 60) {
       read_timecode.second = 0;
       read_timecode.minute++;
+      // TODO: Overflow minute?
     }
   }
 
-  // continually read
+  if (mode & (1 << 5)) {
+    log("Full sector");
+    sector_read_offset = 12;
+    sector_read_length = CDROM_SECTOR_SIZE - 12;
+  } else {
+    if (sector.is_mode_1()) {
+      log("Mode 1 sector");
+      sector_read_offset = 16;
+      sector_read_length = 2048;
+    } else if (sector.is_mode_2_form_1()) {
+      log("Mode 2 form 1 sector");
+      sector_read_offset = 24;
+      sector_read_length = 2048;
+    } else if (sector.is_mode_2_form_2()) {
+      log("Mode 2 form 2 sector");
+      sector_read_offset = 24;
+      sector_read_length = 2324;
+    }
+  }
 
-  int cycles = get_cycles_per_sector();
+  put_response(get_drive_status());
+  put_irq_flag(1);
+}
 
-  drive_transition(&core_t::drive_reading, cycles);
-  logic_transition(&core_t::logic_clearing_response, 1000);
+void core_t::int2_get_id() {
+  log("Delivering 'GetID' second response.");
+
+  drive_state = cdrom_drive_state_t::idle;
+
+  if (disc_file.has_value()) {
+    // INT2(02h,00h, 20h,00h, 53h,43h,45h,4xh)
+    put_response(0x02);
+    put_response(0x00);
+    put_response(0x20);
+    put_response(0x00);
+    put_response('S');
+    put_response('C');
+    put_response('E');
+    put_response('A');
+    put_irq_flag(2);
+  } else {
+    // INT5(08h,40h, 00h,00h, 00h,00h,00h,00h)
+    put_response(0x08);
+    put_response(0x40);
+    put_response(0x00);
+    put_response(0x00);
+    put_response(0x00);
+    put_response(0x00);
+    put_response(0x00);
+    put_response(0x00);
+    put_irq_flag(5);
+  }
+}
+
+void core_t::int2_init() {
+  log("Delivering 'Init' second response.");
+
+  drive_state = cdrom_drive_state_t::idle;
+  mode = 0;
+
+  put_response(get_drive_status());
+  put_irq_flag(2);
+}
+
+void core_t::int2_pause() {
+  log("Delivering 'Pause' second response.");
+
+  drive_state = cdrom_drive_state_t::idle;
+
+  put_response(get_drive_status());
+  put_irq_flag(2);
+}
+
+void core_t::int2_read_toc() {
+  log("Delivering 'ReadTOC' second response.");
+
+  drive_state = cdrom_drive_state_t::idle;
+
+  put_response(get_drive_status());
+  put_irq_flag(2);
+}
+
+void core_t::int2_seek_l() {
+  log("Delivering 'SeekL' second response.");
+
+  drive_state = cdrom_drive_state_t::idle;
+
+  read_timecode = seek_timecode;
+  seek_pending = false;
+
+  put_response(get_drive_status());
+  put_irq_flag(2);
+}
+
+int core_t::dma_speed() {
+  return 40;
+}
+
+bool core_t::dma_read_ready() {
+  return true;
+}
+
+bool core_t::dma_write_ready() {
+  return true;
+}
+
+uint32_t core_t::dma_read() {
+  uint8_t b0 = get_data();
+  uint8_t b1 = get_data();
+  uint8_t b2 = get_data();
+  uint8_t b3 = get_data();
+
+  if (!sector_read_active) {
+    log("DMA complete.");
+  }
+
+  return (b3 << 24) | (b2 << 16) | (b1 << 8) | b0;
+}
+
+void core_t::dma_write(uint32_t) {
+}
+
+uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+  if (width == address_width_t::byte) {
+    if (address == 0x1f801800) {
+      return get_status();
+    }
+
+    if (address == 0x1f801801) {
+      return get_response();
+    }
+
+    if (address == 0x1f801802) {
+      return get_data();
+    }
+
+    if (address == 0x1f801803 && (index & 1) == 1) {
+      return get_irq_flag();
+    }
+
+    if (address == 0x1f801803 && (index & 1) == 0) {
+      return get_irq_mask();
+    }
+  }
+
+  log("index=%d", index);
+
+  return addressable_t::io_read(width, address);
+}
+
+void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+  if (width == address_width_t::byte) {
+    if (address == 0x1f801800) {
+      index = data & 3;
+      return;
+    } else {
+      // I'm going to make my life easier by creating a single identifier for
+      // each port, created from the index and I/O address.
+
+      switch ((index * 4) | (address & 3)) {
+        case 0x1: return put_command(data);
+        case 0x2: return put_parameter(data);
+        case 0x3: return put_host_control(data);
+
+        //  5 - Sound Map Data Out
+        case 0x6: return put_irq_mask(data);
+        case 0x7: return ack_irq_flag(data);
+
+        //  9 - Sound Map Coding Info
+        case 0xa: return; // 10 - Audio Volume for Left-CD-Out to Left-SPU-Input
+        case 0xb: return; // 11 - Audio Volume for Left-CD-Out to Right-SPU-Input
+
+        case 0xd: return; // 13 - Audio Volume for Right-CD-Out to Right-SPU-Input
+        case 0xe: return; // 14 - Audio Volume for Right-CD-Out to Left-SPU-Input
+        case 0xf: return; // 15 - Audio Volume Apply Changes
+      }
+    }
+  }
+
+  log("index=%d", index);
+
+  return addressable_t::io_write(width, address, data);
 }

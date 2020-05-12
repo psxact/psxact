@@ -16,7 +16,7 @@ namespace psx {
     bool log_enabled = {};
 
   public:
-    explicit addressable_t(const char *name, bool log_enabled);
+    addressable_t(const char *name, bool log_enabled);
     virtual ~addressable_t() {}
 
     void log(const char *fmt, ...) const;

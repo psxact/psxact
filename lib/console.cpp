@@ -19,6 +19,9 @@ console_t::console_t()
   wire_t irq1;
   irq1.recv_rise([&]() { cpu->interrupt(interrupt_type_t::gpu); });
 
+  wire_t irq2;
+  irq2.recv_rise([&]() { cpu->interrupt(interrupt_type_t::cdrom); });
+
   wire_t irq3;
   irq3.recv_rise([&]() { cpu->interrupt(interrupt_type_t::dma); });
 
@@ -47,7 +50,7 @@ console_t::console_t()
   exp2 = new exp::expansion2_t();
   exp3 = new exp::expansion3_t();
   gpu = new gpu::core_t(irq1, gpu_hblank, gpu_vblank);
-  cdrom = new cdrom::core_t(*cpu, args::game_file_name);
+  cdrom = new cdrom::core_t(irq2, args::game_file_name);
   input = new input::core_t(*cpu);
   mdec = new mdec::core_t();
   spu = new spu::core_t();
