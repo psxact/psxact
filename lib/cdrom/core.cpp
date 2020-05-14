@@ -13,9 +13,10 @@ constexpr int int2_pause_timing = 1'800; // TODO: This can take much longer?
 constexpr int int2_read_toc_timing = 16'000'000;
 constexpr int int2_seek_l_timing = 1'800;
 
-core_t::core_t(wire_t irq, const char *game_file_name)
+core_t::core_t(wire_t irq, xa_adpcm_t &xa_adpcm, const char *game_file_name)
     : addressable_t("cdc", args::log_cdrom)
-    , irq(irq) {
+    , irq(irq)
+    , xa_adpcm(xa_adpcm) {
 
   if (game_file_name) {
     disc_file.emplace(fopen(game_file_name, "rb"));
@@ -502,8 +503,7 @@ void core_t::put_response(uint8_t val) {
 }
 
 bool core_t::try_deliver_sector_as_adpcm() {
-  if (sector.get_type() != cdrom_sector_type_t::mode2_form1 ||
-      sector.get_type() != cdrom_sector_type_t::mode2_form2) {
+  if (sector.get_mode() != 2) {
     return false;
   }
 
@@ -519,7 +519,7 @@ bool core_t::try_deliver_sector_as_adpcm() {
     return false;
   }
 
-  // TODO: send sector to xa-adpcm decoder
+  xa_adpcm.decode(sector);
 
   return true;
 }
@@ -539,6 +539,7 @@ bool core_t::try_deliver_sector_as_data() {
   } else {
     switch (type) {
       case cdrom_sector_type_t::mode0:
+        assert(0 && "Mode 0");
         break;
 
       case cdrom_sector_type_t::mode1:
@@ -554,6 +555,7 @@ bool core_t::try_deliver_sector_as_data() {
         break;
 
       case cdrom_sector_type_t::mode2_form2:
+        assert(0 && "Mode 2 Form 2");
         break;
     }
   }
@@ -562,11 +564,6 @@ bool core_t::try_deliver_sector_as_data() {
 }
 
 void core_t::int1_read_n() {
-  log("Delivering sector data. (%02d:%02d:%02d)",
-    read_timecode.minute,
-    read_timecode.second,
-    read_timecode.sector);
-
   assert(disc_file.has_value() && "Reading non-existant disc.");
 
   sector.fill_from(*disc_file, read_timecode);
@@ -583,11 +580,21 @@ void core_t::int1_read_n() {
   }
 
   if (try_deliver_sector_as_adpcm()) {
+    log("Delivered sector (%02d:%02d:%02d) as CD-XA ADPCM.",
+      read_timecode.minute,
+      read_timecode.second,
+      read_timecode.sector);
+
     // TODO: Send INT1?
     return;
   }
 
   if (try_deliver_sector_as_data()) {
+    // log("Delivered sector (%02d:%02d:%02d) as data.",
+    //   read_timecode.minute,
+    //   read_timecode.second,
+    //   read_timecode.sector);
+
     put_response(get_drive_status());
     put_irq_flag(1);
     return;

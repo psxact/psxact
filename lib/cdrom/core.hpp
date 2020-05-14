@@ -6,6 +6,7 @@
 #include "cdrom/cdrom-mode.hpp"
 #include "cdrom/cdrom-sector.hpp"
 #include "cdrom/cdrom-sector-filter.hpp"
+#include "cdrom/xa-adpcm.hpp"
 #include "util/fifo.hpp"
 #include "util/wire.hpp"
 #include "addressable.hpp"
@@ -25,9 +26,11 @@ namespace psx::cdrom {
       , public dma_comms_t {
     util::wire_t irq;
 
+    xa_adpcm_t &xa_adpcm;
+
     cdrom_drive_state_t drive_state {};
-    cdrom_mode_t mode { 0 };
-    cdrom_sector_filter_t filter;
+    cdrom_mode_t mode {0};
+    cdrom_sector_filter_t filter {};
     cdrom_sector_t sector {};
     int32_t sector_read_cursor {};
     int32_t sector_read_offset {};
@@ -55,7 +58,7 @@ namespace psx::cdrom {
     std::optional<FILE *> disc_file;
 
   public:
-    core_t(util::wire_t irq, const char *game_file_name);
+    core_t(util::wire_t irq, xa_adpcm_t &xa_adpcm, const char *game_file_name);
 
     void tick(int amount);
 

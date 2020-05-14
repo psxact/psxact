@@ -1,6 +1,7 @@
 #ifndef SPU_CORE_HPP_
 #define SPU_CORE_HPP_
 
+#include "cdrom/xa-adpcm.hpp"
 #include "spu/voice.hpp"
 #include "addressable.hpp"
 #include "dma-comms.hpp"
@@ -10,25 +11,31 @@
 namespace psx::spu {
 
   enum class register_t {
-    kon_lo       = 0x1f801d88,
-    kon_hi       = 0x1f801d8a,
-    koff_lo      = 0x1f801d8c,
-    koff_hi      = 0x1f801d8e,
-    pmon_lo      = 0x1f801d90,
-    pmon_hi      = 0x1f801d92,
-    endx_lo      = 0x1f801d9c,
-    endx_hi      = 0x1f801d9a,
-    ram_addr_irq = 0x1f801da4,
-    ram_addr     = 0x1f801da6,
-    ram_data     = 0x1f801da8,
-    control      = 0x1f801daa,
-    status       = 0x1f801dae
+    kon_lo          = 0x1f801d88,
+    kon_hi          = 0x1f801d8a,
+    koff_lo         = 0x1f801d8c,
+    koff_hi         = 0x1f801d8e,
+    pmon_lo         = 0x1f801d90,
+    pmon_hi         = 0x1f801d92,
+    endx_lo         = 0x1f801d9c,
+    endx_hi         = 0x1f801d9a,
+    ram_addr_irq    = 0x1f801da4,
+    ram_addr        = 0x1f801da6,
+    ram_data        = 0x1f801da8,
+    control         = 0x1f801daa,
+    status          = 0x1f801dae,
+    cd_volume_left  = 0x1f801db0,
+    cd_volume_right = 0x1f801db2
   };
 
   class core_t final
       : public addressable_t
       , public dma_comms_t {
     uint16_t registers[512];
+
+    cdrom::xa_adpcm_t &xa_adpcm;
+    int16_t cd_volume_left;
+    int16_t cd_volume_right;
 
     sound_ram_t ram;
     uint32_t ram_address;
@@ -49,7 +56,7 @@ namespace psx::spu {
     int sample_buffer_index;
 
   public:
-    core_t();
+    core_t(cdrom::xa_adpcm_t &xa_adpcm);
     ~core_t();
 
     void run(int amount);

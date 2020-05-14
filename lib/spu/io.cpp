@@ -122,6 +122,14 @@ void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
         ram_address++;
         return;
 
+      case register_t::cd_volume_left:
+        cd_volume_left = int16_t(data);
+        return;
+
+      case register_t::cd_volume_right:
+        cd_volume_right = int16_t(data);
+        return;
+
       default:
         return;
     }

@@ -9,8 +9,9 @@
 using namespace psx::spu;
 using namespace psx::util;
 
-core_t::core_t()
-  : addressable_t("spu", args::log_spu) {
+core_t::core_t(cdrom::xa_adpcm_t &xa_adpcm)
+  : addressable_t("spu", args::log_spu)
+  , xa_adpcm(xa_adpcm) {
 }
 
 core_t::~core_t() {
@@ -54,6 +55,11 @@ void core_t::tick() {
     lsample += l;
     rsample += r;
   }
+
+  auto samples = xa_adpcm.read();
+
+  lsample += (std::get<0>(samples) * cd_volume_left) / 32767;
+  rsample += (std::get<1>(samples) * cd_volume_right) / 32767;
 
   key_on = 0;
   key_off = 0;

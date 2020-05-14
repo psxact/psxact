@@ -49,6 +49,7 @@ namespace psx {
     memory_t< mib(2) > *wram;
 
     cdrom::core_t *cdrom;
+    cdrom::xa_adpcm_t *xa_adpcm;
     timer::core_t *timer;
     cpu::core_t *cpu;
     dma::core_t *dma;

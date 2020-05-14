@@ -43,6 +43,8 @@ console_t::console_t()
   gpu_vblank.recv_rise([&]() { timer->enter_vblank(); });
   gpu_vblank.recv_fall([&]() { timer->leave_vblank(); });
 
+  xa_adpcm = new cdrom::xa_adpcm_t();
+
   timer = new timer::core_t(irq4, irq5, irq6);
   cpu = new cpu::core_t(*this);
   dma = new dma::core_t(irq3, *this);
@@ -50,10 +52,10 @@ console_t::console_t()
   exp2 = new exp::expansion2_t();
   exp3 = new exp::expansion3_t();
   gpu = new gpu::core_t(irq1, gpu_hblank, gpu_vblank);
-  cdrom = new cdrom::core_t(irq2, args::game_file_name);
+  cdrom = new cdrom::core_t(irq2, *xa_adpcm, args::game_file_name);
   input = new input::core_t(*cpu);
   mdec = new mdec::core_t();
-  spu = new spu::core_t();
+  spu = new spu::core_t(*xa_adpcm);
   mem = new memory_control_t();
 
   dma->attach(0, mdec);
@@ -82,6 +84,7 @@ console_t::~console_t() {
   delete mdec;
   delete spu;
   delete mem;
+  delete xa_adpcm;
 }
 
 addressable_t &console_t::decode(uint32_t address) {
