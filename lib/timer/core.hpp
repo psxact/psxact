@@ -41,7 +41,7 @@ namespace psx::timer {
   public:
     explicit core_t(util::wire_t irq0, util::wire_t irq1, util::wire_t irq2);
 
-    void run(int amount);
+    void tick(int amount);
 
     uint32_t io_read(address_width_t width, uint32_t address);
     void io_write(address_width_t width, uint32_t address, uint32_t data);

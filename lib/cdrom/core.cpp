@@ -538,6 +538,7 @@ bool core_t::try_deliver_sector_as_data() {
     sector_read_length = CDROM_SECTOR_SIZE - 12;
   } else {
     switch (type) {
+      case cdrom_sector_type_t::unknown:
       case cdrom_sector_type_t::mode0:
         assert(0 && "Mode 0");
         break;
@@ -590,10 +591,10 @@ void core_t::int1_read_n() {
   }
 
   if (try_deliver_sector_as_data()) {
-    // log("Delivered sector (%02d:%02d:%02d) as data.",
-    //   read_timecode.minute,
-    //   read_timecode.second,
-    //   read_timecode.sector);
+    log("Delivered sector (%02d:%02d:%02d) as data.",
+      read_timecode.minute,
+      read_timecode.second,
+      read_timecode.sector);
 
     put_response(get_drive_status());
     put_irq_flag(1);

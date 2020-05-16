@@ -59,8 +59,8 @@ namespace psx::spu {
     core_t(cdrom::xa_adpcm_t &xa_adpcm);
     ~core_t();
 
-    void run(int amount);
-    void tick();
+    void tick(int amount);
+    void step();
 
     int16_t *get_sample_buffer() const;
     uint32_t get_sample_buffer_index() const;

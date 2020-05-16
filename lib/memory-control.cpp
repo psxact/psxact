@@ -75,6 +75,7 @@ void memory_control_t::io_write(address_width_t width, uint32_t address, uint32_
       break;
 
     case 0x1f801060:
+      if (data == 0x00000888) return; // Metal Gear Solid
       if (data == 0x00000b88) return;
       break;
   }

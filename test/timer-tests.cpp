@@ -37,7 +37,7 @@ TEST_F(TimerTest, Timer2_SystemBasics) {
   timer.io_write(address_width_t::half, 0x1F801120, 0);
   timer.io_write(address_width_t::half, 0x1F801124, 0);
   timer.io_write(address_width_t::half, 0x1F801128, 0);
-  timer.run(8);
+  timer.tick(8);
 
   ASSERT_EQ(8, timer.io_read(address_width_t::word, 0x1F801120));
 }
@@ -46,7 +46,7 @@ TEST_F(TimerTest, Timer2_SystemLargeValues) {
   timer.io_write(address_width_t::half, 0x1F801120, 0);
   timer.io_write(address_width_t::half, 0x1F801124, 0);
   timer.io_write(address_width_t::half, 0x1F801128, 0);
-  timer.run(65535);
+  timer.tick(65535);
 
   ASSERT_EQ(65535, timer.io_read(address_width_t::word, 0x1F801120));
 }
@@ -56,13 +56,13 @@ TEST_F(TimerTest, Timer2_SystemOver8Basics) {
   timer.io_write(address_width_t::half, 0x1F801124, 0x200);
   timer.io_write(address_width_t::half, 0x1F801128, 0);
 
-  timer.run(8);
+  timer.tick(8);
   ASSERT_EQ(1, timer.io_read(address_width_t::word, 0x1F801120));
 
-  timer.run(7);
+  timer.tick(7);
   ASSERT_EQ(1, timer.io_read(address_width_t::word, 0x1F801120));
 
-  timer.run(1);
+  timer.tick(1);
   ASSERT_EQ(2, timer.io_read(address_width_t::word, 0x1F801120));
 }
 
@@ -71,12 +71,12 @@ TEST_F(TimerTest, Timer2_SystemOver8LargeValues) {
   timer.io_write(address_width_t::half, 0x1F801124, 0x200);
   timer.io_write(address_width_t::half, 0x1F801128, 0);
 
-  timer.run(524'280);
+  timer.tick(524'280);
   ASSERT_EQ(0xFFFF, timer.io_read(address_width_t::word, 0x1F801120));
 
-  timer.run(7); // Test that remainders carry over
+  timer.tick(7); // Test that remainders carry over
   ASSERT_EQ(0xFFFF, timer.io_read(address_width_t::word, 0x1F801120));
 
-  timer.run(1);
+  timer.tick(1);
   ASSERT_EQ(0x0000, timer.io_read(address_width_t::word, 0x1F801120));
 }

@@ -34,7 +34,7 @@ core_t::core_t(wire_t irq0, wire_t irq1, wire_t irq2)
   , timers({ timer_t(irq0), timer_t(irq1), timer_t(irq2) }) {
 }
 
-void core_t::run(int system) {
+void core_t::tick(int system) {
   system_over_8_prescale += system;
   int system_over_8 = system_over_8_prescale / 8;
   system_over_8_prescale &= 7;

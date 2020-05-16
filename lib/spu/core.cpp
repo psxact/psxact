@@ -34,16 +34,16 @@ void core_t::put_status_register() {
   put_register(register_t::status, status);
 }
 
-void core_t::run(int amount) {
+void core_t::tick(int amount) {
   prescaler += amount;
 
   while (prescaler >= SPU_DIVIDER) {
     prescaler -= SPU_DIVIDER;
-    tick();
+    step();
   }
 }
 
-void core_t::tick() {
+void core_t::step() {
   int lsample = 0;
   int rsample = 0;
 

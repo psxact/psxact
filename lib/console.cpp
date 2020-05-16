@@ -133,12 +133,12 @@ void console_t::run_for_one_frame(input_params_t &i, output_params_t &o) {
   while (1) {
     int amount = cpu->tick() + dma->tick();
 
-    spu->run(amount);
-    timer->run(amount);
+    spu->tick(amount);
+    timer->tick(amount);
     cdrom->tick(amount);
     input->tick(amount);
 
-    if (gpu->run(amount)) {
+    if (gpu->tick(amount)) {
       break;
     }
   }

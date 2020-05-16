@@ -10,7 +10,9 @@ static const int pos_xa_adpcm_table[5] = {0, +60, +115, +98, +122};
 static const int neg_xa_adpcm_table[5] = {0,   0,  -52, -55,  -60};
 
 std::tuple<int16_t, int16_t> xa_adpcm_t::read() {
-  return std::tuple(left.get_output(), right.get_output());
+  return std::tuple(
+    channel[0].get_output(),
+    channel[1].get_output());
 }
 
 void xa_adpcm_t::decode(const cdrom_sector_t &sector) {
@@ -28,49 +30,48 @@ void xa_adpcm_t::decode_segment(const cdrom_sector_t &sector, int segment) {
   assert(is_18900hz == false);
   assert(is_8bit == false);
 
-  auto head_base = 24 + (segment * 128) + 4; // skip sync,header,subheader
-  auto data_base = 24 + (segment * 128) + 16;
+  auto base = 24 + (segment * 128);
+  auto step = is_stereo ? 2 : 1;
 
-  // The first 16 bytes are header data.
-  // The next 112 bytes are sample data. The arrangement of this section depends on the stereo/depth bits.
+  auto read_header = [&](int n) { return sector.get(base + n + 4); };
+  auto read_sample = [&](int n) { return sector.get(base + n + 16); };
 
   if (!is_8bit) {
-    if (is_stereo) {
-      for (int stream = 0; stream < 4; stream++) {
-        uint8_t header_left = sector.get(head_base + (stream * 2) + 0);
-        uint8_t header_right = sector.get(head_base + (stream * 2) + 1);
+    for (int stream = 0; stream < 8; stream += step) {
+      for (int nibble = 0; nibble < 0x70; nibble += 4) {
+        if (is_stereo) {
+          auto header1 = read_header(stream + 0);
+          auto header2 = read_header(stream + 1);
+          auto sample  = read_sample((stream / 2) + nibble);
 
-        for (int i = 0; i < 0x70; i += 4) {
-          uint8_t sample = sector.get(data_base + stream + i);
-          uint8_t sample_left = (sample << 4) & 0xf0;
-          uint8_t sample_right = (sample << 0) & 0xf0;
+          decode_sample(header1, int16_t((sample << 12) & 0xf000), 0);
+          decode_sample(header2, int16_t((sample <<  8) & 0xf000), 1);
+        } else {
+          auto header = read_header(stream);
+          auto sample = read_sample((stream / 2) + nibble);
+          auto shift  = (stream & 1) ? 8 : 12;
 
-          decode_sample_pair(header_left, sample_left, header_right, sample_right);
+          decode_sample(header, int16_t((sample << shift) & 0xf000), 0);
+          decode_sample(header, int16_t((sample << shift) & 0xf000), 1);
         }
       }
     }
   }
 }
 
-void xa_adpcm_t::decode_sample_pair(uint8_t left_header, uint8_t left_data, uint8_t right_header, uint8_t right_data) {
-  left.put_sample(decode_sample(left_header, left_data, prev_samples_left));
-  right.put_sample(decode_sample(right_header, right_data, prev_samples_right));
-}
-
-int16_t xa_adpcm_t::decode_sample(uint8_t header, uint8_t sample, int16_t (&prev)[2]) {
+void xa_adpcm_t::decode_sample(uint8_t header, int16_t sample, int32_t c) {
   int32_t shift = header & 15;
   int32_t filter = (header >> 4) & 3;
 
-  int32_t f0 = pos_xa_adpcm_table[filter];
-  int32_t f1 = neg_xa_adpcm_table[filter];
-  int32_t t  = int16_t(sample << 8) >> shift;
+  int32_t pos = pos_xa_adpcm_table[filter];
+  int32_t neg = neg_xa_adpcm_table[filter];
+  int32_t val = sample >> shift;
 
-  t += ((f0 * prev[0] + f1 * prev[1]) + 32) / 64;
+  val += ((pos * prev[c][0]) + (neg * prev[c][1])) >> 6;
+  val  = int_t<16>::clamp(val);
 
-  int32_t s  = int_t<16>::clamp(t);
+  prev[c][1] = prev[c][0];
+  prev[c][0] = val;
 
-  prev[1] = prev[0];
-  prev[0] = s;
-  
-  return s;
+  channel[c].put_sample(val);
 }

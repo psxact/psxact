@@ -34,17 +34,17 @@ int32_t core_t::get_height() const {
   return 480;
 }
 
-bool core_t::run(int amount) {
+bool core_t::tick(int amount) {
   // time-base conversion
   prescaler += amount * 11;
-  int ticks = prescaler / 7;
+  int steps = prescaler / 7;
   prescaler = prescaler % 7;
 
   // the real update function
-  return tick(ticks);
+  return step(steps);
 }
 
-bool core_t::tick(int amount) {
+bool core_t::step(int amount) {
   constexpr int VBLANK_START = int32_t(241 * GPU_LINE_LENGTH + 0.5);
   constexpr int VBLANK_END = int32_t(262.5 * GPU_LINE_LENGTH + 0.5);
 
@@ -82,6 +82,7 @@ void core_t::render_field_240p() {
   const int height = 480;
 
   const int vscale = get_v_resolution() == gpu_v_resolution_t::v480 ? 1 : 2;
+  const int mask = (status & (1 << 23)) ? 0 : 0xffffff;
 
   if (get_display_depth() == gpu_display_depth_t::bpp24) {
     for (int y = 1; y < height; y += 2) {
@@ -94,7 +95,7 @@ void core_t::render_field_240p() {
         gamma_t::apply(color);
 
         video_buffer[y - 1][x] = 0;
-        video_buffer[y - 0][x] = color.to_uint32();
+        video_buffer[y - 0][x] = color.to_uint32() & mask;
       }
     }
   } else {
@@ -109,7 +110,7 @@ void core_t::render_field_240p() {
         gamma_t::apply(color);
 
         video_buffer[y - 1][x] = 0;
-        video_buffer[y - 0][x] = color.to_uint32();
+        video_buffer[y - 0][x] = color.to_uint32() & mask;
       }
     }
   }

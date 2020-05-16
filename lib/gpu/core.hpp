@@ -128,11 +128,11 @@ namespace psx::gpu {
 
     /// Called with the number of CPU cycles that have elapsed.
     /// Returns true if a field has elapsed, false otherwise.
-    bool run(int amount);
+    bool tick(int amount);
 
     /// Called with the number of GPU cycles that have elapsed.
     /// Returns true if a field has elapsed, false otherwise.
-    bool tick(int amount);
+    bool step(int amount);
 
     /// Called at the end of a field to draw the field into the video buffer.
     void render_field_240p();
