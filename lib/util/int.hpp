@@ -34,6 +34,6 @@ namespace psx::util {
       return count;
     }
   };
-}  // namespace psx::util
+}
 
-#endif  // UTIL_INT_HPP_
+#endif

@@ -36,6 +36,6 @@ namespace psx::input {
     virtual int send(int request);
     virtual void set_dtr(bool next_dtr);
   };
-}  // namespace psx::input
+}
 
-#endif  // INPUT_DEVICE_HPP_
+#endif

@@ -5,6 +5,7 @@
 #include "util/int.hpp"
 #include "util/uint.hpp"
 #include "args.hpp"
+#include "timing.hpp"
 
 using namespace psx;
 using namespace psx::cpu;
@@ -84,6 +85,8 @@ bool core_t::get_cop_usable(int n) const {
 }
 
 int core_t::tick() {
+  timing::reset_cpu_time();
+
   read_code();
 
   is_branch_delay_slot = is_branch;
@@ -107,7 +110,7 @@ int core_t::tick() {
     }
   }
 
-  return 4;
+  return timing::get_cpu_time();
 }
 
 static uint32_t segments[8] = {
@@ -289,6 +292,8 @@ void core_t::set_istat(uint32_t value) {
 }
 
 uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+  timing::add_cpu_time(4);
+
   if (width == address_width_t::word || width == address_width_t::half) {
     switch (address) {
       case 0x1f801070:
@@ -303,6 +308,8 @@ uint32_t core_t::io_read(address_width_t width, uint32_t address) {
 }
 
 void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+  timing::add_cpu_time(4);
+
   if (width == address_width_t::word || width == address_width_t::half) {
     switch (address) {
       case 0x1f801070:

@@ -13,8 +13,8 @@ using namespace psx::util;
 
 console_t::console_t()
   : addressable_t("console", false) {
-  bios = new bios_t();
-  wram = new memory_t< mib(2) >("wram");
+  bios = new memory::bios_t();
+  wram = new memory::wram_t();
 
   wire_t irq1;
   irq1.recv_rise([&]() { cpu->interrupt(interrupt_type_t::gpu); });
@@ -56,7 +56,7 @@ console_t::console_t()
   input = new input::core_t(*cpu);
   mdec = new mdec::core_t();
   spu = new spu::core_t(*xa_adpcm);
-  mem = new memory_control_t();
+  mem = new memory::memory_control_t();
 
   dma->attach(0, mdec);
   dma->attach(1, mdec);

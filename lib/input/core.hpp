@@ -7,8 +7,6 @@
 #include "addressable.hpp"
 #include "interruptible.hpp"
 
-using namespace psx::util;
-
 namespace psx::input {
 
   class core_t final : public addressable_t {
@@ -25,7 +23,7 @@ namespace psx::input {
     } dsr = {};
 
     struct {
-      fifo_t< uint8_t, 3 > fifo = {};
+      util::fifo_t< uint8_t, 3 > fifo = {};
       bool enable = {};
       bool interrupt_enable = {};
       int interrupt_mode = {};
@@ -66,6 +64,6 @@ namespace psx::input {
 
     void send_interrupt();
   };
-}  // namespace psx::input
+}
 
-#endif  // INPUT_CORE_HPP_
+#endif

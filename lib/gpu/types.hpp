@@ -91,4 +91,4 @@ namespace psx::gpu {
   };
 }
 
-#endif  // GPU_TYPES_HPP_
+#endif

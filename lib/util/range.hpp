@@ -4,10 +4,11 @@
 #include <cstdint>
 
 namespace psx::range {
+
   template<uint32_t min, uint32_t max>
   bool between(uint32_t value) {
     return (value & ~(min ^ max)) == min;
   }
-}  // namespace psx::range
+}
 
-#endif  // UTIL_RANGE_HPP_
+#endif

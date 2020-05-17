@@ -38,6 +38,6 @@ namespace psx::spu {
 
     void counter_step();
   };
-}  // namespace psx::spu
+}
 
-#endif  // SPU_VOICE_HPP_
+#endif

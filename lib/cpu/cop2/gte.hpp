@@ -62,16 +62,16 @@ namespace psx::cpu::cop2 {
     } gpr = {};
 
   public:
-    void run(uint32_t code);
+    void run(uint32_t code) override;
 
     uint32_t read_matrix_vector_group(uint32_t n);
-    uint32_t read_ccr(uint32_t n);
+    uint32_t read_ccr(uint32_t n) override;
 
     void write_matrix_vector_group(uint32_t n, uint32_t value);
-    void write_ccr(uint32_t n, uint32_t value);
+    void write_ccr(uint32_t n, uint32_t value) override;
 
-    uint32_t read_gpr(uint32_t n);
-    void write_gpr(uint32_t n, uint32_t value);
+    uint32_t read_gpr(uint32_t n) override;
+    void write_gpr(uint32_t n, uint32_t value) override;
 
     uint32_t divide();
 
@@ -152,6 +152,6 @@ namespace psx::cpu::cop2 {
     int32_t flag_g(int32_t n, int32_t value);
     int32_t flag_h(int64_t value);
   };
-}  // namespace psx::cpu::cop2
+}
 
-#endif  // CPU_COP2_GTE_HPP_
+#endif

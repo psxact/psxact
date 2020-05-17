@@ -61,6 +61,6 @@ namespace psx::cpu::cop0 {
     void push_flags();
     void pop_flags();
   };
-}  // namespace psx::cpu::cop0
+}
 
-#endif  // CPU_COP0_SYS_HPP_
+#endif

@@ -69,6 +69,6 @@ namespace psx::timer {
     timer_sync_mode_t timer_sync_mode(int n);
     void timer_blanking_sync(int n, bool active);
   };
-}  // namespace psx::timer
+}
 
-#endif  // TIMER_CORE_HPP_
+#endif

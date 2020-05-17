@@ -1,5 +1,7 @@
 #include "spu/core.hpp"
 
+#include "timing.hpp"
+
 using namespace psx::spu;
 
 int core_t::dma_speed() {
@@ -29,6 +31,8 @@ void core_t::dma_write(uint32_t val) {
 }
 
 uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+  timing::add_cpu_time(width == address_width_t::word ? 39 : 19);
+
   if (width == address_width_t::half) {
     if (address >= 0x1f801c00 && address <= 0x1f801d7f) {
       auto &v = voices[(address >> 4) & 31];
@@ -52,6 +56,8 @@ uint32_t core_t::io_read(address_width_t width, uint32_t address) {
 }
 
 void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+  timing::add_cpu_time(width == address_width_t::word ? 39 : 19);
+
   if (width == address_width_t::word) {
     io_write(address_width_t::half, address & ~2, data);
     io_write(address_width_t::half, address | 2, data >> 16);

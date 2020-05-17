@@ -2,6 +2,7 @@
 
 #include "input/devices/digital-pad.hpp"
 #include "args.hpp"
+#include "timing.hpp"
 
 using namespace psx::input;
 
@@ -64,6 +65,8 @@ void core_t::tick(int amount) {
 }
 
 uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+  timing::add_cpu_time(4);
+
   if (width == address_width_t::byte && address == 0x1f801040) {
     uint8_t data = rx.fifo.is_empty() ? 0xff : rx.fifo.read();
 
@@ -114,6 +117,8 @@ uint32_t core_t::io_read(address_width_t width, uint32_t address) {
 }
 
 void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+  timing::add_cpu_time(4);
+
   if (width == address_width_t::byte && address == 0x1f801040) {
     tx.buffer = data & 0xff;
     tx.pending = true;

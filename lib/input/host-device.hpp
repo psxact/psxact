@@ -36,6 +36,6 @@ namespace psx::input {
     host_device_button_t button_2;
     host_device_button_t button_3;
   };
-}  // namespace psx::input
+}
 
-#endif  // INPUT_DEVICE_HPP_
+#endif

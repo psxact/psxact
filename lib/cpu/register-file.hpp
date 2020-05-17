@@ -14,4 +14,4 @@ namespace psx::cpu {
   };
 }
 
-#endif  // CPU_REGISTER_FILE_HPP_
+#endif

@@ -15,6 +15,6 @@ namespace psx::cpu {
     virtual uint32_t read_gpr(uint32_t n) = 0;
     virtual void write_gpr(uint32_t n, uint32_t value) = 0;
   };
-}  // namespace psx::cpu
+}
 
-#endif  // CPU_COP_HPP_
+#endif

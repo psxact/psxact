@@ -4,6 +4,7 @@
 #include <cstdint>
 
 namespace psx::cdrom {
+
   class resampler_t {
     int16_t buffer[32] {};
     int32_t offset {0};
@@ -22,7 +23,6 @@ namespace psx::cdrom {
     void put_output(int16_t val);
     void put_sample(int16_t val);
   };
-} // namespace psx::cdrom
+}
 
-
-#endif // CDROM_RESAMPLER_HPP_
+#endif

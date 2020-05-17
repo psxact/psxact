@@ -35,4 +35,4 @@ namespace psx::spu {
   };
 }
 
-#endif  // SPU_ENVELOPE_HPP_
+#endif

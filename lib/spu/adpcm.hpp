@@ -22,4 +22,4 @@ namespace psx::spu {
   };
 }
 
-#endif  // SPU_ADPCM_HPP_
+#endif

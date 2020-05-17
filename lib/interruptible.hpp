@@ -23,6 +23,6 @@ namespace psx {
 
     virtual void interrupt(interrupt_type_t flag) = 0;
   };
-}  // namespace psx
+}
 
-#endif  // INTERRUPT_ACCESS_HPP_
+#endif

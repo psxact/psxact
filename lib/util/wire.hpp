@@ -28,6 +28,6 @@ namespace psx::util {
 
     virtual void operator()(wire_state_t val);
   };
-}  // namespace psx::util
+}
 
-#endif  // UTIL_WIRE_HPP_
+#endif

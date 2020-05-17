@@ -25,6 +25,6 @@ namespace psx {
 
     void resize(int w, int h);
   };
-}  // namespace psx
+}
 
-#endif  // SDL2_VIDEO_HPP_
+#endif

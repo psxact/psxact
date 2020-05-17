@@ -64,6 +64,6 @@ namespace psx {
       }
     }
   };
-}  // namespace psx
+}
 
-#endif  // MEMORY_HPP_
+#endif

@@ -18,6 +18,6 @@ namespace psx::input::devices {
     int send(int request) override;
     void set_dtr(bool next_dtr) override;
   };
-}  // namespace psx::input::devices
+}
 
-#endif  // INPUT_DEVICES_DIGITAL_PAD_HPP_
+#endif

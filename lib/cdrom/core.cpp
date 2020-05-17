@@ -702,7 +702,17 @@ uint32_t core_t::dma_read() {
 void core_t::dma_write(uint32_t) {
 }
 
+static void add_cpu_time(psx::address_width_t width) {
+  switch (width) {
+    case psx::address_width_t::byte: psx::timing::add_cpu_time(9);
+    case psx::address_width_t::half: psx::timing::add_cpu_time(15);
+    case psx::address_width_t::word: psx::timing::add_cpu_time(27);
+  }
+}
+
 uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+  add_cpu_time(width);
+
   if (width == address_width_t::byte) {
     if (address == 0x1f801800) {
       return get_status();
@@ -731,6 +741,8 @@ uint32_t core_t::io_read(address_width_t width, uint32_t address) {
 }
 
 void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+  add_cpu_time(width);
+
   if (width == address_width_t::byte) {
     if (address == 0x1f801800) {
       index = data & 3;

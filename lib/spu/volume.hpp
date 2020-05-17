@@ -21,4 +21,4 @@ namespace psx::spu {
   };
 }
 
-#endif  // SPU_VOLUME_HPP_
+#endif

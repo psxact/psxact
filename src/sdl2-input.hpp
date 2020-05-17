@@ -10,6 +10,6 @@ namespace psx {
   public:
     void from_keyboard(psx::input::host_device_t &device);
   };
-}  // namespace psx
+}
 
-#endif  // SDL2_INPUT_HPP_
+#endif

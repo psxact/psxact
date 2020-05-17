@@ -24,6 +24,6 @@ namespace psx {
     virtual uint32_t io_read(address_width_t width, uint32_t address);
     virtual void io_write(address_width_t width, uint32_t address, uint32_t data);
   };
-}  // namespace psx
+}
 
-#endif  // ADDRESSABLE_HPP_
+#endif

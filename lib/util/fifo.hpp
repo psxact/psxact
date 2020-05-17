@@ -59,6 +59,6 @@ namespace psx::util {
       return (wr_ptr - rd_ptr) & mask;
     }
   };
-}  // namespace psx::util
+}
 
-#endif  // UTIL_FIFO_HPP_
+#endif

@@ -177,7 +177,7 @@ void core_t::draw_triangle(gp0_command_t command, const triangle_t &triangle) {
       if (w0 > c[0] && w1 > c[1] && w2 > c[2]) {
         auto color = color_lerp(triangle.colors, w0, w1, w2);
         auto coord = point_lerp(triangle.coords, w0, w1, w2);
-        
+
         draw_color(command, color, point, coord, triangle.tev);
       }
 

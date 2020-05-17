@@ -1,7 +1,7 @@
-#pragma once
+#ifndef SPU_ADSR_HPP_
+#define SPU_ADSR_HPP_
 
 #include <cstdint>
-
 #include "spu/envelope.hpp"
 
 namespace psx::spu {
@@ -39,3 +39,5 @@ namespace psx::spu {
     void put_config_hi(uint16_t val);
   };
 }
+
+#endif

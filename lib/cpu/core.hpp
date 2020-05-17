@@ -100,8 +100,8 @@ namespace psx::cpu {
     uint32_t get_istat() const;
     void set_istat(uint32_t value);
 
-    uint32_t io_read(address_width_t width, uint32_t address);
-    void io_write(address_width_t width, uint32_t address, uint32_t data);
+    uint32_t io_read(address_width_t width, uint32_t address) override;
+    void io_write(address_width_t width, uint32_t address, uint32_t data) override;
 
     void branch(uint32_t target, bool condition);
     uint32_t branch_abs();
@@ -206,6 +206,6 @@ namespace psx::cpu {
     void set_rt_load(uint32_t value);
     void set_register(uint32_t index, uint32_t value);
   };
-}  // namespace psx::cpu
+}
 
-#endif  // CPU_CORE_HPP_
+#endif

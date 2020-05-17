@@ -15,6 +15,6 @@ namespace psx::cdrom {
     void put_channel(uint8_t val);
     bool match(const cdrom_sector_t &sector) const;
   };
-}  // namespace psx::cdrom
+}
 
-#endif  // CDROM_CDROM_SECTOR_FILTER_HPP_
+#endif

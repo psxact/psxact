@@ -194,6 +194,6 @@ namespace psx::gpu {
         const texture_coord_t &coord,
         const tev_t &tev);
   };
-}  // namespace psx::gpu
+}
 
-#endif  // GPU_CORE_HPP_
+#endif

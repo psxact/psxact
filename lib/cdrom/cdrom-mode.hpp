@@ -4,6 +4,7 @@
 #include <cstdint>
 
 namespace psx::cdrom {
+
   class cdrom_mode_t {
     uint8_t val;
 
@@ -20,4 +21,4 @@ namespace psx::cdrom {
   };
 }
 
-#endif  // CDROM_CDROM_MODE_HPP_
+#endif

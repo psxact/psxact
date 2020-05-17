@@ -24,4 +24,4 @@ namespace psx {
   };
 }
 
-#endif  // DMA_COMMS_HPP_
+#endif

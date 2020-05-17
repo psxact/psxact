@@ -11,7 +11,7 @@ const int16_t gauss_t::table[256][4] = {
 int32_t gauss_t::filter(int index, int16_t a, int16_t b, int16_t c, int16_t d) {
   auto coeffs = table[index];
   auto result = 0;
-  
+
   result += int32_t(a) * int32_t(coeffs[0]);
   result += int32_t(b) * int32_t(coeffs[1]);
   result += int32_t(c) * int32_t(coeffs[2]);

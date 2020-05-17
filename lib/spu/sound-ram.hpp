@@ -19,6 +19,6 @@ namespace psx::spu {
     uint16_t read(uint32_t address);
     void write(uint32_t address, uint16_t data);
   };
-}  // namespace psx::spu
+}
 
-#endif  // SPU_SOUND_RAM_HPP_
+#endif

@@ -66,6 +66,6 @@ namespace psx::util {
       }
     }
   };
-}  // namespace psx::util
+}
 
-#endif  // UTIL_BLOB_HPP_
+#endif

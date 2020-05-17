@@ -213,6 +213,8 @@ uint32_t core_t::stat() {
 }
 
 uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+  timing::add_cpu_time(4);
+
   if (width == address_width_t::word) {
     switch (address) {
       case GPU_READ:
@@ -227,6 +229,8 @@ uint32_t core_t::io_read(address_width_t width, uint32_t address) {
 }
 
 void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+  timing::add_cpu_time(4);
+
   if (width == address_width_t::word) {
     switch (address) {
       case GPU_GP0:

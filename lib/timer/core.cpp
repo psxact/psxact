@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include "args.hpp"
+#include "timing.hpp"
 
 // These are not implemented or partially implemented.
 //
@@ -140,7 +141,7 @@ timer_source_t core_t::timer_source(int n) {
     case 1: return (timers[1].control & (1 << 8)) ? timer_source_t::hblank : timer_source_t::system;
     case 2: return (timers[2].control & (1 << 9)) ? timer_source_t::system_over_8 : timer_source_t::system;
   }
-  
+
   assert(0 && "Invalid value for parameter `n'");
 }
 
@@ -210,6 +211,7 @@ void core_t::timer_put_counter(int n, uint16_t val) {
 }
 
 void core_t::timer_put_control(int n, uint16_t val) {
+  timers[n].counter  = 0;
   timers[n].running  = true;
   timers[n].control &= 0x1800;
   timers[n].control |= val & 0x3ff;
@@ -248,6 +250,8 @@ void core_t::timer_put_counter_target(int n, uint16_t val) {
 }
 
 uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+  timing::add_cpu_time(4);
+
   if (width == address_width_t::word || width == address_width_t::half) {
     int n = (address >> 4) & 3;
 
@@ -262,6 +266,8 @@ uint32_t core_t::io_read(address_width_t width, uint32_t address) {
 }
 
 void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+  timing::add_cpu_time(4);
+
   if (width == address_width_t::word || width == address_width_t::half) {
     int n = (address >> 4) & 3;
 

@@ -84,6 +84,6 @@ namespace psx::spu {
     void voice_tick(int v, int32_t *l, int32_t *r);
     void voice_decoder_tick(int v);
   };
-}  // namespace psx::spu
+}
 
-#endif  // SPU_CORE_HPP_
+#endif

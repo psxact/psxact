@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <tuple>
-
 #include "cdrom/cdrom-sector.hpp"
 #include "cdrom/resampler.hpp"
 
@@ -22,4 +21,4 @@ namespace psx::cdrom {
   };
 }
 
-#endif // CDROM_XA_ADPCM_HPP_
+#endif

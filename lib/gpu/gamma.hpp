@@ -13,4 +13,4 @@ namespace psx::gpu {
   };
 }
 
-#endif  // GPU_GAMMA_HPP_
+#endif

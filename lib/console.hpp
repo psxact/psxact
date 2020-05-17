@@ -12,13 +12,13 @@
 #include "input/core.hpp"
 #include "input/host-device.hpp"
 #include "mdec/core.hpp"
+#include "memory/bios.hpp"
+#include "memory/memory-control.hpp"
+#include "memory/wram.hpp"
 #include "spu/core.hpp"
 #include "timer/core.hpp"
 #include "addressable.hpp"
-#include "bios.hpp"
 #include "interruptible.hpp"
-#include "memory.hpp"
-#include "memory-control.hpp"
 
 namespace psx {
 
@@ -45,8 +45,9 @@ namespace psx {
 
   class console_t final
     : public addressable_t {
-    bios_t *bios;
-    memory_t< mib(2) > *wram;
+    memory::bios_t *bios;
+    memory::wram_t *wram;
+    memory::memory_control_t *mem;
 
     cdrom::core_t *cdrom;
     cdrom::xa_adpcm_t *xa_adpcm;
@@ -60,7 +61,6 @@ namespace psx {
     input::core_t *input;
     mdec::core_t *mdec;
     spu::core_t *spu;
-    memory_control_t *mem;
     int cycles;
 
     bool is_exe;
@@ -82,6 +82,6 @@ namespace psx {
 
     void load_exe(const char *game_file_name);
   };
-}  // namespace psx
+}
 
-#endif  // CONSOLE_HPP_
+#endif

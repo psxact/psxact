@@ -18,6 +18,6 @@ namespace psx::args {
   extern bool bios_patch_debug_tty;
 
   void init(int argc, char **argv);
-}  // namespace psx::args
+}
 
-#endif  // ARGS_HPP_
+#endif

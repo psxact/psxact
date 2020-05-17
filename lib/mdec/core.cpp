@@ -3,6 +3,7 @@
 #include "util/int.hpp"
 #include "util/uint.hpp"
 #include "args.hpp"
+#include "timing.hpp"
 
 using namespace psx::mdec;
 using namespace psx::util;
@@ -148,6 +149,8 @@ void core_t::fill_scale_table() {
 }
 
 uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+  timing::add_cpu_time(4);
+
   if (width == address_width_t::word) {
     switch (address) {
       case 0x1f801824: {
@@ -160,6 +163,8 @@ uint32_t core_t::io_read(address_width_t width, uint32_t address) {
 }
 
 void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+  timing::add_cpu_time(4);
+
   if (width == address_width_t::word) {
     switch (address) {
       case 0x1f801820: {

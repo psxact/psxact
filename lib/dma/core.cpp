@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include "args.hpp"
+#include "timing.hpp"
 
 using namespace psx::dma;
 using namespace psx::util;
@@ -276,6 +277,8 @@ void core_t::put_icr(uint32_t val) {
 }
 
 uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+  timing::add_cpu_time(4);
+
   if (width == address_width_t::byte) {
     auto shift = 8 * (address & 3);
     return uint8_t(io_read(address_width_t::word, address) >> shift);
@@ -319,6 +322,8 @@ uint32_t core_t::get32(uint32_t address) {
 }
 
 void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+  timing::add_cpu_time(4);
+
   if (width == address_width_t::byte && address == 0x1f8010f6) {
     return io_write(address_width_t::word, 0x1f8010f4, data << 16);
   }

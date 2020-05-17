@@ -17,6 +17,6 @@ namespace psx {
 
     bool render(psx::output_params_audio_t &params);
   };
-}  // namespace psx
+}
 
-#endif  // SDL2_AUDIO_HPP_
+#endif

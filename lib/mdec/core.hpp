@@ -53,6 +53,6 @@ namespace psx::mdec {
     uint32_t dma_read() override;
     void dma_write(uint32_t val) override;
   };
-}  // namespace psx::mdec
+}
 
-#endif  // MDEC_CORE_HPP_
+#endif

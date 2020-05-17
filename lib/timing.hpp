@@ -1,8 +1,9 @@
 #ifndef TIMING_HPP_
 #define TIMING_HPP_
 
-namespace psx {
+#include <cstdint>
 
+namespace psx {
   constexpr double NTSC_COLOR_CARRIER = 3'579'545.454545455;
   constexpr double NTSC_SCANLINE_LENGTH = 227.5;
   constexpr double NTSC_SCANLINE_FREQ = NTSC_COLOR_CARRIER / NTSC_SCANLINE_LENGTH;
@@ -23,6 +24,11 @@ namespace psx {
 
   constexpr double GPU_LINE_LENGTH = GPU_FREQ / NTSC_SCANLINE_FREQ;
 
-}  // namespace psx
+  namespace timing {
+    void add_cpu_time(int32_t amount);
+    int32_t get_cpu_time();
+    void reset_cpu_time();
+  }
+}
 
-#endif  // TIMING_HPP_
+#endif

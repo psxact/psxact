@@ -13,4 +13,4 @@ namespace psx::spu {
   };
 }
 
-#endif  // SPU_GAUSS_HPP_
+#endif

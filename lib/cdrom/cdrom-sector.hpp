@@ -5,6 +5,7 @@
 #include <cstdio>
 
 namespace psx::cdrom {
+
   constexpr int CDROM_SECTOR_SIZE = 0x930;
 
   struct cdrom_timecode_t {
@@ -62,6 +63,6 @@ namespace psx::cdrom {
 
     uint8_t get(int index) const;
   };
-}  // namespace psx::cdrom
+}
 
-#endif  // CDROM_SECTOR_HPP_
+#endif

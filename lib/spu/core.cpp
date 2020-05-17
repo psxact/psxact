@@ -27,7 +27,7 @@ void core_t::put_register(register_t reg, uint16_t val) {
 
 void core_t::put_status_register() {
   uint16_t status = 0;
-  
+
   status |= get_register(register_t::control) & 0x3f;
   status |= (capture_address & 0x100) << 3;
 
