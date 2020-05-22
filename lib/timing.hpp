@@ -22,7 +22,7 @@ namespace psx {
 
   constexpr int SPU_DIVIDER = CPU_FREQ / SPU_FREQ;
 
-  constexpr double GPU_LINE_LENGTH = GPU_FREQ / NTSC_SCANLINE_FREQ;
+  constexpr double GPU_LINE_LENGTH = 3'379.2; // GPU_FREQ / NTSC_SCANLINE_FREQ;
 
   namespace timing {
     void add_cpu_time(int32_t amount);

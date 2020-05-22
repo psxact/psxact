@@ -6,7 +6,7 @@
 using namespace psx::gpu;
 using namespace psx::util;
 
-// texture_color_t
+// texture_color
 
 color texture_color::to_color() const {
   return color::from_uint16(value);
@@ -20,7 +20,7 @@ bool texture_color::is_full_transparent() const {
   return value == 0;
 }
 
-// color_t
+// color
 
 color color::from_uint16(uint16_t val) {
   color color;
@@ -51,7 +51,7 @@ uint32_t color::to_uint32() const {
   return (r << 16) | (g << 8) | b;
 }
 
-// point_t
+// point
 
 point point::from_uint24(uint32_t val) {
   point point;
@@ -61,7 +61,7 @@ point point::from_uint24(uint32_t val) {
   return point;
 }
 
-// texture_coord_t
+// texture_coord
 
 texture_coord texture_coord::from_uint16(uint16_t val) {
   texture_coord coord;
@@ -71,7 +71,7 @@ texture_coord texture_coord::from_uint16(uint16_t val) {
   return coord;
 }
 
-// gp0_command_t
+// gp0_command
 
 bool gp0_command::is_raw_texture() const {
   return (command & (1 << 24)) != 0;

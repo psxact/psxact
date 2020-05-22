@@ -134,6 +134,9 @@ namespace psx::cdrom {
     /// Called after processing a 'SeekL' command, to deliver the 2nd response.
     void int2_seek_l();
 
+    /// Called after processing a 'Stop' command, to deliver the 2nd response.
+    void int2_stop();
+
     int dma_speed() override;
     bool dma_read_ready() override;
     bool dma_write_ready() override;

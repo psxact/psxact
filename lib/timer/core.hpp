@@ -6,6 +6,11 @@
 
 namespace psx::timer {
 
+  enum class timer_irq_flag {
+    active = 0,
+    inactive = 1
+  };
+
   enum class timer_source {
     system,
     system_over_8,
@@ -22,10 +27,11 @@ namespace psx::timer {
   };
 
   struct timer final {
-    uint16_t counter = {};
-    uint16_t control = {};
-    uint16_t counter_target = {};
-    bool running = {};
+    uint16_t counter {0};
+    uint16_t control {0};
+    uint16_t maximum {0};
+    bool running {false};
+    bool inhibit {false};
 
     util::wire irq;
 
@@ -54,16 +60,17 @@ namespace psx::timer {
 
   private:
     void timer_run(int n, int amount);
+    void timer_run_real(int n, int amount);
     void timer_irq(int n);
-    void timer_irq_flag(int n, bool val);
+    void timer_irq_real(int n, timer_irq_flag val);
 
     uint16_t timer_get_counter(int n);
     uint16_t timer_get_control(int n);
-    uint16_t timer_get_counter_target(int n);
+    uint16_t timer_get_maximum(int n);
 
     void timer_put_counter(int n, uint16_t val);
     void timer_put_control(int n, uint16_t val);
-    void timer_put_counter_target(int n, uint16_t val);
+    void timer_put_maximum(int n, uint16_t val);
 
     timer_source timer_get_source(int n);
     void timer_blanking_sync(int n, bool active);

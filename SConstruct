@@ -16,8 +16,8 @@ if int(debug):
   env.Append(CCFLAGS=['-pg', '-rdynamic', '-no-pie'])
   env.Append(LINKFLAGS=['-pg', '-rdynamic', '-no-pie'])
 else:
-  env.Append(CCFLAGS=['-flto', '-O3'])
-  env.Append(LINKFLAGS=['-flto'])
+  env.Append(CCFLAGS=['-flto', '-rdynamic', '-O3'])
+  env.Append(LINKFLAGS=['-flto', '-rdynamic'])
 
 def build_obj(file):
   return env.Object('build/{}.o'.format(file), file)

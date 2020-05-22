@@ -12,6 +12,7 @@ constexpr int int2_init_timing = 900'000;
 constexpr int int2_pause_timing = 1'800; // TODO: This can take much longer?
 constexpr int int2_read_toc_timing = 16'000'000;
 constexpr int int2_seek_l_timing = 1'800;
+constexpr int int2_stop_timing = 1'800; // TODO: This can take much longer?
 
 core::core(wire irq, xa_adpcm_decoder &xa_adpcm, const char *game_file_name)
     : addressable("cdc", args::log_cdrom)
@@ -108,6 +109,22 @@ void core::tick(int amount) {
             read_timecode = seek_timecode;
             int1_timer += get_seek_time();
           }
+          break;
+        }
+
+        case 0x08: {
+          log("Processing 'Stop' command.");
+
+          put_response(get_drive_status());
+          put_irq_flag(3);
+
+          int1 = nullptr;
+          int1_timer = 0;
+
+          int2 = &core::int2_stop;
+          int2_timer = int2_stop_timing;
+
+          log("Processing complete, delaying second response for %d cycles.", int2_timer);
           break;
         }
 
@@ -669,6 +686,15 @@ void core::int2_seek_l() {
 
   read_timecode = seek_timecode;
   seek_pending = false;
+
+  put_response(get_drive_status());
+  put_irq_flag(2);
+}
+
+void core::int2_stop() {
+  log("Delivering 'Stop' second response.");
+
+  drive_state = cdrom_drive_state::idle;
 
   put_response(get_drive_status());
   put_irq_flag(2);

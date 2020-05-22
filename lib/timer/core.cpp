@@ -83,56 +83,80 @@ void core::leave_vblank() {
 void core::timer_run(int n, int amount) {
   auto &timer = timers[n];
 
+  while (1) {
+    auto cycleEdge = 65536 - timer.counter;
+    if (amount >= cycleEdge) {
+      amount -= cycleEdge;
+      timer_run_real(n, cycleEdge);
+    }
+    else {
+      timer_run_real(n, amount);
+      return;
+    }
+  }
+}
+
+void core::timer_run_real(int n, int amount) {
+  auto &timer = timers[n];
+
   if (!timer.running || amount == 0) {
     return;
   }
+  
+  auto counter = int32_t(timer.counter) + amount;
+  auto control = int32_t(timer.control);
+  auto maximum = int32_t(timer.maximum);
 
-  uint32_t counter = timer.counter + amount;
-  uint32_t target;
+  if (counter > maximum && timer.counter <= timer.maximum) {
+    control |= (1 << 11);
 
-  target = timer.counter_target + 1;
-
-  if (timer.counter < target && counter >= target) {
-    if ((timer.control & (1 << 3)) != 0) counter %= target;
-    if ((timer.control & (1 << 4)) != 0) timer_irq(n);
-    timer.control |= (1 << 11);
+    if (control & (1 << 3)) {
+      counter %= maximum + 1;
+    }
   }
 
-  target = 0xffff + 1;
-
-  if (timer.counter < target && counter > target) {
-    if ((timer.control & (1 << 3)) == 0) counter %= target;
-    if ((timer.control & (1 << 5)) != 0) timer_irq(n);
-    timer.control |= (1 << 12);
+  if (counter > 0xffff) {
+    control |= (1 << 12);
+    counter &= 0xffff;
   }
 
+  timer.control = uint16_t(control);
   timer.counter = uint16_t(counter);
 }
 
 void core::timer_irq(int n) {
-  bool repeat = (timers[n].control & (1 <<  6)) != 0;
-  bool toggle = (timers[n].control & (1 <<  7)) != 0;
-  auto bit_10 = (timers[n].control & (1 << 10)) != 0;
+  auto repeat = (timers[n].control & (1 << 6)) != 0;
+  auto toggle = (timers[n].control & (1 << 7)) != 0;
 
-  // Either toggle bit10 or clear it.
-  if (toggle && repeat) {
-    timer_irq_flag(n, !bit_10);
+  if (toggle) {
+    if (timers[n].control & (1 << 10)) {
+      timer_irq_real(n, timer_irq_flag::active);
+    } else {
+      timer_irq_real(n, timer_irq_flag::inactive);
+    }
   } else {
-    timer_irq_flag(n, 0);
+    timer_irq_real(n, timer_irq_flag::active);
+
+    if (repeat) {
+      timer_irq_real(n, timer_irq_flag::inactive);
+    }
   }
 
-  if (!toggle && repeat) { // pulse mode, repeat
-    timer_irq_flag(n, 1);
-  }
+  timers[n].inhibit = !repeat;
 }
 
-void core::timer_irq_flag(int n, bool val) {
-  if (val) {
+void core::timer_irq_real(int n, timer_irq_flag val) {
+  if (timers[n].inhibit) {
+    // TODO: does the IRQ flag still toggle and just IRQs are suppressed, or does bit10 stay 1?
     timers[n].irq(wire_state::off);
-    timers[n].control |= (1 << 10);
   } else {
-    timers[n].irq(wire_state::on);
-    timers[n].control &= ~(1 << 10);
+    if (val == timer_irq_flag::active) {
+      timers[n].control &= ~(1 << 10);
+      timers[n].irq(wire_state::on);
+    } else {
+      timers[n].control |= (1 << 10);
+      timers[n].irq(wire_state::off);
+    }
   }
 }
 
@@ -190,8 +214,8 @@ uint16_t core::timer_get_control(int n) {
   return control;
 }
 
-uint16_t core::timer_get_counter_target(int n) {
-  return timers[n].counter_target;
+uint16_t core::timer_get_maximum(int n) {
+  return timers[n].maximum;
 }
 
 void core::timer_put_counter(int n, uint16_t val) {
@@ -200,10 +224,11 @@ void core::timer_put_counter(int n, uint16_t val) {
 
 void core::timer_put_control(int n, uint16_t val) {
   timers[n].counter  = 0;
+  timers[n].inhibit  = false;
   timers[n].running  = true;
   timers[n].control &= 0x1800;
   timers[n].control |= val & 0x3ff;
-  timer_irq_flag(n, 1);
+  timer_irq_real(n, timer_irq_flag::inactive);
 
   if ((timers[n].control & 1) == 1) {
     uint32_t sync_mode = (timers[n].control >> 1) & 3;
@@ -233,8 +258,8 @@ void core::timer_put_control(int n, uint16_t val) {
   }
 }
 
-void core::timer_put_counter_target(int n, uint16_t val) {
-  timers[n].counter_target = val;
+void core::timer_put_maximum(int n, uint16_t val) {
+  timers[n].maximum = val;
 }
 
 uint32_t core::io_read(address_width width, uint32_t address) {
@@ -246,7 +271,7 @@ uint32_t core::io_read(address_width width, uint32_t address) {
     switch (address & 15) {
       case 0: return timer_get_counter(n);
       case 4: return timer_get_control(n);
-      case 8: return timer_get_counter_target(n);
+      case 8: return timer_get_maximum(n);
     }
   }
 
@@ -262,7 +287,7 @@ void core::io_write(address_width width, uint32_t address, uint32_t data) {
     switch (address & 15) {
       case 0: return timer_put_counter(n, data);
       case 4: return timer_put_control(n, data);
-      case 8: return timer_put_counter_target(n, data);
+      case 8: return timer_put_maximum(n, data);
     }
   }
 
