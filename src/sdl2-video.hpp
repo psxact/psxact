@@ -7,7 +7,7 @@
 
 namespace psx {
 
-  class sdl2_video_t {
+  class sdl2_video {
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Texture *texture;
@@ -15,10 +15,10 @@ namespace psx {
     int texture_size_y;
 
   public:
-    sdl2_video_t();
-    ~sdl2_video_t();
+    sdl2_video();
+    ~sdl2_video();
 
-    bool render(psx::output_params_video_t &params);
+    bool render(psx::output_params_video &params);
 
   private:
     bool handle_events();

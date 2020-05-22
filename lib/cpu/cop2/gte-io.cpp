@@ -5,7 +5,7 @@
 using namespace psx::cpu::cop2;
 using namespace psx::util;
 
-uint32_t gte_t::read_matrix_vector_group(uint32_t n) {
+uint32_t gte::read_matrix_vector_group(uint32_t n) {
   auto &matrix = ccr.matrix[n >> 3];
   auto &vector = ccr.vector[n >> 3];
 
@@ -23,7 +23,7 @@ uint32_t gte_t::read_matrix_vector_group(uint32_t n) {
   return 0;
 }
 
-uint32_t gte_t::read_ccr(uint32_t n) {
+uint32_t gte::read_ccr(uint32_t n) {
   if (n <= 0x17) {
     return read_matrix_vector_group(n);
   }
@@ -42,7 +42,7 @@ uint32_t gte_t::read_ccr(uint32_t n) {
   return 0;
 }
 
-void gte_t::write_matrix_vector_group(uint32_t n, uint32_t value) {
+void gte::write_matrix_vector_group(uint32_t n, uint32_t value) {
   auto &matrix = ccr.matrix[n >> 3];
   auto &vector = ccr.vector[n >> 3];
 
@@ -85,7 +85,7 @@ void gte_t::write_matrix_vector_group(uint32_t n, uint32_t value) {
   }
 }
 
-void gte_t::write_ccr(uint32_t n, uint32_t value) {
+void gte::write_ccr(uint32_t n, uint32_t value) {
   if (n <= 0x17) {
     return write_matrix_vector_group(n, value);
   }
@@ -127,7 +127,7 @@ void gte_t::write_ccr(uint32_t n, uint32_t value) {
   }
 }
 
-uint32_t gte_t::read_gpr(uint32_t n) {
+uint32_t gte::read_gpr(uint32_t n) {
   switch (n) {
     case 0x00:
       return uint16_t(gpr.vector[0][0]) | (uint16_t(gpr.vector[0][1]) << 16);
@@ -229,7 +229,7 @@ uint32_t gte_t::read_gpr(uint32_t n) {
   }
 }
 
-void gte_t::write_gpr(uint32_t n, uint32_t value) {
+void gte::write_gpr(uint32_t n, uint32_t value) {
   switch (n) {
     case 0x00:
       gpr.vector[0][0] = int16_t(value);

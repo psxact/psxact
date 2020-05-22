@@ -8,22 +8,22 @@ using namespace psx::util;
 
 // texture_color_t
 
-color_t texture_color_t::to_color() const {
-  return color_t::from_uint16(value);
+color texture_color::to_color() const {
+  return color::from_uint16(value);
 }
 
-bool texture_color_t::is_semi_transparent() const {
+bool texture_color::is_semi_transparent() const {
   return (value & 0x8000) != 0;
 }
 
-bool texture_color_t::is_full_transparent() const {
+bool texture_color::is_full_transparent() const {
   return value == 0;
 }
 
 // color_t
 
-color_t color_t::from_uint16(uint16_t val) {
-  color_t color;
+color color::from_uint16(uint16_t val) {
+  color color;
   color.r = (val << 3) & 0xf8;
   color.g = (val >> 2) & 0xf8;
   color.b = (val >> 7) & 0xf8;
@@ -31,8 +31,8 @@ color_t color_t::from_uint16(uint16_t val) {
   return color;
 }
 
-color_t color_t::from_uint24(uint32_t val) {
-  color_t color;
+color color::from_uint24(uint32_t val) {
+  color color;
   color.r = uint_t<8>::trunc(val);
   color.g = uint_t<8>::trunc(val >> 8);
   color.b = uint_t<8>::trunc(val >> 16);
@@ -40,21 +40,21 @@ color_t color_t::from_uint24(uint32_t val) {
   return color;
 }
 
-uint16_t color_t::to_uint16() const {
+uint16_t color::to_uint16() const {
   return
     ((r >> 3) & 0x001f) |
     ((g << 2) & 0x03e0) |
     ((b << 7) & 0x7c00);
 }
 
-uint32_t color_t::to_uint32() const {
+uint32_t color::to_uint32() const {
   return (r << 16) | (g << 8) | b;
 }
 
 // point_t
 
-point_t point_t::from_uint24(uint32_t val) {
-  point_t point;
+point point::from_uint24(uint32_t val) {
+  point point;
   point.x = int_t<11>::trunc(val);
   point.y = int_t<11>::trunc(val >> 16);
 
@@ -63,8 +63,8 @@ point_t point_t::from_uint24(uint32_t val) {
 
 // texture_coord_t
 
-texture_coord_t texture_coord_t::from_uint16(uint16_t val) {
-  texture_coord_t coord;
+texture_coord texture_coord::from_uint16(uint16_t val) {
+  texture_coord coord;
   coord.u = uint_t<8>::trunc(val);
   coord.v = uint_t<8>::trunc(val >> 8);
 
@@ -73,26 +73,26 @@ texture_coord_t texture_coord_t::from_uint16(uint16_t val) {
 
 // gp0_command_t
 
-bool gp0_command_t::is_raw_texture() const {
+bool gp0_command::is_raw_texture() const {
   return (command & (1 << 24)) != 0;
 }
 
-bool gp0_command_t::is_semi_transparent() const {
+bool gp0_command::is_semi_transparent() const {
   return (command & (1 << 25)) != 0;
 }
 
-bool gp0_command_t::is_texture_mapped() const {
+bool gp0_command::is_texture_mapped() const {
   return (command & (1 << 26)) != 0;
 }
 
-bool gp0_command_t::is_poly_line() const {
+bool gp0_command::is_poly_line() const {
   return (command & (1 << 27)) != 0;
 }
 
-bool gp0_command_t::is_quad_poly() const {
+bool gp0_command::is_quad_poly() const {
   return (command & (1 << 27)) != 0;
 }
 
-bool gp0_command_t::is_gouraud_shaded() const {
+bool gp0_command::is_gouraud_shaded() const {
   return (command & (1 << 28)) != 0;
 }

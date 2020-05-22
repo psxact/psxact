@@ -6,16 +6,16 @@
 
 namespace psx {
 
-  class sdl2_audio_t {
+  class sdl2_audio {
     SDL_AudioDeviceID device_id;
     SDL_AudioSpec want;
     SDL_AudioSpec have;
 
   public:
-    sdl2_audio_t();
-    ~sdl2_audio_t();
+    sdl2_audio();
+    ~sdl2_audio();
 
-    bool render(psx::output_params_audio_t &params);
+    bool render(psx::output_params_audio &params);
   };
 }
 

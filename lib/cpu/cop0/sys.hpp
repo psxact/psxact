@@ -2,16 +2,16 @@
 #define CPU_COP0_SYS_HPP_
 
 #include <cstdint>
-#include "cpu/cop.hpp"
+#include "cpu/coprocessor.hpp"
 
 namespace psx::cpu::cop0 {
 
-  enum status_flags_t {
+  enum status_flags {
     ISC = 1 << 16,
     SWC = 1 << 17
   };
 
-  enum class exception_t {
+  enum class exception {
     interrupt,
     tlb_modification,
     tlb_load,
@@ -27,7 +27,7 @@ namespace psx::cpu::cop0 {
     overflow
   };
 
-  class sys_t : public cop_t {
+  class sys : public coprocessor {
     uint32_t bpc;
     uint32_t bda;
     uint32_t tar;
@@ -51,7 +51,7 @@ namespace psx::cpu::cop0 {
     bool get_bev();
 
     void put_tar(uint32_t val);
-    void put_cause_excode(exception_t excode);
+    void put_cause_excode(exception excode);
     void put_cause_ip(bool val);
     void put_cause_ce(int32_t val);
     void put_cause_bt(bool val);

@@ -6,9 +6,9 @@
 
 namespace psx {
 
-  class sdl2_input_t {
+  class sdl2_input {
   public:
-    void from_keyboard(psx::input::host_device_t &device);
+    void from_keyboard(psx::input::host_device &device);
   };
 }
 

@@ -11,52 +11,52 @@
 using namespace psx;
 using namespace psx::util;
 
-console_t::console_t()
-  : addressable_t("console", false) {
-  bios = new memory::bios_t();
-  wram = new memory::wram_t();
+console::console()
+  : addressable("console", false) {
+  bios = new memory::bios();
+  wram = new memory::wram();
 
-  wire_t irq1;
-  irq1.recv_rise([&]() { cpu->interrupt(interrupt_type_t::gpu); });
+  wire irq1;
+  irq1.recv_rise([&]() { cpu->interrupt(interrupt_type::gpu); });
 
-  wire_t irq2;
-  irq2.recv_rise([&]() { cpu->interrupt(interrupt_type_t::cdrom); });
+  wire irq2;
+  irq2.recv_rise([&]() { cpu->interrupt(interrupt_type::cdrom); });
 
-  wire_t irq3;
-  irq3.recv_rise([&]() { cpu->interrupt(interrupt_type_t::dma); });
+  wire irq3;
+  irq3.recv_rise([&]() { cpu->interrupt(interrupt_type::dma); });
 
-  wire_t irq4;
-  irq4.recv_rise([&]() { cpu->interrupt(interrupt_type_t::timer0); });
+  wire irq4;
+  irq4.recv_rise([&]() { cpu->interrupt(interrupt_type::timer0); });
 
-  wire_t irq5;
-  irq5.recv_rise([&]() { cpu->interrupt(interrupt_type_t::timer1); });
+  wire irq5;
+  irq5.recv_rise([&]() { cpu->interrupt(interrupt_type::timer1); });
 
-  wire_t irq6;
-  irq6.recv_rise([&]() { cpu->interrupt(interrupt_type_t::timer2); });
+  wire irq6;
+  irq6.recv_rise([&]() { cpu->interrupt(interrupt_type::timer2); });
 
-  wire_t gpu_hblank;
+  wire gpu_hblank;
   gpu_hblank.recv_rise([&]() { timer->enter_hblank(); });
   gpu_hblank.recv_fall([&]() { timer->leave_hblank(); });
 
-  wire_t gpu_vblank;
-  gpu_vblank.recv_rise([&]() { cpu->interrupt(interrupt_type_t::vblank); });
+  wire gpu_vblank;
+  gpu_vblank.recv_rise([&]() { cpu->interrupt(interrupt_type::vblank); });
   gpu_vblank.recv_rise([&]() { timer->enter_vblank(); });
   gpu_vblank.recv_fall([&]() { timer->leave_vblank(); });
 
-  xa_adpcm = new cdrom::xa_adpcm_t();
+  xa_adpcm = new cdrom::xa_adpcm_decoder();
 
-  timer = new timer::core_t(irq4, irq5, irq6);
-  cpu = new cpu::core_t(*this);
-  dma = new dma::core_t(irq3, *this);
+  timer = new timer::core(irq4, irq5, irq6);
+  cpu = new cpu::core(*this);
+  dma = new dma::core(irq3, *this);
   exp1 = new exp::expansion1_t();
   exp2 = new exp::expansion2_t();
   exp3 = new exp::expansion3_t();
-  gpu = new gpu::core_t(irq1, gpu_hblank, gpu_vblank);
-  cdrom = new cdrom::core_t(irq2, *xa_adpcm, args::game_file_name);
-  input = new input::core_t(*cpu);
-  mdec = new mdec::core_t();
-  spu = new spu::core_t(*xa_adpcm);
-  mem = new memory::memory_control_t();
+  gpu = new gpu::core(irq1, gpu_hblank, gpu_vblank);
+  cdrom = new cdrom::core(irq2, *xa_adpcm, args::game_file_name);
+  input = new input::core(*cpu);
+  mdec = new mdec::core();
+  spu = new spu::core(*xa_adpcm);
+  mem = new memory::memory_control();
 
   dma->attach(0, mdec);
   dma->attach(1, mdec);
@@ -69,7 +69,7 @@ console_t::console_t()
   is_exe = !!(strstr(args::game_file_name, ".exe") || strstr(args::game_file_name, ".psexe"));
 }
 
-console_t::~console_t() {
+console::~console() {
   delete bios;
   delete wram;
   delete cdrom;
@@ -87,7 +87,7 @@ console_t::~console_t() {
   delete xa_adpcm;
 }
 
-addressable_t &console_t::decode(uint32_t address) {
+addressable &console::decode(uint32_t address) {
 #define between(min, max) \
   range::between<(min), (max)>(address)
 
@@ -119,15 +119,15 @@ addressable_t &console_t::decode(uint32_t address) {
   return *mem;
 }
 
-uint32_t console_t::io_read(address_width_t width, uint32_t address) {
+uint32_t console::io_read(address_width width, uint32_t address) {
   return decode(address).io_read(width, address);
 }
 
-void console_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+void console::io_write(address_width width, uint32_t address, uint32_t data) {
   return decode(address).io_write(width, address, data);
 }
 
-void console_t::run_for_one_frame(input_params_t &i, output_params_t &o) {
+void console::run_for_one_frame(input_params &i, output_params &o) {
   input->latch(i.device1, i.device2);
 
   while (1) {
@@ -147,22 +147,22 @@ void console_t::run_for_one_frame(input_params_t &i, output_params_t &o) {
   get_video_params(o.video);
 }
 
-void console_t::get_audio_params(output_params_audio_t &params) {
+void console::get_audio_params(output_params_audio &params) {
   params.buffer = spu->get_sample_buffer();
   params.buffer_len = spu->get_sample_buffer_index();
 
   spu->reset_sample();
 }
 
-void console_t::get_video_params(output_params_video_t &params) {
+void console::get_video_params(output_params_video &params) {
   params.buffer = gpu->get_video_buffer();
   params.width = int(gpu->get_h_resolution());
   params.height = 480;
 }
 
-void console_t::load_exe(const char *game_file_name) {
+void console::load_exe(const char *game_file_name) {
   // load the exe into ram
-  if (blob_t *blob = blob_t::from_file(game_file_name)) {
+  if (blob *blob = blob::from_file(game_file_name)) {
     cpu->set_pc(blob->read_word(0x10));
     cpu->set_register(4, 1);
     cpu->set_register(5, 0);
@@ -180,7 +180,7 @@ void console_t::load_exe(const char *game_file_name) {
     printf("  FP: $%08x\n", cpu->get_register(30));
 
     for (int i = 0; i < text_count; i++) {
-      wram->io_write(address_width_t::byte, text_start + i, blob->read_byte(0x800 + i));
+      wram->io_write(address_width::byte, text_start + i, blob->read_byte(0x800 + i));
     }
   }
 }

@@ -1,5 +1,5 @@
-#ifndef MEMORY_HPP_
-#define MEMORY_HPP_
+#ifndef MEMORY_MEMORY_BASE_HPP_
+#define MEMORY_MEMORY_BASE_HPP_
 
 #include <cstdint>
 #include <cstring>
@@ -13,7 +13,7 @@ namespace psx {
   constexpr uint32_t gib(uint32_t x) { return 1024 * mib(x); }
 
   template<uint32_t kSize>
-  class memory_t : public addressable_t {
+  class memory_base : public addressable {
     static constexpr int kMask = kSize - 1;
 
     union {
@@ -23,8 +23,8 @@ namespace psx {
     };
 
   public:
-    explicit memory_t(const char *name)
-      : addressable_t(name, false)
+    explicit memory_base(const char *name)
+      : addressable(name, false)
       , b() {
     }
 
@@ -32,24 +32,24 @@ namespace psx {
       return &b[address];
     }
 
-    uint32_t io_read(address_width_t width, uint32_t address) {
+    uint32_t io_read(address_width width, uint32_t address) {
       switch (width) {
-        case address_width_t::byte: return b[(address & kMask) / 1];
-        case address_width_t::half: return h[(address & kMask) / 2];
-        case address_width_t::word: return w[(address & kMask) / 4];
+        case address_width::byte: return b[(address & kMask) / 1];
+        case address_width::half: return h[(address & kMask) / 2];
+        case address_width::word: return w[(address & kMask) / 4];
       }
 
-      return addressable_t::io_read(width, address);
+      return addressable::io_read(width, address);
     }
 
-    void io_write(address_width_t width, uint32_t address, uint32_t data) {
+    void io_write(address_width width, uint32_t address, uint32_t data) {
       switch (width) {
-        case address_width_t::byte: b[(address & kMask) / 1] = uint8_t(data); return;
-        case address_width_t::half: h[(address & kMask) / 2] = uint16_t(data); return;
-        case address_width_t::word: w[(address & kMask) / 4] = data; return;
+        case address_width::byte: b[(address & kMask) / 1] = uint8_t(data); return;
+        case address_width::half: h[(address & kMask) / 2] = uint16_t(data); return;
+        case address_width::word: w[(address & kMask) / 4] = data; return;
       }
 
-      return addressable_t::io_write(width, address, data);
+      return addressable::io_write(width, address, data);
     }
 
     bool load_blob(const char *filename) {

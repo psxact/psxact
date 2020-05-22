@@ -5,42 +5,42 @@
 
 namespace psx::gpu {
 
-  struct color_t {
+  struct color {
     uint8_t r = {};
     uint8_t g = {};
     uint8_t b = {};
 
-    static color_t from_uint16(uint16_t val);
-    static color_t from_uint24(uint32_t val);
+    static color from_uint16(uint16_t val);
+    static color from_uint24(uint32_t val);
 
     uint16_t to_uint16() const;
     uint32_t to_uint32() const;
   };
 
   /// Used to represent a color that has come from a texture.
-  struct texture_color_t {
+  struct texture_color {
     uint16_t value;
 
-    color_t to_color() const;
+    color to_color() const;
     bool is_semi_transparent() const;
     bool is_full_transparent() const;
   };
 
-  struct point_t {
+  struct point {
     int32_t x = {};
     int32_t y = {};
 
-    static point_t from_uint24(uint32_t val);
+    static point from_uint24(uint32_t val);
   };
 
-  struct texture_coord_t {
+  struct texture_coord {
     uint8_t u = {};
     uint8_t v = {};
 
-    static texture_coord_t from_uint16(uint16_t val);
+    static texture_coord from_uint16(uint16_t val);
   };
 
-  struct tev_t {
+  struct texture_params {
     // from 'palette'
     int32_t palette_page_x = {};
     int32_t palette_page_y = {};
@@ -52,19 +52,19 @@ namespace psx::gpu {
     int32_t color_mix_mode = {};
   };
 
-  struct triangle_t {
-    color_t colors[3] = {};
-    texture_coord_t coords[3] = {};
-    point_t points[3] = {};
+  struct triangle {
+    color colors[3] = {};
+    texture_coord coords[3] = {};
+    point points[3] = {};
 
-    tev_t tev = {};
+    texture_params tev = {};
   };
 
-  class gp0_command_t final {
+  class gp0_command final {
     uint32_t command;
 
   public:
-    gp0_command_t(uint32_t command) : command(command) {}
+    gp0_command(uint32_t command) : command(command) {}
 
     /// Returns true if bit 24 of `command` is set, otherwise false.
     bool is_raw_texture() const;

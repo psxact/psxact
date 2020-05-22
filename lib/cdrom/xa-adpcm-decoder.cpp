@@ -1,4 +1,4 @@
-#include "cdrom/xa-adpcm.hpp"
+#include "cdrom/xa-adpcm-decoder.hpp"
 
 #include <cassert>
 #include "util/int.hpp"
@@ -9,19 +9,19 @@ using namespace psx::util;
 static const int pos_xa_adpcm_table[5] = {0, +60, +115, +98, +122};
 static const int neg_xa_adpcm_table[5] = {0,   0,  -52, -55,  -60};
 
-std::tuple<int16_t, int16_t> xa_adpcm_t::read() {
+std::tuple<int16_t, int16_t> xa_adpcm_decoder::read() {
   return std::tuple(
     channel[0].get_output(),
     channel[1].get_output());
 }
 
-void xa_adpcm_t::decode(const cdrom_sector_t &sector) {
+void xa_adpcm_decoder::decode(const cdrom_sector &sector) {
   for (int segment = 0; segment < 18; segment++) {
     decode_segment(sector, segment);
   }
 }
 
-void xa_adpcm_t::decode_segment(const cdrom_sector_t &sector, int segment) {
+void xa_adpcm_decoder::decode_segment(const cdrom_sector &sector, int segment) {
   auto coding_info = sector.get_xa_coding_info();
   auto is_stereo   = ((coding_info >> 0) & 3) == 1;
   auto is_18900hz  = ((coding_info >> 2) & 3) == 1;
@@ -59,7 +59,7 @@ void xa_adpcm_t::decode_segment(const cdrom_sector_t &sector, int segment) {
   }
 }
 
-void xa_adpcm_t::decode_sample(uint8_t header, int16_t sample, int32_t c) {
+void xa_adpcm_decoder::decode_sample(uint8_t header, int16_t sample, int32_t c) {
   int32_t shift = header & 15;
   int32_t filter = (header >> 4) & 3;
 

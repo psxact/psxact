@@ -7,7 +7,7 @@
 namespace psx::util {
 
   template<typename T, int bits>
-  class fifo_t {
+  class fifo {
     static const int32_t mask     = (1 << (bits + 1)) - 1;
     static const int32_t mask_lsb = (1 << bits) - 1;
     static const int32_t mask_msb = (1 << bits);

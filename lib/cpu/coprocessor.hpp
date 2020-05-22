@@ -1,11 +1,11 @@
-#ifndef CPU_COP_HPP_
-#define CPU_COP_HPP_
+#ifndef CPU_COPROCESSOR_HPP_
+#define CPU_COPROCESSOR_HPP_
 
 #include <cstdint>
 
 namespace psx::cpu {
 
-  class cop_t {
+  class coprocessor {
   public:
     virtual void run(uint32_t code) = 0;
 

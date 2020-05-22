@@ -26,7 +26,7 @@ static const uint8_t unr_table[0x101] = {
   0x00
 };
 
-uint32_t gte_t::divide() {
+uint32_t gte::divide() {
   if (gpr.sz[3] <= (ccr.h / 2)) {
     return flag_e();
   }
@@ -43,7 +43,7 @@ uint32_t gte_t::divide() {
   return std::min(d, 0x1ffffu);
 }
 
-void gte_t::run(uint32_t code) {
+void gte::run(uint32_t code) {
   ccr.flag = 0;
 
   switch (code & 0x3f) {
@@ -85,32 +85,32 @@ void gte_t::run(uint32_t code) {
 //  Helpers
 // -=======-
 
-typedef int32_t matrix_data_t[3][3];
-typedef int32_t vector_data_t[3];
+typedef int32_t matrix_data[3][3];
+typedef int32_t vector_data[3];
 
 static inline int32_t get_sf(uint32_t code) {
   return (code & (1 << 19)) ? 12 : 0;
 }
 
-matrix_t gte_t::get_mx(uint32_t code) {
-  return matrix_t((code >> 17) & 3);
+matrix gte::get_mx(uint32_t code) {
+  return matrix((code >> 17) & 3);
 }
 
 static inline int32_t get_v(uint32_t code) {
   return (code >> 15) & 3;
 }
 
-vector_t gte_t::get_cv(uint32_t code) {
-  return vector_t((code >> 13) & 3);
+vector gte::get_cv(uint32_t code) {
+  return vector((code >> 13) & 3);
 }
 
-void gte_t::mac_to_ir(uint32_t code) {
+void gte::mac_to_ir(uint32_t code) {
   gpr.vector[3][0] = flag_b(0, code, gpr.mac[1]);
   gpr.vector[3][1] = flag_b(1, code, gpr.mac[2]);
   gpr.vector[3][2] = flag_b(2, code, gpr.mac[3]);
 }
 
-void gte_t::mac_to_rgb() {
+void gte::mac_to_rgb() {
   gpr.rgb[0] = gpr.rgb[1];
   gpr.rgb[1] = gpr.rgb[2];
 
@@ -120,10 +120,10 @@ void gte_t::mac_to_rgb() {
   gpr.rgb[2].c = gpr.rgbc.c;
 }
 
-void gte_t::depth_cue(uint32_t code, int32_t r, int32_t g, int32_t b) {
-  int64_t rfc = int64_t(ccr.vector[static_cast<int>(vector_t::fc)][0]) << 12;
-  int64_t gfc = int64_t(ccr.vector[static_cast<int>(vector_t::fc)][1]) << 12;
-  int64_t bfc = int64_t(ccr.vector[static_cast<int>(vector_t::fc)][2]) << 12;
+void gte::depth_cue(uint32_t code, int32_t r, int32_t g, int32_t b) {
+  int64_t rfc = int64_t(ccr.vector[static_cast<int>(vector::fc)][0]) << 12;
+  int64_t gfc = int64_t(ccr.vector[static_cast<int>(vector::fc)][1]) << 12;
+  int64_t bfc = int64_t(ccr.vector[static_cast<int>(vector::fc)][2]) << 12;
 
   int32_t shift = get_sf(code);
 
@@ -140,12 +140,12 @@ void gte_t::depth_cue(uint32_t code, int32_t r, int32_t g, int32_t b) {
   mac_to_rgb();
 }
 
-void gte_t::transform_dq(int64_t div) {
+void gte::transform_dq(int64_t div) {
   gpr.mac[0] = int32_t(flag_f(ccr.dqb + ccr.dqa * div));
   gpr.ir0 = flag_h((ccr.dqb + ccr.dqa * div) >> 12);
 }
 
-void gte_t::transform_xy(int64_t div) {
+void gte::transform_xy(int64_t div) {
   gpr.mac[0] = int32_t(flag_f(int64_t(ccr.ofx) + gpr.vector[3][0] * div) >> 16);
 
   gpr.sx[0] = gpr.sx[1];
@@ -159,12 +159,12 @@ void gte_t::transform_xy(int64_t div) {
   gpr.sy[2] = flag_g(1, gpr.mac[0]);
 }
 
-int64_t gte_t::transform(uint32_t code, matrix_t mx, vector_t cv, int32_t v) {
+int64_t gte::transform(uint32_t code, matrix mx, vector cv, int32_t v) {
   int64_t mac = 0;
 
-  matrix_data_t &matrix = ccr.matrix[static_cast<int>(mx)];
-  vector_data_t &offset = ccr.vector[static_cast<int>(cv)];
-  vector_data_t &vector = gpr.vector[v];
+  matrix_data &matrix = ccr.matrix[static_cast<int>(mx)];
+  vector_data &offset = ccr.vector[static_cast<int>(cv)];
+  vector_data &vector = gpr.vector[v];
 
   int32_t shift = get_sf(code);
 
@@ -180,12 +180,12 @@ int64_t gte_t::transform(uint32_t code, matrix_t mx, vector_t cv, int32_t v) {
   return mac;
 }
 
-int64_t gte_t::transform_buggy(uint32_t code, matrix_t mx, vector_t cv, int32_t v) {
+int64_t gte::transform_buggy(uint32_t code, matrix mx, vector cv, int32_t v) {
   int64_t mac = 0;
 
-  matrix_data_t &matrix = ccr.matrix[static_cast<int>(mx)];
-  vector_data_t &offset = ccr.vector[static_cast<int>(cv)];
-  vector_data_t &vector = gpr.vector[v];
+  matrix_data &matrix = ccr.matrix[static_cast<int>(mx)];
+  vector_data &offset = ccr.vector[static_cast<int>(cv)];
+  vector_data &vector = gpr.vector[v];
 
   int32_t shift = get_sf(code);
 
@@ -194,7 +194,7 @@ int64_t gte_t::transform_buggy(uint32_t code, matrix_t mx, vector_t cv, int32_t 
 
     int64_t mac = int64_t(offset[i]) << 12;
 
-    if (mx == matrix_t::nil) {
+    if (mx == matrix::nil) {
       if (i == 0) {
         mulr[0] = -((gpr.rgbc.r << 4) * vector[0]);
         mulr[1] = (gpr.rgbc.r << 4) * vector[1];
@@ -202,8 +202,8 @@ int64_t gte_t::transform_buggy(uint32_t code, matrix_t mx, vector_t cv, int32_t 
       } else {
         int32_t cr =
           i == 1
-            ? ccr.matrix[static_cast<int>(matrix_t::rot)][0][2]
-            : ccr.matrix[static_cast<int>(matrix_t::rot)][1][1];
+            ? ccr.matrix[static_cast<int>(matrix::rot)][0][2]
+            : ccr.matrix[static_cast<int>(matrix::rot)][1][1];
 
         mulr[0] = cr * vector[0];
         mulr[1] = cr * vector[1];
@@ -217,7 +217,7 @@ int64_t gte_t::transform_buggy(uint32_t code, matrix_t mx, vector_t cv, int32_t 
 
     mac = flag_a(i, mac + mulr[0]);
 
-    if (cv == vector_t::fc) {
+    if (cv == vector::fc) {
       flag_b(i, 0, int32_t(mac >> shift));
       mac = 0;
     }
@@ -231,7 +231,7 @@ int64_t gte_t::transform_buggy(uint32_t code, matrix_t mx, vector_t cv, int32_t 
   return mac;
 }
 
-int64_t gte_t::transform_pt(uint32_t code, matrix_t mx, vector_t cv, int32_t v) {
+int64_t gte::transform_pt(uint32_t code, matrix mx, vector cv, int32_t v) {
   int32_t z = int32_t(transform(code, mx, cv, v) >> 12);
 
   gpr.vector[3][0] = flag_b(0, code, gpr.mac[1]);
@@ -250,22 +250,22 @@ int64_t gte_t::transform_pt(uint32_t code, matrix_t mx, vector_t cv, int32_t v) 
 //  Instructions
 // -============-
 
-void gte_t::op_avsz3() {
+void gte::op_avsz3() {
   int64_t temp = int64_t(ccr.zsf3) * (gpr.sz[1] + gpr.sz[2] + gpr.sz[3]);
 
   gpr.mac[0] = int32_t(flag_f(temp));
   gpr.otz = flag_d(int32_t(temp >> 12));
 }
 
-void gte_t::op_avsz4() {
+void gte::op_avsz4() {
   int64_t temp = int64_t(ccr.zsf4) * (gpr.sz[0] + gpr.sz[1] + gpr.sz[2] + gpr.sz[3]);
 
   gpr.mac[0] = int32_t(flag_f(temp));
   gpr.otz = flag_d(int32_t(temp >> 12));
 }
 
-void gte_t::op_cc(uint32_t code) {
-  transform(code, matrix_t::lcm, vector_t::bk, 3);
+void gte::op_cc(uint32_t code) {
+  transform(code, matrix::lcm, vector::bk, 3);
   mac_to_ir(code);
 
   int32_t shift = get_sf(code);
@@ -278,8 +278,8 @@ void gte_t::op_cc(uint32_t code) {
   mac_to_rgb();
 }
 
-void gte_t::op_cdp(uint32_t code) {
-  transform(code, matrix_t::lcm, vector_t::bk, 3);
+void gte::op_cdp(uint32_t code) {
+  transform(code, matrix::lcm, vector::bk, 3);
   mac_to_ir(code);
 
   int32_t r = (gpr.rgbc.r << 4) * gpr.vector[3][0];
@@ -289,7 +289,7 @@ void gte_t::op_cdp(uint32_t code) {
   depth_cue(code, r, g, b);
 }
 
-void gte_t::op_dcpl(uint32_t code) {
+void gte::op_dcpl(uint32_t code) {
   int32_t r = (gpr.rgbc.r << 4) * gpr.vector[3][0];
   int32_t g = (gpr.rgbc.g << 4) * gpr.vector[3][1];
   int32_t b = (gpr.rgbc.b << 4) * gpr.vector[3][2];
@@ -297,7 +297,7 @@ void gte_t::op_dcpl(uint32_t code) {
   depth_cue(code, r, g, b);
 }
 
-void gte_t::op_dpcs(uint32_t code) {
+void gte::op_dpcs(uint32_t code) {
   int32_t r = gpr.rgbc.r << 16;
   int32_t g = gpr.rgbc.g << 16;
   int32_t b = gpr.rgbc.b << 16;
@@ -305,7 +305,7 @@ void gte_t::op_dpcs(uint32_t code) {
   depth_cue(code, r, g, b);
 }
 
-void gte_t::op_dpct(uint32_t code) {
+void gte::op_dpct(uint32_t code) {
   for (int32_t i = 0; i < 3; i++) {
     int32_t r = gpr.rgb[0].r << 16;
     int32_t g = gpr.rgb[0].g << 16;
@@ -315,7 +315,7 @@ void gte_t::op_dpct(uint32_t code) {
   }
 }
 
-void gte_t::op_gpf(uint32_t code) {
+void gte::op_gpf(uint32_t code) {
   int32_t shift = get_sf(code);
 
   gpr.mac[1] = (gpr.ir0 * gpr.vector[3][0]) >> shift;
@@ -326,7 +326,7 @@ void gte_t::op_gpf(uint32_t code) {
   mac_to_rgb();
 }
 
-void gte_t::op_gpl(uint32_t code) {
+void gte::op_gpl(uint32_t code) {
   int32_t shift = get_sf(code);
 
   int64_t mac1 = int64_t(gpr.mac[1]) << shift;
@@ -341,8 +341,8 @@ void gte_t::op_gpl(uint32_t code) {
   mac_to_rgb();
 }
 
-void gte_t::op_intpl(uint32_t code) {
-  auto fc = ccr.vector[static_cast<int>(vector_t::fc)];
+void gte::op_intpl(uint32_t code) {
+  auto fc = ccr.vector[static_cast<int>(vector::fc)];
 
   int64_t rfc = int64_t(fc[0]) << 12;
   int64_t gfc = int64_t(fc[1]) << 12;
@@ -367,9 +367,9 @@ void gte_t::op_intpl(uint32_t code) {
   mac_to_rgb();
 }
 
-void gte_t::op_mvmva(uint32_t code) {
-  matrix_t mx = get_mx(code);
-  vector_t cv = get_cv(code);
+void gte::op_mvmva(uint32_t code) {
+  matrix mx = get_mx(code);
+  vector cv = get_cv(code);
   int32_t v = get_v(code);
 
   transform_buggy(code, mx, cv, v);
@@ -377,27 +377,27 @@ void gte_t::op_mvmva(uint32_t code) {
   mac_to_ir(code);
 }
 
-void gte_t::op_nccs(uint32_t code) {
-  transform(code, matrix_t::llm, vector_t::zr, 0);
+void gte::op_nccs(uint32_t code) {
+  transform(code, matrix::llm, vector::zr, 0);
   mac_to_ir(code);
 
   op_cc(code);
 }
 
-void gte_t::op_ncct(uint32_t code) {
+void gte::op_ncct(uint32_t code) {
   for (int32_t i = 0; i < 3; i++) {
-    transform(code, matrix_t::llm, vector_t::zr, i);
+    transform(code, matrix::llm, vector::zr, i);
     mac_to_ir(code);
 
     op_cc(code);
   }
 }
 
-void gte_t::op_ncds(uint32_t code) {
-  transform(code, matrix_t::llm, vector_t::zr, 0);
+void gte::op_ncds(uint32_t code) {
+  transform(code, matrix::llm, vector::zr, 0);
   mac_to_ir(code);
 
-  transform(code, matrix_t::lcm, vector_t::bk, 3);
+  transform(code, matrix::lcm, vector::bk, 3);
   mac_to_ir(code);
 
   int32_t r = (gpr.rgbc.r << 4) * gpr.vector[3][0];
@@ -407,12 +407,12 @@ void gte_t::op_ncds(uint32_t code) {
   depth_cue(code, r, g, b);
 }
 
-void gte_t::op_ncdt(uint32_t code) {
+void gte::op_ncdt(uint32_t code) {
   for (int32_t i = 0; i < 3; i++) {
-    transform(code, matrix_t::llm, vector_t::zr, i);
+    transform(code, matrix::llm, vector::zr, i);
     mac_to_ir(code);
 
-    transform(code, matrix_t::lcm, vector_t::bk, 3);
+    transform(code, matrix::lcm, vector::bk, 3);
     mac_to_ir(code);
 
     int32_t r = (gpr.rgbc.r << 4) * gpr.vector[3][0];
@@ -423,7 +423,7 @@ void gte_t::op_ncdt(uint32_t code) {
   }
 }
 
-void gte_t::op_nclip() {
+void gte::op_nclip() {
   int64_t temp =
     (gpr.sx[0] * int64_t(gpr.sy[1] - gpr.sy[2])) +
     (gpr.sx[1] * int64_t(gpr.sy[2] - gpr.sy[0])) +
@@ -432,28 +432,28 @@ void gte_t::op_nclip() {
   gpr.mac[0] = int32_t(flag_f(temp));
 }
 
-void gte_t::op_ncs(uint32_t code) {
-  transform(code, matrix_t::llm, vector_t::zr, 0);
+void gte::op_ncs(uint32_t code) {
+  transform(code, matrix::llm, vector::zr, 0);
   mac_to_ir(code);
 
-  transform(code, matrix_t::lcm, vector_t::bk, 3);
+  transform(code, matrix::lcm, vector::bk, 3);
   mac_to_ir(code);
   mac_to_rgb();
 }
 
-void gte_t::op_nct(uint32_t code) {
+void gte::op_nct(uint32_t code) {
   for (int32_t i = 0; i < 3; i++) {
-    transform(code, matrix_t::llm, vector_t::zr, i);
+    transform(code, matrix::llm, vector::zr, i);
     mac_to_ir(code);
 
-    transform(code, matrix_t::lcm, vector_t::bk, 3);
+    transform(code, matrix::lcm, vector::bk, 3);
     mac_to_ir(code);
     mac_to_rgb();
   }
 }
 
-void gte_t::op_op(uint32_t code) {
-  matrix_data_t &matrix = ccr.matrix[static_cast<int>(matrix_t::rot)];
+void gte::op_op(uint32_t code) {
+  matrix_data &matrix = ccr.matrix[static_cast<int>(matrix::rot)];
 
   int32_t shift = get_sf(code);
 
@@ -464,25 +464,25 @@ void gte_t::op_op(uint32_t code) {
   mac_to_ir(code);
 }
 
-void gte_t::op_rtps(uint32_t code) {
-  int64_t div = transform_pt(code, matrix_t::rot, vector_t::tr, 0);
+void gte::op_rtps(uint32_t code) {
+  int64_t div = transform_pt(code, matrix::rot, vector::tr, 0);
 
   transform_xy(div);
   transform_dq(div);
 }
 
-void gte_t::op_rtpt(uint32_t code) {
+void gte::op_rtpt(uint32_t code) {
   int64_t div = 0;
 
   for (int i = 0; i < 3; i++) {
-    div = transform_pt(code, matrix_t::rot, vector_t::tr, i);
+    div = transform_pt(code, matrix::rot, vector::tr, i);
     transform_xy(div);
   }
 
   transform_dq(div);
 }
 
-void gte_t::op_sqr(uint32_t code) {
+void gte::op_sqr(uint32_t code) {
   int32_t shift = get_sf(code);
 
   gpr.mac[1] = (gpr.vector[3][0] * gpr.vector[3][0]) >> shift;

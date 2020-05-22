@@ -3,7 +3,7 @@
 using namespace psx::input;
 using namespace psx::input::devices;
 
-void digital_pad_t::latch(const host_device_t &device) {
+void digital_pad::latch(const host_device &device) {
   bits =
     (int(device.select)               <<  0) |
     (0                                <<  1) | // 1   L3/Joy-button ; analog mode only
@@ -25,7 +25,7 @@ void digital_pad_t::latch(const host_device_t &device) {
   bits ^= 0xffff;
 }
 
-int digital_pad_t::send(int data) {
+int digital_pad::send(int data) {
   if (!dtr) {
     return 1;
   }
@@ -75,7 +75,7 @@ int digital_pad_t::send(int data) {
   return tx_bit;
 }
 
-void digital_pad_t::set_dtr(bool next_dtr) {
+void digital_pad::set_dtr(bool next_dtr) {
   if (!dtr && next_dtr) {
     step = 0;
     bit = 0;

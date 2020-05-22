@@ -20,15 +20,15 @@ void signal_handler(int sig) {
   exit(1);
 }
 
-void run(psx::console_t *console);
-void run_headless(psx::console_t *console);
+void run(psx::console *console);
+void run_headless(psx::console *console);
 
 int main(int argc, char *argv[]) {
   signal(SIGABRT, signal_handler);
   signal(SIGSEGV, signal_handler);
 
   psx::args::init(argc, argv);
-  psx::console_t *console = new psx::console_t();
+  psx::console *console = new psx::console();
 
   if (psx::args::headless) {
     run_headless(console);
@@ -41,15 +41,15 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void run(psx::console_t *console) {
+void run(psx::console *console) {
   SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
 
-  psx::sdl2_audio_t audio = psx::sdl2_audio_t();
-  psx::sdl2_video_t video = psx::sdl2_video_t();
-  psx::sdl2_input_t input = psx::sdl2_input_t();
+  psx::sdl2_audio audio = psx::sdl2_audio();
+  psx::sdl2_video video = psx::sdl2_video();
+  psx::sdl2_input input = psx::sdl2_input();
 
-  psx::input_params_t i = {};
-  psx::output_params_t o = {};
+  psx::input_params i = {};
+  psx::output_params o = {};
 
   do {
     input.from_keyboard(i.device1);
@@ -69,9 +69,9 @@ void run(psx::console_t *console) {
   while (1);
 }
 
-void run_headless(psx::console_t *console) {
-  psx::input_params_t i = {};
-  psx::output_params_t o = {};
+void run_headless(psx::console *console) {
+  psx::input_params i = {};
+  psx::output_params o = {};
 
   do {
     console->run_for_one_frame(i, o);

@@ -2,30 +2,30 @@
 
 using namespace psx::cdrom;
 
-bool cdrom_mode_t::double_speed() const {
+bool cdrom_mode::double_speed() const {
   return (val & 0x80) != 0;
 }
 
-bool cdrom_mode_t::send_xa_adpcm_to_spu() const {
+bool cdrom_mode::send_xa_adpcm_to_spu() const {
   return (val & 0x40) != 0;
 }
 
-bool cdrom_mode_t::read_whole_sector() const {
+bool cdrom_mode::read_whole_sector() const {
   return (val & 0x20) != 0;
 }
 
-bool cdrom_mode_t::filter_xa_adpcm() const {
+bool cdrom_mode::filter_xa_adpcm() const {
   return (val & 0x08) != 0;
 }
 
-bool cdrom_mode_t::send_audio_reports() const {
+bool cdrom_mode::send_audio_reports() const {
   return (val & 0x04) != 0;
 }
 
-bool cdrom_mode_t::auto_pause_audio() const {
+bool cdrom_mode::auto_pause_audio() const {
   return (val & 0x02) != 0;
 }
 
-bool cdrom_mode_t::read_cd_da() const {
+bool cdrom_mode::read_cd_da() const {
   return (val & 0x01) != 0;
 }

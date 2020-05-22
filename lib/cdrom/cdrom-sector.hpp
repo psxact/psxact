@@ -8,13 +8,13 @@ namespace psx::cdrom {
 
   constexpr int CDROM_SECTOR_SIZE = 0x930;
 
-  struct cdrom_timecode_t {
+  struct cdrom_timecode {
     uint8_t minute;
     uint8_t second;
     uint8_t sector;
   };
 
-  enum class cdrom_sector_type_t {
+  enum class cdrom_sector_type {
     /// Used when a determination couldn't be made.
     unknown,
     /// Empty, used for padding?
@@ -27,7 +27,7 @@ namespace psx::cdrom {
     mode2_form2
   };
 
-  class cdrom_sector_t {
+  class cdrom_sector {
     uint8_t buffer[CDROM_SECTOR_SIZE];
 
   public:
@@ -56,10 +56,10 @@ namespace psx::cdrom {
     uint8_t get_xa_coding_info() const;
 
     /// Returns the sector type for the currently loaded data.
-    cdrom_sector_type_t get_type() const;
+    cdrom_sector_type get_type() const;
 
     /// Reads a sector from the specified file, at the specified timecode.
-    void fill_from(FILE *file, cdrom_timecode_t timecode);
+    void fill_from(FILE *file, cdrom_timecode timecode);
 
     uint8_t get(int index) const;
   };

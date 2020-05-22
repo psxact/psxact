@@ -5,11 +5,11 @@
 
 namespace psx::cdrom {
 
-  class cdrom_mode_t {
+  class cdrom_mode {
     uint8_t val;
 
   public:
-    explicit cdrom_mode_t(uint8_t val) : val(val) {}
+    explicit cdrom_mode(uint8_t val) : val(val) {}
 
     bool double_speed() const;
     bool send_xa_adpcm_to_spu() const;

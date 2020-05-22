@@ -3,7 +3,7 @@
 
 namespace psx {
 
-  enum class interrupt_type_t {
+  enum class interrupt_type {
     vblank = 0x001,
     gpu    = 0x002,
     cdrom  = 0x004,
@@ -17,11 +17,11 @@ namespace psx {
     pio    = 0x400,
   };
 
-  class interruptible_t {
+  class interruptible {
   public:
-    virtual ~interruptible_t() {}
+    virtual ~interruptible() {}
 
-    virtual void interrupt(interrupt_type_t flag) = 0;
+    virtual void interrupt(interrupt_type flag) = 0;
   };
 }
 

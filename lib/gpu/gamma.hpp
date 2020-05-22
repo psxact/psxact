@@ -3,14 +3,8 @@
 
 #include "gpu/types.hpp"
 
-namespace psx::gpu {
-
-  class gamma_t {
-    static const int lut[256];
-
-  public:
-    static void apply(color_t &color);
-  };
+namespace psx::gpu::gamma {
+  void apply(color &color);
 }
 
 #endif

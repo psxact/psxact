@@ -4,22 +4,22 @@
 
 using namespace psx::cpu::cop0;
 
-void sys_t::run(uint32_t n) {
+void sys::run(uint32_t n) {
   if (n == 0x10) {
     return pop_flags();
   }
 }
 
-uint32_t sys_t::read_ccr(uint32_t) {
+uint32_t sys::read_ccr(uint32_t) {
   assert(0 && "Tried to read unimplemented COP0 register, should trigger RI exception.");
   return 0;
 }
 
-void sys_t::write_ccr(uint32_t, uint32_t) {
+void sys::write_ccr(uint32_t, uint32_t) {
   assert(0 && "Tried to write unimplemented COP0 register, should trigger RI exception.");
 }
 
-uint32_t sys_t::read_gpr(uint32_t n) {
+uint32_t sys::read_gpr(uint32_t n) {
   switch (n) {
     case 0x3: // BPC (Read-write)
       return bpc;
@@ -60,7 +60,7 @@ uint32_t sys_t::read_gpr(uint32_t n) {
   }
 }
 
-void sys_t::write_gpr(uint32_t n, uint32_t value) {
+void sys::write_gpr(uint32_t n, uint32_t value) {
   switch (n) {
     case 0x3: bpc = value; break;
     case 0x5: bda = value; break;
@@ -79,42 +79,42 @@ void sys_t::write_gpr(uint32_t n, uint32_t value) {
   }
 }
 
-bool sys_t::get_bev() {
+bool sys::get_bev() {
   return (sr & (1 << 22)) != 0;
 }
 
-void sys_t::put_tar(uint32_t val) {
+void sys::put_tar(uint32_t val) {
   tar = val;
 }
 
-void sys_t::put_cause_excode(exception_t val) {
+void sys::put_cause_excode(exception val) {
   cause = (cause & ~0x0000007c) | (int(val) << 2);
 }
 
-void sys_t::put_cause_ip(bool val) {
+void sys::put_cause_ip(bool val) {
   cause = (cause & ~0x00000400) | (int(val) << 10);
 }
 
-void sys_t::put_cause_ce(int32_t val) {
+void sys::put_cause_ce(int32_t val) {
   cause = (cause & ~0x30000000) | ((val & 3) << 28);
 }
 
-void sys_t::put_cause_bt(bool val) {
+void sys::put_cause_bt(bool val) {
   cause = (cause & ~0x40000000) | (int(val) << 30);
 }
 
-void sys_t::put_cause_bd(bool val) {
+void sys::put_cause_bd(bool val) {
   cause = (cause & ~0x80000000) | (int(val) << 31);
 }
 
-void sys_t::put_epc(uint32_t val) {
+void sys::put_epc(uint32_t val) {
   epc = val;
 }
 
-void sys_t::push_flags() {
+void sys::push_flags() {
   sr = (sr & ~0x0000003f) | ((sr << 2) & 0x3f);
 }
 
-void sys_t::pop_flags() {
+void sys::pop_flags() {
   sr = (sr & ~0x0000000f) | ((sr >> 2) & 0x0f);
 }

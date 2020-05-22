@@ -8,11 +8,11 @@
 using namespace psx::mdec;
 using namespace psx::util;
 
-core_t::core_t()
-  : addressable_t("mdec", args::log_mdec) {
+core::core()
+  : addressable("mdec", args::log_mdec) {
 }
 
-uint32_t core_t::get_status() const {
+uint32_t core::get_status() const {
   auto bit_31 = data_out.is_empty();
   auto bit_30 = data_in.is_full();
   auto bit_29 = cmd.run;
@@ -31,7 +31,7 @@ uint32_t core_t::get_status() const {
       | (bit_00 <<  0);
 }
 
-void core_t::put_command(uint32_t val) {
+void core::put_command(uint32_t val) {
   cmd.val = (val >> 29) & 0x7;
   cmd.out = (val >> 25) & 0xf;
   cmd.len = (val >>  0) & 0xffff;
@@ -50,7 +50,7 @@ void core_t::put_command(uint32_t val) {
   }
 }
 
-void core_t::put_parameter(uint32_t val) {
+void core::put_parameter(uint32_t val) {
   if (data_in.is_full()) {
     // For at least command 1, the MDEC appears to wait for a full input FIFO
     // before processing anything.
@@ -67,7 +67,7 @@ void core_t::put_parameter(uint32_t val) {
   }
 }
 
-void core_t::put_control(uint32_t val) {
+void core::put_control(uint32_t val) {
   dma_0_enabled = (val >> 30) & 1;
   dma_1_enabled = (val >> 29) & 1;
 
@@ -81,7 +81,7 @@ void core_t::put_control(uint32_t val) {
   }
 }
 
-void core_t::run_command() {
+void core::run_command() {
   if (cmd.val == 1) {
     log("running command 1");
 
@@ -111,7 +111,7 @@ void core_t::run_command() {
   assert(data_in.is_empty());
 }
 
-void core_t::fill_light_table() {
+void core::fill_light_table() {
   // We can't just assert the actual data size here because color data might
   // follow.
 
@@ -126,7 +126,7 @@ void core_t::fill_light_table() {
   }
 }
 
-void core_t::fill_color_table() {
+void core::fill_color_table() {
   assert(data_in.size() == 16);
 
   for (int i = 0; i < 64; ) {
@@ -138,7 +138,7 @@ void core_t::fill_color_table() {
   }
 }
 
-void core_t::fill_scale_table() {
+void core::fill_scale_table() {
   assert(data_in.size() == 32);
 
   for (int i = 0; i < 64; ) {
@@ -148,10 +148,10 @@ void core_t::fill_scale_table() {
   }
 }
 
-uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+uint32_t core::io_read(address_width width, uint32_t address) {
   timing::add_cpu_time(4);
 
-  if (width == address_width_t::word) {
+  if (width == address_width::word) {
     switch (address) {
       case 0x1f801824: {
         return get_status();
@@ -159,13 +159,13 @@ uint32_t core_t::io_read(address_width_t width, uint32_t address) {
     }
   }
 
-  return addressable_t::io_read(width, address);
+  return addressable::io_read(width, address);
 }
 
-void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+void core::io_write(address_width width, uint32_t address, uint32_t data) {
   timing::add_cpu_time(4);
 
-  if (width == address_width_t::word) {
+  if (width == address_width::word) {
     switch (address) {
       case 0x1f801820: {
         if (cmd.run) {
@@ -181,25 +181,26 @@ void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
     }
   }
 
-  return addressable_t::io_write(width, address, data);
+  return addressable::io_write(width, address, data);
 }
 
-int core_t::dma_speed() {
+int core::dma_speed() {
   return 1;
 }
 
-bool core_t::dma_read_ready() {
+bool core::dma_read_ready() {
   return true;
 }
 
-bool core_t::dma_write_ready() {
+bool core::dma_write_ready() {
   return true;
 }
 
-uint32_t core_t::dma_read() {
-  assert(0 && "MDEC DMA read isn't implemented.");
+uint32_t core::dma_read() {
+  // assert(0 && "MDEC DMA read isn't implemented.");
+  return 0;
 }
 
-void core_t::dma_write(uint32_t val) {
-  io_write(address_width_t::word, 0x1f801820, val);
+void core::dma_write(uint32_t val) {
+  io_write(address_width::word, 0x1f801820, val);
 }

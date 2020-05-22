@@ -4,12 +4,12 @@
 
 using namespace psx::memory;
 
-memory_control_t::memory_control_t()
-  : addressable_t("memctl", false) {
+memory_control::memory_control()
+  : addressable("memctl", false) {
 }
 
-uint32_t memory_control_t::io_read(address_width_t width, uint32_t address) {
-  if (width == address_width_t::word) {
+uint32_t memory_control::io_read(address_width width, uint32_t address) {
+  if (width == address_width::word) {
     if (address == 0xfffe0130) {
       return biu;
     }
@@ -28,11 +28,11 @@ uint32_t memory_control_t::io_read(address_width_t width, uint32_t address) {
     }
   }
 
-  return addressable_t::io_read(width, address);
+  return addressable::io_read(width, address);
 }
 
-void memory_control_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
-  if (width == address_width_t::word) {
+void memory_control::io_write(address_width width, uint32_t address, uint32_t data) {
+  if (width == address_width::word) {
     switch (address) {
       case 0x1f801000:
         exp1_base = (data & 0x00ffffff) | 0x1f000000;
@@ -119,5 +119,5 @@ void memory_control_t::io_write(address_width_t width, uint32_t address, uint32_
     }
   }
 
-  return addressable_t::io_write(width, address, data);
+  return addressable::io_write(width, address, data);
 }

@@ -7,18 +7,18 @@
 
 namespace psx::util {
 
-  enum class wire_state_t {
+  enum class wire_state {
     off,
     on
   };
 
   /// Models a connection between two components
-  class wire_t {
+  class wire {
     std::vector<std::function<void()>> on_receivers;
     std::vector<std::function<void()>> off_receivers;
     std::vector<std::function<void()>> rise_receivers;
     std::vector<std::function<void()>> fall_receivers;
-    wire_state_t state;
+    wire_state state;
 
   public:
     virtual void recv_on(std::function<void()> receiver);
@@ -26,7 +26,7 @@ namespace psx::util {
     virtual void recv_rise(std::function<void()> receiver);
     virtual void recv_fall(std::function<void()> receiver);
 
-    virtual void operator()(wire_state_t val);
+    virtual void operator()(wire_state val);
   };
 }
 

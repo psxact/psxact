@@ -6,12 +6,12 @@
 
 namespace psx::input {
 
-  enum class device_dsr_t {
+  enum class device_dsr {
     high = 0,
     low = 1
   };
 
-  class device_t {
+  class device {
   private:
     static const int DSR_DELAY_PERIOD = 100;
     static const int DSR_PULSE_PERIOD = 100;
@@ -22,17 +22,17 @@ namespace psx::input {
   protected:
     bool dtr = {};
 
-    device_t() {}
-    ~device_t() {}
+    device() {}
+    ~device() {}
 
     void start_dsr_pulse();
 
   public:
-    static device_t not_connected;
+    static device not_connected;
 
-    device_dsr_t tick(int amount, device_dsr_t dsr);
+    device_dsr tick(int amount, device_dsr dsr);
 
-    virtual void latch(const host_device_t &device);
+    virtual void latch(const host_device &device);
     virtual int send(int request);
     virtual void set_dtr(bool next_dtr);
   };

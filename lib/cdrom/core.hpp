@@ -6,7 +6,7 @@
 #include "cdrom/cdrom-mode.hpp"
 #include "cdrom/cdrom-sector.hpp"
 #include "cdrom/cdrom-sector-filter.hpp"
-#include "cdrom/xa-adpcm.hpp"
+#include "cdrom/xa-adpcm-decoder.hpp"
 #include "util/fifo.hpp"
 #include "util/wire.hpp"
 #include "addressable.hpp"
@@ -14,35 +14,35 @@
 
 namespace psx::cdrom {
 
-  enum class cdrom_drive_state_t {
+  enum class cdrom_drive_state {
     idle,
     reading,
     seeking,
     playing
   };
 
-  class core_t final
-      : public addressable_t
-      , public dma_comms_t {
-    util::wire_t irq;
+  class core final
+      : public addressable
+      , public dma_comms {
+    util::wire irq;
 
-    xa_adpcm_t &xa_adpcm;
+    xa_adpcm_decoder &xa_adpcm;
 
-    cdrom_drive_state_t drive_state {};
-    cdrom_mode_t mode {0};
-    cdrom_sector_filter_t filter {};
-    cdrom_sector_t sector {};
+    cdrom_drive_state drive_state {};
+    cdrom_mode mode {0};
+    cdrom_sector_filter filter {};
+    cdrom_sector sector {};
     int32_t sector_read_cursor {};
     int32_t sector_read_offset {};
     int32_t sector_read_length {};
     bool sector_read_active {};
 
-    cdrom_timecode_t seek_timecode {};
-    cdrom_timecode_t read_timecode {};
+    cdrom_timecode seek_timecode {};
+    cdrom_timecode read_timecode {};
     bool seek_pending {};
 
-    util::fifo_t<uint8_t, 4> parameter {};
-    util::fifo_t<uint8_t, 4> response {};
+    util::fifo<uint8_t, 4> parameter {};
+    util::fifo<uint8_t, 4> response {};
     std::optional<uint8_t> command {};
     uint8_t index {};
     uint8_t irq_flag {};
@@ -50,15 +50,15 @@ namespace psx::cdrom {
     int timer {};
 
     int int1_timer;
-    void (cdrom::core_t:: *int1)();
+    void (cdrom::core:: *int1)();
 
     int int2_timer;
-    void (cdrom::core_t:: *int2)();
+    void (cdrom::core:: *int2)();
 
     std::optional<FILE *> disc_file;
 
   public:
-    core_t(util::wire_t irq, xa_adpcm_t &xa_adpcm, const char *game_file_name);
+    core(util::wire irq, xa_adpcm_decoder &xa_adpcm, const char *game_file_name);
 
     void tick(int amount);
 
@@ -140,8 +140,8 @@ namespace psx::cdrom {
     uint32_t dma_read() override;
     void dma_write(uint32_t val) override;
 
-    uint32_t io_read(address_width_t width, uint32_t address) override;
-    void io_write(address_width_t width, uint32_t address, uint32_t data) override;
+    uint32_t io_read(address_width width, uint32_t address) override;
+    void io_write(address_width width, uint32_t address, uint32_t data) override;
   };
 }
 

@@ -6,7 +6,7 @@
 
 namespace psx::input::devices {
 
-  class digital_pad_t : public device_t {
+  class digital_pad : public device {
     int bit = {};
     int step = {};
     uint16_t bits = {};
@@ -14,7 +14,7 @@ namespace psx::input::devices {
     uint8_t tx_buffer = {0xff};
 
   public:
-    void latch(const host_device_t &device) override;
+    void latch(const host_device &device) override;
     int send(int request) override;
     void set_dtr(bool next_dtr) override;
   };

@@ -2,20 +2,20 @@
 #define GPU_CORE_HPP_
 
 #include "gpu/types.hpp"
+#include "memory/memory-base.hpp"
 #include "util/fifo.hpp"
 #include "util/wire.hpp"
 #include "addressable.hpp"
 #include "dma-comms.hpp"
-#include "memory.hpp"
 
 namespace psx::gpu {
 
-  enum class gpu_display_depth_t {
+  enum class gpu_display_depth {
     bpp15,
     bpp24
   };
 
-  enum class gpu_h_resolution_t {
+  enum class gpu_h_resolution {
     h256 = 256,
     h320 = 320,
     h368 = 368,
@@ -23,12 +23,12 @@ namespace psx::gpu {
     h640 = 640
   };
 
-  enum class gpu_v_resolution_t {
+  enum class gpu_v_resolution {
     v240 = 240,
     v480 = 480
   };
 
-  enum class gpu_field_t {
+  enum class gpu_field {
     even,
     odd
   };
@@ -38,32 +38,32 @@ namespace psx::gpu {
   constexpr int GPU_READ = 0x1f801810;
   constexpr int GPU_STAT = 0x1f801814;
 
-  class core_t final
-      : public addressable_t
-      , public dma_comms_t {
+  class core final
+      : public addressable
+      , public dma_comms {
 
     /// Used to send IRQ(1) signals to the CPU.
-    util::wire_t irq;
+    util::wire irq;
 
     /// Used to send HBlank signals to the timers.
-    util::wire_t hbl;
+    util::wire hbl;
 
     /// Used to send VBlank signals to the timers, and IRQ(0) signals to the CPU.
-    util::wire_t vbl;
+    util::wire vbl;
 
     int prescaler = {};
     int counter = {};
 
-    gpu_h_resolution_t h_resolution = gpu_h_resolution_t::h256;
-    gpu_v_resolution_t v_resolution = gpu_v_resolution_t::v240;
-    gpu_display_depth_t display_depth;
-    gpu_field_t field = gpu_field_t::even;
+    gpu_h_resolution h_resolution = gpu_h_resolution::h256;
+    gpu_v_resolution v_resolution = gpu_v_resolution::v240;
+    gpu_display_depth display_depth;
+    gpu_field field = gpu_field::even;
     uint32_t video_buffer[480][640];
 
     uint32_t status = 0x14802000;
 
   public:
-    memory_t< mib(1) > *vram;
+    memory_base<mib(1)> *vram;
 
     uint32_t data_latch = {};
     uint32_t texture_window_mask_x = {};
@@ -85,7 +85,7 @@ namespace psx::gpu {
     bool textured_rectangle_x_flip = {};
     bool textured_rectangle_y_flip = {};
 
-    psx::util::fifo_t< uint32_t, 4 > fifo = {};
+    psx::util::fifo< uint32_t, 4 > fifo = {};
 
     struct {
       struct {
@@ -117,8 +117,8 @@ namespace psx::gpu {
       } run = {};
     } gpu_to_cpu_transfer = {};
 
-    core_t(util::wire_t irq, util::wire_t hbl, util::wire_t vbl);
-    ~core_t();
+    core(util::wire irq, util::wire hbl, util::wire vbl);
+    ~core();
 
     // Interface for external video rendering
 
@@ -141,9 +141,9 @@ namespace psx::gpu {
     void render_field_480i();
 
     uint32_t get_status() const;
-    gpu_h_resolution_t get_h_resolution() const;
-    gpu_v_resolution_t get_v_resolution() const;
-    gpu_display_depth_t get_display_depth() const;
+    gpu_h_resolution get_h_resolution() const;
+    gpu_v_resolution get_v_resolution() const;
+    gpu_display_depth get_display_depth() const;
 
     int dma_speed() override;
     bool dma_read_ready() override;
@@ -151,8 +151,8 @@ namespace psx::gpu {
     uint32_t dma_read() override;
     void dma_write(uint32_t val) override;
 
-    uint32_t io_read(address_width_t width, uint32_t address) override;
-    void io_write(address_width_t width, uint32_t address, uint32_t data) override;
+    uint32_t io_read(address_width width, uint32_t address) override;
+    void io_write(address_width width, uint32_t address, uint32_t data) override;
 
     uint32_t data();
     uint32_t stat();
@@ -174,25 +174,25 @@ namespace psx::gpu {
     void copy_wram_to_vram();
     void copy_vram_to_wram();
 
-    void draw_point(point_t point, color_t color);
+    void draw_point(point point, color color);
     void draw_line();
     void draw_polygon();
     void draw_rectangle();
-    void draw_triangle(gp0_command_t command, const triangle_t &triangle);
+    void draw_triangle(gp0_command command, const triangle &triangle);
     void fill_rectangle();
 
     // common functionality
 
-    texture_color_t get_texture_color__4bpp(const tev_t &tev, const texture_coord_t &coord);
-    texture_color_t get_texture_color__8bpp(const tev_t &tev, const texture_coord_t &coord);
-    texture_color_t get_texture_color_15bpp(const tev_t &tev, const texture_coord_t &coord);
-    texture_color_t get_texture_color(const tev_t &tev, const texture_coord_t &coord);
+    texture_color get_texture_color__4bpp(const texture_params &tev, const texture_coord &coord);
+    texture_color get_texture_color__8bpp(const texture_params &tev, const texture_coord &coord);
+    texture_color get_texture_color_15bpp(const texture_params &tev, const texture_coord &coord);
+    texture_color get_texture_color(const texture_params &tev, const texture_coord &coord);
 
-    void draw_color(gp0_command_t command,
-        const color_t &color,
-        const point_t &point,
-        const texture_coord_t &coord,
-        const tev_t &tev);
+    void draw_color(gp0_command command,
+        const color &color,
+        const point &point,
+        const texture_coord &coord,
+        const texture_params &tev);
   };
 }
 

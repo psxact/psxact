@@ -19,16 +19,16 @@ static const int neg_xa_adpcm_table[16] = {
     0,   0,   0,   0
 };
 
-void voice_t::put_header(uint16_t val) {
-  header = adpcm_header_t::create(val);
+void voice::put_header(uint16_t val) {
+  header = adpcm_header::create(val);
 
   if (header.loop_start) {
     loop_address = current_address & ~7;
   }
 }
 
-void voice_t::put_sample(uint16_t val) {
-  adpcm_sample_t sample = adpcm_sample_t::create(val);
+void voice::put_sample(uint16_t val) {
+  adpcm_sample sample = adpcm_sample::create(val);
 
   // decode
   int wp = pos_xa_adpcm_table[header.filter];
@@ -53,23 +53,23 @@ void voice_t::put_sample(uint16_t val) {
   }
 }
 
-int32_t voice_t::raw_sample() {
+int32_t voice::raw_sample() {
   int index = (phase >> 4) & 0xff;
 
-  return gauss_t::filter(index,
+  return gauss::filter(index,
     decoder_fifo.at(0),
     decoder_fifo.at(1),
     decoder_fifo.at(2),
     decoder_fifo.at(3));
 }
 
-int32_t voice_t::apply_envelope(int32_t raw) {
+int32_t voice::apply_envelope(int32_t raw) {
   int32_t level = int32_t(adsr.get_level());
 
   return (level * raw) >> 15;
 }
 
-void voice_t::counter_step() {
+void voice::counter_step() {
   uint16_t r = pitch;
 
   // TODO: pitch modulation

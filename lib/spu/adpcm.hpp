@@ -5,20 +5,20 @@
 
 namespace psx::spu {
 
-  struct adpcm_header_t {
+  struct adpcm_header {
     int shift;
     int filter;
     bool loop_end;
     bool loop_repeat;
     bool loop_start;
 
-    static adpcm_header_t create(uint16_t header);
+    static adpcm_header create(uint16_t header);
   };
 
-  struct adpcm_sample_t {
+  struct adpcm_sample {
     int16_t coded[4];
 
-    static adpcm_sample_t create(uint16_t sample);
+    static adpcm_sample create(uint16_t sample);
   };
 }
 

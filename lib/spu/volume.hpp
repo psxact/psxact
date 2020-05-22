@@ -6,14 +6,14 @@
 
 namespace psx::spu {
 
-  enum class volume_mode_t {
+  enum class volume_mode {
     fixed,
     sweep
   };
 
-  struct volume_t {
-    envelope_params_t params;
-    volume_mode_t mode;
+  struct volume {
+    envelope_params params;
+    volume_mode mode;
     int16_t level;
 
     int16_t get_level();

@@ -22,63 +22,63 @@
 
 namespace psx {
 
-  struct input_params_t {
-    psx::input::host_device_t device1;
-    psx::input::host_device_t device2;
+  struct input_params {
+    psx::input::host_device device1;
+    psx::input::host_device device2;
   };
 
-  struct output_params_audio_t {
+  struct output_params_audio {
     int16_t *buffer;
     int32_t buffer_len;
   };
 
-  struct output_params_video_t {
+  struct output_params_video {
     uint32_t *buffer;
     int32_t width;
     int32_t height;
   };
 
-  struct output_params_t {
-    output_params_audio_t audio;
-    output_params_video_t video;
+  struct output_params {
+    output_params_audio audio;
+    output_params_video video;
   };
 
-  class console_t final
-    : public addressable_t {
-    memory::bios_t *bios;
-    memory::wram_t *wram;
-    memory::memory_control_t *mem;
+  class console final
+    : public addressable {
+    memory::bios *bios;
+    memory::wram *wram;
+    memory::memory_control *mem;
 
-    cdrom::core_t *cdrom;
-    cdrom::xa_adpcm_t *xa_adpcm;
-    timer::core_t *timer;
-    cpu::core_t *cpu;
-    dma::core_t *dma;
+    cdrom::core *cdrom;
+    cdrom::xa_adpcm_decoder *xa_adpcm;
+    timer::core *timer;
+    cpu::core *cpu;
+    dma::core *dma;
     exp::expansion1_t *exp1;
     exp::expansion2_t *exp2;
     exp::expansion3_t *exp3;
-    gpu::core_t *gpu;
-    input::core_t *input;
-    mdec::core_t *mdec;
-    spu::core_t *spu;
+    gpu::core *gpu;
+    input::core *input;
+    mdec::core *mdec;
+    spu::core *spu;
     int cycles;
 
     bool is_exe;
 
   public:
-    console_t();
-    ~console_t();
+    console();
+    ~console();
 
-    uint32_t io_read(address_width_t width, uint32_t address);
-    void io_write(address_width_t width, uint32_t address, uint32_t data);
+    uint32_t io_read(address_width width, uint32_t address);
+    void io_write(address_width width, uint32_t address, uint32_t data);
 
-    void run_for_one_frame(input_params_t &input, output_params_t &output);
+    void run_for_one_frame(input_params &input, output_params &output);
 
   private:
-    addressable_t &decode(uint32_t address);
+    addressable &decode(uint32_t address);
 
-    void get_audio_params(output_params_audio_t &params);
-    void get_video_params(output_params_video_t &params);
+    void get_audio_params(output_params_audio &params);
+    void get_video_params(output_params_video &params);
 
     void load_exe(const char *game_file_name);
   };

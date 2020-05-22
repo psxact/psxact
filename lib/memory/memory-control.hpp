@@ -1,11 +1,11 @@
-#ifndef MEMORY_CONTROL_HPP_
-#define MEMORY_CONTROL_HPP_
+#ifndef MEMORY_MEMORY_CONTROL_HPP_
+#define MEMORY_MEMORY_CONTROL_HPP_
 
 #include "addressable.hpp"
 
 namespace psx::memory {
 
-  class memory_control_t : public addressable_t {
+  class memory_control : public addressable {
     uint32_t biu;
     uint32_t exp1_base;
     uint32_t exp2_base;
@@ -19,11 +19,11 @@ namespace psx::memory {
     uint32_t wram_conf;
 
   public:
-    memory_control_t();
-    ~memory_control_t() {}
+    memory_control();
+    ~memory_control() {}
 
-    uint32_t io_read(address_width_t width, uint32_t address) override;
-    void io_write(address_width_t width, uint32_t address, uint32_t data) override;
+    uint32_t io_read(address_width width, uint32_t address) override;
+    void io_write(address_width width, uint32_t address, uint32_t data) override;
   };
 }
 

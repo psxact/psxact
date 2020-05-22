@@ -9,32 +9,32 @@
 using namespace psx::spu;
 using namespace psx::util;
 
-core_t::core_t(cdrom::xa_adpcm_t &xa_adpcm)
-  : addressable_t("spu", args::log_spu)
+core::core(cdrom::xa_adpcm_decoder &xa_adpcm)
+  : addressable("spu", args::log_spu)
   , xa_adpcm(xa_adpcm) {
 }
 
-core_t::~core_t() {
+core::~core() {
 }
 
-uint16_t core_t::get_register(register_t reg) {
+uint16_t core::get_register(spu_register reg) {
   return registers[uint32_t(reg) - 0x1f801c00];
 }
 
-void core_t::put_register(register_t reg, uint16_t val) {
+void core::put_register(spu_register reg, uint16_t val) {
   registers[uint32_t(reg) - 0x1f801c00] = val;
 }
 
-void core_t::put_status_register() {
+void core::put_status_register() {
   uint16_t status = 0;
 
-  status |= get_register(register_t::control) & 0x3f;
+  status |= get_register(spu_register::control) & 0x3f;
   status |= (capture_address & 0x100) << 3;
 
-  put_register(register_t::status, status);
+  put_register(spu_register::status, status);
 }
 
-void core_t::tick(int amount) {
+void core::tick(int amount) {
   prescaler += amount;
 
   while (prescaler >= SPU_DIVIDER) {
@@ -43,7 +43,7 @@ void core_t::tick(int amount) {
   }
 }
 
-void core_t::step() {
+void core::step() {
   int lsample = 0;
   int rsample = 0;
 
@@ -73,11 +73,11 @@ void core_t::step() {
 
   // Update registers
   put_status_register();
-  put_register(register_t::endx_lo, uint16_t(endx >> 0));
-  put_register(register_t::endx_hi, uint16_t(endx >> 16));
+  put_register(spu_register::endx_lo, uint16_t(endx >> 0));
+  put_register(spu_register::endx_hi, uint16_t(endx >> 16));
 }
 
-void core_t::voice_tick(int v, int32_t *l, int32_t *r) {
+void core::voice_tick(int v, int32_t *l, int32_t *r) {
   auto &voice = voices[v];
   voice_decoder_tick(v);
 
@@ -114,7 +114,7 @@ void core_t::voice_tick(int v, int32_t *l, int32_t *r) {
     voice.adsr.key_on();
     voice.start_delay = 4;
     voice.phase = 0;
-    voice.header = adpcm_header_t::create(0);
+    voice.header = adpcm_header::create(0);
     voice.decoder_fifo.clear();
     voice.last_samples[0] = 0;
     voice.last_samples[1] = 0;
@@ -122,7 +122,7 @@ void core_t::voice_tick(int v, int32_t *l, int32_t *r) {
   }
 }
 
-void core_t::voice_decoder_tick(int v) {
+void core::voice_decoder_tick(int v) {
   auto &voice = voices[v];
 
   if (voice.decoder_fifo.size() >= 11) {
@@ -148,14 +148,14 @@ void core_t::voice_decoder_tick(int v) {
   voice.current_address++;
 }
 
-int16_t* core_t::get_sample_buffer() const {
+int16_t* core::get_sample_buffer() const {
   return (int16_t *) sample_buffer;
 }
 
-uint32_t core_t::get_sample_buffer_index() const {
+uint32_t core::get_sample_buffer_index() const {
   return sample_buffer_index;
 }
 
-void core_t::reset_sample() {
+void core::reset_sample() {
   sample_buffer_index = 0;
 }

@@ -6,14 +6,14 @@
 
 namespace psx::timer {
 
-  enum class timer_source_t {
+  enum class timer_source {
     system,
     system_over_8,
     hblank,
     dotclock
   };
 
-  enum class timer_sync_mode_t {
+  enum class timer_sync_mode {
     none,
     sync_mode_0,
     sync_mode_1,
@@ -21,30 +21,30 @@ namespace psx::timer {
     sync_mode_3
   };
 
-  struct timer_t final {
+  struct timer final {
     uint16_t counter = {};
     uint16_t control = {};
     uint16_t counter_target = {};
     bool running = {};
 
-    util::wire_t irq;
+    util::wire irq;
 
-    timer_t(util::wire_t irq) : irq(irq) {}
+    timer(util::wire irq) : irq(irq) {}
   };
 
-  class core_t final : public addressable_t {
-    timer_t timers[3];
+  class core final : public addressable {
+    timer timers[3];
     int system_over_8_prescale = {};
     bool in_hblank = {};
     bool in_vblank = {};
 
   public:
-    explicit core_t(util::wire_t irq0, util::wire_t irq1, util::wire_t irq2);
+    explicit core(util::wire irq0, util::wire irq1, util::wire irq2);
 
     void tick(int amount);
 
-    uint32_t io_read(address_width_t width, uint32_t address);
-    void io_write(address_width_t width, uint32_t address, uint32_t data);
+    uint32_t io_read(address_width width, uint32_t address);
+    void io_write(address_width width, uint32_t address, uint32_t data);
 
     void enter_hblank();
     void leave_hblank();
@@ -65,8 +65,8 @@ namespace psx::timer {
     void timer_put_control(int n, uint16_t val);
     void timer_put_counter_target(int n, uint16_t val);
 
-    timer_source_t timer_source(int n);
-    timer_sync_mode_t timer_sync_mode(int n);
+    timer_source timer_get_source(int n);
+    timer_sync_mode timer_get_sync_mode(int n);
     void timer_blanking_sync(int n, bool active);
   };
 }

@@ -5,7 +5,7 @@
 
 namespace psx::spu {
 
-  class gauss_t {
+  class gauss {
     static const int16_t table[256][4];
 
   public:

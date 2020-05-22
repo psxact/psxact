@@ -17,52 +17,52 @@ enum {
   XA_CODING_INFO_OFFSET = 19
 };
 
-uint8_t cdrom_sector_t::get_minute() const {
+uint8_t cdrom_sector::get_minute() const {
   return buffer[MINUTE_OFFSET];
 }
 
-uint8_t cdrom_sector_t::get_second() const {
+uint8_t cdrom_sector::get_second() const {
   return buffer[SECOND_OFFSET];
 }
 
-uint8_t cdrom_sector_t::get_sector() const {
+uint8_t cdrom_sector::get_sector() const {
   return buffer[SECTOR_OFFSET];
 }
 
-uint8_t cdrom_sector_t::get_mode() const {
+uint8_t cdrom_sector::get_mode() const {
   return buffer[MODE_OFFSET];
 }
 
-uint8_t cdrom_sector_t::get_xa_file() const {
+uint8_t cdrom_sector::get_xa_file() const {
   return buffer[XA_FILE_OFFSET];
 }
 
-uint8_t cdrom_sector_t::get_xa_channel() const {
+uint8_t cdrom_sector::get_xa_channel() const {
   return buffer[XA_CHANNEL_OFFSET];
 }
 
-uint8_t cdrom_sector_t::get_xa_sub_mode() const {
+uint8_t cdrom_sector::get_xa_sub_mode() const {
   return buffer[XA_SUB_MODE_OFFSET];
 }
 
-uint8_t cdrom_sector_t::get_xa_coding_info() const {
+uint8_t cdrom_sector::get_xa_coding_info() const {
   return buffer[XA_CODING_INFO_OFFSET];
 }
 
-cdrom_sector_type_t cdrom_sector_t::get_type() const {
+cdrom_sector_type cdrom_sector::get_type() const {
   switch (get_mode()) {
-    case 0: return cdrom_sector_type_t::mode0;
-    case 1: return cdrom_sector_type_t::mode1;
+    case 0: return cdrom_sector_type::mode0;
+    case 1: return cdrom_sector_type::mode1;
     case 2:
       return (get_xa_sub_mode() & 0x20)
-          ? cdrom_sector_type_t::mode2_form2
-          : cdrom_sector_type_t::mode2_form1;
+          ? cdrom_sector_type::mode2_form2
+          : cdrom_sector_type::mode2_form1;
   }
 
-  return cdrom_sector_type_t::unknown;
+  return cdrom_sector_type::unknown;
 }
 
-void cdrom_sector_t::fill_from(FILE *file, cdrom_timecode_t timecode) {
+void cdrom_sector::fill_from(FILE *file, cdrom_timecode timecode) {
   constexpr int sectors_per_second = 75;
   constexpr int seconds_per_minute = 60;
   constexpr int sectors_per_minute = sectors_per_second * seconds_per_minute;
@@ -83,7 +83,7 @@ void cdrom_sector_t::fill_from(FILE *file, cdrom_timecode_t timecode) {
     bcd::to_dec(get_sector()) == timecode.sector);
 }
 
-uint8_t cdrom_sector_t::get(int index) const {
+uint8_t cdrom_sector::get(int index) const {
   assert(index < CDROM_SECTOR_SIZE);
   return buffer[index];
 }

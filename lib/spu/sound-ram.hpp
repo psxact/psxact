@@ -5,14 +5,14 @@
 
 namespace psx::spu {
 
-  struct sound_ram_address_t final {
+  struct sound_ram_address final {
     static uint32_t create(uint16_t reg_value);
   };
 
   constexpr int sound_ram_size = 262144;
   constexpr int sound_ram_mask = sound_ram_size - 1;
 
-  class sound_ram_t final {
+  class sound_ram final {
     uint16_t buffer[sound_ram_size];
 
   public:

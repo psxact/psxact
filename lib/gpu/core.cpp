@@ -8,33 +8,33 @@
 using namespace psx::gpu;
 using namespace psx::util;
 
-core_t::core_t(wire_t irq, wire_t hbl, wire_t vbl)
-  : addressable_t("gpu", args::log_gpu)
+core::core(wire irq, wire hbl, wire vbl)
+  : addressable("gpu", args::log_gpu)
   , irq(irq)
   , hbl(hbl)
   , vbl(vbl)
-  , h_resolution(gpu_h_resolution_t::h256)
-  , v_resolution(gpu_v_resolution_t::v240) {
-  vram = new memory_t< mib(1) >("vram");
+  , h_resolution(gpu_h_resolution::h256)
+  , v_resolution(gpu_v_resolution::v240) {
+  vram = new memory_base<mib(1)>("vram");
 }
 
-core_t::~core_t() {
+core::~core() {
   delete vram;
 }
 
-uint32_t *core_t::get_video_buffer() const {
+uint32_t *core::get_video_buffer() const {
   return (uint32_t *)video_buffer;
 }
 
-int32_t core_t::get_width() const {
+int32_t core::get_width() const {
   return 640;
 }
 
-int32_t core_t::get_height() const {
+int32_t core::get_height() const {
   return 480;
 }
 
-bool core_t::tick(int amount) {
+bool core::tick(int amount) {
   // time-base conversion
   prescaler += amount * 11;
   int steps = prescaler / 7;
@@ -44,7 +44,7 @@ bool core_t::tick(int amount) {
   return step(steps);
 }
 
-bool core_t::step(int amount) {
+bool core::step(int amount) {
   constexpr int VBLANK_START = int32_t(241 * GPU_LINE_LENGTH + 0.5);
   constexpr int VBLANK_END = int32_t(262.5 * GPU_LINE_LENGTH + 0.5);
 
@@ -56,20 +56,20 @@ bool core_t::step(int amount) {
   counter = next % VBLANK_END;
 
   if (prev < VBLANK_START && next >= VBLANK_START) {
-    vbl(wire_state_t::on);
+    vbl(wire_state::on);
   }
 
   if (prev < VBLANK_END && next >= VBLANK_END) {
-    vbl(wire_state_t::off);
+    vbl(wire_state::off);
   }
 
   if (next >= VBLANK_END) {
-    if (get_v_resolution() == gpu_v_resolution_t::v480) {
+    if (get_v_resolution() == gpu_v_resolution::v480) {
       render_field_480i();
-      field = field == gpu_field_t::even ? gpu_field_t::odd : gpu_field_t::even;
+      field = field == gpu_field::even ? gpu_field::odd : gpu_field::even;
     } else {
       render_field_240p();
-      field = gpu_field_t::odd;
+      field = gpu_field::odd;
     }
     return true;
   }
@@ -77,22 +77,22 @@ bool core_t::step(int amount) {
   return false;
 }
 
-void core_t::render_field_240p() {
+void core::render_field_240p() {
   const int width = int(get_h_resolution());
   const int height = 480;
 
-  const int vscale = get_v_resolution() == gpu_v_resolution_t::v480 ? 1 : 2;
+  const int vscale = get_v_resolution() == gpu_v_resolution::v480 ? 1 : 2;
   const int mask = (status & (1 << 23)) ? 0 : 0xffffff;
 
-  if (get_display_depth() == gpu_display_depth_t::bpp24) {
+  if (get_display_depth() == gpu_display_depth::bpp24) {
     for (int y = 1; y < height; y += 2) {
       for (int x = 0; x < width; x++) {
-        color_t color;
+        color color;
         color.r = vram_read8(x * 3 + 0, y / vscale);
         color.g = vram_read8(x * 3 + 1, y / vscale);
         color.b = vram_read8(x * 3 + 2, y / vscale);
 
-        gamma_t::apply(color);
+        gamma::apply(color);
 
         video_buffer[y - 1][x] = 0;
         video_buffer[y - 0][x] = color.to_uint32() & mask;
@@ -105,9 +105,9 @@ void core_t::render_field_240p() {
           display_area_x + x,
           display_area_y + (y / vscale));
 
-        color_t color = color_t::from_uint16(pixel);
+        color color = color::from_uint16(pixel);
 
-        gamma_t::apply(color);
+        gamma::apply(color);
 
         video_buffer[y - 1][x] = 0;
         video_buffer[y - 0][x] = color.to_uint32() & mask;
@@ -116,21 +116,21 @@ void core_t::render_field_240p() {
   }
 }
 
-void core_t::render_field_480i() {
+void core::render_field_480i() {
   const int width = int(get_h_resolution());
   const int height = 480;
 
   const int field = int(this->field);
 
-  if (get_display_depth() == gpu_display_depth_t::bpp24) {
+  if (get_display_depth() == gpu_display_depth::bpp24) {
     for (int y = field; y < height; y += 2) {
       for (int x = 0; x < width; x++) {
-        color_t color;
+        color color;
         color.r = vram_read8(x * 3 + 0, y);
         color.g = vram_read8(x * 3 + 1, y);
         color.b = vram_read8(x * 3 + 2, y);
 
-        gamma_t::apply(color);
+        gamma::apply(color);
 
         video_buffer[y][x] = color.to_uint32();
       }
@@ -142,9 +142,9 @@ void core_t::render_field_480i() {
           display_area_x + x,
           display_area_y + y);
 
-        color_t color = color_t::from_uint16(pixel);
+        color color = color::from_uint16(pixel);
 
-        gamma_t::apply(color);
+        gamma::apply(color);
 
         video_buffer[y][x] = color.to_uint32();
       }
@@ -152,43 +152,43 @@ void core_t::render_field_480i() {
   }
 }
 
-uint32_t core_t::get_status() const {
+uint32_t core::get_status() const {
   return status;
 }
 
-gpu_h_resolution_t core_t::get_h_resolution() const {
+gpu_h_resolution core::get_h_resolution() const {
   return h_resolution;
 }
 
-gpu_v_resolution_t core_t::get_v_resolution() const {
+gpu_v_resolution core::get_v_resolution() const {
   return v_resolution;
 }
 
-gpu_display_depth_t core_t::get_display_depth() const {
+gpu_display_depth core::get_display_depth() const {
   return display_depth;
 }
 
-int core_t::dma_speed() {
+int core::dma_speed() {
   return 1;
 }
 
-bool core_t::dma_read_ready() {
+bool core::dma_read_ready() {
   return true;
 }
 
-bool core_t::dma_write_ready() {
+bool core::dma_write_ready() {
   return true;
 }
 
-uint32_t core_t::dma_read() {
+uint32_t core::dma_read() {
   return data();
 }
 
-void core_t::dma_write(uint32_t val) {
+void core::dma_write(uint32_t val) {
   gp0(val);
 }
 
-uint32_t core_t::data() {
+uint32_t core::data() {
   if (gpu_to_cpu_transfer.run.active) {
     uint16_t lower = vram_transfer_read();
     uint16_t upper = vram_transfer_read();
@@ -199,7 +199,7 @@ uint32_t core_t::data() {
   return data_latch;
 }
 
-uint32_t core_t::stat() {
+uint32_t core::stat() {
   auto bit31 = int(field);
   auto bit13 = int(field);
 
@@ -212,10 +212,10 @@ uint32_t core_t::stat() {
       | (bit13 << 13);
 }
 
-uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+uint32_t core::io_read(address_width width, uint32_t address) {
   timing::add_cpu_time(4);
 
-  if (width == address_width_t::word) {
+  if (width == address_width::word) {
     switch (address) {
       case GPU_READ:
         return data();
@@ -225,13 +225,13 @@ uint32_t core_t::io_read(address_width_t width, uint32_t address) {
     }
   }
 
-  return addressable_t::io_read(width, address);
+  return addressable::io_read(width, address);
 }
 
-void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+void core::io_write(address_width width, uint32_t address, uint32_t data) {
   timing::add_cpu_time(4);
 
-  if (width == address_width_t::word) {
+  if (width == address_width::word) {
     switch (address) {
       case GPU_GP0:
         return gp0(data);
@@ -241,12 +241,12 @@ void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
     }
   }
 
-  return addressable_t::io_write(width, address, data);
+  return addressable::io_write(width, address, data);
 }
 
 // common functionality
 
-texture_color_t core_t::get_texture_color__4bpp(const tev_t &tev, const texture_coord_t &coord) {
+texture_color core::get_texture_color__4bpp(const texture_params &tev, const texture_coord &coord) {
   uint16_t texel = vram_read(
     tev.texture_page_x + (coord.u / 4),
     tev.texture_page_y + coord.v);
@@ -260,7 +260,7 @@ texture_color_t core_t::get_texture_color__4bpp(const tev_t &tev, const texture_
   return { pixel };
 }
 
-texture_color_t core_t::get_texture_color__8bpp(const tev_t &tev, const texture_coord_t &coord) {
+texture_color core::get_texture_color__8bpp(const texture_params &tev, const texture_coord &coord) {
   uint16_t texel = vram_read(
     tev.texture_page_x + (coord.u / 2),
     tev.texture_page_y + coord.v);
@@ -274,7 +274,7 @@ texture_color_t core_t::get_texture_color__8bpp(const tev_t &tev, const texture_
   return { pixel };
 }
 
-texture_color_t core_t::get_texture_color_15bpp(const tev_t &tev, const texture_coord_t &coord) {
+texture_color core::get_texture_color_15bpp(const texture_params &tev, const texture_coord &coord) {
   uint16_t pixel = vram_read(
     tev.texture_page_x + coord.u,
     tev.texture_page_y + coord.v);
@@ -282,7 +282,7 @@ texture_color_t core_t::get_texture_color_15bpp(const tev_t &tev, const texture_
   return { pixel };
 }
 
-texture_color_t core_t::get_texture_color(const tev_t &tev, const texture_coord_t &coord) {
+texture_color core::get_texture_color(const texture_params &tev, const texture_coord &coord) {
   switch (tev.texture_colors) {
   case  0: return get_texture_color__4bpp(tev, coord);
   case  1: return get_texture_color__8bpp(tev, coord);

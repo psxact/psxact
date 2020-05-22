@@ -5,7 +5,7 @@
 
 namespace psx::cpu {
 
-  class register_file_t {
+  class register_file {
     uint32_t registers[32];
 
   public:

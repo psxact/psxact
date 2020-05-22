@@ -2,13 +2,13 @@
 
 using namespace psx::spu;
 
-const int16_t gauss_t::table[256][4] = {
+const int16_t gauss::table[256][4] = {
   #define ENTRY(a, b, c, d) { a, b, c, d },
   #include "spu/gauss.inc"
   #undef ENTRY
 };
 
-int32_t gauss_t::filter(int index, int16_t a, int16_t b, int16_t c, int16_t d) {
+int32_t gauss::filter(int index, int16_t a, int16_t b, int16_t c, int16_t d) {
   auto coeffs = table[index];
   auto result = 0;
 

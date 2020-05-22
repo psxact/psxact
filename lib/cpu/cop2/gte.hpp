@@ -3,25 +3,25 @@
 
 #include <algorithm>
 #include <cstdint>
-#include "cpu/cop.hpp"
+#include "cpu/coprocessor.hpp"
 
 namespace psx::cpu::cop2 {
 
-  enum class matrix_t {
+  enum class matrix {
     rot = 0,
     llm = 1,
     lcm = 2,
     nil = 3
   };
 
-  enum class vector_t {
+  enum class vector {
     tr = 0,
     bk = 1,
     fc = 2,
     zr = 3
   };
 
-  union color_t {
+  union color {
     struct {
       uint8_t r;
       uint8_t g;
@@ -32,7 +32,7 @@ namespace psx::cpu::cop2 {
     uint32_t value = {};
   };
 
-  class gte_t : public cop_t {
+  class gte : public coprocessor {
     struct {
       int32_t matrix[4][3][3] = {};
       int32_t vector[4][3] = {};
@@ -48,13 +48,13 @@ namespace psx::cpu::cop2 {
 
     struct {
       int32_t vector[4][3] = {};
-      color_t rgbc = {};
+      color rgbc = {};
       int32_t otz = {};
       int32_t ir0 = {};
       int32_t sx[3] = {};
       int32_t sy[3] = {};
       int32_t sz[4] = {};
-      color_t rgb[3] = {};
+      color rgb[3] = {};
       int32_t res = {};
       int32_t mac[4] = {};
       int32_t lzcs = {};
@@ -76,8 +76,8 @@ namespace psx::cpu::cop2 {
     uint32_t divide();
 
   private:
-    matrix_t get_mx(uint32_t code);
-    vector_t get_cv(uint32_t code);
+    matrix get_mx(uint32_t code);
+    vector get_cv(uint32_t code);
 
     // -============-
     //  Instructions
@@ -91,9 +91,9 @@ namespace psx::cpu::cop2 {
     void transform_dq(int64_t div);
     void transform_xy(int64_t div);
 
-    int64_t transform(uint32_t code, matrix_t mx, vector_t cv, int32_t v);
-    int64_t transform_buggy(uint32_t code, matrix_t mx, vector_t cv, int32_t v);
-    int64_t transform_pt(uint32_t code, matrix_t mx, vector_t cv, int32_t v);
+    int64_t transform(uint32_t code, matrix mx, vector cv, int32_t v);
+    int64_t transform_buggy(uint32_t code, matrix mx, vector cv, int32_t v);
+    int64_t transform_pt(uint32_t code, matrix mx, vector cv, int32_t v);
 
     void op_avsz3();
     void op_avsz4();

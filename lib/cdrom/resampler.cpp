@@ -37,7 +37,7 @@ static const int16_t table[7][29] = {
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000 }
 };
 
-void resampler_t::interpolate(int phase) {
+void resampler::interpolate(int phase) {
   int sum = 0;
 
   for (int i = 0; i < 29; i++) {
@@ -47,7 +47,7 @@ void resampler_t::interpolate(int phase) {
   put_output(int_t<16>::clamp(sum));
 }
 
-void resampler_t::put_sample(int16_t val) {
+void resampler::put_sample(int16_t val) {
   buffer[offset & 31] = val;
   count6--;
 
@@ -67,7 +67,7 @@ void resampler_t::put_sample(int16_t val) {
   offset++;
 }
 
-int16_t resampler_t::get_output() {
+int16_t resampler::get_output() {
   if (output_read_index == output_write_index) {
     return 0;
   }
@@ -78,7 +78,7 @@ int16_t resampler_t::get_output() {
   return sample;
 }
 
-void resampler_t::put_output(int16_t val) {
+void resampler::put_output(int16_t val) {
   output[output_write_index & 0xfff] = val;
   output_write_index++;
 }

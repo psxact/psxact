@@ -2,28 +2,28 @@
 
 using namespace psx::util;
 
-async_t::async_t()
-  : type(async_type_t::exit)
+async::async()
+  : type(async_type::exit)
   , wait() {
 }
 
-async_t::async_t(int time, typename async_wait_t::K cont)
-  : type(async_type_t::wait)
+async::async(int time, typename async_wait::K cont)
+  : type(async_type::wait)
   , wait({ time, cont }) {
 }
 
-auto async_t::then(std::function<async_t()> f) -> async_t {
-  if (type == async_type_t::exit) {
+auto async::then(std::function<async()> f) -> async {
+  if (type == async_type::exit) {
     return f();
   }
 
-  return async_t(wait.time, [&]() {
+  return async(wait.time, [&]() {
     return wait.cont().then(f);
   });
 }
 
-auto async_t::tick(int time) -> async_t {
-  if (type == async_type_t::exit) {
+auto async::tick(int time) -> async {
+  if (type == async_type::exit) {
     return *this;
   }
 

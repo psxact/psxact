@@ -6,7 +6,7 @@
 using namespace psx::gpu;
 using namespace psx::util;
 
-static int32_t get_x_length(psx::util::fifo_t< uint32_t, 4 > &fifo) {
+static int32_t get_x_length(psx::util::fifo< uint32_t, 4 > &fifo) {
   switch ((fifo.at(0) >> 27) & 3) {
   case  1: return 1;
   case  2: return 8;
@@ -18,7 +18,7 @@ static int32_t get_x_length(psx::util::fifo_t< uint32_t, 4 > &fifo) {
   }
 }
 
-static int32_t get_y_length(psx::util::fifo_t< uint32_t, 4 > &fifo) {
+static int32_t get_y_length(psx::util::fifo< uint32_t, 4 > &fifo) {
   switch ((fifo.at(0) >> 27) & 3) {
   case  1: return 1;
   case  2: return 8;
@@ -30,8 +30,8 @@ static int32_t get_y_length(psx::util::fifo_t< uint32_t, 4 > &fifo) {
   }
 }
 
-void core_t::draw_color(gp0_command_t command, const color_t &shade, const point_t &point, const texture_coord_t &coord, const tev_t &tev) {
-  color_t color;
+void core::draw_color(gp0_command command, const color &shade, const point &point, const texture_coord &coord, const texture_params &tev) {
+  color color;
   bool blend;
 
   if (!command.is_texture_mapped()) {
@@ -54,7 +54,7 @@ void core_t::draw_color(gp0_command_t command, const color_t &shade, const point
   }
 
   if (blend) {
-    auto cur_color = color_t::from_uint16(vram_read(point.x, point.y));
+    auto cur_color = color::from_uint16(vram_read(point.x, point.y));
 
     switch (tev.color_mix_mode) {
       case 0:
@@ -86,8 +86,8 @@ void core_t::draw_color(gp0_command_t command, const color_t &shade, const point
   draw_point(point, color);
 }
 
-void core_t::draw_rectangle() {
-  tev_t tev;
+void core::draw_rectangle() {
+  texture_params tev;
   tev.palette_page_x = (fifo.at(2) >> 12) & 0x3f0;
   tev.palette_page_y = (fifo.at(2) >> 22) & 0x1ff;
   tev.texture_page_x = (status << 6) & 0x3c0;
@@ -95,9 +95,9 @@ void core_t::draw_rectangle() {
   tev.texture_colors = (status >> 7) & 3;
   tev.color_mix_mode = (status >> 5) & 3;
 
-  auto command = gp0_command_t(fifo.at(0));
-  auto shade = color_t::from_uint24(fifo.at(0));
-  auto coord = texture_coord_t::from_uint16(fifo.at(2));
+  auto command = gp0_command(fifo.at(0));
+  auto shade = color::from_uint24(fifo.at(0));
+  auto coord = texture_coord::from_uint16(fifo.at(2));
 
   int32_t xofs = x_offset + int_t<11>::trunc(fifo.at(1));
   int32_t yofs = y_offset + int_t<11>::trunc(fifo.at(1) >> 16);
@@ -107,11 +107,11 @@ void core_t::draw_rectangle() {
 
   for (int32_t y = 0; y < h; y++) {
     for (int32_t x = 0; x < w; x++) {
-      texture_coord_t this_coord;
+      texture_coord this_coord;
       this_coord.u = coord.u + x;
       this_coord.v = coord.v + y;
 
-      point_t point;
+      point point;
       point.x = xofs + x;
       point.y = yofs + y;
 

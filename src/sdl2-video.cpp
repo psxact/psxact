@@ -5,7 +5,7 @@ using namespace psx;
 static constexpr int window_width = 640;
 static constexpr int window_height = 480;
 
-sdl2_video_t::sdl2_video_t()
+sdl2_video::sdl2_video()
   : window()
   , renderer()
   , texture()
@@ -35,33 +35,33 @@ sdl2_video_t::sdl2_video_t()
     window_height);
 }
 
-sdl2_video_t::~sdl2_video_t() {
+sdl2_video::~sdl2_video() {
   SDL_DestroyWindow(window);
   SDL_DestroyRenderer(renderer);
   SDL_DestroyTexture(texture);
 }
 
-bool sdl2_video_t::render(psx::output_params_video_t &params) {
+bool sdl2_video::render(psx::output_params_video &params) {
   resize(params.width, params.height);
 
-  using pixel_type_t = uint32_t;
+  using pixel_type = uint32_t;
 
   void *dst_pixels = nullptr;
   int dst_pitch = 0;
   void *src_pixels = params.buffer;
-  int src_pitch = 640 * sizeof(pixel_type_t);
+  int src_pitch = 640 * sizeof(pixel_type);
 
   if (SDL_LockTexture(texture, nullptr, &dst_pixels, &dst_pitch) == 0) {
-    auto dst = reinterpret_cast<pixel_type_t *>(dst_pixels);
-    auto src = reinterpret_cast<pixel_type_t *>(src_pixels);
+    auto dst = reinterpret_cast<pixel_type *>(dst_pixels);
+    auto src = reinterpret_cast<pixel_type *>(src_pixels);
 
     for (int py = 0; py < params.height; py++) {
       for (int px = 0; px < params.width; px++) {
         dst[px] = src[px];
       }
 
-      src += src_pitch / sizeof(pixel_type_t);
-      dst += dst_pitch / sizeof(pixel_type_t);
+      src += src_pitch / sizeof(pixel_type);
+      dst += dst_pitch / sizeof(pixel_type);
     }
 
     SDL_UnlockTexture(texture);
@@ -72,7 +72,7 @@ bool sdl2_video_t::render(psx::output_params_video_t &params) {
   return handle_events();
 }
 
-bool sdl2_video_t::handle_events() {
+bool sdl2_video::handle_events() {
   SDL_Event event;
 
   bool alive = true;
@@ -92,7 +92,7 @@ bool sdl2_video_t::handle_events() {
   return alive;
 }
 
-void sdl2_video_t::resize(int w, int h) {
+void sdl2_video::resize(int w, int h) {
   if (texture_size_x == w && texture_size_y == h) {
     return;
   }

@@ -6,7 +6,7 @@
 namespace psx {
 
   /// Interface to implement for communication with a DMA channel.
-  struct dma_comms_t {
+  struct dma_comms {
     /// Returns the number of cycles needed for one access.
     virtual int dma_speed() = 0;
 

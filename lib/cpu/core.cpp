@@ -11,67 +11,67 @@ using namespace psx;
 using namespace psx::cpu;
 using namespace psx::util;
 
-core_t::opcode_t core_t::op_table[64] = {
-  nullptr,          &core_t::op_bxx,   &core_t::op_j,    &core_t::op_jal,
-  &core_t::op_beq,  &core_t::op_bne,   &core_t::op_blez, &core_t::op_bgtz,
-  &core_t::op_addi, &core_t::op_addiu, &core_t::op_slti, &core_t::op_sltiu,
-  &core_t::op_andi, &core_t::op_ori,   &core_t::op_xori, &core_t::op_lui,
-  &core_t::op_cop0, &core_t::op_cop1,  &core_t::op_cop2, &core_t::op_cop3,
-  &core_t::op_und,  &core_t::op_und,   &core_t::op_und,  &core_t::op_und,
-  &core_t::op_und,  &core_t::op_und,   &core_t::op_und,  &core_t::op_und,
-  &core_t::op_und,  &core_t::op_und,   &core_t::op_und,  &core_t::op_und,
-  &core_t::op_lb,   &core_t::op_lh,    &core_t::op_lwl,  &core_t::op_lw,
-  &core_t::op_lbu,  &core_t::op_lhu,   &core_t::op_lwr,  &core_t::op_und,
-  &core_t::op_sb,   &core_t::op_sh,    &core_t::op_swl,  &core_t::op_sw,
-  &core_t::op_und,  &core_t::op_und,   &core_t::op_swr,  &core_t::op_und,
-  &core_t::op_lwc0, &core_t::op_lwc1,  &core_t::op_lwc2, &core_t::op_lwc3,
-  &core_t::op_und,  &core_t::op_und,   &core_t::op_und,  &core_t::op_und,
-  &core_t::op_swc0, &core_t::op_swc1,  &core_t::op_swc2, &core_t::op_swc3,
-  &core_t::op_und,  &core_t::op_und,   &core_t::op_und,  &core_t::op_und
+core::opcode core::op_table[64] = {
+  nullptr,          &core::op_bxx,   &core::op_j,    &core::op_jal,
+  &core::op_beq,  &core::op_bne,   &core::op_blez, &core::op_bgtz,
+  &core::op_addi, &core::op_addiu, &core::op_slti, &core::op_sltiu,
+  &core::op_andi, &core::op_ori,   &core::op_xori, &core::op_lui,
+  &core::op_cop0, &core::op_cop1,  &core::op_cop2, &core::op_cop3,
+  &core::op_und,  &core::op_und,   &core::op_und,  &core::op_und,
+  &core::op_und,  &core::op_und,   &core::op_und,  &core::op_und,
+  &core::op_und,  &core::op_und,   &core::op_und,  &core::op_und,
+  &core::op_lb,   &core::op_lh,    &core::op_lwl,  &core::op_lw,
+  &core::op_lbu,  &core::op_lhu,   &core::op_lwr,  &core::op_und,
+  &core::op_sb,   &core::op_sh,    &core::op_swl,  &core::op_sw,
+  &core::op_und,  &core::op_und,   &core::op_swr,  &core::op_und,
+  &core::op_lwc0, &core::op_lwc1,  &core::op_lwc2, &core::op_lwc3,
+  &core::op_und,  &core::op_und,   &core::op_und,  &core::op_und,
+  &core::op_swc0, &core::op_swc1,  &core::op_swc2, &core::op_swc3,
+  &core::op_und,  &core::op_und,   &core::op_und,  &core::op_und
 };
 
-core_t::opcode_t core_t::op_table_special[64] = {
-  &core_t::op_sll,     &core_t::op_und,   &core_t::op_srl,  &core_t::op_sra,
-  &core_t::op_sllv,    &core_t::op_und,   &core_t::op_srlv, &core_t::op_srav,
-  &core_t::op_jr,      &core_t::op_jalr,  &core_t::op_und,  &core_t::op_und,
-  &core_t::op_syscall, &core_t::op_break, &core_t::op_und,  &core_t::op_und,
-  &core_t::op_mfhi,    &core_t::op_mthi,  &core_t::op_mflo, &core_t::op_mtlo,
-  &core_t::op_und,     &core_t::op_und,   &core_t::op_und,  &core_t::op_und,
-  &core_t::op_mult,    &core_t::op_multu, &core_t::op_div,  &core_t::op_divu,
-  &core_t::op_und,     &core_t::op_und,   &core_t::op_und,  &core_t::op_und,
-  &core_t::op_add,     &core_t::op_addu,  &core_t::op_sub,  &core_t::op_subu,
-  &core_t::op_and,     &core_t::op_or,    &core_t::op_xor,  &core_t::op_nor,
-  &core_t::op_und,     &core_t::op_und,   &core_t::op_slt,  &core_t::op_sltu,
-  &core_t::op_und,     &core_t::op_und,   &core_t::op_und,  &core_t::op_und,
-  &core_t::op_und,     &core_t::op_und,   &core_t::op_und,  &core_t::op_und,
-  &core_t::op_und,     &core_t::op_und,   &core_t::op_und,  &core_t::op_und,
-  &core_t::op_und,     &core_t::op_und,   &core_t::op_und,  &core_t::op_und,
-  &core_t::op_und,     &core_t::op_und,   &core_t::op_und,  &core_t::op_und
+core::opcode core::op_table_special[64] = {
+  &core::op_sll,     &core::op_und,   &core::op_srl,  &core::op_sra,
+  &core::op_sllv,    &core::op_und,   &core::op_srlv, &core::op_srav,
+  &core::op_jr,      &core::op_jalr,  &core::op_und,  &core::op_und,
+  &core::op_syscall, &core::op_break, &core::op_und,  &core::op_und,
+  &core::op_mfhi,    &core::op_mthi,  &core::op_mflo, &core::op_mtlo,
+  &core::op_und,     &core::op_und,   &core::op_und,  &core::op_und,
+  &core::op_mult,    &core::op_multu, &core::op_div,  &core::op_divu,
+  &core::op_und,     &core::op_und,   &core::op_und,  &core::op_und,
+  &core::op_add,     &core::op_addu,  &core::op_sub,  &core::op_subu,
+  &core::op_and,     &core::op_or,    &core::op_xor,  &core::op_nor,
+  &core::op_und,     &core::op_und,   &core::op_slt,  &core::op_sltu,
+  &core::op_und,     &core::op_und,   &core::op_und,  &core::op_und,
+  &core::op_und,     &core::op_und,   &core::op_und,  &core::op_und,
+  &core::op_und,     &core::op_und,   &core::op_und,  &core::op_und,
+  &core::op_und,     &core::op_und,   &core::op_und,  &core::op_und,
+  &core::op_und,     &core::op_und,   &core::op_und,  &core::op_und
 };
 
-core_t::core_t(addressable_t &memory)
-  : addressable_t("cpu", args::log_cpu)
+core::core(addressable &memory)
+  : addressable("cpu", args::log_cpu)
   , memory(memory)
   , dcache("dcache") {
   regs.pc = 0xbfc00000;
   regs.next_pc = regs.pc + 4;
 
-  cop[0] = new cop0::sys_t();
-  cop[2] = new cop2::gte_t();
+  cop[0] = new cop0::sys();
+  cop[2] = new cop2::gte();
 
   cop[0]->write_gpr(12, 0x00000000);
 }
 
-void core_t::interrupt(interrupt_type_t type) {
+void core::interrupt(interrupt_type type) {
   int istat = get_istat() | static_cast<int>(type);
   set_istat(istat);
 }
 
-cop_t *core_t::get_cop(int n) const {
+coprocessor *core::get_cop(int n) const {
   return cop[n];
 }
 
-bool core_t::get_cop_usable(int n) const {
+bool core::get_cop_usable(int n) const {
   if (get_cop(n) == nullptr) {
     return false;
   }
@@ -84,7 +84,7 @@ bool core_t::get_cop_usable(int n) const {
     : (stat & mask) != 0;
 }
 
-int core_t::tick() {
+int core::tick() {
   timing::reset_cpu_time();
 
   read_code();
@@ -100,7 +100,7 @@ int core_t::tick() {
   bool gte = (code & 0xfe000000) == 0x4a000000;
 
   if (iec && irq && !gte) {
-    enter_exception(cop0::exception_t::interrupt, 0);
+    enter_exception(cop0::exception::interrupt, 0);
   } else {
     uint32_t code = (get_code() >> 26) & 63;
     if (code) {
@@ -132,8 +132,8 @@ static inline uint32_t map_address(uint32_t address) {
   return address & segments[get_segment(address)];
 }
 
-void core_t::enter_exception(cop0::exception_t code, int cop) {
-  auto cop0 = (cop0::sys_t *) get_cop(0);
+void core::enter_exception(cop0::exception code, int cop) {
+  auto cop0 = (cop0::sys *) get_cop(0);
 
   cop0->push_flags();
   cop0->put_cause_excode(code);
@@ -160,9 +160,9 @@ void core_t::enter_exception(cop0::exception_t code, int cop) {
   }
 }
 
-void core_t::read_code() {
+void core::read_code() {
   if (regs.pc & 3) {
-    return enter_exception(cop0::exception_t::address_error_load, 0);
+    return enter_exception(cop0::exception::address_error_load, 0);
   }
 
   regs.this_pc = regs.pc;
@@ -171,99 +171,99 @@ void core_t::read_code() {
 
   // TODO: read i-cache
 
-  code = memory.io_read(address_width_t::word, map_address(regs.this_pc));
+  code = memory.io_read(address_width::word, map_address(regs.this_pc));
 }
 
-io_target_t core_t::get_target(uint32_t address) const {
+io_target core::get_target(uint32_t address) const {
   uint32_t cop0r12 = get_cop(0)->read_gpr(12);
   if (cop0r12 & cop0::ISC) {
     if (cop0r12 & cop0::SWC) {
       log("i-cache isolated access ~%08x", address);
-      return io_target_t::ICACHE;
+      return io_target::ICACHE;
     } else {
       log("d-cache isolated access ~%08x", address);
-      return io_target_t::DCACHE;
+      return io_target::DCACHE;
     }
   }
 
   if ((address & 0x7ffffc00) == 0x1f800000 && get_segment(address) < KSEG1) {
     log("d-cache memory access ~%08x", address);
-    return io_target_t::DCACHE;
+    return io_target::DCACHE;
   }
 
-  return io_target_t::MEMORY;
+  return io_target::MEMORY;
 }
 
-uint32_t core_t::read_data_byte(uint32_t address) {
+uint32_t core::read_data_byte(uint32_t address) {
   address = map_address(address);
 
   switch (get_target(address)) {
-    case io_target_t::ICACHE: return 0;
-    case io_target_t::DCACHE: return dcache.io_read(address_width_t::byte, address);
-    case io_target_t::MEMORY: return memory.io_read(address_width_t::byte, address);
+    case io_target::ICACHE: return 0;
+    case io_target::DCACHE: return dcache.io_read(address_width::byte, address);
+    case io_target::MEMORY: return memory.io_read(address_width::byte, address);
   }
 
   return 0;
 }
 
-uint32_t core_t::read_data_half(uint32_t address) {
+uint32_t core::read_data_half(uint32_t address) {
   address = map_address(address);
 
   switch (get_target(address)) {
-    case io_target_t::ICACHE: return 0;
-    case io_target_t::DCACHE: return dcache.io_read(address_width_t::half, address);
-    case io_target_t::MEMORY: return memory.io_read(address_width_t::half, address);
+    case io_target::ICACHE: return 0;
+    case io_target::DCACHE: return dcache.io_read(address_width::half, address);
+    case io_target::MEMORY: return memory.io_read(address_width::half, address);
   }
 
   return 0;
 }
 
-uint32_t core_t::read_data_word(uint32_t address) {
+uint32_t core::read_data_word(uint32_t address) {
   address = map_address(address);
 
   switch (get_target(address)) {
-    case io_target_t::ICACHE: return 0;
-    case io_target_t::DCACHE: return dcache.io_read(address_width_t::word, address);
-    case io_target_t::MEMORY: return memory.io_read(address_width_t::word, address);
+    case io_target::ICACHE: return 0;
+    case io_target::DCACHE: return dcache.io_read(address_width::word, address);
+    case io_target::MEMORY: return memory.io_read(address_width::word, address);
   }
 
   return 0;
 }
 
-void core_t::write_data_byte(uint32_t address, uint32_t data) {
+void core::write_data_byte(uint32_t address, uint32_t data) {
   address = map_address(address);
 
   switch (get_target(address)) {
-    case io_target_t::ICACHE: break;
-    case io_target_t::DCACHE: dcache.io_write(address_width_t::byte, address, data); break;
-    case io_target_t::MEMORY: memory.io_write(address_width_t::byte, address, data); break;
+    case io_target::ICACHE: break;
+    case io_target::DCACHE: dcache.io_write(address_width::byte, address, data); break;
+    case io_target::MEMORY: memory.io_write(address_width::byte, address, data); break;
   }
 }
 
-void core_t::write_data_half(uint32_t address, uint32_t data) {
+void core::write_data_half(uint32_t address, uint32_t data) {
   address = map_address(address);
 
   switch (get_target(address)) {
-    case io_target_t::ICACHE: break;
-    case io_target_t::DCACHE: dcache.io_write(address_width_t::half, address, data); break;
-    case io_target_t::MEMORY: memory.io_write(address_width_t::half, address, data); break;
+    case io_target::ICACHE: break;
+    case io_target::DCACHE: dcache.io_write(address_width::half, address, data); break;
+    case io_target::MEMORY: memory.io_write(address_width::half, address, data); break;
   }
 }
 
-void core_t::write_data_word(uint32_t address, uint32_t data) {
+void core::write_data_word(uint32_t address, uint32_t data) {
   address = map_address(address);
 
   switch (get_target(address)) {
-    case io_target_t::ICACHE: break;
-    case io_target_t::DCACHE: dcache.io_write(address_width_t::word, address, data); break;
-    case io_target_t::MEMORY: memory.io_write(address_width_t::word, address, data); break;
+    case io_target::ICACHE: break;
+    case io_target::DCACHE: dcache.io_write(address_width::word, address, data); break;
+    case io_target::MEMORY: memory.io_write(address_width::word, address, data); break;
   }
 }
 
-void core_t::update_irq(uint32_t stat, uint32_t mask) {
+void core::update_irq(uint32_t stat, uint32_t mask) {
   log("update irq: stat=0x%08x, mask=0x%08x", stat, mask);
 
-  auto cop0 = (cop0::sys_t *) get_cop(0);
+  auto cop0 = (cop0::sys *) get_cop(0);
 
   istat = stat;
   imask = mask;
@@ -275,26 +275,26 @@ void core_t::update_irq(uint32_t stat, uint32_t mask) {
   }
 }
 
-uint32_t core_t::get_imask() const {
+uint32_t core::get_imask() const {
   return imask;
 }
 
-void core_t::set_imask(uint32_t value) {
+void core::set_imask(uint32_t value) {
   update_irq(get_istat(), value);
 }
 
-uint32_t core_t::get_istat() const {
+uint32_t core::get_istat() const {
   return istat;
 }
 
-void core_t::set_istat(uint32_t value) {
+void core::set_istat(uint32_t value) {
   update_irq(value, get_imask());
 }
 
-uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+uint32_t core::io_read(address_width width, uint32_t address) {
   timing::add_cpu_time(4);
 
-  if (width == address_width_t::word || width == address_width_t::half) {
+  if (width == address_width::word || width == address_width::half) {
     switch (address) {
       case 0x1f801070:
         return get_istat();
@@ -304,13 +304,13 @@ uint32_t core_t::io_read(address_width_t width, uint32_t address) {
     }
   }
 
-  return addressable_t::io_read(width, address);
+  return addressable::io_read(width, address);
 }
 
-void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+void core::io_write(address_width width, uint32_t address, uint32_t data) {
   timing::add_cpu_time(4);
 
-  if (width == address_width_t::word || width == address_width_t::half) {
+  if (width == address_width::word || width == address_width::half) {
     switch (address) {
       case 0x1f801070:
         return set_istat(data & istat);
@@ -320,7 +320,7 @@ void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
     }
   }
 
-  return addressable_t::io_write(width, address, data);
+  return addressable::io_write(width, address, data);
 }
 
 // --========--
@@ -331,27 +331,27 @@ static inline uint32_t overflow(uint32_t x, uint32_t y, uint32_t z) {
   return (~(x ^ y) & (x ^ z) & 0x80000000);
 }
 
-uint32_t core_t::get_code() const {
+uint32_t core::get_code() const {
   return code;
 }
 
-uint32_t core_t::get_pc() const {
+uint32_t core::get_pc() const {
   return regs.pc;
 }
 
-uint32_t core_t::get_rt() const {
+uint32_t core::get_rt() const {
   return get_register(decode_rt());
 }
 
-uint32_t core_t::get_rt_forwarded() const {
+uint32_t core::get_rt_forwarded() const {
   return get_register_forwarded(decode_rt());
 }
 
-uint32_t core_t::get_rs() const {
+uint32_t core::get_rs() const {
   return get_register(decode_rs());
 }
 
-uint32_t core_t::get_register(uint32_t index) const {
+uint32_t core::get_register(uint32_t index) const {
   if (is_load_delay_slot && load_index == index) {
     return load_value;
   } else {
@@ -359,25 +359,25 @@ uint32_t core_t::get_register(uint32_t index) const {
   }
 }
 
-uint32_t core_t::get_register_forwarded(uint32_t index) const {
+uint32_t core::get_register_forwarded(uint32_t index) const {
   return rf.get(index);
 }
 
-void core_t::set_pc(uint32_t value) {
+void core::set_pc(uint32_t value) {
   regs.this_pc = value;
   regs.pc = value;
   regs.next_pc = value + sizeof(uint32_t);
 }
 
-void core_t::set_rd(uint32_t value) {
+void core::set_rd(uint32_t value) {
   rf.put(decode_rd(), value);
 }
 
-void core_t::set_rt(uint32_t value) {
+void core::set_rt(uint32_t value) {
   rf.put(decode_rt(), value);
 }
 
-void core_t::set_rt_load(uint32_t value) {
+void core::set_rt_load(uint32_t value) {
   uint32_t t = decode_rt();
 
   if (is_load_delay_slot && load_index == t) {
@@ -391,11 +391,11 @@ void core_t::set_rt_load(uint32_t value) {
   rf.put(t, value);
 }
 
-void core_t::set_register(uint32_t index, uint32_t value) {
+void core::set_register(uint32_t index, uint32_t value) {
   rf.put(index, value);
 }
 
-void core_t::branch(uint32_t target, bool condition) {
+void core::branch(uint32_t target, bool condition) {
   is_branch = true;
   is_branch_taken = condition;
   branch_target = target;
@@ -405,11 +405,11 @@ void core_t::branch(uint32_t target, bool condition) {
   }
 }
 
-uint32_t core_t::branch_abs() {
+uint32_t core::branch_abs() {
   return (regs.pc & 0xf0000000) | ((get_code() << 2) & 0x0ffffffc);
 }
 
-uint32_t core_t::branch_rel() {
+uint32_t core::branch_rel() {
   return regs.pc + (decode_iconst() << 2);
 }
 
@@ -417,67 +417,67 @@ uint32_t core_t::branch_rel() {
 //   Instructions
 // --============--
 
-void core_t::op_add() {
+void core::op_add() {
   uint32_t x = get_rs();
   uint32_t y = get_rt();
   uint32_t z = x + y;
 
   if (overflow(x, y, z)) {
-    return enter_exception(cop0::exception_t::overflow, 0);
+    return enter_exception(cop0::exception::overflow, 0);
   }
 
   set_rd(z);
 }
 
-void core_t::op_addi() {
+void core::op_addi() {
   uint32_t x = get_rs();
   uint32_t y = decode_iconst();
   uint32_t z = x + y;
 
   if (overflow(x, y, z)) {
-    return enter_exception(cop0::exception_t::overflow, 0);
+    return enter_exception(cop0::exception::overflow, 0);
   }
 
   set_rt(z);
 }
 
-void core_t::op_addiu() {
+void core::op_addiu() {
   set_rt(get_rs() + decode_iconst());
 }
 
-void core_t::op_addu() {
+void core::op_addu() {
   set_rd(get_rs() + get_rt());
 }
 
-void core_t::op_and() {
+void core::op_and() {
   set_rd(get_rs() & get_rt());
 }
 
-void core_t::op_andi() {
+void core::op_andi() {
   set_rt(get_rs() & decode_uconst());
 }
 
-void core_t::op_beq() {
+void core::op_beq() {
   branch(branch_rel(), get_rs() == get_rt());
 }
 
-void core_t::op_bgtz() {
+void core::op_bgtz() {
   branch(branch_rel(), int32_t(get_rs()) > 0);
 }
 
-void core_t::op_blez() {
+void core::op_blez() {
   branch(branch_rel(), int32_t(get_rs()) <= 0);
 }
 
-void core_t::op_bne() {
+void core::op_bne() {
   branch(branch_rel(), get_rs() != get_rt());
 }
 
-void core_t::op_break() {
-  enter_exception(cop0::exception_t::breakpoint, 0);
+void core::op_break() {
+  enter_exception(cop0::exception::breakpoint, 0);
 }
 
-void core_t::op_bxx() {
+void core::op_bxx() {
   // bgez rs,$nnnn
   // bgezal rs,$nnnn
   // bltz rs,$nnnn
@@ -493,9 +493,9 @@ void core_t::op_bxx() {
   branch(branch_rel(), condition);
 }
 
-void core_t::op_cop(int n) {
+void core::op_cop(int n) {
   if (get_cop_usable(n) == false) {
-    return enter_exception(cop0::exception_t::cop_unusable, n);
+    return enter_exception(cop0::exception::cop_unusable, n);
   }
 
   auto cop = get_cop(n);
@@ -517,23 +517,23 @@ void core_t::op_cop(int n) {
   log("op_cop%d(0x%08x)", n, get_code());
 }
 
-void core_t::op_cop0() {
+void core::op_cop0() {
   op_cop(0);
 }
 
-void core_t::op_cop1() {
+void core::op_cop1() {
   op_cop(1);
 }
 
-void core_t::op_cop2() {
+void core::op_cop2() {
   op_cop(2);
 }
 
-void core_t::op_cop3() {
+void core::op_cop3() {
   op_cop(3);
 }
 
-void core_t::op_div() {
+void core::op_div() {
   int32_t dividend = int32_t(get_rs());
   int32_t divisor = int32_t(get_rt());
 
@@ -552,7 +552,7 @@ void core_t::op_div() {
   }
 }
 
-void core_t::op_divu() {
+void core::op_divu() {
   uint32_t dividend = get_rs();
   uint32_t divisor = get_rt();
 
@@ -565,27 +565,27 @@ void core_t::op_divu() {
   }
 }
 
-void core_t::op_j() {
+void core::op_j() {
   branch(branch_abs(), true);
 }
 
-void core_t::op_jal() {
+void core::op_jal() {
   rf.put(31, regs.next_pc);
   branch(branch_abs(), true);
 }
 
-void core_t::op_jalr() {
+void core::op_jalr() {
   uint32_t ra = regs.next_pc;
   branch(get_rs(), true);
 
   set_rd(ra);
 }
 
-void core_t::op_jr() {
+void core::op_jr() {
   branch(get_rs(), true);
 }
 
-void core_t::op_lb() {
+void core::op_lb() {
   uint32_t address = get_rs() + decode_iconst();
   uint32_t data = read_data_byte(address);
   data = int_t<8>::trunc(data);
@@ -593,7 +593,7 @@ void core_t::op_lb() {
   set_rt_load(data);
 }
 
-void core_t::op_lbu() {
+void core::op_lbu() {
   uint32_t address = get_rs() + decode_iconst();
   uint32_t data = read_data_byte(address);
   data = uint_t<8>::trunc(data);
@@ -601,10 +601,10 @@ void core_t::op_lbu() {
   set_rt_load(data);
 }
 
-void core_t::op_lh() {
+void core::op_lh() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    return enter_exception(cop0::exception_t::address_error_load, 0);
+    return enter_exception(cop0::exception::address_error_load, 0);
   }
 
   uint32_t data = read_data_half(address);
@@ -613,10 +613,10 @@ void core_t::op_lh() {
   set_rt_load(data);
 }
 
-void core_t::op_lhu() {
+void core::op_lhu() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    return enter_exception(cop0::exception_t::address_error_load, 0);
+    return enter_exception(cop0::exception::address_error_load, 0);
   }
 
   uint32_t data = read_data_half(address);
@@ -625,14 +625,14 @@ void core_t::op_lhu() {
   set_rt_load(data);
 }
 
-void core_t::op_lui() {
+void core::op_lui() {
   set_rt(decode_uconst() << 16);
 }
 
-void core_t::op_lw() {
+void core::op_lw() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    return enter_exception(cop0::exception_t::address_error_load, 0);
+    return enter_exception(cop0::exception::address_error_load, 0);
   }
 
   uint32_t data = read_data_word(address);
@@ -640,36 +640,36 @@ void core_t::op_lw() {
   set_rt_load(data);
 }
 
-void core_t::op_lwc(int n) {
+void core::op_lwc(int n) {
   if (get_cop_usable(n) == false) {
-    return enter_exception(cop0::exception_t::cop_unusable, n);
+    return enter_exception(cop0::exception::cop_unusable, n);
   }
 
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    return enter_exception(cop0::exception_t::address_error_load, 0);
+    return enter_exception(cop0::exception::address_error_load, 0);
   }
 
   get_cop(n)->write_gpr(decode_rt(), read_data_word(address));
 }
 
-void core_t::op_lwc0() {
+void core::op_lwc0() {
   op_lwc(0);
 }
 
-void core_t::op_lwc1() {
+void core::op_lwc1() {
   op_lwc(1);
 }
 
-void core_t::op_lwc2() {
+void core::op_lwc2() {
   op_lwc(2);
 }
 
-void core_t::op_lwc3() {
+void core::op_lwc3() {
   op_lwc(3);
 }
 
-void core_t::op_lwl() {
+void core::op_lwl() {
   uint32_t address = get_rs() + decode_iconst();
   uint32_t data = read_data_word(address & ~3);
 
@@ -683,7 +683,7 @@ void core_t::op_lwl() {
   set_rt_load(data);
 }
 
-void core_t::op_lwr() {
+void core::op_lwr() {
   uint32_t address = get_rs() + decode_iconst();
   uint32_t data = read_data_word(address & ~3);
 
@@ -697,23 +697,23 @@ void core_t::op_lwr() {
   set_rt_load(data);
 }
 
-void core_t::op_mfhi() {
+void core::op_mfhi() {
   set_rd(regs.hi);
 }
 
-void core_t::op_mflo() {
+void core::op_mflo() {
   set_rd(regs.lo);
 }
 
-void core_t::op_mthi() {
+void core::op_mthi() {
   regs.hi = get_rs();
 }
 
-void core_t::op_mtlo() {
+void core::op_mtlo() {
   regs.lo = get_rs();
 }
 
-void core_t::op_mult() {
+void core::op_mult() {
   int32_t rs = int32_t(get_rs());
   int32_t rt = int32_t(get_rt());
 
@@ -722,7 +722,7 @@ void core_t::op_mult() {
   regs.hi = uint32_t(result >> 32);
 }
 
-void core_t::op_multu() {
+void core::op_multu() {
   uint32_t s = get_rs();
   uint32_t t = get_rt();
 
@@ -731,94 +731,94 @@ void core_t::op_multu() {
   regs.hi = uint32_t(result >> 32);
 }
 
-void core_t::op_nor() {
+void core::op_nor() {
   set_rd(~(get_rs() | get_rt()));
 }
 
-void core_t::op_or() {
+void core::op_or() {
   set_rd(get_rs() | get_rt());
 }
 
-void core_t::op_ori() {
+void core::op_ori() {
   set_rt(get_rs() | decode_uconst());
 }
 
-void core_t::op_sb() {
+void core::op_sb() {
   uint32_t address = get_rs() + decode_iconst();
   uint32_t data = get_rt();
 
   write_data_byte(address, data);
 }
 
-void core_t::op_sh() {
+void core::op_sh() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 1) {
-    return enter_exception(cop0::exception_t::address_error_store, 0);
+    return enter_exception(cop0::exception::address_error_store, 0);
   }
 
   write_data_half(address, get_rt());
 }
 
-void core_t::op_sll() {
+void core::op_sll() {
   set_rd(get_rt() << decode_sa());
 }
 
-void core_t::op_sllv() {
+void core::op_sllv() {
   set_rd(get_rt() << get_rs());
 }
 
-void core_t::op_slt() {
+void core::op_slt() {
   set_rd(int32_t(get_rs()) < int32_t(get_rt()) ? 1 : 0);
 }
 
-void core_t::op_slti() {
+void core::op_slti() {
   set_rt(int32_t(get_rs()) < int32_t(decode_iconst()) ? 1 : 0);
 }
 
-void core_t::op_sltiu() {
+void core::op_sltiu() {
   set_rt(get_rs() < decode_iconst() ? 1 : 0);
 }
 
-void core_t::op_sltu() {
+void core::op_sltu() {
   set_rd(get_rs() < get_rt() ? 1 : 0);
 }
 
-void core_t::op_sra() {
+void core::op_sra() {
   set_rd(int32_t(get_rt()) >> decode_sa());
 }
 
-void core_t::op_srav() {
+void core::op_srav() {
   set_rd(int32_t(get_rt()) >> get_rs());
 }
 
-void core_t::op_srl() {
+void core::op_srl() {
   set_rd(get_rt() >> decode_sa());
 }
 
-void core_t::op_srlv() {
+void core::op_srlv() {
   set_rd(get_rt() >> get_rs());
 }
 
-void core_t::op_sub() {
+void core::op_sub() {
   uint32_t x = get_rs();
   uint32_t y = get_rt();
   uint32_t z = x - y;
 
   if (overflow(x, ~y, z)) {
-    return enter_exception(cop0::exception_t::overflow, 0);
+    return enter_exception(cop0::exception::overflow, 0);
   }
 
   set_rd(z);
 }
 
-void core_t::op_subu() {
+void core::op_subu() {
   set_rd(get_rs() - get_rt());
 }
 
-void core_t::op_sw() {
+void core::op_sw() {
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    return enter_exception(cop0::exception_t::address_error_store, 0);
+    return enter_exception(cop0::exception::address_error_store, 0);
   }
 
   uint32_t data = get_rt();
@@ -826,36 +826,36 @@ void core_t::op_sw() {
   write_data_word(address, data);
 }
 
-void core_t::op_swc(int n) {
+void core::op_swc(int n) {
   if (get_cop_usable(n) == false) {
-    return enter_exception(cop0::exception_t::cop_unusable, n);
+    return enter_exception(cop0::exception::cop_unusable, n);
   }
 
   uint32_t address = get_rs() + decode_iconst();
   if (address & 3) {
-    return enter_exception(cop0::exception_t::address_error_store, 0);
+    return enter_exception(cop0::exception::address_error_store, 0);
   }
 
   write_data_word(address, get_cop(n)->read_gpr(decode_rt()));
 }
 
-void core_t::op_swc0() {
+void core::op_swc0() {
   op_swc(0);
 }
 
-void core_t::op_swc1() {
+void core::op_swc1() {
   op_swc(1);
 }
 
-void core_t::op_swc2() {
+void core::op_swc2() {
   op_swc(2);
 }
 
-void core_t::op_swc3() {
+void core::op_swc3() {
   op_swc(3);
 }
 
-void core_t::op_swl() {
+void core::op_swl() {
   uint32_t address = get_rs() + decode_iconst();
   uint32_t data = read_data_word(address & ~3);
 
@@ -869,7 +869,7 @@ void core_t::op_swl() {
   write_data_word(address & ~3, data);
 }
 
-void core_t::op_swr() {
+void core::op_swr() {
   uint32_t address = get_rs() + decode_iconst();
   uint32_t data = read_data_word(address & ~3);
 
@@ -883,18 +883,18 @@ void core_t::op_swr() {
   write_data_word(address & ~3, data);
 }
 
-void core_t::op_syscall() {
-  enter_exception(cop0::exception_t::syscall, 0);
+void core::op_syscall() {
+  enter_exception(cop0::exception::syscall, 0);
 }
 
-void core_t::op_xor() {
+void core::op_xor() {
   set_rd(get_rs() ^ get_rt());
 }
 
-void core_t::op_xori() {
+void core::op_xori() {
   set_rt(get_rs() ^ decode_uconst());
 }
 
-void core_t::op_und() {
-  enter_exception(cop0::exception_t::reserved_instruction, 0);
+void core::op_und() {
+  enter_exception(cop0::exception::reserved_instruction, 0);
 }

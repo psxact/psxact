@@ -6,14 +6,14 @@
 
 namespace psx::cdrom {
 
-  class cdrom_sector_filter_t {
+  class cdrom_sector_filter {
     uint8_t file {0};
     uint8_t channel {0};
 
   public:
     void put_file(uint8_t val);
     void put_channel(uint8_t val);
-    bool match(const cdrom_sector_t &sector) const;
+    bool match(const cdrom_sector &sector) const;
   };
 }
 

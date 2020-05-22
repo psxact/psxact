@@ -6,11 +6,11 @@
 using namespace psx;
 using namespace psx::gpu;
 
-static constexpr int gamma(int x) {
+static constexpr int gamma_function(int x) {
   return std::sqrt(256) * std::pow(x, 1.1 / 2.2);
 }
 
-#define DO_0(x) gamma(x)
+#define DO_0(x) gamma_function(x)
 #define DO_1(x) DO_0(x), DO_0(x + 1)
 #define DO_2(x) DO_1(x), DO_1(x + 2)
 #define DO_3(x) DO_2(x), DO_2(x + 4)
@@ -20,11 +20,11 @@ static constexpr int gamma(int x) {
 #define DO_7(x) DO_6(x), DO_6(x + 64)
 #define DO_8(x) DO_7(x), DO_7(x + 128)
 
-const int gamma_t::lut[256] = {
+static const int lut[256] = {
   DO_8(0)
 };
 
-void gamma_t::apply(color_t &color) {
+void gamma::apply(color &color) {
   if (args::gamma_correction) {
     color.r = lut[color.r];
     color.g = lut[color.g];

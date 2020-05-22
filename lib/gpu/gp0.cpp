@@ -28,7 +28,7 @@ static int command_size[256] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // $f0
 };
 
-void core_t::fill_rectangle() {
+void core::fill_rectangle() {
   assert(fifo.size() == 3);
 
   uint16_t color =
@@ -36,27 +36,27 @@ void core_t::fill_rectangle() {
     ((fifo.at(0) >> 6) & 0x03e0) |
     ((fifo.at(0) >> 9) & 0x7c00);
 
-  point_t point;
-  point.x = (fifo.at(1) + 0x0) & 0x3f0;
-  point.y = (fifo.at(1) >> 16) & 0x1ff;
+  point start;
+  start.x = (fifo.at(1) + 0x0) & 0x3f0;
+  start.y = (fifo.at(1) >> 16) & 0x1ff;
 
-  point_t count;
+  point count;
   count.x = (fifo.at(2) + 0xf) & 0x7f0;
   count.y = (fifo.at(2) >> 16) & 0x1ff;
 
   for (int y = 0; y < count.y; y++) {
     for (int x = 0; x < count.x; x++) {
       vram_write(
-        point.x + x,
-        point.y + y,
+        start.x + x,
+        start.y + y,
         color);
     }
   }
 }
 
-void core_t::copy_vram_to_vram() {}
+void core::copy_vram_to_vram() {}
 
-void core_t::copy_wram_to_vram() {
+void core::copy_wram_to_vram() {
   assert(fifo.size() == 3);
 
   auto &transfer = cpu_to_gpu_transfer;
@@ -70,7 +70,7 @@ void core_t::copy_wram_to_vram() {
   transfer.run.active = true;
 }
 
-void core_t::copy_vram_to_wram() {
+void core::copy_vram_to_wram() {
   assert(fifo.size() == 3);
 
   auto &transfer = gpu_to_cpu_transfer;
@@ -84,7 +84,7 @@ void core_t::copy_vram_to_wram() {
   transfer.run.active = true;
 }
 
-void core_t::gp0(uint32_t data) {
+void core::gp0(uint32_t data) {
   log("gp0(%08x)", data);
 
   if (cpu_to_gpu_transfer.run.active) {
@@ -106,7 +106,7 @@ void core_t::gp0(uint32_t data) {
   }
 }
 
-void core_t::run_command() {
+void core::run_command() {
   uint32_t command = fifo.at(0) >> 24;
 
   switch (command & 0xe0) {
@@ -140,7 +140,7 @@ void core_t::run_command() {
       return fill_rectangle();
 
     case 0x1F:
-      irq(wire_state_t::on);
+      irq(wire_state::on);
       status |= (1 << 24);
       return;
 

@@ -7,15 +7,15 @@
 
 namespace psx::util {
 
-  class blob_t {
+  class blob {
     uint8_t *buffer;
 
   public:
-    blob_t(int size) {
+    blob(int size) {
       buffer = new uint8_t[size];
     }
 
-    ~blob_t() {
+    ~blob() {
       delete [] buffer;
     }
 
@@ -49,17 +49,17 @@ namespace psx::util {
       write_half(address |  2, data >> 16);
     }
 
-    static blob_t *from_file(const char *filename) {
+    static blob *from_file(const char *filename) {
       if (FILE* file = fopen(filename, "rb+")) {
         fseek(file, 0, SEEK_END);
         int size = ftell(file);
         fseek(file, 0, SEEK_SET);
 
-        blob_t *blob = new blob_t(size);
+        blob *result = new blob(size);
 
-        fread(blob->buffer, sizeof(uint8_t), size, file);
+        fread(result->buffer, sizeof(uint8_t), size, file);
         fclose(file);
-        return blob;
+        return result;
       } else {
         printf("unable to load '%s'\n", filename);
         return nullptr;

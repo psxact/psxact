@@ -2,39 +2,39 @@
 #define CPU_CORE_HPP_
 
 #include <cstdio>
-#include "cpu/cop.hpp"
 #include "cpu/cop0/sys.hpp"
 #include "cpu/cop2/gte.hpp"
+#include "cpu/coprocessor.hpp"
 #include "cpu/register-file.hpp"
+#include "memory/memory-base.hpp"
 #include "addressable.hpp"
 #include "interruptible.hpp"
-#include "memory.hpp"
 
 namespace psx::cpu {
 
-  enum class io_target_t {
+  enum class io_target {
     MEMORY,
     ICACHE,
     DCACHE
   };
 
-  enum segment_t {
+  enum segment {
     KUSEG = 0,
     KSEG0 = 4,
     KSEG1 = 5,
     KSEG2 = 6
   };
 
-  class core_t final
-      : public addressable_t
-      , public interruptible_t {
-    addressable_t &memory;
+  class core final
+      : public addressable
+      , public interruptible {
+    addressable &memory;
 
-    cop_t *cop[4] = {};
+    coprocessor *cop[4] = {};
 
-    memory_t< kib(1) > dcache;
+    memory_base<kib(1)> dcache;
 
-    register_file_t rf = {};
+    register_file rf = {};
 
     struct {
       uint32_t lo = {};
@@ -59,32 +59,32 @@ namespace psx::cpu {
     uint32_t istat = {};
     uint32_t imask = {};
 
-    typedef void (core_t:: *opcode_t)();
+    typedef void (core:: *opcode)();
 
-    static opcode_t op_table[64];
+    static opcode op_table[64];
 
-    static opcode_t op_table_special[64];
+    static opcode op_table_special[64];
 
   public:
-    explicit core_t(addressable_t &memory);
+    explicit core(addressable &memory);
 
-    void interrupt(psx::interrupt_type_t type);
+    void interrupt(psx::interrupt_type type);
 
     uint32_t get_code() const;
 
-    cop_t *get_cop(int n) const;
+    coprocessor *get_cop(int n) const;
 
     bool get_cop_usable(int n) const;
 
     int tick();
 
-    void enter_exception(cop0::exception_t code, int cop);
+    void enter_exception(cop0::exception code, int cop);
 
     void update_irq(uint32_t stat, uint32_t mask);
 
     void read_code();
 
-    io_target_t get_target(uint32_t address) const;
+    io_target get_target(uint32_t address) const;
 
     uint32_t read_data_byte(uint32_t address);
     uint32_t read_data_half(uint32_t address);
@@ -100,8 +100,8 @@ namespace psx::cpu {
     uint32_t get_istat() const;
     void set_istat(uint32_t value);
 
-    uint32_t io_read(address_width_t width, uint32_t address) override;
-    void io_write(address_width_t width, uint32_t address, uint32_t data) override;
+    uint32_t io_read(address_width width, uint32_t address) override;
+    void io_write(address_width width, uint32_t address, uint32_t data) override;
 
     void branch(uint32_t target, bool condition);
     uint32_t branch_abs();

@@ -5,7 +5,7 @@ using namespace psx;
 constexpr int sample_rate = 44100;
 constexpr int sample_size = sample_rate / 60;
 
-sdl2_audio_t::sdl2_audio_t()
+sdl2_audio::sdl2_audio()
   : device_id()
   , want()
   , have() {
@@ -26,10 +26,10 @@ sdl2_audio_t::sdl2_audio_t()
   SDL_PauseAudioDevice(device_id, 0);
 }
 
-sdl2_audio_t::~sdl2_audio_t() {
+sdl2_audio::~sdl2_audio() {
   SDL_CloseAudioDevice(device_id);
 }
 
-bool sdl2_audio_t::render(psx::output_params_audio_t &params) {
+bool sdl2_audio::render(psx::output_params_audio &params) {
   return SDL_QueueAudio(device_id, params.buffer, params.buffer_len * sizeof(int16_t)) == 0;
 }

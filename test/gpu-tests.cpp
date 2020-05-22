@@ -7,69 +7,69 @@ using namespace psx::util;
 class GpuTest : public ::testing::Test {
 public:
   GpuTest()
-    : gpu(wire_t(), wire_t(), wire_t()) {
+    : gpu(wire(), wire(), wire()) {
   }
 
-  core_t gpu;
+  core gpu;
 };
 
 TEST_F(GpuTest, Gp1_08_DisplayMode) {
   // Test initial values
 
-  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution_t::h256);
-  EXPECT_EQ(gpu.get_v_resolution(), gpu_v_resolution_t::v240);
+  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution::h256);
+  EXPECT_EQ(gpu.get_v_resolution(), gpu_v_resolution::v240);
 
   // Test setting horizontal resolution, without the "Force 368" bit.
 
   gpu.gp1(0x08000000);
-  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution_t::h256);
+  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution::h256);
 
   gpu.gp1(0x08000001);
-  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution_t::h320);
+  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution::h320);
 
   gpu.gp1(0x08000002);
-  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution_t::h512);
+  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution::h512);
 
   gpu.gp1(0x08000003);
-  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution_t::h640);
+  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution::h640);
 
   // Test setting horizontal resolution, with the "Force 368" bit.
 
   gpu.gp1(0x08000040);
-  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution_t::h368);
+  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution::h368);
 
   gpu.gp1(0x08000041);
-  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution_t::h368);
+  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution::h368);
 
   gpu.gp1(0x08000042);
-  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution_t::h368);
+  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution::h368);
 
   gpu.gp1(0x08000043);
-  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution_t::h368);
+  EXPECT_EQ(gpu.get_h_resolution(), gpu_h_resolution::h368);
 
   // Test setting vertical resolution, without the "Interlace" bit.
 
   gpu.gp1(0x08000000);
-  EXPECT_EQ(gpu.get_v_resolution(), gpu_v_resolution_t::v240);
+  EXPECT_EQ(gpu.get_v_resolution(), gpu_v_resolution::v240);
 
   gpu.gp1(0x08000004);
-  EXPECT_EQ(gpu.get_v_resolution(), gpu_v_resolution_t::v240);
+  EXPECT_EQ(gpu.get_v_resolution(), gpu_v_resolution::v240);
 
   // Test setting vertical resolution, with the "Interlace" bit.
 
   gpu.gp1(0x08000020);
-  EXPECT_EQ(gpu.get_v_resolution(), gpu_v_resolution_t::v240);
+  EXPECT_EQ(gpu.get_v_resolution(), gpu_v_resolution::v240);
 
   gpu.gp1(0x08000024);
-  EXPECT_EQ(gpu.get_v_resolution(), gpu_v_resolution_t::v480);
+  EXPECT_EQ(gpu.get_v_resolution(), gpu_v_resolution::v480);
 
   // Test setting display depth.
 
   gpu.gp1(0x08000000);
-  EXPECT_EQ(gpu.get_display_depth(), gpu_display_depth_t::bpp15);
+  EXPECT_EQ(gpu.get_display_depth(), gpu_display_depth::bpp15);
 
   gpu.gp1(0x08000010);
-  EXPECT_EQ(gpu.get_display_depth(), gpu_display_depth_t::bpp24);
+  EXPECT_EQ(gpu.get_display_depth(), gpu_display_depth::bpp24);
 }
 
 TEST_F(GpuTest, StatusBits) {

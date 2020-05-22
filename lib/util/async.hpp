@@ -5,29 +5,29 @@
 
 namespace psx::util {
 
-  enum class async_type_t {
+  enum class async_type {
     exit,
     wait
   };
 
-  struct async_t;
+  struct async;
 
-  struct async_wait_t {
-    using K = std::function<async_t()>;
+  struct async_wait {
+    using K = std::function<async()>;
 
     int time;
     K cont;
   };
 
-  struct async_t {
-    async_type_t type;
-    async_wait_t wait;
+  struct async {
+    async_type type;
+    async_wait wait;
 
-    async_t();
-    async_t(int time, typename async_wait_t::K cont);
+    async();
+    async(int time, typename async_wait::K cont);
 
-    async_t then(std::function<async_t()> f);
-    async_t tick(int time);
+    async then(std::function<async()> f);
+    async tick(int time);
   };
 }
 

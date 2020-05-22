@@ -4,6 +4,6 @@
 
 using namespace psx::gpu;
 
-void core_t::draw_line() {
+void core::draw_line() {
   assert(0 && "Line drawing isn't implemented yet.");
 }

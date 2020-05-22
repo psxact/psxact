@@ -6,7 +6,7 @@
 using namespace psx::cpu::cop2;
 using namespace psx::util;
 
-void gte_t::set_flag(int32_t flag) {
+void gte::set_flag(int32_t flag) {
   ccr.flag |= 1 << flag;
 }
 
@@ -16,7 +16,7 @@ static inline int32_t get_lm(uint32_t code) {
     : int_t<16>::min;
 }
 
-int64_t gte_t::flag_a(int32_t n, int64_t value) {
+int64_t gte::flag_a(int32_t n, int64_t value) {
   const int64_t max = int_t<44>::max;
   const int64_t min = int_t<44>::min;
 
@@ -29,7 +29,7 @@ int64_t gte_t::flag_a(int32_t n, int64_t value) {
   return (value << 20) >> 20;
 }
 
-int32_t gte_t::flag_b(int32_t n, uint32_t code, int32_t value) {
+int32_t gte::flag_b(int32_t n, uint32_t code, int32_t value) {
   int32_t max = int_t<16>::max;
   int32_t min = get_lm(code);
 
@@ -46,7 +46,7 @@ int32_t gte_t::flag_b(int32_t n, uint32_t code, int32_t value) {
   return value;
 }
 
-int32_t gte_t::flag_b(int32_t n, uint32_t code, int32_t value, int32_t shifted) {
+int32_t gte::flag_b(int32_t n, uint32_t code, int32_t value, int32_t shifted) {
   const int32_t max = int_t<16>::max;
   const int32_t min = int_t<16>::min;
 
@@ -67,7 +67,7 @@ int32_t gte_t::flag_b(int32_t n, uint32_t code, int32_t value, int32_t shifted) 
   return value;
 }
 
-int32_t gte_t::flag_c(int32_t n, int32_t value) {
+int32_t gte::flag_c(int32_t n, int32_t value) {
   const int32_t max = uint_t<8>::max;
   const int32_t min = uint_t<8>::min;
 
@@ -84,7 +84,7 @@ int32_t gte_t::flag_c(int32_t n, int32_t value) {
   return value;
 }
 
-int32_t gte_t::flag_d(int32_t value) {
+int32_t gte::flag_d(int32_t value) {
   const int32_t max = uint_t<16>::max;
   const int32_t min = uint_t<16>::min;
 
@@ -101,12 +101,12 @@ int32_t gte_t::flag_d(int32_t value) {
   return value;
 }
 
-int32_t gte_t::flag_e() {
+int32_t gte::flag_e() {
   set_flag(E);
   return 0x1ffff;
 }
 
-int64_t gte_t::flag_f(int64_t value) {
+int64_t gte::flag_f(int64_t value) {
   const int32_t max = int_t<32>::max;
   const int32_t min = int_t<32>::min;
 
@@ -121,7 +121,7 @@ int64_t gte_t::flag_f(int64_t value) {
   return value;
 }
 
-int32_t gte_t::flag_g(int32_t n, int32_t value) {
+int32_t gte::flag_g(int32_t n, int32_t value) {
   const int32_t max = int_t<11>::max;
   const int32_t min = int_t<11>::min;
 
@@ -138,7 +138,7 @@ int32_t gte_t::flag_g(int32_t n, int32_t value) {
   return value;
 }
 
-int32_t gte_t::flag_h(int64_t value) {
+int32_t gte::flag_h(int64_t value) {
   const int32_t max = uint_t<12>::max + 1;  // TODO: why is this one different?
   const int32_t min = uint_t<12>::min;
 

@@ -1,16 +1,15 @@
 #ifndef SPU_CORE_HPP_
 #define SPU_CORE_HPP_
 
-#include "cdrom/xa-adpcm.hpp"
+#include "cdrom/xa-adpcm-decoder.hpp"
 #include "spu/voice.hpp"
 #include "addressable.hpp"
 #include "dma-comms.hpp"
 #include "sound-ram.hpp"
-#include "memory.hpp"
 
 namespace psx::spu {
 
-  enum class register_t {
+  enum class spu_register {
     kon_lo          = 0x1f801d88,
     kon_hi          = 0x1f801d8a,
     koff_lo         = 0x1f801d8c,
@@ -28,23 +27,23 @@ namespace psx::spu {
     cd_volume_right = 0x1f801db2
   };
 
-  class core_t final
-      : public addressable_t
-      , public dma_comms_t {
+  class core final
+      : public addressable
+      , public dma_comms {
     uint16_t registers[512];
 
-    cdrom::xa_adpcm_t &xa_adpcm;
+    cdrom::xa_adpcm_decoder &xa_adpcm;
     int16_t cd_volume_left;
     int16_t cd_volume_right;
 
-    sound_ram_t ram;
+    sound_ram ram;
     uint32_t ram_address;
     uint32_t ram_address_irq;
     uint16_t ram_transfer_control;
 
     uint32_t capture_address;
 
-    voice_t voices[24];
+    voice voices[24];
     uint32_t key_on;
     uint32_t key_off;
     uint32_t pmon;
@@ -56,8 +55,8 @@ namespace psx::spu {
     int sample_buffer_index;
 
   public:
-    core_t(cdrom::xa_adpcm_t &xa_adpcm);
-    ~core_t();
+    core(cdrom::xa_adpcm_decoder &xa_adpcm);
+    ~core();
 
     void tick(int amount);
     void step();
@@ -66,8 +65,8 @@ namespace psx::spu {
     uint32_t get_sample_buffer_index() const;
     void reset_sample();
 
-    uint16_t get_register(register_t reg);
-    void put_register(register_t reg, uint16_t value);
+    uint16_t get_register(spu_register reg);
+    void put_register(spu_register reg, uint16_t value);
     void put_status_register();
 
     int dma_speed() override;
@@ -76,8 +75,8 @@ namespace psx::spu {
     uint32_t dma_read() override;
     void dma_write(uint32_t val) override;
 
-    uint32_t io_read(address_width_t width, uint32_t address);
-    void io_write(address_width_t width, uint32_t address, uint32_t data);
+    uint32_t io_read(address_width width, uint32_t address);
+    void io_write(address_width width, uint32_t address, uint32_t data);
 
     // voice functions
 

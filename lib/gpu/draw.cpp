@@ -12,7 +12,7 @@ static const int dither_lut[4][4] = {
   {  3, -1,  2, -2 }
 };
 
-void core_t::draw_point(point_t point, color_t color) {
+void core::draw_point(point point, color color) {
   if (point.x < drawing_area_x1 ||
       point.x > drawing_area_x2 ||
       point.y < drawing_area_y1 ||

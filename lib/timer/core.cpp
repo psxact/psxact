@@ -30,56 +30,56 @@
 using namespace psx::timer;
 using namespace psx::util;
 
-core_t::core_t(wire_t irq0, wire_t irq1, wire_t irq2)
-  : addressable_t("timer", args::log_timer)
-  , timers({ timer_t(irq0), timer_t(irq1), timer_t(irq2) }) {
+core::core(wire irq0, wire irq1, wire irq2)
+  : addressable("timer", args::log_timer)
+  , timers { timer(irq0), timer(irq1), timer(irq2) } {
 }
 
-void core_t::tick(int system) {
+void core::tick(int system) {
   system_over_8_prescale += system;
   int system_over_8 = system_over_8_prescale / 8;
   system_over_8_prescale &= 7;
 
-  if (timer_source(0) == timer_source_t::system) {
+  if (timer_source(0) == timer_source::system) {
     timer_run(0, system);
   }
 
-  if (timer_source(1) == timer_source_t::system) {
+  if (timer_source(1) == timer_source::system) {
     timer_run(1, system);
   }
 
-  if (timer_source(2) == timer_source_t::system) {
+  if (timer_source(2) == timer_source::system) {
     timer_run(2, system);
-  } else if (timer_source(2) == timer_source_t::system_over_8) {
+  } else if (timer_source(2) == timer_source::system_over_8) {
     timer_run(2, system_over_8);
   }
 }
 
-void core_t::enter_hblank() {
+void core::enter_hblank() {
   in_hblank = true;
   timer_blanking_sync(0, in_hblank);
 
-  if (timer_source(1) == timer_source_t::hblank) {
+  if (timer_source(1) == timer_source::hblank) {
     timer_run(1, 1);
   }
 }
 
-void core_t::leave_hblank() {
+void core::leave_hblank() {
   in_hblank = false;
   timer_blanking_sync(0, in_hblank);
 }
 
-void core_t::enter_vblank() {
+void core::enter_vblank() {
   in_vblank = true;
   timer_blanking_sync(1, in_vblank);
 }
 
-void core_t::leave_vblank() {
+void core::leave_vblank() {
   in_vblank = false;
   timer_blanking_sync(1, in_vblank);
 }
 
-void core_t::timer_run(int n, int amount) {
+void core::timer_run(int n, int amount) {
   auto &timer = timers[n];
 
   if (!timer.running) {
@@ -108,7 +108,7 @@ void core_t::timer_run(int n, int amount) {
   timer.counter = counter;
 }
 
-void core_t::timer_irq(int n) {
+void core::timer_irq(int n) {
   bool repeat = (timers[n].control & (1 <<  6)) != 0;
   bool toggle = (timers[n].control & (1 <<  7)) != 0;
   auto bit_10 = (timers[n].control & (1 << 10)) != 0;
@@ -125,55 +125,55 @@ void core_t::timer_irq(int n) {
   }
 }
 
-void core_t::timer_irq_flag(int n, bool val) {
+void core::timer_irq_flag(int n, bool val) {
   if (val) {
-    timers[n].irq(wire_state_t::off);
+    timers[n].irq(wire_state::off);
     timers[n].control |= (1 << 10);
   } else {
-    timers[n].irq(wire_state_t::on);
+    timers[n].irq(wire_state::on);
     timers[n].control &= ~(1 << 10);
   }
 }
 
-timer_source_t core_t::timer_source(int n) {
+timer_source core::timer_get_source(int n) {
   switch (n) {
-    case 0: return (timers[0].control & (1 << 8)) ? timer_source_t::dotclock : timer_source_t::system;
-    case 1: return (timers[1].control & (1 << 8)) ? timer_source_t::hblank : timer_source_t::system;
-    case 2: return (timers[2].control & (1 << 9)) ? timer_source_t::system_over_8 : timer_source_t::system;
+    case 0: return (timers[0].control & (1 << 8)) ? timer_source::dotclock : timer_source::system;
+    case 1: return (timers[1].control & (1 << 8)) ? timer_source::hblank : timer_source::system;
+    case 2: return (timers[2].control & (1 << 9)) ? timer_source::system_over_8 : timer_source::system;
   }
 
   assert(0 && "Invalid value for parameter `n'");
 }
 
-timer_sync_mode_t core_t::timer_sync_mode(int n) {
+timer_sync_mode core::timer_get_sync_mode(int n) {
   if (timers[n].control & 1) {
     switch ((timers[n].control >> 1) & 3) {
-      case  0: return timer_sync_mode_t::sync_mode_0;
-      case  1: return timer_sync_mode_t::sync_mode_1;
-      case  2: return timer_sync_mode_t::sync_mode_2;
-      default: return timer_sync_mode_t::sync_mode_3;
+      case  0: return timer_sync_mode::sync_mode_0;
+      case  1: return timer_sync_mode::sync_mode_1;
+      case  2: return timer_sync_mode::sync_mode_2;
+      default: return timer_sync_mode::sync_mode_3;
     }
   } else {
-    return timer_sync_mode_t::none;
+    return timer_sync_mode::none;
   }
 }
 
-void core_t::timer_blanking_sync(int n, bool active) {
+void core::timer_blanking_sync(int n, bool active) {
   switch (timer_sync_mode(n)) {
-    case timer_sync_mode_t::none:
+    case timer_sync_mode::none:
       break;
 
-    case timer_sync_mode_t::sync_mode_0: // 0 = Pause counter during blank(s)
+    case timer_sync_mode::sync_mode_0: // 0 = Pause counter during blank(s)
       timers[n].running = !active;
       break;
 
-    case timer_sync_mode_t::sync_mode_1: // 1 = Reset counter to 0000h at blank(s)
+    case timer_sync_mode::sync_mode_1: // 1 = Reset counter to 0000h at blank(s)
       if (active) {
         timers[n].counter = 0;
       }
       break;
 
-    case timer_sync_mode_t::sync_mode_2: // 2 = Reset counter to 0000h at blank(s) and pause outside of blank
+    case timer_sync_mode::sync_mode_2: // 2 = Reset counter to 0000h at blank(s) and pause outside of blank
       timers[n].running = active;
 
       if (active) {
@@ -181,7 +181,7 @@ void core_t::timer_blanking_sync(int n, bool active) {
       }
       break;
 
-    case timer_sync_mode_t::sync_mode_3: // 3 = Pause until blank occurs once, then switch to Free Run
+    case timer_sync_mode::sync_mode_3: // 3 = Pause until blank occurs once, then switch to Free Run
       if (active) {
         timers[n].running = true;
       }
@@ -189,11 +189,11 @@ void core_t::timer_blanking_sync(int n, bool active) {
   }
 }
 
-uint16_t core_t::timer_get_counter(int n) {
+uint16_t core::timer_get_counter(int n) {
   return timers[n].counter;
 }
 
-uint16_t core_t::timer_get_control(int n) {
+uint16_t core::timer_get_control(int n) {
   uint16_t control = timers[n].control;
 
   timers[n].control &= ~(1 << 11); // Reset after reading
@@ -202,15 +202,15 @@ uint16_t core_t::timer_get_control(int n) {
   return control;
 }
 
-uint16_t core_t::timer_get_counter_target(int n) {
+uint16_t core::timer_get_counter_target(int n) {
   return timers[n].counter_target;
 }
 
-void core_t::timer_put_counter(int n, uint16_t val) {
+void core::timer_put_counter(int n, uint16_t val) {
   timers[n].counter = val;
 }
 
-void core_t::timer_put_control(int n, uint16_t val) {
+void core::timer_put_control(int n, uint16_t val) {
   timers[n].counter  = 0;
   timers[n].running  = true;
   timers[n].control &= 0x1800;
@@ -245,14 +245,14 @@ void core_t::timer_put_control(int n, uint16_t val) {
   }
 }
 
-void core_t::timer_put_counter_target(int n, uint16_t val) {
+void core::timer_put_counter_target(int n, uint16_t val) {
   timers[n].counter_target = val;
 }
 
-uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+uint32_t core::io_read(address_width width, uint32_t address) {
   timing::add_cpu_time(4);
 
-  if (width == address_width_t::word || width == address_width_t::half) {
+  if (width == address_width::word || width == address_width::half) {
     int n = (address >> 4) & 3;
 
     switch (address & 0x1F80110F) {
@@ -262,13 +262,13 @@ uint32_t core_t::io_read(address_width_t width, uint32_t address) {
     }
   }
 
-  return addressable_t::io_read(width, address);
+  return addressable::io_read(width, address);
 }
 
-void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+void core::io_write(address_width width, uint32_t address, uint32_t data) {
   timing::add_cpu_time(4);
 
-  if (width == address_width_t::word || width == address_width_t::half) {
+  if (width == address_width::word || width == address_width::half) {
     int n = (address >> 4) & 3;
 
     switch (address & 0x1F80110F) {
@@ -278,5 +278,5 @@ void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
     }
   }
 
-  return addressable_t::io_write(width, address, data);
+  return addressable::io_write(width, address, data);
 }

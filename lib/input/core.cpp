@@ -6,23 +6,23 @@
 
 using namespace psx::input;
 
-core_t::core_t(interruptible_t &irq)
-  : addressable_t("input", args::log_input)
+core::core(interruptible &irq)
+  : addressable("input", args::log_input)
   , irq(irq) {
-  port.memcard[0] = &device_t::not_connected;
-  port.control[0] = new devices::digital_pad_t();
-  port.memcard[1] = &device_t::not_connected;
-  port.control[1] = &device_t::not_connected;
+  port.memcard[0] = &device::not_connected;
+  port.control[0] = new devices::digital_pad();
+  port.memcard[1] = &device::not_connected;
+  port.control[1] = &device::not_connected;
 }
 
-void core_t::latch(const host_device_t &device1, const host_device_t &device2) {
+void core::latch(const host_device &device1, const host_device &device2) {
   port.memcard[0]->latch(device1);
   port.memcard[1]->latch(device2);
   port.control[0]->latch(device1);
   port.control[1]->latch(device2);
 }
 
-void core_t::tick(int amount) {
+void core::tick(int amount) {
   baud.counter -= amount;
 
   while (baud.counter <= 0) {
@@ -54,20 +54,20 @@ void core_t::tick(int amount) {
     }
   }
 
-  dsr.level = port.control[0]->tick(amount, device_dsr_t::high);
+  dsr.level = port.control[0]->tick(amount, device_dsr::high);
   dsr.level = port.memcard[0]->tick(amount, dsr.level);
   dsr.level = port.control[1]->tick(amount, dsr.level);
   dsr.level = port.memcard[1]->tick(amount, dsr.level);
 
-  if (dsr.level == device_dsr_t::low) {
+  if (dsr.level == device_dsr::low) {
     send_interrupt();
   }
 }
 
-uint32_t core_t::io_read(address_width_t width, uint32_t address) {
+uint32_t core::io_read(address_width width, uint32_t address) {
   timing::add_cpu_time(4);
 
-  if (width == address_width_t::byte && address == 0x1f801040) {
+  if (width == address_width::byte && address == 0x1f801040) {
     uint8_t data = rx.fifo.is_empty() ? 0xff : rx.fifo.read();
 
     log("1040: rx '%02x'", data);
@@ -75,7 +75,7 @@ uint32_t core_t::io_read(address_width_t width, uint32_t address) {
     return data;
   }
 
-  if (width == address_width_t::word || width == address_width_t::half) {
+  if (width == address_width::word || width == address_width::half) {
     switch (address) {
       case 0x1f801044: {
         uint16_t data =
@@ -113,13 +113,13 @@ uint32_t core_t::io_read(address_width_t width, uint32_t address) {
     }
   }
 
-  return addressable_t::io_read(width, address);
+  return addressable::io_read(width, address);
 }
 
-void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
+void core::io_write(address_width width, uint32_t address, uint32_t data) {
   timing::add_cpu_time(4);
 
-  if (width == address_width_t::byte && address == 0x1f801040) {
+  if (width == address_width::byte && address == 0x1f801040) {
     tx.buffer = data & 0xff;
     tx.pending = true;
 
@@ -127,7 +127,7 @@ void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
     return;
   }
 
-  if (width == address_width_t::word || width == address_width_t::half) {
+  if (width == address_width::word || width == address_width::half) {
     switch (address) {
       case 0x1f801048:
         // 1F801048h JOY_MODE (R/W) (usually 000Dh, ie. 8bit, no parity, MUL1)
@@ -179,10 +179,10 @@ void core_t::io_write(address_width_t width, uint32_t address, uint32_t data) {
     }
   }
 
-  return addressable_t::io_write(width, address, data);
+  return addressable::io_write(width, address, data);
 }
 
-void core_t::write_rx(uint8_t data) {
+void core::write_rx(uint8_t data) {
   rx.fifo.write(data);
 
   if (rx.interrupt_enable) {
@@ -190,11 +190,11 @@ void core_t::write_rx(uint8_t data) {
   }
 }
 
-void core_t::send_interrupt() {
+void core::send_interrupt() {
   if (interrupt == 0) {
     log("sending interrupt");
 
     interrupt = 1;
-    irq.interrupt(interrupt_type_t::input);
+    irq.interrupt(interrupt_type::input);
   }
 }

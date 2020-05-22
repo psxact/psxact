@@ -5,7 +5,7 @@
 
 namespace psx::cdrom {
 
-  class resampler_t {
+  class resampler {
     int16_t buffer[32] {};
     int32_t offset {0};
     int32_t count6 {6};
@@ -17,7 +17,7 @@ namespace psx::cdrom {
     void interpolate(int phase);
 
   public:
-    resampler_t() : count6(6) {}
+    resampler() : count6(6) {}
 
     int16_t get_output();
     void put_output(int16_t val);

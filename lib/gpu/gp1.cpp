@@ -5,7 +5,7 @@
 using namespace psx::gpu;
 using namespace psx::util;
 
-void core_t::gp1(uint32_t data) {
+void core::gp1(uint32_t data) {
   log("gp1(%08x)", data);
 
   switch ((data >> 24) & 0x3f) {
@@ -21,7 +21,7 @@ void core_t::gp1(uint32_t data) {
       break;
 
     case 0x02:
-      irq(wire_state_t::off);
+      irq(wire_state::off);
       status &= ~(1 << 24);
       break;
 
@@ -52,26 +52,26 @@ void core_t::gp1(uint32_t data) {
 
     case 0x08: {
       if (data & (1 << 6)) {
-        h_resolution = gpu_h_resolution_t::h368;
+        h_resolution = gpu_h_resolution::h368;
       } else {
         switch (data & (3 << 0)) {
-          case 0: h_resolution = gpu_h_resolution_t::h256; break;
-          case 1: h_resolution = gpu_h_resolution_t::h320; break;
-          case 2: h_resolution = gpu_h_resolution_t::h512; break;
-          case 3: h_resolution = gpu_h_resolution_t::h640; break;
+          case 0: h_resolution = gpu_h_resolution::h256; break;
+          case 1: h_resolution = gpu_h_resolution::h320; break;
+          case 2: h_resolution = gpu_h_resolution::h512; break;
+          case 3: h_resolution = gpu_h_resolution::h640; break;
         }
       }
 
       if ((data & (1 << 2)) && (data & (1 << 5))) {
-        v_resolution = gpu_v_resolution_t::v480;
+        v_resolution = gpu_v_resolution::v480;
       } else {
-        v_resolution = gpu_v_resolution_t::v240;
+        v_resolution = gpu_v_resolution::v240;
       }
 
       if (data & (1 << 4)) {
-        display_depth = gpu_display_depth_t::bpp24;
+        display_depth = gpu_display_depth::bpp24;
       } else {
-        display_depth = gpu_display_depth_t::bpp15;
+        display_depth = gpu_display_depth::bpp15;
       }
 
       status &= ~0x7f4000;
