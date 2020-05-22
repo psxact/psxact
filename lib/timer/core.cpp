@@ -1,6 +1,7 @@
 #include "timer/core.hpp"
 
 #include <cassert>
+#include <cstdio>
 #include "args.hpp"
 #include "timing.hpp"
 
@@ -40,17 +41,17 @@ void core::tick(int system) {
   int system_over_8 = system_over_8_prescale / 8;
   system_over_8_prescale &= 7;
 
-  if (timer_source(0) == timer_source::system) {
+  if (timer_get_source(0) == timer_source::system) {
     timer_run(0, system);
   }
 
-  if (timer_source(1) == timer_source::system) {
+  if (timer_get_source(1) == timer_source::system) {
     timer_run(1, system);
   }
 
-  if (timer_source(2) == timer_source::system) {
+  if (timer_get_source(2) == timer_source::system) {
     timer_run(2, system);
-  } else if (timer_source(2) == timer_source::system_over_8) {
+  } else if (timer_get_source(2) == timer_source::system_over_8) {
     timer_run(2, system_over_8);
   }
 }
@@ -82,7 +83,7 @@ void core::leave_vblank() {
 void core::timer_run(int n, int amount) {
   auto &timer = timers[n];
 
-  if (!timer.running) {
+  if (!timer.running || amount == 0) {
     return;
   }
 
@@ -105,7 +106,7 @@ void core::timer_run(int n, int amount) {
     timer.control |= (1 << 12);
   }
 
-  timer.counter = counter;
+  timer.counter = uint16_t(counter);
 }
 
 void core::timer_irq(int n) {
@@ -143,19 +144,6 @@ timer_source core::timer_get_source(int n) {
   }
 
   assert(0 && "Invalid value for parameter `n'");
-}
-
-timer_sync_mode core::timer_get_sync_mode(int n) {
-  if (timers[n].control & 1) {
-    switch ((timers[n].control >> 1) & 3) {
-      case  0: return timer_sync_mode::sync_mode_0;
-      case  1: return timer_sync_mode::sync_mode_1;
-      case  2: return timer_sync_mode::sync_mode_2;
-      default: return timer_sync_mode::sync_mode_3;
-    }
-  } else {
-    return timer_sync_mode::none;
-  }
 }
 
 void core::timer_blanking_sync(int n, bool active) {
@@ -255,10 +243,10 @@ uint32_t core::io_read(address_width width, uint32_t address) {
   if (width == address_width::word || width == address_width::half) {
     int n = (address >> 4) & 3;
 
-    switch (address & 0x1F80110F) {
-      case 0x1F801100: return timer_get_counter(n);
-      case 0x1F801104: return timer_get_control(n);
-      case 0x1F801108: return timer_get_counter_target(n);
+    switch (address & 15) {
+      case 0: return timer_get_counter(n);
+      case 4: return timer_get_control(n);
+      case 8: return timer_get_counter_target(n);
     }
   }
 
@@ -271,10 +259,10 @@ void core::io_write(address_width width, uint32_t address, uint32_t data) {
   if (width == address_width::word || width == address_width::half) {
     int n = (address >> 4) & 3;
 
-    switch (address & 0x1F80110F) {
-      case 0x1F801100: return timer_put_counter(n, data);
-      case 0x1F801104: return timer_put_control(n, data);
-      case 0x1F801108: return timer_put_counter_target(n, data);
+    switch (address & 15) {
+      case 0: return timer_put_counter(n, data);
+      case 4: return timer_put_control(n, data);
+      case 8: return timer_put_counter_target(n, data);
     }
   }
 

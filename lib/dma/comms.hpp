@@ -3,10 +3,10 @@
 
 #include <cstdint>
 
-namespace psx {
+namespace psx::dma {
 
   /// Interface to implement for communication with a DMA channel.
-  struct dma_comms {
+  struct comms {
     /// Returns the number of cycles needed for one access.
     virtual int dma_speed() = 0;
 

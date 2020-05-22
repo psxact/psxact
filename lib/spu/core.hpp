@@ -2,9 +2,9 @@
 #define SPU_CORE_HPP_
 
 #include "cdrom/xa-adpcm-decoder.hpp"
+#include "dma/comms.hpp"
 #include "spu/voice.hpp"
 #include "addressable.hpp"
-#include "dma-comms.hpp"
 #include "sound-ram.hpp"
 
 namespace psx::spu {
@@ -29,7 +29,7 @@ namespace psx::spu {
 
   class core final
       : public addressable
-      , public dma_comms {
+      , public dma::comms {
     uint16_t registers[512];
 
     cdrom::xa_adpcm_decoder &xa_adpcm;

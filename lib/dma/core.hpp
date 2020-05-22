@@ -1,9 +1,9 @@
 #ifndef DMA_CORE_HPP_
 #define DMA_CORE_HPP_
 
+#include "dma/comms.hpp"
 #include "util/wire.hpp"
 #include "addressable.hpp"
-#include "dma-comms.hpp"
 
 namespace psx::dma {
 
@@ -11,7 +11,7 @@ namespace psx::dma {
     uint32_t address;
     uint32_t counter;
     uint32_t control;
-    dma_comms *comms;
+    dma::comms *comms;
   };
 
   class core final : public addressable {
@@ -36,7 +36,7 @@ namespace psx::dma {
   public:
     core(util::wire irq, addressable &memory);
 
-    void attach(int n, dma_comms *comms);
+    void attach(int n, dma::comms *comms);
 
     int tick();
     int tick_channel(int n);

@@ -1,12 +1,12 @@
 #ifndef GPU_CORE_HPP_
 #define GPU_CORE_HPP_
 
+#include "dma/comms.hpp"
 #include "gpu/types.hpp"
 #include "memory/memory-base.hpp"
 #include "util/fifo.hpp"
 #include "util/wire.hpp"
 #include "addressable.hpp"
-#include "dma-comms.hpp"
 
 namespace psx::gpu {
 
@@ -40,7 +40,7 @@ namespace psx::gpu {
 
   class core final
       : public addressable
-      , public dma_comms {
+      , public dma::comms {
 
     /// Used to send IRQ(1) signals to the CPU.
     util::wire irq;

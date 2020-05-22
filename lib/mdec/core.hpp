@@ -1,15 +1,15 @@
 #ifndef MDEC_CORE_HPP_
 #define MDEC_CORE_HPP_
 
+#include "dma/comms.hpp"
 #include "util/fifo.hpp"
 #include "addressable.hpp"
-#include "dma-comms.hpp"
 
 namespace psx::mdec {
 
   class core final
       : public addressable
-      , public dma_comms {
+      , public dma::comms {
   private:
     uint32_t status;
     bool dma_0_enabled;

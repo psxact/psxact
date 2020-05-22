@@ -35,7 +35,7 @@ core::core(wire irq, addressable &memory)
   , memory(memory) {
 }
 
-void core::attach(int n, dma_comms *comms) {
+void core::attach(int n, dma::comms *comms) {
   channels[n].comms = comms;
 }
 

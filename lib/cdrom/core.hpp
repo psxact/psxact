@@ -7,10 +7,10 @@
 #include "cdrom/cdrom-sector.hpp"
 #include "cdrom/cdrom-sector-filter.hpp"
 #include "cdrom/xa-adpcm-decoder.hpp"
+#include "dma/comms.hpp"
 #include "util/fifo.hpp"
 #include "util/wire.hpp"
 #include "addressable.hpp"
-#include "dma-comms.hpp"
 
 namespace psx::cdrom {
 
@@ -23,7 +23,7 @@ namespace psx::cdrom {
 
   class core final
       : public addressable
-      , public dma_comms {
+      , public dma::comms {
     util::wire irq;
 
     xa_adpcm_decoder &xa_adpcm;
