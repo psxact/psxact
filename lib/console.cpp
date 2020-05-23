@@ -48,9 +48,9 @@ console::console()
   timer = new timer::core(irq4, irq5, irq6);
   cpu = new cpu::core(*this);
   dma = new dma::core(irq3, *this);
-  exp1 = new exp::expansion1_t();
-  exp2 = new exp::expansion2_t();
-  exp3 = new exp::expansion3_t();
+  exp1 = new exp::expansion1();
+  exp2 = new exp::expansion2();
+  exp3 = new exp::expansion3();
   gpu = new gpu::core(irq1, gpu_hblank, gpu_vblank);
   cdrom = new cdrom::core(irq2, *xa_adpcm, args::game_file_name);
   input = new input::core(*cpu);
@@ -178,6 +178,8 @@ void console::load_exe(const char *game_file_name) {
     printf("  GP: $%08x\n", cpu->get_register(28));
     printf("  SP: $%08x\n", cpu->get_register(29));
     printf("  FP: $%08x\n", cpu->get_register(30));
+    printf("  Text Start: %08x\n", text_start);
+    printf("  Text Count: %08x\n", text_count);
 
     for (int i = 0; i < text_count; i++) {
       wram->io_write(address_width::byte, text_start + i, blob->read_byte(0x800 + i));

@@ -5,9 +5,9 @@
 
 namespace psx::exp {
 
-  class expansion3_t final : public addressable {
+  class expansion3 final : public addressable {
   public:
-    expansion3_t();
+    expansion3();
 
     uint32_t io_read(address_width width, uint32_t address) override;
     void io_write(address_width width, uint32_t address, uint32_t data) override;

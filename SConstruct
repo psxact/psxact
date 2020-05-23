@@ -13,8 +13,8 @@ env['LINKFLAGS'] = []
 debug = ARGUMENTS.get('debug', 0)
 
 if int(debug):
-  env.Append(CCFLAGS=['-pg', '-rdynamic', '-no-pie'])
-  env.Append(LINKFLAGS=['-pg', '-rdynamic', '-no-pie'])
+  env.Append(CCFLAGS=['-rdynamic', '-no-pie'])
+  env.Append(LINKFLAGS=['-rdynamic', '-no-pie'])
 else:
   env.Append(CCFLAGS=['-flto', '-rdynamic', '-O3'])
   env.Append(LINKFLAGS=['-flto', '-rdynamic'])

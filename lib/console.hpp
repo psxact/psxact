@@ -54,9 +54,9 @@ namespace psx {
     timer::core *timer;
     cpu::core *cpu;
     dma::core *dma;
-    exp::expansion1_t *exp1;
-    exp::expansion2_t *exp2;
-    exp::expansion3_t *exp3;
+    exp::expansion1 *exp1;
+    exp::expansion2 *exp2;
+    exp::expansion3 *exp3;
     gpu::core *gpu;
     input::core *input;
     mdec::core *mdec;

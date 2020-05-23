@@ -13,16 +13,9 @@
 namespace psx::cpu {
 
   enum class io_target {
-    MEMORY,
-    ICACHE,
-    DCACHE
-  };
-
-  enum segment {
-    KUSEG = 0,
-    KSEG0 = 4,
-    KSEG1 = 5,
-    KSEG2 = 6
+    memory,
+    icache,
+    dcache
   };
 
   class core final
@@ -86,13 +79,8 @@ namespace psx::cpu {
 
     io_target get_target(uint32_t address) const;
 
-    uint32_t read_data_byte(uint32_t address);
-    uint32_t read_data_half(uint32_t address);
-    uint32_t read_data_word(uint32_t address);
-
-    void write_data_byte(uint32_t address, uint32_t data);
-    void write_data_half(uint32_t address, uint32_t data);
-    void write_data_word(uint32_t address, uint32_t data);
+    uint32_t read_data(address_width width, uint32_t address);
+    void write_data(address_width width, uint32_t address, uint32_t data);
 
     uint32_t get_imask() const;
     void set_imask(uint32_t value);

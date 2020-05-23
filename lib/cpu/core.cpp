@@ -2,6 +2,7 @@
 
 #include "cpu/cop0/sys.hpp"
 #include "cpu/cop2/gte.hpp"
+#include "cpu/segment.hpp"
 #include "util/int.hpp"
 #include "util/uint.hpp"
 #include "args.hpp"
@@ -113,23 +114,8 @@ int core::tick() {
   return timing::get_cpu_time();
 }
 
-static uint32_t segments[8] = {
-  0x7fffffff,  // kuseg ($0000_0000 - $7fff_ffff)
-  0x7fffffff,  //
-  0x7fffffff,  //
-  0x7fffffff,  //
-  0x1fffffff,  // kseg0 ($8000_0000 - $9fff_ffff)
-  0x1fffffff,  // kseg1 ($a000_0000 - $bfff_ffff)
-  0xffffffff,  // kseg2 ($c000_0000 - $ffff_ffff)
-  0xffffffff   //
-};
-
-static inline uint32_t get_segment(uint32_t address) {
-  return address >> 29;
-}
-
 static inline uint32_t map_address(uint32_t address) {
-  return address & segments[get_segment(address)];
+  return address & get_segment_mask(address);
 }
 
 void core::enter_exception(cop0::exception code, int cop) {
@@ -179,84 +165,40 @@ io_target core::get_target(uint32_t address) const {
   if (cop0r12 & cop0::ISC) {
     if (cop0r12 & cop0::SWC) {
       log("i-cache isolated access ~%08x", address);
-      return io_target::ICACHE;
+      return io_target::icache;
     } else {
       log("d-cache isolated access ~%08x", address);
-      return io_target::DCACHE;
+      return io_target::dcache;
     }
   }
 
-  if ((address & 0x7ffffc00) == 0x1f800000 && get_segment(address) < KSEG1) {
+  if ((address & 0x7ffffc00) == 0x1f800000 && get_segment(address) < segment::kseg1) {
     log("d-cache memory access ~%08x", address);
-    return io_target::DCACHE;
+    return io_target::dcache;
   }
 
-  return io_target::MEMORY;
+  return io_target::memory;
 }
 
-uint32_t core::read_data_byte(uint32_t address) {
+uint32_t core::read_data(address_width width, uint32_t address) {
   address = map_address(address);
 
   switch (get_target(address)) {
-    case io_target::ICACHE: return 0;
-    case io_target::DCACHE: return dcache.io_read(address_width::byte, address);
-    case io_target::MEMORY: return memory.io_read(address_width::byte, address);
-  }
-
-  return 0;
-}
-
-uint32_t core::read_data_half(uint32_t address) {
-  address = map_address(address);
-
-  switch (get_target(address)) {
-    case io_target::ICACHE: return 0;
-    case io_target::DCACHE: return dcache.io_read(address_width::half, address);
-    case io_target::MEMORY: return memory.io_read(address_width::half, address);
+    case io_target::icache: return 0;
+    case io_target::dcache: return dcache.io_read(width, address);
+    case io_target::memory: return memory.io_read(width, address);
   }
 
   return 0;
 }
 
-uint32_t core::read_data_word(uint32_t address) {
+void core::write_data(address_width width, uint32_t address, uint32_t data) {
   address = map_address(address);
 
   switch (get_target(address)) {
-    case io_target::ICACHE: return 0;
-    case io_target::DCACHE: return dcache.io_read(address_width::word, address);
-    case io_target::MEMORY: return memory.io_read(address_width::word, address);
-  }
-
-  return 0;
-}
-
-void core::write_data_byte(uint32_t address, uint32_t data) {
-  address = map_address(address);
-
-  switch (get_target(address)) {
-    case io_target::ICACHE: break;
-    case io_target::DCACHE: dcache.io_write(address_width::byte, address, data); break;
-    case io_target::MEMORY: memory.io_write(address_width::byte, address, data); break;
-  }
-}
-
-void core::write_data_half(uint32_t address, uint32_t data) {
-  address = map_address(address);
-
-  switch (get_target(address)) {
-    case io_target::ICACHE: break;
-    case io_target::DCACHE: dcache.io_write(address_width::half, address, data); break;
-    case io_target::MEMORY: memory.io_write(address_width::half, address, data); break;
-  }
-}
-
-void core::write_data_word(uint32_t address, uint32_t data) {
-  address = map_address(address);
-
-  switch (get_target(address)) {
-    case io_target::ICACHE: break;
-    case io_target::DCACHE: dcache.io_write(address_width::word, address, data); break;
-    case io_target::MEMORY: memory.io_write(address_width::word, address, data); break;
+    case io_target::icache: break;
+    case io_target::dcache: dcache.io_write(width, address, data); break;
+    case io_target::memory: memory.io_write(width, address, data); break;
   }
 }
 
@@ -587,7 +529,7 @@ void core::op_jr() {
 
 void core::op_lb() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data_byte(address);
+  uint32_t data = read_data(address_width::byte, address);
   data = int_t<8>::trunc(data);
 
   set_rt_load(data);
@@ -595,7 +537,7 @@ void core::op_lb() {
 
 void core::op_lbu() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data_byte(address);
+  uint32_t data = read_data(address_width::byte, address);
   data = uint_t<8>::trunc(data);
 
   set_rt_load(data);
@@ -607,7 +549,7 @@ void core::op_lh() {
     return enter_exception(cop0::exception::address_error_load, 0);
   }
 
-  uint32_t data = read_data_half(address);
+  uint32_t data = read_data(address_width::half, address);
   data = int_t<16>::trunc(data);
 
   set_rt_load(data);
@@ -619,7 +561,7 @@ void core::op_lhu() {
     return enter_exception(cop0::exception::address_error_load, 0);
   }
 
-  uint32_t data = read_data_half(address);
+  uint32_t data = read_data(address_width::half, address);
   data = uint_t<16>::trunc(data);
 
   set_rt_load(data);
@@ -635,7 +577,7 @@ void core::op_lw() {
     return enter_exception(cop0::exception::address_error_load, 0);
   }
 
-  uint32_t data = read_data_word(address);
+  uint32_t data = read_data(address_width::word, address);
 
   set_rt_load(data);
 }
@@ -650,7 +592,7 @@ void core::op_lwc(int n) {
     return enter_exception(cop0::exception::address_error_load, 0);
   }
 
-  get_cop(n)->write_gpr(decode_rt(), read_data_word(address));
+  get_cop(n)->write_gpr(decode_rt(), read_data(address_width::word, address));
 }
 
 void core::op_lwc0() {
@@ -671,7 +613,7 @@ void core::op_lwc3() {
 
 void core::op_lwl() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data_word(address & ~3);
+  uint32_t data = read_data(address_width::word, address & ~3);
 
   switch (address & 3) {
     case 0: data = (data << 24) | (get_rt_forwarded() & 0x00ffffff); break;
@@ -685,7 +627,7 @@ void core::op_lwl() {
 
 void core::op_lwr() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data_word(address & ~3);
+  uint32_t data = read_data(address_width::word, address & ~3);
 
   switch (address & 3) {
     case 0: data = (data >>  0) | (get_rt_forwarded() & 0x00000000); break;
@@ -747,7 +689,7 @@ void core::op_sb() {
   uint32_t address = get_rs() + decode_iconst();
   uint32_t data = get_rt();
 
-  write_data_byte(address, data);
+  write_data(address_width::byte, address, data);
 }
 
 void core::op_sh() {
@@ -756,7 +698,7 @@ void core::op_sh() {
     return enter_exception(cop0::exception::address_error_store, 0);
   }
 
-  write_data_half(address, get_rt());
+  write_data(address_width::half, address, get_rt());
 }
 
 void core::op_sll() {
@@ -823,7 +765,7 @@ void core::op_sw() {
 
   uint32_t data = get_rt();
 
-  write_data_word(address, data);
+  write_data(address_width::word, address, data);
 }
 
 void core::op_swc(int n) {
@@ -836,7 +778,7 @@ void core::op_swc(int n) {
     return enter_exception(cop0::exception::address_error_store, 0);
   }
 
-  write_data_word(address, get_cop(n)->read_gpr(decode_rt()));
+  write_data(address_width::word, address, get_cop(n)->read_gpr(decode_rt()));
 }
 
 void core::op_swc0() {
@@ -857,7 +799,7 @@ void core::op_swc3() {
 
 void core::op_swl() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data_word(address & ~3);
+  uint32_t data = read_data(address_width::word, address & ~3);
 
   switch (address & 3) {
     case 0: data = (data & 0xffffff00) | (get_rt() >> 24); break;
@@ -866,12 +808,12 @@ void core::op_swl() {
     case 3: data = (data & 0x00000000) | (get_rt() >>  0); break;
   }
 
-  write_data_word(address & ~3, data);
+  write_data(address_width::word, address & ~3, data);
 }
 
 void core::op_swr() {
   uint32_t address = get_rs() + decode_iconst();
-  uint32_t data = read_data_word(address & ~3);
+  uint32_t data = read_data(address_width::word, address & ~3);
 
   switch (address & 3) {
     case 0: data = (data & 0x00000000) | (get_rt() <<  0); break;
@@ -880,7 +822,7 @@ void core::op_swr() {
     case 3: data = (data & 0x00ffffff) | (get_rt() << 24); break;
   }
 
-  write_data_word(address & ~3, data);
+  write_data(address_width::word, address & ~3, data);
 }
 
 void core::op_syscall() {

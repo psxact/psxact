@@ -5,7 +5,7 @@
 
 using namespace psx::exp;
 
-expansion2_t::expansion2_t()
+expansion2::expansion2()
   : addressable("exp2", false) {
 }
 
@@ -17,7 +17,7 @@ static void add_cpu_time(psx::address_width width) {
   }
 }
 
-uint32_t expansion2_t::io_read(address_width width, uint32_t address) {
+uint32_t expansion2::io_read(address_width width, uint32_t address) {
   add_cpu_time(width);
 
   if (width == address_width::byte) {
@@ -29,7 +29,7 @@ uint32_t expansion2_t::io_read(address_width width, uint32_t address) {
   return addressable::io_read(width, address);
 }
 
-void expansion2_t::io_write(address_width width, uint32_t address, uint32_t data) {
+void expansion2::io_write(address_width width, uint32_t address, uint32_t data) {
   add_cpu_time(width);
 
   if (width == address_width::byte) {
