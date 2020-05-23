@@ -87,20 +87,24 @@ void core::draw_color(gp0_command command, const color &shade, const point &poin
 }
 
 void core::draw_rectangle() {
-  texture_params tev;
-  tev.palette_page_x = (fifo.at(2) >> 12) & 0x3f0;
-  tev.palette_page_y = (fifo.at(2) >> 22) & 0x1ff;
-  tev.texture_page_x = (status << 6) & 0x3c0;
-  tev.texture_page_y = (status << 4) & 0x100;
-  tev.texture_colors = (status >> 7) & 3;
-  tev.color_mix_mode = (status >> 5) & 3;
+  texture_coord coord;
+  texture_params params;
 
   auto command = gp0_command(fifo.at(0));
   auto shade = color::from_uint24(fifo.at(0));
-  auto coord = texture_coord::from_uint16(fifo.at(2));
 
   int32_t xofs = x_offset + int_t<11>::trunc(fifo.at(1));
   int32_t yofs = y_offset + int_t<11>::trunc(fifo.at(1) >> 16);
+
+  if (command.is_texture_mapped()) {
+    params.palette_page_x = (fifo.at(2) >> 12) & 0x3f0;
+    params.palette_page_y = (fifo.at(2) >> 22) & 0x1ff;
+    params.texture_page_x = (status << 6) & 0x3c0;
+    params.texture_page_y = (status << 4) & 0x100;
+    params.texture_colors = (status >> 7) & 3;
+    params.color_mix_mode = (status >> 5) & 3;
+    coord = texture_coord::from_uint16(fifo.at(2));
+  }
 
   int32_t w = get_x_length(fifo);
   int32_t h = get_y_length(fifo);
@@ -115,7 +119,7 @@ void core::draw_rectangle() {
       point.x = xofs + x;
       point.y = yofs + y;
 
-      draw_color(command, shade, point, this_coord, tev);
+      draw_color(command, shade, point, this_coord, params);
     }
   }
 }
