@@ -13,7 +13,7 @@ using namespace psx::cpu;
 using namespace psx::util;
 
 core::opcode core::op_table[64] = {
-  nullptr,          &core::op_bxx,   &core::op_j,    &core::op_jal,
+  nullptr,        &core::op_bxx,   &core::op_j,    &core::op_jal,
   &core::op_beq,  &core::op_bne,   &core::op_blez, &core::op_bgtz,
   &core::op_addi, &core::op_addiu, &core::op_slti, &core::op_sltiu,
   &core::op_andi, &core::op_ori,   &core::op_xori, &core::op_lui,
@@ -51,7 +51,7 @@ core::opcode core::op_table_special[64] = {
 };
 
 core::core(addressable &memory)
-  : addressable("cpu", args::log_cpu)
+  : addressable("cpu", args::get_log_enabled(component::cpu))
   , memory(memory)
   , dcache("dcache") {
   regs.pc = 0xbfc00000;

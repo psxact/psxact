@@ -30,7 +30,7 @@ static const uint32_t REG_BIT1[32] = {
 };
 
 core::core(wire irq, addressable &memory)
-  : addressable("dma", args::log_dma)
+  : addressable("dma", args::get_log_enabled(component::dma))
   , irq(irq)
   , memory(memory) {
 }

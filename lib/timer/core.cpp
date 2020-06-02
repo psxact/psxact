@@ -32,7 +32,7 @@ using namespace psx::timer;
 using namespace psx::util;
 
 core::core(wire irq0, wire irq1, wire irq2)
-  : addressable("timer", args::log_timer)
+  : addressable("timer", args::get_log_enabled(component::timer))
   , timers { timer(irq0), timer(irq1), timer(irq2) } {
 }
 
@@ -102,7 +102,7 @@ void core::timer_run_real(int n, int amount) {
   if (!timer.running || amount == 0) {
     return;
   }
-  
+
   auto counter = int32_t(timer.counter) + amount;
   auto control = int32_t(timer.control);
   auto maximum = int32_t(timer.maximum);

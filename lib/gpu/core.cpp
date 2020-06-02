@@ -1,7 +1,6 @@
 #include "gpu/core.hpp"
 
 #include <cassert>
-#include "gpu/gamma.hpp"
 #include "args.hpp"
 #include "timing.hpp"
 
@@ -9,7 +8,7 @@ using namespace psx::gpu;
 using namespace psx::util;
 
 core::core(wire irq, wire hbl, wire vbl)
-  : addressable("gpu", args::log_gpu)
+  : addressable("gpu", args::get_log_enabled(component::gpu))
   , irq(irq)
   , hbl(hbl)
   , vbl(vbl)
@@ -92,8 +91,6 @@ void core::render_field_240p() {
         color.g = vram_read8(x * 3 + 1, y / vscale);
         color.b = vram_read8(x * 3 + 2, y / vscale);
 
-        gamma::apply(color);
-
         video_buffer[y - 1][x] = 0;
         video_buffer[y - 0][x] = color.to_uint32() & mask;
       }
@@ -106,8 +103,6 @@ void core::render_field_240p() {
           display_area_y + (y / vscale));
 
         color color = color::from_uint16(pixel);
-
-        gamma::apply(color);
 
         video_buffer[y - 1][x] = 0;
         video_buffer[y - 0][x] = color.to_uint32() & mask;
@@ -130,8 +125,6 @@ void core::render_field_480i() {
         color.g = vram_read8(x * 3 + 1, y);
         color.b = vram_read8(x * 3 + 2, y);
 
-        gamma::apply(color);
-
         video_buffer[y][x] = color.to_uint32();
       }
     }
@@ -143,8 +136,6 @@ void core::render_field_480i() {
           display_area_y + y);
 
         color color = color::from_uint16(pixel);
-
-        gamma::apply(color);
 
         video_buffer[y][x] = color.to_uint32();
       }

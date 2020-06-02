@@ -3,16 +3,17 @@
 #include "args.hpp"
 #include "timing.hpp"
 
+using namespace psx;
 using namespace psx::memory;
 
 bios::bios() : bios_base("bios") {
-  load_blob(args::bios_file_name);
+  load_blob(args::get_bios_file());
 
-  if (args::bios_patch_skip_intro) {
+  if (args::get_patch_enabled(bios_patch::skip_intro)) {
     io_write(address_width::word, 0x6990, 0x00000000); // nop
   }
 
-  if (args::bios_patch_debug_tty) {
+  if (args::get_patch_enabled(bios_patch::debug_tty)) {
     io_write(address_width::word, 0x6f0c, 0x34010001); // li $at, 0x1
     io_write(address_width::word, 0x6f10, 0x0ff019e1); // jal 0xbfc06784
     io_write(address_width::word, 0x6f14, 0xaf81a9c0); // sw $at -0x5460($gp)
@@ -20,10 +21,13 @@ bios::bios() : bios_base("bios") {
 }
 
 static void add_cpu_time(psx::address_width width) {
+  constexpr int non_seq = 8;
+  constexpr int seq = 6;
+
   switch (width) {
-    case psx::address_width::byte: psx::timing::add_cpu_time( 8); break; // 8
-    case psx::address_width::half: psx::timing::add_cpu_time(14); break; // 8+6
-    case psx::address_width::word: psx::timing::add_cpu_time(26); break; // 8+6+6+6
+    case address_width::byte: return timing::add_cpu_time(non_seq);
+    case address_width::half: return timing::add_cpu_time(non_seq + (seq * 1));
+    case address_width::word: return timing::add_cpu_time(non_seq + (seq * 3));
   }
 }
 

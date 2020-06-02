@@ -30,11 +30,7 @@ int main(int argc, char *argv[]) {
   psx::args::init(argc, argv);
   psx::console *console = new psx::console();
 
-  if (psx::args::headless) {
-    run_headless(console);
-  } else {
-    run(console);
-  }
+  run(console);
 
   delete console;
 
@@ -65,16 +61,6 @@ void run(psx::console *console) {
       printf("%s\n", SDL_GetError());
       break;
     }
-  }
-  while (1);
-}
-
-void run_headless(psx::console *console) {
-  psx::input_params i = {};
-  psx::output_params o = {};
-
-  do {
-    console->run_for_one_frame(i, o);
   }
   while (1);
 }

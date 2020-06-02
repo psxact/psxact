@@ -2,6 +2,7 @@
 #define CONSOLE_HPP_
 
 #include <cstdint>
+#include <cstdio>
 #include "cdrom/core.hpp"
 #include "cpu/core.hpp"
 #include "dma/core.hpp"
@@ -63,7 +64,7 @@ namespace psx {
     spu::core *spu;
     int cycles;
 
-    bool is_exe;
+    bool load_exe_pending;
 
   public:
     console();
@@ -80,7 +81,7 @@ namespace psx {
     void get_audio_params(output_params_audio &params);
     void get_video_params(output_params_video &params);
 
-    void load_exe(const char *game_file_name);
+    void load_exe(FILE *game_file);
   };
 }
 

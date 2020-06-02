@@ -58,7 +58,7 @@ namespace psx::cdrom {
     std::optional<FILE *> disc_file;
 
   public:
-    core(util::wire irq, xa_adpcm_decoder &xa_adpcm, const char *game_file_name);
+    core(util::wire irq, xa_adpcm_decoder &xa_adpcm, std::optional<FILE *> disc_file);
 
     void tick(int amount);
 

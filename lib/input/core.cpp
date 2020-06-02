@@ -7,7 +7,7 @@
 using namespace psx::input;
 
 core::core(interruptible &irq)
-  : addressable("input", args::log_input)
+  : addressable("input", args::get_log_enabled(component::input))
   , irq(irq) {
   port.memcard[0] = &device::not_connected;
   port.control[0] = new devices::digital_pad();

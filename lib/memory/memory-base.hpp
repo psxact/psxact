@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <cstring>
 #include <cstdio>
+
+#include "util/panic.hpp"
 #include "addressable.hpp"
 
 namespace psx {
@@ -52,16 +54,9 @@ namespace psx {
       return addressable::io_write(width, address, data);
     }
 
-    bool load_blob(const char *filename) {
-      if (FILE *file = fopen(filename, "rb+")) {
-        fread(b, sizeof(uint8_t), kSize, file);
-        fclose(file);
-        return true;
-      } else {
-        log("unable to load '%s'", filename);
-
-        return false;
-      }
+    void load_blob(FILE *file) {
+      fread(b, sizeof(uint8_t), kSize, file);
+      fclose(file);
     }
   };
 }

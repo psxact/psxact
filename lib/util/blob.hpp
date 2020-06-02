@@ -2,7 +2,6 @@
 #define UTIL_BLOB_HPP_
 
 #include <cstdint>
-#include <cstring>
 #include <cstdio>
 
 namespace psx::util {
@@ -49,21 +48,16 @@ namespace psx::util {
       write_half(address |  2, data >> 16);
     }
 
-    static blob *from_file(const char *filename) {
-      if (FILE* file = fopen(filename, "rb+")) {
-        fseek(file, 0, SEEK_END);
-        int size = ftell(file);
-        fseek(file, 0, SEEK_SET);
+    static blob *from_file(FILE *file) {
+      fseek(file, 0, SEEK_END);
+      int size = ftell(file);
+      fseek(file, 0, SEEK_SET);
 
-        blob *result = new blob(size);
+      blob *result = new blob(size);
 
-        fread(result->buffer, sizeof(uint8_t), size, file);
-        fclose(file);
-        return result;
-      } else {
-        printf("unable to load '%s'\n", filename);
-        return nullptr;
-      }
+      fread(result->buffer, sizeof(uint8_t), size, file);
+      fclose(file);
+      return result;
     }
   };
 }

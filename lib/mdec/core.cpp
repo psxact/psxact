@@ -9,7 +9,7 @@ using namespace psx::mdec;
 using namespace psx::util;
 
 core::core()
-  : addressable("mdec", args::log_mdec) {
+  : addressable("mdec", args::get_log_enabled(component::mdec)) {
 }
 
 uint32_t core::get_status() const {

@@ -10,7 +10,7 @@ using namespace psx::spu;
 using namespace psx::util;
 
 core::core(cdrom::xa_adpcm_decoder &xa_adpcm)
-  : addressable("spu", args::log_spu)
+  : addressable("spu", args::get_log_enabled(component::spu))
   , xa_adpcm(xa_adpcm) {
 }
 

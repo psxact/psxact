@@ -1,8 +1,5 @@
 #include "console.hpp"
 
-#include <cassert>
-#include <cstring>
-#include <exception>
 #include "util/blob.hpp"
 #include "util/range.hpp"
 #include "util/wire.hpp"
@@ -52,7 +49,7 @@ console::console()
   exp2 = new exp::expansion2();
   exp3 = new exp::expansion3();
   gpu = new gpu::core(irq1, gpu_hblank, gpu_vblank);
-  cdrom = new cdrom::core(irq2, *xa_adpcm, args::game_file_name);
+  cdrom = new cdrom::core(irq2, *xa_adpcm, args::get_game_file());
   input = new input::core(*cpu);
   mdec = new mdec::core();
   spu = new spu::core(*xa_adpcm);
@@ -66,7 +63,7 @@ console::console()
   dma->attach(5, nullptr); // PIO
   dma->attach(6, nullptr); // OTC - special cased in the DMA code.
 
-  is_exe = !!(strstr(args::game_file_name, ".exe") || strstr(args::game_file_name, ".psexe"));
+  load_exe_pending = args::get_game_file_type() == game_type::psexe;
 }
 
 console::~console() {
@@ -92,9 +89,9 @@ addressable &console::decode(uint32_t address) {
   range::between<(min), (max)>(address)
 
   if (between(0x1f801800, 0x1f801803)) {
-    if (is_exe) {
-      is_exe = false;
-      load_exe(args::game_file_name);
+    if (load_exe_pending) {
+      load_exe_pending = false;
+      load_exe(args::get_game_file().value());
     }
 
     return *cdrom;
@@ -160,9 +157,9 @@ void console::get_video_params(output_params_video &params) {
   params.height = 480;
 }
 
-void console::load_exe(const char *game_file_name) {
+void console::load_exe(FILE *game_file) {
   // load the exe into ram
-  if (blob *blob = blob::from_file(game_file_name)) {
+  if (blob *blob = blob::from_file(game_file)) {
     cpu->set_pc(blob->read_word(0x10));
     cpu->set_register(4, 1);
     cpu->set_register(5, 0);
@@ -184,5 +181,7 @@ void console::load_exe(const char *game_file_name) {
     for (int i = 0; i < text_count; i++) {
       wram->io_write(address_width::byte, text_start + i, blob->read_byte(0x800 + i));
     }
+
+    delete blob;
   }
 }
