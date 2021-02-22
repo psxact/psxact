@@ -2,14 +2,13 @@
 
 #include "util/int.hpp"
 #include "util/uint.hpp"
-#include "args.hpp"
 #include "timing.hpp"
 
 using namespace psx::mdec;
 using namespace psx::util;
 
-core::core()
-  : addressable("mdec", args::get_log_enabled(component::mdec)) {
+core::core(opts &o)
+  : addressable(o, component::mdec) {
 }
 
 uint32_t core::get_status() const {

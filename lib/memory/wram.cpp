@@ -4,8 +4,8 @@
 
 using namespace psx::memory;
 
-wram::wram()
-  : memory_base("wram") {
+wram::wram(opts &o)
+  : memory_base(o, component::wram) {
 }
 
 uint32_t wram::io_read(address_width width, uint32_t address) {

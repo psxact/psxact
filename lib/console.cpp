@@ -3,15 +3,15 @@
 #include "util/blob.hpp"
 #include "util/range.hpp"
 #include "util/wire.hpp"
-#include "args.hpp"
 
 using namespace psx;
 using namespace psx::util;
 
-console::console()
-  : addressable("console", false) {
-  bios = new memory::bios();
-  wram = new memory::wram();
+console::console(opts &o)
+  : addressable(o, component::console)
+  , opt(o) {
+  bios = new memory::bios(o);
+  wram = new memory::wram(o);
 
   wire irq1;
   irq1.recv_rise([&]() { cpu->interrupt(interrupt_type::gpu); });
@@ -42,18 +42,18 @@ console::console()
 
   xa_adpcm = new cdrom::xa_adpcm_decoder();
 
-  timer = new timer::core(irq4, irq5, irq6);
-  cpu = new cpu::core(*this);
-  dma = new dma::core(irq3, *this);
-  exp1 = new exp::expansion1();
-  exp2 = new exp::expansion2();
-  exp3 = new exp::expansion3();
-  gpu = new gpu::core(irq1, gpu_hblank, gpu_vblank);
-  cdrom = new cdrom::core(irq2, *xa_adpcm, args::get_game_file());
-  input = new input::core(*cpu);
-  mdec = new mdec::core();
-  spu = new spu::core(*xa_adpcm);
-  mem = new memory::memory_control();
+  timer = new timer::core(o, irq4, irq5, irq6);
+  cpu = new cpu::core(o, *this);
+  dma = new dma::core(o, irq3, *this);
+  exp1 = new exp::expansion1(o);
+  exp2 = new exp::expansion2(o);
+  exp3 = new exp::expansion3(o);
+  gpu = new gpu::core(o, irq1, gpu_hblank, gpu_vblank);
+  cdrom = new cdrom::core(o, irq2, *xa_adpcm);
+  input = new input::core(o, *cpu);
+  mdec = new mdec::core(o);
+  spu = new spu::core(o, *xa_adpcm);
+  mem = new memory::memory_control(o);
 
   dma->attach(0, mdec);
   dma->attach(1, mdec);
@@ -63,7 +63,7 @@ console::console()
   dma->attach(5, nullptr); // PIO
   dma->attach(6, nullptr); // OTC - special cased in the DMA code.
 
-  load_exe_pending = args::get_game_file_type() == game_type::psexe;
+  load_exe_pending = o.get_game_file_type() == game_type::psexe;
 }
 
 console::~console() {
@@ -91,7 +91,7 @@ addressable &console::decode(uint32_t address) {
   if (between(0x1f801800, 0x1f801803)) {
     if (load_exe_pending) {
       load_exe_pending = false;
-      load_exe(args::get_game_file().value());
+      load_exe(opt.get_game_file().value());
     }
 
     return *cdrom;

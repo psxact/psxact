@@ -1,7 +1,7 @@
 #include "dma/core.hpp"
 
 #include <cassert>
-#include "args.hpp"
+
 #include "timing.hpp"
 
 using namespace psx::dma;
@@ -29,8 +29,8 @@ static const uint32_t REG_BIT1[32] = {
   0x00000000, 0x00000000, 0x00000000, 0x00000000, // ctrl
 };
 
-core::core(wire irq, addressable &memory)
-  : addressable("dma", args::get_log_enabled(component::dma))
+core::core(opts &o, wire irq, addressable &memory)
+  : addressable(o, component::dma)
   , irq(irq)
   , memory(memory) {
 }

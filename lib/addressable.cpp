@@ -6,9 +6,9 @@
 
 using namespace psx;
 
-addressable::addressable(const char *name, bool log_enabled)
-  : name(name)
-  , log_enabled(log_enabled) {
+addressable::addressable(opts &o, component c)
+  : name(o.get_log_name(c))
+  , log_enabled(o.get_log_enabled(c)) {
 }
 
 void addressable::log(const char *format, ...) const {

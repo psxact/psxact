@@ -1,16 +1,16 @@
 #include "spu/core.hpp"
 
 #include <cassert>
+
 #include "util/int.hpp"
 #include "util/uint.hpp"
-#include "args.hpp"
 #include "timing.hpp"
 
 using namespace psx::spu;
 using namespace psx::util;
 
-core::core(cdrom::xa_adpcm_decoder &xa_adpcm)
-  : addressable("spu", args::get_log_enabled(component::spu))
+core::core(opts &o, cdrom::xa_adpcm_decoder &xa_adpcm)
+  : addressable(o, component::spu)
   , xa_adpcm(xa_adpcm) {
 }
 

@@ -19,7 +19,7 @@ namespace psx::memory {
     uint32_t wram_conf;
 
   public:
-    memory_control();
+    memory_control(opts &o);
     ~memory_control() {}
 
     uint32_t io_read(address_width width, uint32_t address) override;

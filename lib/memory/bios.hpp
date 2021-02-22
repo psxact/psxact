@@ -9,7 +9,7 @@ namespace psx::memory {
 
   class bios : public bios_base {
   public:
-    bios();
+    bios(opts &o);
 
     uint32_t io_read(address_width width, uint32_t address) override;
     void io_write(address_width width, uint32_t address, uint32_t data) override;

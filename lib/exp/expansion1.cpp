@@ -4,8 +4,8 @@
 
 using namespace psx::exp;
 
-expansion1::expansion1()
-  : addressable("exp1", false) {
+expansion1::expansion1(opts &o)
+  : addressable(o, component::exp1) {
 }
 
 static void add_cpu_time(psx::address_width width) {

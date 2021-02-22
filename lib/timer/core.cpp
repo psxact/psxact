@@ -2,7 +2,7 @@
 
 #include <cassert>
 #include <cstdio>
-#include "args.hpp"
+
 #include "timing.hpp"
 
 // These are not implemented or partially implemented.
@@ -31,8 +31,8 @@
 using namespace psx::timer;
 using namespace psx::util;
 
-core::core(wire irq0, wire irq1, wire irq2)
-  : addressable("timer", args::get_log_enabled(component::timer))
+core::core(opts &o, wire irq0, wire irq1, wire irq2)
+  : addressable(o, component::timer)
   , timers { timer(irq0), timer(irq1), timer(irq2) } {
 }
 

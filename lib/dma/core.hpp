@@ -34,7 +34,7 @@ namespace psx::dma {
     channel channels[7] = {};
 
   public:
-    core(util::wire irq, addressable &memory);
+    core(opts &o, util::wire irq, addressable &memory);
 
     void attach(int n, dma::comms *comms);
 

@@ -4,8 +4,8 @@
 
 using namespace psx::memory;
 
-memory_control::memory_control()
-  : addressable("memctl", false) {
+memory_control::memory_control(opts &o)
+  : addressable(o, component::memctl) {
 }
 
 uint32_t memory_control::io_read(address_width width, uint32_t address) {

@@ -46,6 +46,8 @@ namespace psx {
 
   class console final
     : public addressable {
+    opts &opt;
+
     memory::bios *bios;
     memory::wram *wram;
     memory::memory_control *mem;
@@ -67,7 +69,7 @@ namespace psx {
     bool load_exe_pending;
 
   public:
-    console();
+    console(opts &o);
     ~console();
 
     uint32_t io_read(address_width width, uint32_t address);

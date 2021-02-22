@@ -30,7 +30,7 @@ namespace psx::mdec {
     int16_t scale_table[64];
 
   public:
-    core();
+    core(opts &o);
 
     uint32_t get_status() const;
 

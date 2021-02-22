@@ -5,7 +5,6 @@
 #include "cpu/segment.hpp"
 #include "util/int.hpp"
 #include "util/uint.hpp"
-#include "args.hpp"
 #include "timing.hpp"
 
 using namespace psx;
@@ -50,10 +49,10 @@ core::opcode core::op_table_special[64] = {
   &core::op_und,     &core::op_und,   &core::op_und,  &core::op_und
 };
 
-core::core(addressable &memory)
-  : addressable("cpu", args::get_log_enabled(component::cpu))
+core::core(opts &o, addressable &memory)
+  : addressable(o, component::cpu)
   , memory(memory)
-  , dcache("dcache") {
+  , dcache(o, component::dcache) {
   regs.pc = 0xbfc00000;
   regs.next_pc = regs.pc + 4;
 

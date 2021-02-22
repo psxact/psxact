@@ -1,20 +1,20 @@
 #include "gpu/core.hpp"
 
 #include <cassert>
-#include "args.hpp"
+
 #include "timing.hpp"
 
 using namespace psx::gpu;
 using namespace psx::util;
 
-core::core(wire irq, wire hbl, wire vbl)
-  : addressable("gpu", args::get_log_enabled(component::gpu))
+core::core(opts &o, wire irq, wire hbl, wire vbl)
+  : addressable(o, component::gpu)
   , irq(irq)
   , hbl(hbl)
   , vbl(vbl)
   , h_resolution(gpu_h_resolution::h256)
   , v_resolution(gpu_v_resolution::v240) {
-  vram = new memory_base<mib(1)>("vram");
+  vram = new memory_base<mib(1)>(o, component::vram);
 }
 
 core::~core() {

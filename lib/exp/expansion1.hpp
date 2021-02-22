@@ -7,7 +7,7 @@ namespace psx::exp {
 
   class expansion1 final : public addressable {
   public:
-    expansion1();
+    expansion1(opts &o);
 
     uint32_t io_read(address_width width, uint32_t address) override;
     void io_write(address_width width, uint32_t address, uint32_t data) override;

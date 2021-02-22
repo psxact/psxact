@@ -50,7 +50,7 @@ namespace psx::input {
     interruptible &irq;
 
   public:
-    explicit core(interruptible &irq);
+    explicit core(opts &o, interruptible &irq);
 
     void latch(const host_device &device1, const host_device &device2);
 

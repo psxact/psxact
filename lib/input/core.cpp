@@ -1,13 +1,12 @@
 #include "input/core.hpp"
 
 #include "input/devices/digital-pad.hpp"
-#include "args.hpp"
 #include "timing.hpp"
 
 using namespace psx::input;
 
-core::core(interruptible &irq)
-  : addressable("input", args::get_log_enabled(component::input))
+core::core(opts &o, interruptible &irq)
+  : addressable(o, component::input)
   , irq(irq) {
   port.memcard[0] = &device::not_connected;
   port.control[0] = new devices::digital_pad();

@@ -45,7 +45,7 @@ namespace psx::timer {
     bool in_vblank = {};
 
   public:
-    explicit core(util::wire irq0, util::wire irq1, util::wire irq2);
+    explicit core(opts &o, util::wire irq0, util::wire irq1, util::wire irq2);
 
     void tick(int amount);
 

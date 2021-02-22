@@ -1,8 +1,10 @@
 #include <csignal>
 #include <cstdio>
 #include <execinfo.h>
-#include "args.hpp"
+
+#include "cli.hpp"
 #include "console.hpp"
+#include "opts.hpp"
 #include "sdl2-audio.hpp"
 #include "sdl2-video.hpp"
 #include "sdl2-input.hpp"
@@ -21,18 +23,19 @@ void signal_handler(int sig) {
 }
 
 void run(psx::console *console);
-void run_headless(psx::console *console);
 
 int main(int argc, char *argv[]) {
   signal(SIGABRT, signal_handler);
   signal(SIGSEGV, signal_handler);
 
-  psx::args::init(argc, argv);
-  psx::console *console = new psx::console();
-
-  run(console);
-
-  delete console;
+  auto opt = cli_parse(argc, argv);
+  if (!opt.has_value()) {
+    psx::util::panic("unable to parse command line arguments");
+  } else {
+    auto console = new psx::console(opt.value());
+    run(console);
+    delete console;
+  }
 
   return 0;
 }
@@ -40,14 +43,14 @@ int main(int argc, char *argv[]) {
 void run(psx::console *console) {
   SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
 
-  psx::sdl2_audio audio = psx::sdl2_audio();
-  psx::sdl2_video video = psx::sdl2_video();
-  psx::sdl2_input input = psx::sdl2_input();
+  auto audio = psx::sdl2_audio();
+  auto video = psx::sdl2_video();
+  auto input = psx::sdl2_input();
 
-  psx::input_params i = {};
-  psx::output_params o = {};
+  auto i = psx::input_params {};
+  auto o = psx::output_params {};
 
-  do {
+  while (1) {
     input.from_keyboard(i.device1);
 
     console->run_for_one_frame(i, o);
@@ -62,5 +65,4 @@ void run(psx::console *console) {
       break;
     }
   }
-  while (1);
 }

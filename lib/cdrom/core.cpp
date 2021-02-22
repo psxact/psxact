@@ -2,7 +2,6 @@
 
 #include "util/bcd.hpp"
 #include "util/panic.hpp"
-#include "args.hpp"
 #include "timing.hpp"
 
 using namespace psx::cdrom;
@@ -15,11 +14,11 @@ constexpr int int2_read_toc_timing = 16'000'000;
 constexpr int int2_seek_l_timing = 1'800;
 constexpr int int2_stop_timing = 1'800; // TODO: This can take much longer?
 
-core::core(wire irq, xa_adpcm_decoder &xa_adpcm, std::optional<FILE *> disc_file)
-    : addressable("cdc", args::get_log_enabled(component::cdrom))
+core::core(opts &o, wire irq, xa_adpcm_decoder &xa_adpcm)
+    : addressable(o, component::cdrom)
     , irq(irq)
     , xa_adpcm(xa_adpcm)
-    , disc_file(disc_file) {
+    , disc_file(o.get_game_file()) {
 }
 
 void core::tick(int amount) {

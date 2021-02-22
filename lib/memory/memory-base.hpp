@@ -25,8 +25,8 @@ namespace psx {
     };
 
   public:
-    explicit memory_base(const char *name)
-      : addressable(name, false)
+    explicit memory_base(opts &o, component c)
+      : addressable(o, c)
       , b() {
     }
 

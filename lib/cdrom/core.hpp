@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <optional>
+
 #include "cdrom/cdrom-mode.hpp"
 #include "cdrom/cdrom-sector.hpp"
 #include "cdrom/cdrom-sector-filter.hpp"
@@ -58,7 +59,7 @@ namespace psx::cdrom {
     std::optional<FILE *> disc_file;
 
   public:
-    core(util::wire irq, xa_adpcm_decoder &xa_adpcm, std::optional<FILE *> disc_file);
+    core(opts &o, util::wire irq, xa_adpcm_decoder &xa_adpcm);
 
     void tick(int amount);
 

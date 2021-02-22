@@ -55,7 +55,7 @@ namespace psx::spu {
     int sample_buffer_index;
 
   public:
-    core(cdrom::xa_adpcm_decoder &xa_adpcm);
+    core(opts &o, cdrom::xa_adpcm_decoder &xa_adpcm);
     ~core();
 
     void tick(int amount);

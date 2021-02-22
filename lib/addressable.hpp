@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include "opts.hpp"
+
 namespace psx {
 
   enum class address_width {
@@ -16,7 +18,7 @@ namespace psx {
     bool log_enabled = {};
 
   public:
-    addressable(const char *name, bool log_enabled);
+    addressable(opts &o, component c);
     virtual ~addressable() {}
 
     void log(const char *fmt, ...) const;

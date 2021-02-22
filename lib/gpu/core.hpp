@@ -117,7 +117,7 @@ namespace psx::gpu {
       } run = {};
     } gpu_to_cpu_transfer = {};
 
-    core(util::wire irq, util::wire hbl, util::wire vbl);
+    core(opts &o, util::wire irq, util::wire hbl, util::wire vbl);
     ~core();
 
     // Interface for external video rendering

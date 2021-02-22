@@ -1,13 +1,14 @@
 #include <gtest/gtest.h>
 #include "gpu/core.hpp"
 
+using namespace psx;
 using namespace psx::gpu;
 using namespace psx::util;
 
 class GpuTest : public ::testing::Test {
 public:
   GpuTest()
-    : gpu(wire(), wire(), wire()) {
+    : gpu(opts::empty, wire(), wire(), wire()) {
   }
 
   core gpu;

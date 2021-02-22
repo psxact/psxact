@@ -59,7 +59,7 @@ namespace psx::cpu {
     static opcode op_table_special[64];
 
   public:
-    explicit core(addressable &memory);
+    explicit core(opts &o, addressable &memory);
 
     void interrupt(psx::interrupt_type type);
 

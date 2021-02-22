@@ -8,7 +8,7 @@ using namespace psx::util;
 class TimerTest : public ::testing::Test {
   public:
     TimerTest()
-      : timer(wire(), wire(), wire()) {
+      : timer(opts::empty, wire(), wire(), wire()) {
     }
 
   protected:
