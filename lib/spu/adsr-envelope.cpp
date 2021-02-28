@@ -77,7 +77,6 @@ void adsr_envelope::put_config_lo(uint16_t val) {
   params[1].put_params(decay_mode, decay_shift, decay_step);
 
   level_sustain = (((val & 15) + 1) << 11) - 1;
-  assert(level_sustain < 0x8000);
 }
 
 void adsr_envelope::put_config_hi(uint16_t val) {

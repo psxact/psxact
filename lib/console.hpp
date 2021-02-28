@@ -64,7 +64,6 @@ namespace psx {
     input::core *input;
     mdec::core *mdec;
     spu::core *spu;
-    int cycles;
 
     bool load_exe_pending;
 

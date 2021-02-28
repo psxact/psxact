@@ -61,7 +61,7 @@ namespace psx::cpu {
   public:
     explicit core(opts &o, addressable &memory);
 
-    void interrupt(psx::interrupt_type type);
+    void interrupt(psx::interrupt_type type) override;
 
     uint32_t get_code() const;
 
