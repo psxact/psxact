@@ -1,7 +1,6 @@
 #include "dma/core.hpp"
 
-#include <cassert>
-
+#include "util/panic.hpp"
 #include "timing.hpp"
 
 using namespace psx::dma;
@@ -69,20 +68,20 @@ int core::tick() {
     amount += tick_channel(priority_lut[n]);
   }
 
-  log("all transfers completed in %d cycles", amount);
+  LOG_INFO("all transfers completed in %d cycles", amount);
 
   return amount;
 }
 
 int core::tick_channel(int n) {
-  log("attempting to run channel %d");
+  LOG_INFO("attempting to run channel %d");
 
   if ((channels[n].control & (1 << 28)) == 0 &&
       (channels[n].control & (1 << 24)) == 0) {
     return 0;
   }
 
-  log("running channel %d. madr=%08x, bcr=%08x, chcr=%08x", n,
+  LOG_INFO("running channel %d. madr=%08x, bcr=%08x, chcr=%08x", n,
     channels[n].address,
     channels[n].counter,
     channels[n].control);
@@ -90,7 +89,8 @@ int core::tick_channel(int n) {
   channels[n].control &= ~(1 << 28);
 
   // Chopping isn't supported, we'll die if a game uses it.
-  assert((channels[n].control & (1 << 8)) == 0);
+  PANIC_IF((channels[n].control & (1 << 8)) != 0,
+		"dma with chopping enabled");
 
   if (n == 6) {
     return tick_sync_mode_otc();
@@ -101,7 +101,7 @@ int core::tick_channel(int n) {
     case  1: return tick_sync_mode_1(n); // SyncMode(1): Wait for DRQ
     case  2: return tick_sync_mode_2(n); // SyncMode(2): Linked-list
     default:
-      assert(0 && "channel tried to use an undefined sync mode.");
+      PANIC("channel tried to use an undefined sync mode.");
       return 0;
   }
 }
@@ -250,7 +250,7 @@ void core::update_irq_active_flag() {
 
 void core::put_pcr(uint32_t val) {
   if (pcr != val) {
-    log("re-computing priority table. old=%08x, new=%08x", pcr, val);
+    LOG_INFO("re-computing priority table. old=%08x, new=%08x", pcr, val);
 
     pcr = val;
 
@@ -262,7 +262,7 @@ void core::put_pcr(uint32_t val) {
           priority_lut[priority_len] = channel;
           priority_len++;
 
-          log("enabled channel %d with priority %d", channel, priority & 7);
+          LOG_INFO("enabled channel %d with priority %d", channel, priority & 7);
         }
       }
     }

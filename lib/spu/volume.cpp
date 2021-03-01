@@ -1,6 +1,6 @@
 #include "spu/volume.hpp"
 
-#include <cassert>
+#include "util/panic.hpp"
 
 using namespace psx::spu;
 
@@ -14,6 +14,6 @@ void volume::put_level(uint16_t val) {
   if (mode == volume_mode::fixed) {
     level = int16_t((val << 1) & 0xfffe);
   } else {
-    assert(0 && "Volume sweep isn't supported yet.");
+    PANIC("Volume sweep isn't supported yet.");
   }
 }

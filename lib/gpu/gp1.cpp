@@ -6,7 +6,7 @@ using namespace psx::gpu;
 using namespace psx::util;
 
 void core::gp1(uint32_t data) {
-  log("gp1(%08x)", data);
+  LOG_INFO("gp1(%08x)", data);
 
   switch ((data >> 24) & 0x3f) {
     case 0x00:

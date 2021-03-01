@@ -69,7 +69,7 @@ uint32_t core::io_read(address_width width, uint32_t address) {
   if (width == address_width::byte && address == 0x1f801040) {
     uint8_t data = rx.fifo.is_empty() ? 0xff : rx.fifo.read();
 
-    log("1040: rx '%02x'", data);
+    LOG_INFO("1040: rx '%02x'", data);
 
     return data;
   }
@@ -86,7 +86,7 @@ uint32_t core::io_read(address_width width, uint32_t address) {
           (interrupt << 9) |
           (baud.counter << 11);
 
-        log("1044: returning '%04x'", data);
+        LOG_INFO("1044: returning '%04x'", data);
 
         return data;
       }
@@ -102,7 +102,7 @@ uint32_t core::io_read(address_width width, uint32_t address) {
           (dsr.interrupt_enable << 12) |
           (port.select << 13);
 
-        log("104a: returning '%04x'", data);
+        LOG_INFO("104a: returning '%04x'", data);
 
         return data;
       }
@@ -122,7 +122,7 @@ void core::io_write(address_width width, uint32_t address, uint32_t data) {
     tx.buffer = data & 0xff;
     tx.pending = true;
 
-    log("1040: tx '%02x'", tx.buffer);
+    LOG_INFO("1040: tx '%02x'", tx.buffer);
     return;
   }
 
@@ -140,13 +140,13 @@ void core::io_write(address_width width, uint32_t address, uint32_t data) {
         //   9-15  Unknown (always zero)
 
         if (data != 0x000d) {
-          log("1048 - non-standard value: %04x", data);
+          LOG_INFO("1048 - non-standard value: %04x", data);
         }
         return;
 
       case 0x1f80104a:
         if (data & 0x40) {
-          log("resetting input");
+          LOG_INFO("resetting input");
           interrupt = 0;
           port.output = 0;
           port.select = 0;
@@ -191,7 +191,7 @@ void core::write_rx(uint8_t data) {
 
 void core::send_interrupt() {
   if (interrupt == 0) {
-    log("sending interrupt");
+    LOG_INFO("sending interrupt");
 
     interrupt = 1;
     irq.interrupt(interrupt_type::input);

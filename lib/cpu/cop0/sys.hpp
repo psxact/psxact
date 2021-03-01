@@ -2,7 +2,9 @@
 #define CPU_COP0_SYS_HPP_
 
 #include <cstdint>
+
 #include "cpu/coprocessor.hpp"
+#include "util/logger.hpp"
 
 namespace psx::cpu::cop0 {
 
@@ -28,6 +30,8 @@ namespace psx::cpu::cop0 {
   };
 
   class sys : public coprocessor {
+		psx::util::logger logger;
+
     uint32_t bpc;
     uint32_t bda;
     uint32_t tar;
@@ -40,6 +44,8 @@ namespace psx::cpu::cop0 {
     uint32_t epc;
 
   public:
+		sys();
+
     void run(uint32_t n);
 
     uint32_t read_ccr(uint32_t n);

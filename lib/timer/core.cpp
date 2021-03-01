@@ -1,8 +1,8 @@
 #include "timer/core.hpp"
 
-#include <cassert>
 #include <cstdio>
 
+#include "util/panic.hpp"
 #include "timing.hpp"
 
 // These are not implemented or partially implemented.
@@ -167,7 +167,8 @@ timer_source core::timer_get_source(int n) {
     case 2: return (timers[2].control & (1 << 9)) ? timer_source::system_over_8 : timer_source::system;
   }
 
-  assert(0 && "Invalid value for parameter `n'");
+  PANIC("Invalid value for parameter `n'");
+	return timer_source::system;
 }
 
 void core::timer_blanking_sync(int n, bool active) {

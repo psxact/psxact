@@ -1,6 +1,7 @@
 #include "mdec/core.hpp"
 
 #include "util/int.hpp"
+#include "util/panic.hpp"
 #include "util/uint.hpp"
 #include "timing.hpp"
 
@@ -82,18 +83,20 @@ void core::put_control(uint32_t val) {
 
 void core::run_command() {
   if (cmd.val == 1) {
-    log("running command 1");
+    LOG_INFO("running command 1");
 
-    assert(data_in.size() == 32);
+    PANIC_IF(data_in.size() != 32,
+			"mdec command with wrong parameter count");
+
     data_in.clear();
   }
 
   if (cmd.val == 2) {
-    log("running command 2");
+    LOG_INFO("running command 2");
 
     uint32_t len = data_in.size();
     if (len != 16 && len != 32) {
-      assert(0 && "Unhandled MDEC FIFO size for command 2.");
+      PANIC("Unhandled MDEC FIFO size for command 2.");
     } else if (len == 16) {
       fill_light_table();
     } else if (len == 32) {
@@ -103,18 +106,20 @@ void core::run_command() {
   }
 
   if (cmd.val == 3) {
-    log("running command 3");
+    LOG_INFO("running command 3");
     fill_scale_table();
   }
 
-  assert(data_in.is_empty());
+  PANIC_IF(data_in.is_empty() == false,
+		"junk data left in mdec parameter fifo");
 }
 
 void core::fill_light_table() {
   // We can't just assert the actual data size here because color data might
   // follow.
 
-  assert(data_in.size() == 16 || data_in.size() == 32);
+  PANIC_IF(data_in.size() != 16 && data_in.size() != 32,
+		"fill light table with wrong parameter count");
 
   for (int i = 0; i < 64; ) {
     uint32_t val = data_in.read();
@@ -126,7 +131,8 @@ void core::fill_light_table() {
 }
 
 void core::fill_color_table() {
-  assert(data_in.size() == 16);
+  PANIC_IF(data_in.size() != 16,
+		"fill color table with wrong parameter count");
 
   for (int i = 0; i < 64; ) {
     uint32_t val = data_in.read();
@@ -138,7 +144,8 @@ void core::fill_color_table() {
 }
 
 void core::fill_scale_table() {
-  assert(data_in.size() == 32);
+  PANIC_IF(data_in.size() != 32,
+		"fill scale table with wrong parameter count");
 
   for (int i = 0; i < 64; ) {
     uint32_t val = data_in.read();
@@ -196,7 +203,7 @@ bool core::dma_write_ready() {
 }
 
 uint32_t core::dma_read() {
-  // assert(0 && "MDEC DMA read isn't implemented.");
+  // panic("MDEC DMA read isn't implemented.");
   return 0;
 }
 

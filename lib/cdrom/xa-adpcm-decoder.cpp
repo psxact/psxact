@@ -1,7 +1,8 @@
 #include "cdrom/xa-adpcm-decoder.hpp"
 
-#include <cassert>
 #include "util/int.hpp"
+#include "util/unused.hpp"
+#include "util/panic.hpp"
 
 using namespace psx::cdrom;
 using namespace psx::util;
@@ -27,8 +28,10 @@ void xa_adpcm_decoder::decode_segment(const cdrom_sector &sector, int segment) {
   auto is_18900hz  = ((coding_info >> 2) & 3) == 1;
   auto is_8bit     = ((coding_info >> 4) & 3) == 1;
 
-  assert(is_18900hz == false);
-  assert(is_8bit == false);
+	MAYBE_UNUSED(is_18900hz);
+
+  PANIC_IF(is_18900hz, "18.9khz playback isn't supported");
+  PANIC_IF(is_8bit, "8-bit playback isn't supported");
 
   auto base = 24 + (segment * 128);
   auto step = is_stereo ? 2 : 1;

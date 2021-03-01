@@ -5,13 +5,12 @@
 #include "util/panic.hpp"
 
 using namespace psx;
-using namespace psx::util;
 
 void opts_builder::put_bios_filename(const char *val) {
   if (FILE *file = fopen(val, "rb")) {
     bios_file.emplace(file);
   } else {
-    panic("Unable to open '%s' for reading.", val);
+    PANIC("Unable to open '%s' for reading.", val);
   }
 }
 
@@ -25,7 +24,7 @@ void opts_builder::put_game_filename(const char *val) {
       game_file_type = game_type::disc;
     }
   } else {
-    panic("Unable to open '%s' for reading.", val);
+    PANIC("Unable to open '%s' for reading.", val);
   }
 }
 

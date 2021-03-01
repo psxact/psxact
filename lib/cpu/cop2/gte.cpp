@@ -43,6 +43,9 @@ uint32_t gte::divide() {
   return std::min(d, 0x1ffffu);
 }
 
+gte::gte() : logger("gte", false) {
+}
+
 void gte::run(uint32_t code) {
   ccr.flag = 0;
 
@@ -73,7 +76,7 @@ void gte::run(uint32_t code) {
     case 0x3f: op_ncct(code); break;
 
     default:
-      printf("cop2::run(0x%08x)\n", code);
+      LOG_INFO("cop2::run(0x%08x)\n", code);
       break;
   }
 

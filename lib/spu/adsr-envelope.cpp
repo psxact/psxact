@@ -1,6 +1,5 @@
 #include "spu/adsr-envelope.hpp"
 
-#include <cassert>
 #include "util/uint.hpp"
 
 using namespace psx::spu;

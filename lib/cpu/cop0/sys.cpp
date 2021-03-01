@@ -1,8 +1,12 @@
 #include "cpu/cop0/sys.hpp"
 
-#include "cassert"
+#include "util/panic.hpp"
 
 using namespace psx::cpu::cop0;
+using namespace psx::util;
+
+sys::sys() : logger("sys", false) {
+}
 
 void sys::run(uint32_t n) {
   if (n == 0x10) {
@@ -11,12 +15,12 @@ void sys::run(uint32_t n) {
 }
 
 uint32_t sys::read_ccr(uint32_t) {
-  assert(0 && "Tried to read unimplemented COP0 register, should trigger RI exception.");
+  PANIC("Tried to read unimplemented COP0 register, should trigger RI exception.");
   return 0;
 }
 
 void sys::write_ccr(uint32_t, uint32_t) {
-  assert(0 && "Tried to write unimplemented COP0 register, should trigger RI exception.");
+  PANIC("Tried to write unimplemented COP0 register, should trigger RI exception.");
 }
 
 uint32_t sys::read_gpr(uint32_t n) {
@@ -55,8 +59,8 @@ uint32_t sys::read_gpr(uint32_t n) {
       return 0x0000'0002;
 
     default:
-      assert(0 && "Tried to read unimplemented COP0 register, should trigger RI exception.");
-      break;
+      PANIC("Tried to read unimplemented COP0 register, should trigger RI exception.");
+      return 0;
   }
 }
 

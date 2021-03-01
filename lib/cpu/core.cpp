@@ -163,16 +163,16 @@ io_target core::get_target(uint32_t address) const {
   uint32_t cop0r12 = get_cop(0)->read_gpr(12);
   if (cop0r12 & cop0::ISC) {
     if (cop0r12 & cop0::SWC) {
-      log("i-cache isolated access ~%08x", address);
+      LOG_INFO("i-cache isolated access ~%08x", address);
       return io_target::icache;
     } else {
-      log("d-cache isolated access ~%08x", address);
+      LOG_INFO("d-cache isolated access ~%08x", address);
       return io_target::dcache;
     }
   }
 
   if ((address & 0x7ffffc00) == 0x1f800000 && get_segment(address) < segment::kseg1) {
-    log("d-cache memory access ~%08x", address);
+    LOG_INFO("d-cache memory access ~%08x", address);
     return io_target::dcache;
   }
 
@@ -202,7 +202,7 @@ void core::write_data(address_width width, uint32_t address, uint32_t data) {
 }
 
 void core::update_irq(uint32_t stat, uint32_t mask) {
-  log("update irq: stat=0x%08x, mask=0x%08x", stat, mask);
+  LOG_INFO("update irq: stat=0x%08x, mask=0x%08x", stat, mask);
 
   auto cop0 = (cop0::sys *) get_cop(0);
 
@@ -455,7 +455,7 @@ void core::op_cop(int n) {
     case 0x06: return cop->write_ccr(rd, get_register(rt));
   }
 
-  log("op_cop%d(0x%08x)", n, get_code());
+  LOG_INFO("op_cop%d(0x%08x)", n, get_code());
 }
 
 void core::op_cop0() {

@@ -3,6 +3,7 @@
 
 #include <cstdint>
 
+#include "util/logger.hpp"
 #include "opts.hpp"
 
 namespace psx {
@@ -14,14 +15,11 @@ namespace psx {
   };
 
   class addressable {
-    const char *name = {};
-    bool log_enabled = {};
+    util::logger logger;
 
   public:
     addressable(opts &o, component c);
     virtual ~addressable() {}
-
-    void log(const char *fmt, ...) const;
 
     virtual uint32_t io_read(address_width width, uint32_t address);
     virtual void io_write(address_width width, uint32_t address, uint32_t data);

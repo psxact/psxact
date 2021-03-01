@@ -1,6 +1,7 @@
 #include "cdrom/core.hpp"
 
 #include "util/bcd.hpp"
+#include "util/unused.hpp"
 #include "util/panic.hpp"
 #include "timing.hpp"
 
@@ -57,7 +58,7 @@ void core::tick(int amount) {
 
       switch (cmd) {
         case 0x01: {
-          log("Processing 'GetStat' command.");
+          LOG_INFO("Processing 'GetStat' command.");
 
           put_response(get_drive_status());
           put_irq_flag(3);
@@ -65,7 +66,7 @@ void core::tick(int amount) {
         }
 
         case 0x02: {
-          log("Processing 'SetLoc' command.");
+          LOG_INFO("Processing 'SetLoc' command.");
 
           seek_timecode.minute = bcd::to_dec(get_parameter());
           seek_timecode.second = bcd::to_dec(get_parameter());
@@ -78,7 +79,7 @@ void core::tick(int amount) {
         }
 
         case 0x03: {
-          log("Processing 'Play' command.");
+          LOG_INFO("Processing 'Play' command.");
 
           parameter.clear();
 
@@ -89,7 +90,7 @@ void core::tick(int amount) {
 
         case 0x1b:
         case 0x06: {
-          log("Processing 'ReadN' command.");
+          LOG_INFO("Processing 'ReadN' command.");
 
           drive_state = cdrom_drive_state::reading;
 
@@ -108,7 +109,7 @@ void core::tick(int amount) {
         }
 
         case 0x08: {
-          log("Processing 'Stop' command.");
+          LOG_INFO("Processing 'Stop' command.");
 
           put_response(get_drive_status());
           put_irq_flag(3);
@@ -119,12 +120,12 @@ void core::tick(int amount) {
           int2 = &core::int2_stop;
           int2_timer = int2_stop_timing;
 
-          log("Processing complete, delaying second response for %d cycles.", int2_timer);
+          LOG_INFO("Processing complete, delaying second response for %d cycles.", int2_timer);
           break;
         }
 
         case 0x09: {
-          log("Processing 'Pause' command.");
+          LOG_INFO("Processing 'Pause' command.");
 
           put_response(get_drive_status());
           put_irq_flag(3);
@@ -135,12 +136,12 @@ void core::tick(int amount) {
           int2 = &core::int2_pause;
           int2_timer = int2_pause_timing;
 
-          log("Processing complete, delaying second response for %d cycles.", int2_timer);
+          LOG_INFO("Processing complete, delaying second response for %d cycles.", int2_timer);
           break;
         }
 
         case 0x0a: {
-          log("Processing 'Init' command.");
+          LOG_INFO("Processing 'Init' command.");
 
           put_response(get_drive_status());
           put_irq_flag(3);
@@ -151,12 +152,12 @@ void core::tick(int amount) {
           int2 = &core::int2_init;
           int2_timer = int2_init_timing;
 
-          log("Processing complete, delaying second response for %d cycles.", int2_timer);
+          LOG_INFO("Processing complete, delaying second response for %d cycles.", int2_timer);
           break;
         }
 
         case 0x0b: {
-          log("Processing 'Mute' command.");
+          LOG_INFO("Processing 'Mute' command.");
 
           put_response(get_drive_status());
           put_irq_flag(3);
@@ -164,7 +165,7 @@ void core::tick(int amount) {
         }
 
         case 0x0c: {
-          log("Processing 'Un-mute' command.");
+          LOG_INFO("Processing 'Un-mute' command.");
 
           put_response(get_drive_status());
           put_irq_flag(3);
@@ -172,7 +173,7 @@ void core::tick(int amount) {
         }
 
         case 0x0d: {
-          log("Processing 'SetFilter' command.");
+          LOG_INFO("Processing 'SetFilter' command.");
 
           filter.put_file(get_parameter());
           filter.put_channel(get_parameter());
@@ -183,7 +184,7 @@ void core::tick(int amount) {
         }
 
         case 0x0e: {
-          log("Processing 'SetMode' command.");
+          LOG_INFO("Processing 'SetMode' command.");
 
           mode = cdrom_mode { get_parameter() };
 
@@ -193,7 +194,7 @@ void core::tick(int amount) {
         }
 
         case 0x10: {
-          log("Processing 'GetLocL' command.");
+          LOG_INFO("Processing 'GetLocL' command.");
 
           put_response(sector.get_minute());
           put_response(sector.get_second());
@@ -208,7 +209,7 @@ void core::tick(int amount) {
         }
 
         case 0x11: {
-          log("Processing 'GetLocP' command.");
+          LOG_INFO("Processing 'GetLocP' command.");
 
           put_response(0x01); // Track
           put_response(0x01); // Index
@@ -223,7 +224,7 @@ void core::tick(int amount) {
         }
 
         case 0x13: {
-          log("Processing 'GetTN' command.");
+          LOG_INFO("Processing 'GetTN' command.");
 
           put_response(get_drive_status());
           put_response(0x01);
@@ -233,11 +234,12 @@ void core::tick(int amount) {
         }
 
         case 0x14: {
-          log("Processing 'GetTD' command.");
+          LOG_INFO("Processing 'GetTD' command.");
 
           auto track = get_parameter();
+					MAYBE_UNUSED(track);
 
-          log("Track=%d", track);
+          LOG_INFO("Track=%d", track);
 
           put_response(get_drive_status());
           put_response(0x00);
@@ -248,7 +250,7 @@ void core::tick(int amount) {
 
         case 0x15:
         case 0x16: {
-          log("Processing 'SeekL' command.");
+          LOG_INFO("Processing 'SeekL' command.");
 
           drive_state = cdrom_drive_state::seeking;
 
@@ -262,12 +264,12 @@ void core::tick(int amount) {
           int2 = &core::int2_seek_l;
           int2_timer = get_seek_time() + int2_seek_l_timing;
 
-          log("Processing complete, delaying second response for %d cycles.", int2_timer);
+          LOG_INFO("Processing complete, delaying second response for %d cycles.", int2_timer);
           break;
         }
 
         case 0x19: {
-          log("Processing 'Test' command.");
+          LOG_INFO("Processing 'Test' command.");
 
           auto sub_cmd = get_parameter();
           switch (sub_cmd) {
@@ -292,15 +294,14 @@ void core::tick(int amount) {
               break;
 
             default:
-              log("Unhandled sub-command: %02x", sub_cmd);
-              assert(0);
+              PANIC("Unhandled sub-command: %02x", sub_cmd);
               break;
           }
           break;
         }
 
         case 0x1a: {
-          log("Processing 'GetID' command.");
+          LOG_INFO("Processing 'GetID' command.");
 
           drive_state = cdrom_drive_state::reading;
 
@@ -313,12 +314,12 @@ void core::tick(int amount) {
           int2 = &core::int2_get_id;
           int2_timer = int2_get_id_timing;
 
-          log("Processing complete, delaying second response for %d cycles.", int2_timer);
+          LOG_INFO("Processing complete, delaying second response for %d cycles.", int2_timer);
           break;
         }
 
         case 0x1e: {
-          log("Processing 'ReadTOC' command.");
+          LOG_INFO("Processing 'ReadTOC' command.");
 
           drive_state = cdrom_drive_state::reading;
 
@@ -331,17 +332,17 @@ void core::tick(int amount) {
           int2 = &core::int2_read_toc;
           int2_timer = int2_read_toc_timing;
 
-          log("Processing complete, delaying second response for %d cycles.", int2_timer);
+          LOG_INFO("Processing complete, delaying second response for %d cycles.", int2_timer);
           break;
         }
 
         default:
-          log("Unhandled command: %02x", cmd);
-          assert(0);
+          PANIC("Unhandled command: %02x", cmd);
           break;
       }
 
-      assert(parameter.is_empty());
+      PANIC_IF(parameter.is_empty() == false,
+				"junk data left in the parameter fifo");
     }
   }
 }
@@ -366,10 +367,12 @@ int core::get_seek_time() const {
 }
 
 uint8_t core::get_data() {
-  assert(sector_read_active && "Sector read while not active.");
+  PANIC_IF(sector_read_active == false,
+		"sector read while not active");
 
   if (sector_read_active) {
-    assert(sector_read_cursor < sector_read_length);
+    PANIC_IF(sector_read_cursor >= sector_read_length,
+			"sector read beyond the end");
 
     uint8_t result = sector.get(sector_read_cursor + sector_read_offset);
     sector_read_cursor++;
@@ -402,7 +405,7 @@ uint8_t core::get_drive_status() {
 
   response |= (1 << 1);
 
-  log("Get drive status: %02x", response);
+  LOG_INFO("Get drive status: %02x", response);
 
   return response;
 }
@@ -418,7 +421,7 @@ uint8_t core::get_irq_mask() const {
 uint8_t core::get_parameter() {
   auto data = parameter.read();
 
-  log("Get parameter: %02x", data);
+  LOG_INFO("Get parameter: %02x", data);
 
   return data;
 }
@@ -426,7 +429,7 @@ uint8_t core::get_parameter() {
 uint8_t core::get_response() {
   auto data = response.read();
 
-  log("Get response: %02x", data);
+  LOG_INFO("Get response: %02x", data);
 
   return data;
 }
@@ -447,13 +450,13 @@ uint8_t core::get_status() {
     | (bit6 << 6)
     | (bit7 << 7);
 
-  log("Get status: %02x", stat);
+  LOG_INFO("Get status: %02x", stat);
 
   return stat;
 }
 
 void core::ack_irq_flag(uint8_t val) {
-  log("Ack IRQ flag: %02x", val);
+  LOG_INFO("Ack IRQ flag: %02x", val);
 
   if (val & 0x40) {
     parameter.clear();
@@ -463,17 +466,15 @@ void core::ack_irq_flag(uint8_t val) {
 }
 
 void core::put_command(uint8_t val) {
-  log("Put command: %02x", val);
+  LOG_INFO("Put command: %02x", val);
 
-  if (command.has_value()) {
-    assert(0 && "Command written before previous command was started.");
-  }
+  PANIC_IF(command.has_value(), "Command written before previous command was started.");
 
   command.emplace(val);
 }
 
 void core::put_host_control(uint8_t val) {
-  log("Put host control: %02x", val);
+  LOG_INFO("Put host control: %02x", val);
 
   if (sector_read_active == 0 && (val & 0x80)) {
     sector_read_cursor = 0;
@@ -483,33 +484,33 @@ void core::put_host_control(uint8_t val) {
 }
 
 void core::put_irq_flag(uint8_t val) {
-  log("Put IRQ flag: %02x", val);
+  LOG_INFO("Put IRQ flag: %02x", val);
 
   irq_flag = val & 31;
 
   if (irq_flag != 0 && (irq_flag & irq_mask) == irq_flag) {
-    log("IRQ wire: 1");
+    LOG_INFO("IRQ wire: 1");
     irq(wire_state::on);
   } else {
-    log("IRQ wire: 0");
+    LOG_INFO("IRQ wire: 0");
     irq(wire_state::off);
   }
 }
 
 void core::put_irq_mask(uint8_t val) {
-  log("Put IRQ mask: %02x", val);
+  LOG_INFO("Put IRQ mask: %02x", val);
 
   irq_mask = val & 31;
 }
 
 void core::put_parameter(uint8_t val) {
-  log("Put parameter: %02x", val);
+  LOG_INFO("Put parameter: %02x", val);
 
   parameter.write(val);
 }
 
 void core::put_response(uint8_t val) {
-  log("Put response: %02x", val);
+  LOG_INFO("Put response: %02x", val);
 
   response.write(val);
 }
@@ -545,30 +546,30 @@ bool core::try_deliver_sector_as_data() {
   }
 
   if (mode.read_whole_sector()) {
-    log("Full sector");
+    LOG_INFO("Full sector");
     sector_read_offset = 12;
     sector_read_length = CDROM_SECTOR_SIZE - 12;
   } else {
     switch (type) {
       case cdrom_sector_type::unknown:
       case cdrom_sector_type::mode0:
-        assert(0 && "Mode 0");
+        PANIC("Mode 0");
         break;
 
       case cdrom_sector_type::mode1:
-        log("Mode 1 sector");
+        LOG_INFO("Mode 1 sector");
         sector_read_offset = 16;
         sector_read_length = 2048;
         break;
 
       case cdrom_sector_type::mode2_form1:
-        log("Mode 2 form 1 sector");
+        LOG_INFO("Mode 2 form 1 sector");
         sector_read_offset = 24;
         sector_read_length = 2048;
         break;
 
       case cdrom_sector_type::mode2_form2:
-        assert(0 && "Mode 2 Form 2");
+        PANIC("Mode 2 Form 2");
         break;
     }
   }
@@ -577,7 +578,8 @@ bool core::try_deliver_sector_as_data() {
 }
 
 void core::int1_read_n() {
-  assert(disc_file.has_value() && "Reading non-existant disc.");
+  PANIC_IF(disc_file.has_value() == false,
+		"reading non-existant disc");
 
   sector.fill_from(*disc_file, read_timecode);
 
@@ -593,7 +595,7 @@ void core::int1_read_n() {
   }
 
   if (try_deliver_sector_as_adpcm()) {
-    log("Delivered sector (%02d:%02d:%02d) as CD-XA ADPCM.",
+    LOG_INFO("Delivered sector (%02d:%02d:%02d) as CD-XA ADPCM.",
       read_timecode.minute,
       read_timecode.second,
       read_timecode.sector);
@@ -603,7 +605,7 @@ void core::int1_read_n() {
   }
 
   if (try_deliver_sector_as_data()) {
-    log("Delivered sector (%02d:%02d:%02d) as data.",
+    LOG_INFO("Delivered sector (%02d:%02d:%02d) as data.",
       read_timecode.minute,
       read_timecode.second,
       read_timecode.sector);
@@ -617,7 +619,7 @@ void core::int1_read_n() {
 }
 
 void core::int2_get_id() {
-  log("Delivering 'GetID' second response.");
+  LOG_INFO("Delivering 'GetID' second response.");
 
   drive_state = cdrom_drive_state::idle;
 
@@ -647,7 +649,7 @@ void core::int2_get_id() {
 }
 
 void core::int2_init() {
-  log("Delivering 'Init' second response.");
+  LOG_INFO("Delivering 'Init' second response.");
 
   drive_state = cdrom_drive_state::idle;
   mode = cdrom_mode { 0 };
@@ -657,7 +659,7 @@ void core::int2_init() {
 }
 
 void core::int2_pause() {
-  log("Delivering 'Pause' second response.");
+  LOG_INFO("Delivering 'Pause' second response.");
 
   drive_state = cdrom_drive_state::idle;
 
@@ -666,7 +668,7 @@ void core::int2_pause() {
 }
 
 void core::int2_read_toc() {
-  log("Delivering 'ReadTOC' second response.");
+  LOG_INFO("Delivering 'ReadTOC' second response.");
 
   drive_state = cdrom_drive_state::idle;
 
@@ -675,7 +677,7 @@ void core::int2_read_toc() {
 }
 
 void core::int2_seek_l() {
-  log("Delivering 'SeekL' second response.");
+  LOG_INFO("Delivering 'SeekL' second response.");
 
   drive_state = cdrom_drive_state::idle;
 
@@ -687,7 +689,7 @@ void core::int2_seek_l() {
 }
 
 void core::int2_stop() {
-  log("Delivering 'Stop' second response.");
+  LOG_INFO("Delivering 'Stop' second response.");
 
   drive_state = cdrom_drive_state::idle;
 
@@ -714,7 +716,7 @@ uint32_t core::dma_read() {
   uint8_t b3 = get_data();
 
   if (!sector_read_active) {
-    log("DMA complete.");
+    LOG_INFO("DMA complete.");
   }
 
   return (b3 << 24) | (b2 << 16) | (b1 << 8) | b0;
@@ -756,7 +758,7 @@ uint32_t core::io_read(address_width width, uint32_t address) {
     }
   }
 
-  log("index=%d", index);
+  LOG_INFO("index=%d", index);
 
   return addressable::io_read(width, address);
 }
@@ -792,7 +794,7 @@ void core::io_write(address_width width, uint32_t address, uint32_t data) {
     }
   }
 
-  log("index=%d", index);
+  LOG_INFO("index=%d", index);
 
   return addressable::io_write(width, address, data);
 }

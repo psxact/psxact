@@ -1,6 +1,6 @@
 #include "envelope.hpp"
 
-#include <cassert>
+#include "util/panic.hpp"
 #include "util/uint.hpp"
 
 using namespace psx::spu;
@@ -39,7 +39,7 @@ auto envelope_params::get_lev_step(int16_t lev) -> int16_t {
     }
 
     default:
-      assert(0 && "Unexpected value for envelope_mode.");
+      PANIC("Unexpected value for envelope_mode.");
       return 0;
   }
 }

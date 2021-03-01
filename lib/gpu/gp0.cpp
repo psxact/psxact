@@ -29,7 +29,8 @@ static int command_size[256] = {
 };
 
 void core::fill_rectangle() {
-  assert(fifo.size() == 3);
+  PANIC_IF(fifo.size() != 3,
+		"fill rectangle with wrong parameter count");
 
   uint16_t color =
     ((fifo.at(0) >> 3) & 0x001f) |
@@ -57,7 +58,8 @@ void core::fill_rectangle() {
 void core::copy_vram_to_vram() {}
 
 void core::copy_wram_to_vram() {
-  assert(fifo.size() == 3);
+  PANIC_IF(fifo.size() != 3,
+		"copy wram->vram with wrong parameter count");
 
   auto &transfer = cpu_to_gpu_transfer;
   transfer.reg.x = fifo.at(1) & 0xffff;
@@ -71,7 +73,8 @@ void core::copy_wram_to_vram() {
 }
 
 void core::copy_vram_to_wram() {
-  assert(fifo.size() == 3);
+  PANIC_IF(fifo.size() != 3,
+		"copy wram->vram with wrong parameter count");
 
   auto &transfer = gpu_to_cpu_transfer;
   transfer.reg.x = fifo.at(1) & 0xffff;
@@ -85,7 +88,7 @@ void core::copy_vram_to_wram() {
 }
 
 void core::gp0(uint32_t data) {
-  log("gp0(%08x)", data);
+  LOG_INFO("gp0(%08x)", data);
 
   if (cpu_to_gpu_transfer.run.active) {
     uint16_t lower = uint16_t(data >> 0);
@@ -161,7 +164,9 @@ void core::run_command() {
       break;
 
     case 0xe3:
-      assert(fifo.size() == 1);
+      PANIC_IF(fifo.size() != 1,
+				"set draw area (top left) with wrong parameter count");
+
       drawing_area_x1 = (fifo.at(0) >> 0) & 0x3ff;
       drawing_area_y1 = (fifo.at(0) >> 10) & 0x3ff;
       break;

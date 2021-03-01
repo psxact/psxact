@@ -1,7 +1,7 @@
 #include "cdrom/resampler.hpp"
 
-#include <cassert>
 #include "util/int.hpp"
+#include "util/panic.hpp"
 
 using namespace psx::cdrom;
 using namespace psx::util;
@@ -51,7 +51,7 @@ void resampler::put_sample(int16_t val) {
   buffer[offset & 31] = val;
   count6--;
 
-  assert(count6 >= 0);
+  PANIC_IF(count6 < 0, "resampler count6 (%d) is negative", count6);
 
   if (count6 == 0) {
     count6 = 6;

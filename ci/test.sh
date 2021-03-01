@@ -1,3 +1,3 @@
 #!/bin/bash -ex
 
-./build/psxact-tests
+./build/release/psxact-tests

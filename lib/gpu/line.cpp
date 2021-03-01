@@ -1,9 +1,10 @@
 #include "gpu/core.hpp"
 
-#include <cstdio>
+#include "util/panic.hpp"
 
 using namespace psx::gpu;
+using namespace psx::util;
 
 void core::draw_line() {
-  assert(0 && "Line drawing isn't implemented yet.");
+  PANIC("Line drawing isn't implemented yet.");
 }

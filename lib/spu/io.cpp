@@ -116,7 +116,7 @@ void core::io_write(address_width width, uint32_t address, uint32_t data) {
 
       case spu_register::ram_addr_irq:
         ram_address_irq = sound_ram_address::create(data);
-        log("IRQ address = 0x%08x", ram_address_irq);
+        LOG_INFO("IRQ address = 0x%08x", ram_address_irq);
         return;
 
       case spu_register::ram_addr:

@@ -1,3 +1,4 @@
 #!/bin/bash -ex
 
-make -j $(nproc)
+make CONFIGURATION=release clean
+make CONFIGURATION=release -j $(nproc)

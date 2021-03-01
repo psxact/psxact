@@ -1,7 +1,5 @@
 #include "memory/memory-control.hpp"
 
-#include <cassert>
-
 using namespace psx::memory;
 
 memory_control::memory_control(opts &o)
@@ -113,7 +111,7 @@ void memory_control::io_write(address_width width, uint32_t address, uint32_t da
       //      1 :: inv    - Invalidate Mode
       //      0 :: lock   - Lock Mode
 
-      log("biu=%08x", data);
+      LOG_INFO("biu=%08x", data);
       biu = data;
       return;
     }

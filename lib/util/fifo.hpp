@@ -1,8 +1,9 @@
 #ifndef UTIL_FIFO_HPP_
 #define UTIL_FIFO_HPP_
 
-#include <cassert>
 #include <cstdint>
+
+#include "util/panic.hpp"
 
 namespace psx::util {
 
@@ -24,17 +25,17 @@ namespace psx::util {
     }
 
     void discard(int how_many) {
-      assert(size() >= how_many);
+      PANIC_IF(how_many >= size(), "attempt to discard %d/%d items", how_many, size());
       rd_ptr = (rd_ptr + how_many) & mask;
     }
 
     const T &at(int index) const {
-      assert(size() > index);
+      PANIC_IF(index >= size(), "attempt to read index %d/%d", index, size());
       return buffer[(rd_ptr + index) & mask_lsb];
     }
 
     const T &read() {
-      assert(!is_empty());
+      PANIC_IF(is_empty(), "attempt to read from empty fifo");
       T &value = buffer[rd_ptr & mask_lsb];
       rd_ptr = (rd_ptr + 1) & mask;
 
@@ -42,7 +43,7 @@ namespace psx::util {
     }
 
     void write(const T &value) {
-      assert(!is_full());
+      PANIC_IF(is_full(), "attempt to write to full fifo");
       buffer[wr_ptr & mask_lsb] = value;
       wr_ptr = (wr_ptr + 1) & mask;
     }

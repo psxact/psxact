@@ -1,26 +1,30 @@
-BUILD := build
+ifneq ($(CONFIGURATION), release)
+	CONFIGURATION := debug
+endif
 
-LIBPSXACT := $(BUILD)/libpsxact.a
-LIBPSXACT_CLI := $(BUILD)/libpsxact-cli.a
-LIBPSXACT_TEST := $(BUILD)/libpsxact-tests.a
+OUTDIR := build/$(CONFIGURATION)
 
-PSXACT := $(BUILD)/psxact
-PSXACT_TEST := $(BUILD)/psxact-tests
+LIBPSXACT := $(OUTDIR)/libpsxact.a
+LIBPSXACT_CLI := $(OUTDIR)/libpsxact-cli.a
+LIBPSXACT_TEST := $(OUTDIR)/libpsxact-tests.a
+
+PSXACT := $(OUTDIR)/psxact
+PSXACT_TEST := $(OUTDIR)/psxact-tests
 
 .PHONY: all clean
 
 all: $(PSXACT) $(PSXACT_TEST)
 
 clean:
-	@rm -rf $(BUILD)
+	@rm -rf $(OUTDIR)
 
 $(PSXACT): $(LIBPSXACT_CLI) $(LIBPSXACT)
 	@mkdir -p $(@D)
-	$(CXX) $^ -o $@ -lSDL2
+	$(CXX) $^ -o $@ -flto=full -lSDL2
 
 $(PSXACT_TEST): $(LIBPSXACT_TEST) $(LIBPSXACT)
 	@mkdir -p $(@D)
-	$(CXX) $^ -o $@ -lgtest_main -lgtest -pthread
+	$(CXX) $^ -o $@ -flto=full -lgtest_main -lgtest -pthread
 
 $(LIBPSXACT): ALWAYS
 	$(MAKE) -C lib

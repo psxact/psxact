@@ -1,7 +1,6 @@
 #include "gpu/core.hpp"
 
-#include <cassert>
-
+#include "util/panic.hpp"
 #include "timing.hpp"
 
 using namespace psx::gpu;
@@ -47,7 +46,8 @@ bool core::step(int amount) {
   constexpr int VBLANK_START = int32_t(241 * GPU_LINE_LENGTH + 0.5);
   constexpr int VBLANK_END = int32_t(262.5 * GPU_LINE_LENGTH + 0.5);
 
-  assert(amount < VBLANK_END);
+  PANIC_IF(amount >= VBLANK_END,
+		"attempting to sync gpu with more cycles than a single frame");
 
   int prev = counter;
   int next = counter + amount;

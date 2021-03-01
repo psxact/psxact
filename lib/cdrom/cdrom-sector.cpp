@@ -1,7 +1,8 @@
 #include "cdrom/cdrom-sector.hpp"
 
-#include <cassert>
 #include "util/bcd.hpp"
+#include "util/unused.hpp"
+#include "util/panic.hpp"
 
 using namespace psx::cdrom;
 using namespace psx::util;
@@ -72,18 +73,29 @@ void cdrom_sector::fill_from(FILE *file, cdrom_timecode timecode) {
       (timecode.minute * sectors_per_minute) +
       (timecode.second * sectors_per_second) + timecode.sector;
 
-  assert(fseek(file, (sector - leadin) * CDROM_SECTOR_SIZE, SEEK_SET) == 0);
-  assert(fread(buffer, sizeof(uint8_t), CDROM_SECTOR_SIZE, file) == CDROM_SECTOR_SIZE);
+	auto seek_result = fseek(file, (sector - leadin) * CDROM_SECTOR_SIZE, SEEK_SET);
+	MAYBE_UNUSED(seek_result);
+
+  PANIC_IF(seek_result != 0,
+		"unable to seek sector %d", sector);
+
+	auto read_result = fread(buffer, sizeof(uint8_t), CDROM_SECTOR_SIZE, file);
+	MAYBE_UNUSED(read_result);
+
+  PANIC_IF(read_result != CDROM_SECTOR_SIZE,
+		"unable to read sector %d", sector);
 
   // Sanity check to make sure we've read the correct sector.
 
-  assert(
-    bcd::to_dec(get_minute()) == timecode.minute &&
-    bcd::to_dec(get_second()) == timecode.second &&
-    bcd::to_dec(get_sector()) == timecode.sector);
+  PANIC_IF(
+    bcd::to_dec(get_minute()) != timecode.minute ||
+    bcd::to_dec(get_second()) != timecode.second ||
+    bcd::to_dec(get_sector()) != timecode.sector, "");
 }
 
 uint8_t cdrom_sector::get(int index) const {
-  assert(index < CDROM_SECTOR_SIZE);
+  PANIC_IF(index >= CDROM_SECTOR_SIZE,
+		"unable to get data at %d of sector", index);
+
   return buffer[index];
 }

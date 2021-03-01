@@ -1,5 +1,5 @@
-#ifndef PSX_OPTS_BUILDER_HPP_
-#define PSX_OPTS_BUILDER_HPP_
+#ifndef OPTS_BUILDER_HPP_
+#define OPTS_BUILDER_HPP_
 
 #include "opts.hpp"
 

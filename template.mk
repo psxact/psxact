@@ -1,25 +1,26 @@
-ifeq ($(configuration), release)
+ifeq ($(CONFIGURATION), release)
   CXXFLAGS += -g -O3 -DNDEBUG
   CXXFLAGS += -march=native
 else
+	CONFIGURATION := debug
   CXXFLAGS += -g -O0 -DDEBUG -D_DEBUG
   CXXFLAGS += -DUNIT_TESTS
 endif
 
-CXXFLAGS += -MMD -std=c++17 -I../lib -c
+CXXFLAGS += -MMD -std=c++17 -I../lib -Wall -Wextra -flto=full -c
 
 CPP := $(shell find . -type f -name '*.cpp')
-DEP := $(CPP:./%.cpp=$(OUT_DIR)/%.d)
-OBJ := $(CPP:./%.cpp=$(OUT_DIR)/%.o)
+DEP := $(CPP:./%.cpp=$(OUTDIR)/$(CONFIGURATION)/%.d)
+OBJ := $(CPP:./%.cpp=$(OUTDIR)/$(CONFIGURATION)/%.o)
 
 .PHONY: all
 
-all: $(OUT_DIR)/$(OUT)
+all: $(OUTDIR)/$(CONFIGURATION)/$(OUT)
 
-$(OUT_DIR)/$(OUT): $(OBJ)
+$(OUTDIR)/$(CONFIGURATION)/$(OUT): $(OBJ)
 	ar rcs $@ $^
 
-$(OUT_DIR)/%.o: %.cpp
+$(OUTDIR)/$(CONFIGURATION)/%.o: %.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) $< -o $@
 

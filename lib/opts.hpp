@@ -1,5 +1,5 @@
-#ifndef PSX_OPTS_HPP_
-#define PSX_OPTS_HPP_
+#ifndef OPTS_HPP_
+#define OPTS_HPP_
 
 #include <optional>
 

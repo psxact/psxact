@@ -1,7 +1,5 @@
 #include "spu/core.hpp"
 
-#include <cassert>
-
 #include "util/int.hpp"
 #include "util/uint.hpp"
 #include "timing.hpp"

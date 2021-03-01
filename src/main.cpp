@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
   auto opt = cli_parse(argc, argv);
   if (!opt.has_value()) {
-    psx::util::panic("unable to parse command line arguments");
+    PANIC("unable to parse command line arguments");
   } else {
     auto console = new psx::console(opt.value());
     run(console);

@@ -3,7 +3,9 @@
 
 #include <algorithm>
 #include <cstdint>
+
 #include "cpu/coprocessor.hpp"
+#include "util/logger.hpp"
 
 namespace psx::cpu::cop2 {
 
@@ -33,6 +35,8 @@ namespace psx::cpu::cop2 {
   };
 
   class gte : public coprocessor {
+		psx::util::logger logger;
+
     struct {
       int32_t matrix[4][3][3] = {};
       int32_t vector[4][3] = {};
@@ -62,6 +66,8 @@ namespace psx::cpu::cop2 {
     } gpr = {};
 
   public:
+		gte();
+
     void run(uint32_t code) override;
 
     uint32_t read_matrix_vector_group(uint32_t n);
