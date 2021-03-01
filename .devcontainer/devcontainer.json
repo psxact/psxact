@@ -3,12 +3,10 @@
   "service": "dev",
   "workspaceFolder": "/workspaces/psxact",
   "extensions": [
+    "editorconfig.editorconfig",
     "ms-vscode.cpptools"
   ],
   "settings": {
-    "C_Cpp.autoAddFileAssociations": false,
-    "files.associations": {
-      "SConstruct": "python"
-    }
+    "C_Cpp.autoAddFileAssociations": false
   }
 }

@@ -1,3 +1,3 @@
 #!/bin/bash -ex
 
-scons -j $(nproc)
+make -j $(nproc)

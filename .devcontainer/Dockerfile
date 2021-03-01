@@ -7,7 +7,6 @@ RUN apt -y update && apt -y install --no-install-recommends --no-install-suggest
         git-lfs \
         libgtest-dev \
         libsdl2-dev \
-        scons \
  && apt -y autoremove \
  && apt -y clean \
  && rm -rf /var/lib/apt/lists/*
