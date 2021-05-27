@@ -22,7 +22,7 @@ $ psxact -b <bios file here> -g <game file here>
 
 ## Building
 
-This project uses [SCons][scons] for building, and relies on [SDL2][sdl2] for multimedia. At the very simplest, building is accomplished by invoking `scons` from the root of the project.
+This project uses `make` for building, and relies on [SDL2][sdl2] for multimedia. At the very simplest, building is accomplished by invoking `make` from the root of the project.
 
 ## Contributing
 
@@ -33,5 +33,4 @@ If you'd like to contribute, please create a fork and issue pull requests! Newco
 Join us on our `freenode` channel, `#psxact`!
 
 [hw-tests]: https://gitlab.com/psx-emu-dev/psx-hardware-tests
-[scons]: https://scons.org/
 [sdl2]: https://www.libsdl.org/
