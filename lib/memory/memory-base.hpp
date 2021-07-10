@@ -30,10 +30,6 @@ namespace psx {
       , b() {
     }
 
-    void *get_pointer(uint32_t address) {
-      return &b[address];
-    }
-
     uint32_t io_read(address_width width, uint32_t address) {
       switch (width) {
         case address_width::byte: return b[(address & kMask) / 1];
