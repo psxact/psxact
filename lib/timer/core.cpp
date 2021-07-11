@@ -60,7 +60,7 @@ void core::enter_hblank() {
   in_hblank = true;
   timer_blanking_sync(0, in_hblank);
 
-  if (timer_source(1) == timer_source::hblank) {
+  if (timer_get_source(1) == timer_source::hblank) {
     timer_run(1, 1);
   }
 }
@@ -171,8 +171,21 @@ timer_source core::timer_get_source(int n) {
 	return timer_source::system;
 }
 
+timer_sync_mode core::timer_get_sync_mode(int n) {
+	if ((timers[n].control & (1 << 0)) == 0) {
+		return timer_sync_mode::none;
+	}
+
+	switch ((timers[n].control >> 1) & 3) {
+		case  0: return timer_sync_mode::sync_mode_0;
+		case  1: return timer_sync_mode::sync_mode_1;
+		case  2: return timer_sync_mode::sync_mode_2;
+		default: return timer_sync_mode::sync_mode_3;
+	}
+}
+
 void core::timer_blanking_sync(int n, bool active) {
-  switch (timer_sync_mode(n)) {
+  switch (timer_get_sync_mode(n)) {
     case timer_sync_mode::none:
       break;
 

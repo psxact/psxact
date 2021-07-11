@@ -73,6 +73,7 @@ namespace psx::timer {
     void timer_put_maximum(int n, uint16_t val);
 
     timer_source timer_get_source(int n);
+		timer_sync_mode timer_get_sync_mode(int n);
     void timer_blanking_sync(int n, bool active);
   };
 }
